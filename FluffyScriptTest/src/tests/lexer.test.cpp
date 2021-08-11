@@ -439,4 +439,84 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.filename, "anom_block");
 		}
 	}
+
+	TEST_F(LexerTest, TestCharacterConstant)
+	{
+		lex->loadSource("'a' 'b' '0'");
+
+		lex->parse(tok); // 'a'
+		{
+			EXPECT_EQ(tok.value, "a");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 'b'
+		{
+			EXPECT_EQ(tok.value, "b");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // '0'
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 9);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerTest, TestStringConstant)
+	{
+		lex->loadSource("\"test\" \"bola\" \"\\n\\r\" \"'tonhudo'\"");
+
+		lex->parse(tok); // test
+		{
+			EXPECT_EQ(tok.value, "test");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // bola
+		{
+			EXPECT_EQ(tok.value, "bola");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 8);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // \n\r
+		{
+			EXPECT_EQ(tok.value, "\\n\\r");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 15);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 'tonhudo'
+		{
+			EXPECT_EQ(tok.value, "'tonhudo'");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 22);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
 } }

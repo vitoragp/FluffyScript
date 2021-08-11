@@ -80,5 +80,43 @@ namespace fluffy { namespace exceptions {
 		sprintf(buffer, "Malphormed number at: line %d, column %d", m_line, m_column);
 		return buffer;
 	}
+
+	/**
+	 * malformed_character_constant_exception
+	 */
+
+	malformed_character_constant_exception::malformed_character_constant_exception(U32 line, U32 column)
+		: m_line(line)
+		, m_column(column)
+	{}
+
+	malformed_character_constant_exception::~malformed_character_constant_exception()
+	{}
+
+	const char* malformed_character_constant_exception::what() noexcept
+	{
+		static char buffer[256];
+		sprintf(buffer, "Malphormed character constant at: line %d, column %d", m_line, m_column);
+		return buffer;
+	}
+
+	/**
+	 * malformed_string_constant_exception
+	 */
+
+	malformed_string_constant_exception::malformed_string_constant_exception(U32 line, U32 column)
+		: m_line(line)
+		, m_column(column)
+	{}
+
+	malformed_string_constant_exception::~malformed_string_constant_exception()
+	{}
+
+	const char* malformed_string_constant_exception::what() noexcept
+	{
+		static char buffer[256];
+		sprintf(buffer, "Malphormed string constant at: line %d, column %d", m_line, m_column);
+		return buffer;
+	}
 } }
 

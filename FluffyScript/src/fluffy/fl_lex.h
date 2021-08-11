@@ -35,6 +35,8 @@ namespace fluffy { namespace lexer {
 		void					parseIdentifier(Token_s& tok);
 		void					parseSymbols(Token_s& tok);
 		void					parseNumbers(Token_s& tok);
+		void					parseChar(Token_s& tok);
+		void					parseString(Token_s& tok);
 
 	private:
 		U32 					m_cursor;

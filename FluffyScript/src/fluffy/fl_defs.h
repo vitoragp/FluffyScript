@@ -206,6 +206,9 @@ namespace fluffy {
 		eTST_ConstantBin,
 		eTST_ConstantHex,
 
+		eTST_ConstantChar,
+		eTST_ConstantString,
+
 		eTST_SubTypeCount
 	};
 

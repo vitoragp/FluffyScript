@@ -73,5 +73,39 @@ namespace fluffy { namespace exceptions {
 		U32 					m_line;
 		U32 					m_column;
 	};
+
+	/**
+	 * malformed_character_constant_exception
+	 */
+
+	class malformed_character_constant_exception : public std::exception
+	{
+	public:
+								malformed_character_constant_exception(U32 line, U32 column);
+								~malformed_character_constant_exception();
+
+		virtual const char*		what() noexcept;
+
+	private:
+		U32 					m_line;
+		U32 					m_column;
+	};
+
+	/**
+	 * malformed_string_constant_exception
+	 */
+
+	class malformed_string_constant_exception : public std::exception
+	{
+	public:
+								malformed_string_constant_exception(U32 line, U32 column);
+								~malformed_string_constant_exception();
+
+		virtual const char*		what() noexcept;
+
+	private:
+		U32 					m_line;
+		U32 					m_column;
+	};
 } }
 #endif /* FL_EXCEPTIONS_H_ */

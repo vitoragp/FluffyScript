@@ -115,6 +115,14 @@ namespace fluffy {
 		return ch == '0' || ch == '1';
 	}
 
+	static Bool ischar(I8 ch) {
+		return ch == '\'';
+	}
+
+	static Bool isstring(I8 ch) {
+		return ch == '\"';
+	}
+
 	static const auto isSpace = [](char ch) -> bool { return ch == ' '; };
 	static const auto isNewLine = [](char ch) -> bool { return ch == '\n'; };
 	static const auto isCarriage = [](char ch) -> bool { return ch == '\r'; };
@@ -185,6 +193,14 @@ namespace fluffy { namespace lexer {
 			}
 			if (isnumber(ch)) {
 				parseNumbers(tok);
+				return;
+			}
+			if (ischar(ch)) {
+				parseChar(tok);
+				return;
+			}
+			if (isstring(ch)) {
+				parseString(tok);
 				return;
 			}
 			throw exceptions::unexpected_token_exception(tok.line, tok.column);
@@ -742,6 +758,42 @@ namespace fluffy { namespace lexer {
 			tok.subType = eTST_ConstantI32;
 			return;
 		}
+	}
+
+	void Lexer::parseChar(Token_s& tok)
+	{
+		tok.type = eTT_Constant;
+		tok.subType = eTST_ConstantChar;
+
+		nextChar(); // Consome '
+		tok.value.push_back(readChar());
+		nextChar();
+		if (!ischar(readChar())) {
+			throw exceptions::malformed_character_constant_exception(tok.line, tok.column);
+		}
+		nextChar(); // Consome '
+	}
+
+	void Lexer::parseString(Token_s& tok)
+	{
+		tok.type = eTT_Constant;
+		tok.subType = eTST_ConstantString;
+
+		nextChar(); // Consome "
+		while (true)
+		{
+			const I8 ch = readChar();
+
+			if (ch == '\n' || ch == '\0') {
+				throw exceptions::malformed_string_constant_exception(tok.line, tok.column);
+			}
+			if (ch == '\"') {
+				break;
+			}
+			tok.value.push_back(readChar());
+			nextChar();
+		}
+		nextChar(); // Consome "
 	}
 } }
 
