@@ -205,6 +205,15 @@ namespace fluffy { namespace lexer {
 			}
 			throw exceptions::unexpected_token_exception(tok.line, tok.column);
 		}
+		else
+		{
+			tok.line = 0;
+			tok.column = 0;
+			tok.filename = m_filename;
+			tok.value.clear();
+			tok.type = eTT_EOF;
+			tok.subType = eTST_Unknown;
+		}
 	}
 
 	void Lexer::setTabSpaces(U32 newTabSpaces)
@@ -220,7 +229,6 @@ namespace fluffy { namespace lexer {
 	void Lexer::nextChar()
 	{
 		m_cursor++;
-		m_column++;
 
 		const U8 ch = readChar();
 		{
@@ -230,11 +238,14 @@ namespace fluffy { namespace lexer {
 			if (isNewLine(ch)) {
 				m_line++;
 				m_column = 0;
+				return;
 			}
 			if (isTab(ch)) {
 				m_column += m_tabSpaces;
+				return;
 			}
 		}
+		m_column++;
 	}
 
 	void Lexer::skip()
@@ -243,6 +254,9 @@ namespace fluffy { namespace lexer {
 			const I8 ch = readChar();
 			const I8 ch2 = readChar(1);
 
+			if (m_line == 28) {
+				int i = 0;
+			}
 
 			// Comentario de linha
 			if (ch == '/' && ch2 == '/') {

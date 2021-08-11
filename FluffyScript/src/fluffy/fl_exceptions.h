@@ -21,7 +21,7 @@ namespace fluffy { namespace exceptions {
 								file_not_found_exception(const String filename);
 								~file_not_found_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 
 	private:
 		String					m_filename;
@@ -37,7 +37,7 @@ namespace fluffy { namespace exceptions {
 								unexpected_token_exception(U32 line, U32 column);
 								~unexpected_token_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 
 	private:
 		U32 					m_line;
@@ -54,7 +54,7 @@ namespace fluffy { namespace exceptions {
 								unexpected_end_of_file_exception();
 								~unexpected_end_of_file_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 	};
 
 	/**
@@ -67,7 +67,7 @@ namespace fluffy { namespace exceptions {
 								malformed_number_exception(U32 line, U32 column);
 								~malformed_number_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 
 	private:
 		U32 					m_line;
@@ -84,7 +84,7 @@ namespace fluffy { namespace exceptions {
 								malformed_character_constant_exception(U32 line, U32 column);
 								~malformed_character_constant_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 
 	private:
 		U32 					m_line;
@@ -101,7 +101,7 @@ namespace fluffy { namespace exceptions {
 								malformed_string_constant_exception(U32 line, U32 column);
 								~malformed_string_constant_exception();
 
-		virtual const char*		what() noexcept;
+		virtual const char*		what() const noexcept override;
 
 	private:
 		U32 					m_line;

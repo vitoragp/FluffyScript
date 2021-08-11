@@ -53,6 +53,7 @@ namespace fluffy {
 		eTT_Char,
 		eTT_Constant,
 		eTT_Comment,
+		eTT_EOF,
 
 		eTT_TypeCount
 	};
@@ -71,6 +72,7 @@ namespace fluffy {
 		 */
 
 		eTST_Include,
+		eTST_From,
 		eTST_Namespace,
 		eTST_Class,
 		eTST_Constructor,

@@ -519,4 +519,22 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.filename, "anom_block");
 		}
 	}
+
+	TEST_F(LexerTest, TestComplexScript)
+	{
+		lex->loadFromSource(".\\files\\source_4.txt");
+
+		int tokenCount = 0;
+		while (true)
+		{
+			lex->parse(tok);
+			{
+				if (tok.type == eTT_EOF) {
+					break;
+				}
+			}
+			tokenCount++;
+		}
+		EXPECT_EQ(tokenCount, 134);
+	}
 } }

@@ -1,0 +1,40 @@
+include {print} from "stl";
+
+namespace com.application
+{
+	fn main(args: string[])
+	{
+		let path = args[0];
+		let count: u32 = args.length(); // 40
+		let hasOption = false;
+		let step: u32; // 50
+		
+		for let i = 1; i < count; i++ // 62
+		{
+			if args[i] == "--option" // 70
+			{
+				hasOption = true;
+				continue;			
+			} // 78
+			
+			if args[i] == "--step" // 85
+			{
+				const stepValue = u32.parse(args[++i]); // 100
+				switch stepValue
+				{
+					case 0:
+						break;
+					
+					case 1: // 111
+					{
+						step = stepValue * 2;
+					}
+					break; // 121
+					
+					default:
+						panic("Unexpected parameter!"); // 128
+				}
+			}		
+		}
+	}
+} // 133

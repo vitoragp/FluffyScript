@@ -19,7 +19,7 @@ namespace fluffy { namespace exceptions {
 	file_not_found_exception::~file_not_found_exception()
 	{}
 
-	const char* file_not_found_exception::what() noexcept
+	const char* file_not_found_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "File not found: '%s'", m_filename.c_str());
@@ -38,7 +38,7 @@ namespace fluffy { namespace exceptions {
 	unexpected_token_exception::~unexpected_token_exception()
 	{}
 
-	const char* unexpected_token_exception::what() noexcept
+	const char* unexpected_token_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "Unexpected token at: line %d, column %d", m_line, m_column);
@@ -55,7 +55,7 @@ namespace fluffy { namespace exceptions {
 	unexpected_end_of_file_exception::~unexpected_end_of_file_exception()
 	{}
 
-	const char* unexpected_end_of_file_exception::what() noexcept
+	const char* unexpected_end_of_file_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "Unexpected end of file");
@@ -74,7 +74,7 @@ namespace fluffy { namespace exceptions {
 	malformed_number_exception::~malformed_number_exception()
 	{}
 
-	const char* malformed_number_exception::what() noexcept
+	const char* malformed_number_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "Malphormed number at: line %d, column %d", m_line, m_column);
@@ -93,7 +93,7 @@ namespace fluffy { namespace exceptions {
 	malformed_character_constant_exception::~malformed_character_constant_exception()
 	{}
 
-	const char* malformed_character_constant_exception::what() noexcept
+	const char* malformed_character_constant_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "Malphormed character constant at: line %d, column %d", m_line, m_column);
@@ -112,7 +112,7 @@ namespace fluffy { namespace exceptions {
 	malformed_string_constant_exception::~malformed_string_constant_exception()
 	{}
 
-	const char* malformed_string_constant_exception::what() noexcept
+	const char* malformed_string_constant_exception::what() const noexcept
 	{
 		static char buffer[256];
 		sprintf(buffer, "Malphormed string constant at: line %d, column %d", m_line, m_column);
