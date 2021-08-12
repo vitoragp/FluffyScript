@@ -91,10 +91,10 @@ namespace fluffy { namespace testing {
 	using std::unique_ptr;
 
 	/**
-	 * LexerTest
+	 * LexerWithDirectBufferTest
 	 */
 
-	struct LexerTest : public ::testing::Test
+	struct LexerWithDirectBufferTest : public ::testing::Test
 	{
 		unique_ptr<Lexer> 	lex;
 		Token_s 			tok;
@@ -110,7 +110,7 @@ namespace fluffy { namespace testing {
 	 * Testing
 	 */
 
-	TEST_F(LexerTest, TestParseKeywordInclude)
+	TEST_F(LexerWithDirectBufferTest, TestParseKeywordInclude)
 	{
 		lex->loadSource("include");
 		lex->parse(tok);
@@ -124,7 +124,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseKeywordNamespace)
+	TEST_F(LexerWithDirectBufferTest, TestParseKeywordNamespace)
 	{
 		lex->loadSource("namespace");
 		lex->parse(tok);
@@ -138,7 +138,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseIdentifier)
+	TEST_F(LexerWithDirectBufferTest, TestParseIdentifier)
 	{
 		lex->loadSource("test");
 		lex->parse(tok);
@@ -152,7 +152,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseMultiplesTokens)
+	TEST_F(LexerWithDirectBufferTest, TestParseMultiplesTokens)
 	{
 		lex->loadSource("void test");
 		lex->parse(tok);
@@ -175,7 +175,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseMultiplesLines)
+	TEST_F(LexerWithDirectBufferTest, TestParseMultiplesLines)
 	{
 		lex->loadSource("void test\nu32 love");
 
@@ -204,7 +204,7 @@ namespace fluffy { namespace testing {
 
 	}
 
-	TEST_F(LexerTest, TestParseFile)
+	TEST_F(LexerWithDirectBufferTest, TestParseFile)
 	{
 		const std::string filename = ".\\files\\source_1.txt";
 
@@ -251,7 +251,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseInvalidFile)
+	TEST_F(LexerWithDirectBufferTest, TestParseInvalidFile)
 	{
 		const std::string filename = ".\\files\\source_not_exist.txt";
 
@@ -265,7 +265,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseInvalidToken)
+	TEST_F(LexerWithDirectBufferTest, TestParseInvalidToken)
 	{
 		try
 		{
@@ -280,7 +280,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestParseSymbol)
+	TEST_F(LexerWithDirectBufferTest, TestParseSymbol)
 	{
 		lex->loadSource("> >= == +=");
 
@@ -325,7 +325,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestSkipComments)
+	TEST_F(LexerWithDirectBufferTest, TestSkipComments)
 	{
 		lex->loadFromSource(".\\files\\source_2.txt");
 
@@ -340,7 +340,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestSkipCommentInvalid)
+	TEST_F(LexerWithDirectBufferTest, TestSkipCommentInvalid)
 	{
 		try
 		{
@@ -355,7 +355,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestHexConstant)
+	TEST_F(LexerWithDirectBufferTest, TestHexConstant)
 	{
 		lex->loadSource("0x0 0x10a");
 
@@ -380,7 +380,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestBinConstant)
+	TEST_F(LexerWithDirectBufferTest, TestBinConstant)
 	{
 		lex->loadSource("0b0 0b101");
 
@@ -405,7 +405,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestRealConstant)
+	TEST_F(LexerWithDirectBufferTest, TestRealConstant)
 	{
 		lex->loadSource("0.0 0.5f 0.95F");
 
@@ -440,7 +440,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestIntegerConstant)
+	TEST_F(LexerWithDirectBufferTest, TestIntegerConstant)
 	{
 		lex->loadSource("0 0i8 0u8 150u64 350i64 12u16 65i32");
 
@@ -515,7 +515,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestCharacterConstant)
+	TEST_F(LexerWithDirectBufferTest, TestCharacterConstant)
 	{
 		lex->loadSource("'a' 'b' '0'");
 
@@ -550,7 +550,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestStringConstant)
+	TEST_F(LexerWithDirectBufferTest, TestStringConstant)
 	{
 		lex->loadSource("\"test\" \"bola\" \"\\n\\r\" \"'tonhudo'\"");
 
@@ -595,7 +595,7 @@ namespace fluffy { namespace testing {
 		}
 	}
 
-	TEST_F(LexerTest, TestComplexScript)
+	TEST_F(LexerWithDirectBufferTest, TestComplexScript)
 	{
 		lex->loadFromSource(".\\files\\source_4.txt");
 
@@ -613,7 +613,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(tokenCount, 134);
 	}
 
-	TEST_F(LexerTest, TestAllKeywordsImpl)
+	TEST_F(LexerWithDirectBufferTest, TestAllKeywordsImpl)
 	{
 		std::set<U32> keywordsImplSet;
 
@@ -635,7 +635,7 @@ namespace fluffy { namespace testing {
 		ASSERT_EQ(detail::keywordsCount, keywordsImplSet.size());
 	}
 
-	TEST_F(LexerTest, TestAllSymbolsImpl)
+	TEST_F(LexerWithDirectBufferTest, TestAllSymbolsImpl)
 	{
 		std::set<U32> symbolsImplSet;
 
@@ -651,6 +651,589 @@ namespace fluffy { namespace testing {
 				if (tok.type == eTT_EOF) {
 					break;
 				}
+			}
+		}
+
+		ASSERT_EQ(46, symbolsImplSet.size());
+	}
+} }
+
+namespace fluffy { namespace testing {
+	using fluffy::lexer::Lexer;
+	using fluffy::Token_s;
+	using std::unique_ptr;
+
+	/**
+	 * LexerWithLazyBufferTest
+	 */
+
+	struct LexerWithLazyBufferTest : public ::testing::Test
+	{
+		unique_ptr<Lexer> 	lex;
+		Token_s 			tok;
+
+		// Sets up the test fixture.
+		virtual void SetUp()
+		{
+			lex = std::make_unique<Lexer>(new LazyBuffer(5));
+		}
+	};
+
+	/**
+	 * Testing
+	 */
+
+	TEST_F(LexerWithLazyBufferTest, TestParseKeywordInclude)
+	{
+		lex->loadSource("include");
+		lex->parse(tok);
+		{
+			EXPECT_EQ(tok.value, "include");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Include);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseKeywordNamespace)
+	{
+		lex->loadSource("namespace");
+		lex->parse(tok);
+		{
+			EXPECT_EQ(tok.value, "namespace");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Namespace);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseIdentifier)
+	{
+		lex->loadSource("test");
+		lex->parse(tok);
+		{
+			EXPECT_EQ(tok.value, "test");
+			EXPECT_EQ(tok.type, fluffy::eTT_Identifier);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Unknown);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseMultiplesTokens)
+	{
+		lex->loadSource("void test");
+		lex->parse(tok);
+		{
+			EXPECT_EQ(tok.value, "void");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Void);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+		lex->parse(tok);
+		{
+			EXPECT_EQ(tok.value, "test");
+			EXPECT_EQ(tok.type, fluffy::eTT_Identifier);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Unknown);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 6);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseMultiplesLines)
+	{
+		lex->loadSource("void test\nu32 love");
+
+		lex->parse(tok); // void
+		lex->parse(tok); // test
+
+		lex->parse(tok); // u32
+		{
+			EXPECT_EQ(tok.value, "u32");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_u32);
+			EXPECT_EQ(tok.line, 2);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // love
+		{
+			EXPECT_EQ(tok.value, "love");
+			EXPECT_EQ(tok.type, fluffy::eTT_Identifier);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Unknown);
+			EXPECT_EQ(tok.line, 2);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseFile)
+	{
+		const std::string filename = ".\\files\\source_1.txt";
+
+		lex->loadFromSource(filename);
+
+		lex->parse(tok); // u64
+		{
+			EXPECT_EQ(tok.value, "u64");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_u64);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, filename);
+		}
+
+		lex->parse(tok); // id
+		{
+			EXPECT_EQ(tok.value, "id");
+			EXPECT_EQ(tok.type, fluffy::eTT_Identifier);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Unknown);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, filename);
+		}
+
+		lex->parse(tok); // string
+		{
+			EXPECT_EQ(tok.value, "string");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_String);
+			EXPECT_EQ(tok.line, 2);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, filename);
+		}
+
+		lex->parse(tok); // name
+		{
+			EXPECT_EQ(tok.value, "name");
+			EXPECT_EQ(tok.type, fluffy::eTT_Identifier);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Unknown);
+			EXPECT_EQ(tok.line, 2);
+			EXPECT_EQ(tok.column, 8);
+			EXPECT_EQ(tok.filename, filename);
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseInvalidFile)
+	{
+		const std::string filename = ".\\files\\source_not_exist.txt";
+
+		try
+		{
+			lex->loadFromSource(filename);
+		}
+		catch (exceptions::file_not_found_exception& e)
+		{
+			EXPECT_STREQ(e.what(), "File not found: '.\\files\\source_not_exist.txt'");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseInvalidToken)
+	{
+		try
+		{
+			lex->loadSource("#");
+			lex->parse(tok);
+
+			throw std::exception();
+		}
+		catch (exceptions::unexpected_token_exception& e)
+		{
+			EXPECT_STREQ(e.what(), "Unexpected token '#' at: line 1, column 1");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestParseSymbol)
+	{
+		lex->loadSource("> >= == +=");
+
+		lex->parse(tok); // >
+		{
+			EXPECT_EQ(tok.value, ">");
+			EXPECT_EQ(tok.type, fluffy::eTT_Symbol);
+			EXPECT_EQ(tok.subType, fluffy::eTST_GreaterThan);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // >=
+		{
+			EXPECT_EQ(tok.value, ">=");
+			EXPECT_EQ(tok.type, fluffy::eTT_Symbol);
+			EXPECT_EQ(tok.subType, fluffy::eTST_GreaterThanOrEqual);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 3);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // ==
+		{
+			EXPECT_EQ(tok.value, "==");
+			EXPECT_EQ(tok.type, fluffy::eTT_Symbol);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Equal);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 6);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // +=
+		{
+			EXPECT_EQ(tok.value, "+=");
+			EXPECT_EQ(tok.type, fluffy::eTT_Symbol);
+			EXPECT_EQ(tok.subType, fluffy::eTST_PlusAssign);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 9);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestSkipComments)
+	{
+		lex->loadFromSource(".\\files\\source_2.txt");
+
+		lex->parse(tok); // void
+		{
+			EXPECT_EQ(tok.value, "void");
+			EXPECT_EQ(tok.type, fluffy::eTT_Keyword);
+			EXPECT_EQ(tok.subType, fluffy::eTST_Void);
+			EXPECT_EQ(tok.line, 7);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, ".\\files\\source_2.txt");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestSkipCommentInvalid)
+	{
+		try
+		{
+			lex->loadFromSource(".\\files\\source_3.txt");
+			lex->parse(tok);
+
+			throw std::exception();
+		}
+		catch (exceptions::unexpected_end_of_file_exception& e)
+		{
+			EXPECT_STREQ(e.what(), "Unexpected end of file");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestHexConstant)
+	{
+		lex->loadSource("0x0 0x10a");
+
+		lex->parse(tok); // 0x0
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantHex);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0x10a
+		{
+			EXPECT_EQ(tok.value, "10a");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantHex);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestBinConstant)
+	{
+		lex->loadSource("0b0 0b101");
+
+		lex->parse(tok); // 0x0
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantBin);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0x10a
+		{
+			EXPECT_EQ(tok.value, "101");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantBin);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestRealConstant)
+	{
+		lex->loadSource("0.0 0.5f 0.95F");
+
+		lex->parse(tok); // 0.0
+		{
+			EXPECT_EQ(tok.value, "0.0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantFp64);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0.5f
+		{
+			EXPECT_EQ(tok.value, "0.5");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantFp32);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0.95F
+		{
+			EXPECT_EQ(tok.value, "0.95");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantFp32);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 10);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestIntegerConstant)
+	{
+		lex->loadSource("0 0i8 0u8 150u64 350i64 12u16 65i32");
+
+		lex->parse(tok); // 0
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantI32);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0i8
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantI8);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 3);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 0u8
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantU8);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 7);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 150u64
+		{
+			EXPECT_EQ(tok.value, "150");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantU64);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 11);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 350i64
+		{
+			EXPECT_EQ(tok.value, "350");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantI64);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 18);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 12u16
+		{
+			EXPECT_EQ(tok.value, "12");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantU16);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 25);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 65i32
+		{
+			EXPECT_EQ(tok.value, "65");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantI32);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 31);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestCharacterConstant)
+	{
+		lex->loadSource("'a' 'b' '0'");
+
+		lex->parse(tok); // 'a'
+		{
+			EXPECT_EQ(tok.value, "a");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 'b'
+		{
+			EXPECT_EQ(tok.value, "b");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 5);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // '0'
+		{
+			EXPECT_EQ(tok.value, "0");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantChar);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 9);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestStringConstant)
+	{
+		lex->loadSource("\"test\" \"bola\" \"\\n\\r\" \"'tonhudo'\"");
+
+		lex->parse(tok); // test
+		{
+			EXPECT_EQ(tok.value, "test");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 1);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // bola
+		{
+			EXPECT_EQ(tok.value, "bola");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 8);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // \n\r
+		{
+			EXPECT_EQ(tok.value, "\\n\\r");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 15);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+
+		lex->parse(tok); // 'tonhudo'
+		{
+			EXPECT_EQ(tok.value, "'tonhudo'");
+			EXPECT_EQ(tok.type, fluffy::eTT_Constant);
+			EXPECT_EQ(tok.subType, fluffy::eTST_ConstantString);
+			EXPECT_EQ(tok.line, 1);
+			EXPECT_EQ(tok.column, 22);
+			EXPECT_EQ(tok.filename, "anom_block");
+		}
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestComplexScript)
+	{
+		lex->loadFromSource(".\\files\\source_4.txt");
+
+		int tokenCount = 0;
+		while (true)
+		{
+			lex->parse(tok);
+			{
+				if (tok.type == eTT_EOF) {
+					break;
+				}
+			}
+			tokenCount++;
+		}
+		EXPECT_EQ(tokenCount, 134);
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestAllKeywordsImpl)
+	{
+		std::set<U32> keywordsImplSet;
+
+		lex->loadFromSource(".\\files\\source_5.txt");
+
+		while (true)
+		{
+			lex->parse(tok);
+			{
+				if (tok.type == eTT_Keyword) {
+					keywordsImplSet.insert(tok.subType);
+				}
+				if (tok.type == eTT_EOF) {
+					break;
+				}
+			}
+		}
+
+		ASSERT_EQ(detail::keywordsCount, keywordsImplSet.size());
+	}
+
+	TEST_F(LexerWithLazyBufferTest, TestAllSymbolsImpl)
+	{
+		std::set<U32> symbolsImplSet;
+
+		lex->loadFromSource(".\\files\\source_6.txt");
+
+		while (true)
+		{
+			try
+			{
+				lex->parse(tok);
+				{
+					if (tok.subType == eTST_Dot) {
+						std::cout << "," << std::endl;
+					}
+					if (tok.type == eTT_Symbol) {
+						symbolsImplSet.insert(tok.subType);
+					}
+					if (tok.type == eTT_EOF) {
+						break;
+					}
+				}
+			}
+			catch (std::exception& e)
+			{
+				std::cout << e.what() << std::endl;
 			}
 		}
 
