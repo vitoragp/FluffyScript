@@ -34,6 +34,7 @@ namespace fluffy { namespace lexer {
 
 	private:
 		I8 						readChar(U32 offset = 0);
+		I8 						readCharAndAdv();
 		void					nextChar();
 		void					skip();
 

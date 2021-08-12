@@ -7,6 +7,7 @@
 
 #ifndef FL_BUFFER_H_
 #define FL_BUFFER_H_
+#include <fstream>
 #include "fl_defs.h"
 
 namespace fluffy
@@ -47,6 +48,34 @@ namespace fluffy
 		U32						m_cursor;
 		U32						m_length;
 
+	};
+
+	/**
+	 * LazyBuffer
+	 */
+
+	class LazyBuffer : public BufferBase
+	{
+	public:
+								LazyBuffer(const U32 bufferSize = 512);
+		virtual					~LazyBuffer();
+
+		virtual void			load(const I8* sourcePtr, const U32 len) override;
+		virtual void			loadFromFile(const I8* fileName) override;
+		virtual const I8		readByte(U8 offset = 0) override;
+		virtual void			nextByte() override;
+
+	private:
+		const I8*				cacheSourceFile(const I8* sourcePtr, const U32 len);
+
+	private:
+		std::ifstream			m_stream;
+		String					m_cacheFileName;
+		I8*						m_memory;
+		U32						m_cursor;
+		U32						m_length;
+		U32						m_fileSize;
+		Bool					m_hasCache;
 	};
 }
 #endif /* FL_BUFFER_H_ */

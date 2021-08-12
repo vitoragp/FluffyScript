@@ -218,6 +218,13 @@ namespace fluffy { namespace lexer {
 		return m_buffer->readByte(offset);
 	}
 
+	I8 Lexer::readCharAndAdv()
+	{
+		const I8 ch = readChar();
+		nextChar();
+		return ch;
+	}
+
 	void Lexer::nextChar()
 	{
 		m_buffer->nextByte();
@@ -244,6 +251,12 @@ namespace fluffy { namespace lexer {
 	{
 		while (true) {
 			const I8 ch = readChar();
+
+			// Sai se o primeiro for o fim do arquivo.
+			if (ch == '\0') {
+				return;
+			}
+
 			const I8 ch2 = readChar(1);
 
 			// Comentario de linha
@@ -266,13 +279,15 @@ namespace fluffy { namespace lexer {
 			if (ch == '/' && ch2 == '*') {
 				while (true) {
 					const I8 nch = readChar();
+
+					if (m_eof) {
+						throw exceptions::unexpected_end_of_file_exception();
+					}
+
 					const I8 nch2 = readChar(1);
 
 					if (nch == '*' && nch2 == '/') {
 						break;
-					}
-					if (m_eof) {
-						throw exceptions::unexpected_end_of_file_exception();
 					}
 					nextChar();
 				}
@@ -298,8 +313,7 @@ namespace fluffy { namespace lexer {
 			if (!isidentifier(ch) && !isdigit(ch)) {
 				break;
 			}
-			tok.value.push_back(ch);
-			nextChar();
+			tok.value.push_back(readCharAndAdv());
 		}
 
 		// Verifica se o token e uma palavra reservada.
@@ -326,22 +340,18 @@ namespace fluffy { namespace lexer {
 		case '>':
 			{
 				tok.subType = eTST_GreaterThan;
-				tok.value.push_back(ch);
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_GreaterThanOrEqual;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '>') {
 					tok.subType = eTST_BitWiseRShift;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					if (readChar() == '=') {
 						tok.subType = eTST_BitWiseRShiftAssign;
-						tok.value.push_back(readChar());
-						nextChar();
+						tok.value.push_back(readCharAndAdv());
 						return;
 					}
 					return;
@@ -351,22 +361,18 @@ namespace fluffy { namespace lexer {
 		case '<':
 			{
 				tok.subType = eTST_LessThan;
-				tok.value.push_back(ch);
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_LessThanOrEqual;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '<') {
 					tok.subType = eTST_BitWiseLShift;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					if (readChar() == '=') {
 						tok.subType = eTST_BitWiseLShiftAssign;
-						tok.value.push_back(readChar());
-						nextChar();
+						tok.value.push_back(readCharAndAdv());
 						return;
 					}
 					return;
@@ -376,12 +382,10 @@ namespace fluffy { namespace lexer {
 		case ':':
 			{
 				tok.subType = eTST_Colon;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == ':') {
 					tok.subType = eTST_ScopeResolution;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -389,18 +393,15 @@ namespace fluffy { namespace lexer {
 		case '+':
 			{
 				tok.subType = eTST_Plus;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '+') {
 					tok.subType = eTST_Increment;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '=') {
 					tok.subType = eTST_PlusAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -408,24 +409,20 @@ namespace fluffy { namespace lexer {
 		case '-':
 			{
 				tok.subType = eTST_Minus;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '-') {
 					tok.subType = eTST_Decrement;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '=') {
 					tok.subType = eTST_MinusAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '>') {
 					tok.subType = eTST_ReturnSet;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -433,12 +430,10 @@ namespace fluffy { namespace lexer {
 		case '=':
 			{
 				tok.subType = eTST_Assign;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_Equal;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -446,12 +441,10 @@ namespace fluffy { namespace lexer {
 		case '!':
 			{
 				tok.subType = eTST_LogicalNot;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_NotEqual;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -459,18 +452,15 @@ namespace fluffy { namespace lexer {
 		case '&':
 			{
 				tok.subType = eTST_BitWiseAnd;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '&') {
 					tok.subType = eTST_LogicalAnd;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '=') {
 					tok.subType = eTST_BitWiseAndAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -478,18 +468,15 @@ namespace fluffy { namespace lexer {
 		case '|':
 			{
 				tok.subType = eTST_BitWiseOr;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '|') {
 					tok.subType = eTST_LogicalOr;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 				if (readChar() == '=') {
 					tok.subType = eTST_BitWiseOrAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -497,61 +484,52 @@ namespace fluffy { namespace lexer {
 		case '.':
 			{
 				tok.subType = eTST_Dot;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '(':
 			{
 				tok.subType = eTST_LParBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case ')':
 			{
 				tok.subType = eTST_RParBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '[':
 			{
 				tok.subType = eTST_LSquBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case ']':
 			{
 				tok.subType = eTST_RSquBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '{':
 			{
 				tok.subType = eTST_LBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '}':
 			{
 				tok.subType = eTST_RBracket;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '/':
 			{
 				tok.subType = eTST_Division;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_DivAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -559,12 +537,10 @@ namespace fluffy { namespace lexer {
 		case '*':
 			{
 				tok.subType = eTST_Multiplication;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_MultAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -572,12 +548,10 @@ namespace fluffy { namespace lexer {
 		case '%':
 			{
 				tok.subType = eTST_Modulo;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_ModAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -585,19 +559,16 @@ namespace fluffy { namespace lexer {
 		case '~':
 			{
 				tok.subType = eTST_BitWiseNot;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '^':
 			{
 				tok.subType = eTST_BitWiseXor;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 				if (readChar() == '=') {
 					tok.subType = eTST_BitWiseXorAssign;
-					tok.value.push_back(readChar());
-					nextChar();
+					tok.value.push_back(readCharAndAdv());
 					return;
 				}
 			}
@@ -605,22 +576,19 @@ namespace fluffy { namespace lexer {
 		case ';':
 			{
 				tok.subType = eTST_SemiColon;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case ',':
 			{
 				tok.subType = eTST_Comma;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		case '?':
 			{
 				tok.subType = eTST_Interrogation;
-				tok.value.push_back(readChar());
-				nextChar();
+				tok.value.push_back(readCharAndAdv());
 			}
 			break;
 		default:
@@ -630,10 +598,13 @@ namespace fluffy { namespace lexer {
 
 	void Lexer::parseNumbers(Token_s& tok)
 	{
+		I8 ch = readChar();
+		I8 ch2 = readChar(1);
+
 		tok.type = eTT_Constant;
 
 		// Processa hexadecimal.
-		if (readChar() == '0' && (readChar(1) == 'x' || readChar(1) == 'X'))
+		if (ch == '0' && (ch2 == 'x' || ch2 == 'X'))
 		{
 			nextChar(); // Consome 0
 			nextChar(); // Consome x ou X
@@ -643,7 +614,7 @@ namespace fluffy { namespace lexer {
 			bool isValid = false;
 			while (true)
 			{
-				const I8 ch = readChar();
+				ch = readChar();
 				if (!ishex(ch)) {
 					if (!isValid) {
 						throw exceptions::malformed_number_exception(tok.line, tok.column);
@@ -668,7 +639,7 @@ namespace fluffy { namespace lexer {
 			Bool isValid = false;
 			while (true)
 			{
-				const I8 ch = readChar();
+				ch = readChar();
 				if (!isbin(ch)) {
 					if (!isValid) {
 						throw exceptions::malformed_number_exception(tok.line, tok.column);
@@ -686,7 +657,7 @@ namespace fluffy { namespace lexer {
 		Bool isReal = false;
 		while (true)
 		{
-			const I8 ch = readChar();
+			ch = readChar();
 
 			if (!isnumber(ch) && ch != '.')
 			{
@@ -704,7 +675,7 @@ namespace fluffy { namespace lexer {
 		}
 
 		if (isReal) {
-			const I8 ch = readChar();
+			ch = readChar();
 
 			if (ch == 'f' || ch == 'F') {
 				tok.subType = eTST_ConstantFp32;
@@ -714,33 +685,33 @@ namespace fluffy { namespace lexer {
 			}
 			return;
 		} else {
-			const I8 ch = readChar();
+			ch = readChar();
 
 			// Processa pos fixo.
 			if (ch == 'i' || ch == 'I')
 			{
 				nextChar();
-				const I8 ch1 = readChar();
+				ch = readChar();
 
-				if (ch1 == '8') {
+				if (ch == '8') {
 					nextChar();
 					tok.subType = eTST_ConstantI8;
 					return;
 				}
 				nextChar();
-				const I8 ch2 = readChar();
+				ch2 = readChar();
 
-				if (ch1 == '1' && ch2 == '6') {
+				if (ch == '1' && ch2 == '6') {
 					nextChar();
 					tok.subType = eTST_ConstantI16;
 					return;
 				}
-				if (ch1 == '3' && ch2 == '2') {
+				if (ch == '3' && ch2 == '2') {
 					nextChar();
 					tok.subType = eTST_ConstantI32;
 					return;
 				}
-				if (ch1 == '6' && ch2 == '4') {
+				if (ch == '6' && ch2 == '4') {
 					nextChar();
 					tok.subType = eTST_ConstantI64;
 					return;
@@ -752,27 +723,27 @@ namespace fluffy { namespace lexer {
 			if (ch == 'u' || ch == 'U')
 			{
 				nextChar();
-				const I8 ch1 = readChar();
+				ch = readChar();
 
-				if (ch1 == '8') {
+				if (ch == '8') {
 					nextChar();
 					tok.subType = eTST_ConstantU8;
 					return;
 				}
 				nextChar();
-				const I8 ch2 = readChar();
+				ch2 = readChar();
 
-				if (ch1 == '1' && ch2 == '6') {
+				if (ch == '1' && ch2 == '6') {
 					nextChar();
 					tok.subType = eTST_ConstantU16;
 					return;
 				}
-				if (ch1 == '3' && ch2 == '2') {
+				if (ch == '3' && ch2 == '2') {
 					nextChar();
 					tok.subType = eTST_ConstantU32;
 					return;
 				}
-				if (ch1 == '6' && ch2 == '4') {
+				if (ch == '6' && ch2 == '4') {
 					nextChar();
 					tok.subType = eTST_ConstantU64;
 					return;
@@ -792,8 +763,7 @@ namespace fluffy { namespace lexer {
 		tok.subType = eTST_ConstantChar;
 
 		nextChar(); // Consome '
-		tok.value.push_back(readChar());
-		nextChar();
+		tok.value.push_back(readCharAndAdv());
 		if (!ischar(readChar())) {
 			throw exceptions::malformed_character_constant_exception(tok.line, tok.column);
 		}
@@ -816,8 +786,7 @@ namespace fluffy { namespace lexer {
 			if (ch == '\"') {
 				break;
 			}
-			tok.value.push_back(readChar());
-			nextChar();
+			tok.value.push_back(readCharAndAdv());
 		}
 		nextChar(); // Consome "
 	}
