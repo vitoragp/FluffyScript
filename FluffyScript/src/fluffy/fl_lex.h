@@ -7,6 +7,8 @@
 
 #ifndef SRC_FLUFFY_FL_LEX_H_
 #define SRC_FLUFFY_FL_LEX_H_
+#include <memory>
+#include "fl_buffer.h"
 #include "fl_defs.h"
 
 namespace fluffy { namespace lexer {
@@ -16,8 +18,11 @@ namespace fluffy { namespace lexer {
 
 	class Lexer
 	{
+	private:
+		using BufferBasePtr = std::unique_ptr<BufferBase>;
+
 	public:
-								Lexer();
+								Lexer(BufferBase* const buffer);
 								~Lexer();
 
 		void 					loadSource(String source);
@@ -39,12 +44,11 @@ namespace fluffy { namespace lexer {
 		void					parseString(Token_s& tok);
 
 	private:
-		U32 					m_cursor;
+		BufferBasePtr			m_buffer;
 		U32 					m_line;
 		U32 					m_column;
 		U32						m_tabSpaces;
 		Bool					m_eof;
-		String 					m_source;
 		String					m_filename;
 	};
 } }

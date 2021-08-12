@@ -9,6 +9,7 @@
 #include <set>
 #include <gtest/gtest.h>
 #include "fl_lex.h"
+#include "fl_buffer.h"
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace detail {
@@ -80,6 +81,8 @@ namespace fluffy { namespace detail {
 		std::make_tuple("return", 		eTST_Return),		// ok
 		std::make_tuple("null", 		eTST_Null)			// ok
 	};
+
+	const U32 keywordsCount = sizeof(detail::keywords) / sizeof(std::tuple<String, TokenSubType_e>);
 } }
 
 namespace fluffy { namespace testing {
@@ -99,7 +102,7 @@ namespace fluffy { namespace testing {
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
-			lex = std::make_unique<Lexer>();
+			lex = std::make_unique<Lexer>(new DirectBuffer());
 		}
 	};
 
@@ -273,7 +276,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::unexpected_token_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "Unexpected token at: line 1, column 1");
+			EXPECT_STREQ(e.what(), "Unexpected token '#' at: line 1, column 1");
 		}
 	}
 
@@ -629,7 +632,7 @@ namespace fluffy { namespace testing {
 			}
 		}
 
-		ASSERT_EQ(sizeof(detail::keywords) / sizeof(std::tuple<String, TokenSubType_e>), keywordsImplSet.size());
+		ASSERT_EQ(detail::keywordsCount, keywordsImplSet.size());
 	}
 
 	TEST_F(LexerTest, TestAllSymbolsImpl)

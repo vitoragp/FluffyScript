@@ -6,9 +6,7 @@
  */
 
 #include <tuple>
-#include <fstream>
 #include <algorithm>
-#include <streambuf>
 
 #include "fl_lex.h"
 #include "fl_exceptions.h"
@@ -137,8 +135,8 @@ namespace fluffy {
 }
 
 namespace fluffy { namespace lexer {
-	Lexer::Lexer()
-		: m_cursor(0)
+	Lexer::Lexer(BufferBase* const buffer)
+		: m_buffer(buffer)
 		, m_line(1)
 		, m_column(1)
 		, m_tabSpaces(4)
@@ -150,27 +148,14 @@ namespace fluffy { namespace lexer {
 
 	void Lexer::loadSource(String source)
 	{
-		m_source = source;
+		m_buffer->load(source.c_str(), source.length());
 		m_filename = "anom_block";
 	}
 
 	void Lexer::loadFromSource(String sourceFile)
 	{
+		m_buffer->loadFromFile(sourceFile.c_str());
 		m_filename = sourceFile;
-		{
-			std::ifstream fileStream(m_filename, std::ifstream::binary);
-			if (!fileStream.is_open()) {
-				throw exceptions::file_not_found_exception(m_filename);
-			}
-
-			// Copia o conteudo do arquivo para a string.
-			m_source.assign(
-				std::istreambuf_iterator<char>(fileStream),
-				std::istreambuf_iterator<char>()
-			);
-
-			fileStream.close();
-		}
 	}
 
 	void Lexer::parse(Token_s& tok)
@@ -210,7 +195,7 @@ namespace fluffy { namespace lexer {
 				parseString(tok);
 				return;
 			}
-			throw exceptions::unexpected_token_exception(tok.line, tok.column);
+			throw exceptions::unexpected_token_exception(ch, tok.line, tok.column);
 		}
 		else
 		{
@@ -230,12 +215,12 @@ namespace fluffy { namespace lexer {
 
 	I8 Lexer::readChar(U32 offset)
 	{
-		return m_source[m_cursor + offset];
+		return m_buffer->readByte(offset);
 	}
 
 	void Lexer::nextChar()
 	{
-		m_cursor++;
+		m_buffer->nextByte();
 
 		const U8 ch = readChar();
 		{
@@ -639,7 +624,7 @@ namespace fluffy { namespace lexer {
 			}
 			break;
 		default:
-			throw exceptions::unexpected_token_exception(tok.line, tok.column);
+			throw exceptions::unexpected_token_exception(readChar(), tok.line, tok.column);
 		}
 	}
 

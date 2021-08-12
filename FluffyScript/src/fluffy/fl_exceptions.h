@@ -34,12 +34,13 @@ namespace fluffy { namespace exceptions {
 	class unexpected_token_exception : public std::exception
 	{
 	public:
-								unexpected_token_exception(U32 line, U32 column);
+								unexpected_token_exception(I8 token, U32 line, U32 column);
 								~unexpected_token_exception();
 
 		virtual const char*		what() const noexcept override;
 
 	private:
+		I8 						m_token;
 		U32 					m_line;
 		U32 					m_column;
 	};

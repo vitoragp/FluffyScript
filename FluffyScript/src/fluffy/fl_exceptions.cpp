@@ -30,8 +30,9 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_token_exception
 	 */
 
-	unexpected_token_exception::unexpected_token_exception(U32 line, U32 column)
-		: m_line(line)
+	unexpected_token_exception::unexpected_token_exception(I8 token, U32 line, U32 column)
+		: m_token(token)
+		, m_line(line)
 		, m_column(column)
 	{}
 
@@ -41,7 +42,7 @@ namespace fluffy { namespace exceptions {
 	const char* unexpected_token_exception::what() const noexcept
 	{
 		static char buffer[256];
-		sprintf(buffer, "Unexpected token at: line %d, column %d", m_line, m_column);
+		sprintf(buffer, "Unexpected token '%c' at: line %d, column %d", m_token, m_line, m_column);
 		return buffer;
 	}
 
