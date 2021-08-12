@@ -6,9 +6,81 @@
  */
 
 #include <memory>
+#include <set>
 #include <gtest/gtest.h>
 #include "fl_lex.h"
 #include "fl_exceptions.h"
+
+namespace fluffy { namespace detail {
+	static const std::tuple<String, TokenSubType_e> keywords[] = {
+		std::make_tuple("include", 		eTST_Include),		// ok
+		std::make_tuple("from", 		eTST_From),			// ok
+		std::make_tuple("namespace",	eTST_Namespace),	// ok
+		std::make_tuple("class", 		eTST_Class),		// ok
+		std::make_tuple("extends", 		eTST_Extends),		// ok
+		std::make_tuple("implements",	eTST_Implements),	// ok
+		std::make_tuple("constructor",	eTST_Constructor),	// ok
+		std::make_tuple("destructor",	eTST_Destructor),	// ok
+		std::make_tuple("super",		eTST_Super),		// ok
+		std::make_tuple("public", 		eTST_Public),		// ok
+		std::make_tuple("protected",	eTST_Protected),	// ok
+		std::make_tuple("private", 		eTST_Private),		// ok
+		std::make_tuple("final",		eTST_Final),		// ok
+		std::make_tuple("override", 	eTST_Override),		// ok
+		std::make_tuple("abstract", 	eTST_Abstract),		// ok
+		std::make_tuple("virtual", 		eTST_Virtual),		// ok
+		std::make_tuple("interface",	eTST_Interface),	// ok
+		std::make_tuple("struct",		eTST_Struct),		// ok
+		std::make_tuple("enum", 		eTST_Enum),			// ok
+		std::make_tuple("trait", 		eTST_Trait),		// ok
+		std::make_tuple("static", 		eTST_Static),		// ok
+		std::make_tuple("const", 		eTST_Const),		// ok
+		std::make_tuple("true", 		eTST_True),			// ok
+		std::make_tuple("false", 		eTST_False),		// ok
+		std::make_tuple("void", 		eTST_Void),			// ok
+		std::make_tuple("bool", 		eTST_Bool),			// ok
+		std::make_tuple("i8", 			eTST_i8),			// ok
+		std::make_tuple("u8", 			eTST_u8),			// ok
+		std::make_tuple("i16", 			eTST_i16),			// ok
+		std::make_tuple("u16", 			eTST_u16),			// ok
+		std::make_tuple("i32", 			eTST_i32),			// ok
+		std::make_tuple("u32", 			eTST_u32),			// ok
+		std::make_tuple("i64", 			eTST_i64),			// ok
+		std::make_tuple("u64", 			eTST_u64),			// ok
+		std::make_tuple("fp32",			eTST_fp32),			// ok
+		std::make_tuple("fp64",			eTST_fp64),			// ok
+		std::make_tuple("string", 		eTST_String),		// ok
+		std::make_tuple("map", 			eTST_Map),			// ok
+		std::make_tuple("object", 		eTST_Object),		// ok
+		std::make_tuple("fn", 			eTST_Fn),			// ok
+		std::make_tuple("let", 			eTST_Let),			// ok
+		std::make_tuple("this", 		eTST_This),			// ok
+		std::make_tuple("self", 		eTST_Self),			// ok
+		std::make_tuple("sizeof", 		eTST_SizeOf),		// ok
+		std::make_tuple("new", 			eTST_New),			// ok
+		std::make_tuple("as", 			eTST_As),			// ok
+		std::make_tuple("is", 			eTST_Is),			// ok
+		std::make_tuple("goto", 		eTST_Goto),			// ok
+		std::make_tuple("if", 			eTST_If),			// ok
+		std::make_tuple("else", 		eTST_Else),			// ok
+		std::make_tuple("switch", 		eTST_Switch),		// ok
+		std::make_tuple("case", 		eTST_Case),			// ok
+		std::make_tuple("default", 		eTST_Default),		// ok
+		std::make_tuple("continue", 	eTST_Continue),		// ok
+		std::make_tuple("break", 		eTST_Break),		// ok
+		std::make_tuple("for", 			eTST_For),			// ok
+		std::make_tuple("foreach", 		eTST_Foreach),		// ok
+		std::make_tuple("in",			eTST_In),			// ok
+		std::make_tuple("while", 		eTST_While),		// ok
+		std::make_tuple("do", 			eTST_Do),			// ok
+		std::make_tuple("try", 			eTST_Try),			// ok
+		std::make_tuple("catch",		eTST_Catch),		// ok
+		std::make_tuple("finally",		eTST_Finally),		// ok
+		std::make_tuple("panic", 		eTST_Panic),		// ok
+		std::make_tuple("return", 		eTST_Return),		// ok
+		std::make_tuple("null", 		eTST_Null)			// ok
+	};
+} }
 
 namespace fluffy { namespace testing {
 	using fluffy::lexer::Lexer;
@@ -536,5 +608,27 @@ namespace fluffy { namespace testing {
 			tokenCount++;
 		}
 		EXPECT_EQ(tokenCount, 134);
+	}
+
+	TEST_F(LexerTest, TestAllKeywordsImpl)
+	{
+		std::set<U32> keywordsImplSet;
+
+		lex->loadFromSource(".\\files\\source_5.txt");
+
+		while (true)
+		{
+			lex->parse(tok);
+			{
+				if (tok.type == eTT_Keyword) {
+					keywordsImplSet.insert(tok.subType);
+				}
+				if (tok.type == eTT_EOF) {
+					break;
+				}
+			}
+		}
+
+		ASSERT_EQ(sizeof(detail::keywords) / sizeof(std::tuple<String, TokenSubType_e>), keywordsImplSet.size());
 	}
 } }

@@ -49,10 +49,7 @@ namespace fluffy {
 		eTT_Identifier,
 		eTT_Keyword,
 		eTT_Symbol,
-		eTT_String,
-		eTT_Char,
 		eTT_Constant,
-		eTT_Comment,
 		eTT_EOF,
 
 		eTT_TypeCount
@@ -75,10 +72,11 @@ namespace fluffy {
 		eTST_From,
 		eTST_Namespace,
 		eTST_Class,
+		eTST_Extends,
+		eTST_Implements,
 		eTST_Constructor,
 		eTST_Destructor,
-		eTST_Interface,
-		eTST_Enum,
+		eTST_Super,
 		eTST_Public,
 		eTST_Protected,
 		eTST_Private,
@@ -86,10 +84,15 @@ namespace fluffy {
 		eTST_Override,
 		eTST_Abstract,
 		eTST_Virtual,
+		eTST_Interface,
+		eTST_Struct,
+		eTST_Enum,
+		eTST_Trait,
+		eTST_Static,
 		eTST_Const,
-		eTST_Void,
 		eTST_True,
 		eTST_False,
+		eTST_Void,
 		eTST_Bool,
 		eTST_i8,
 		eTST_u8,
@@ -102,12 +105,12 @@ namespace fluffy {
 		eTST_fp32,
 		eTST_fp64,
 		eTST_String,
-		eTST_Array,
 		eTST_Map,
 		eTST_Object,
 		eTST_Fn,
 		eTST_Let,
 		eTST_This,
+		eTST_Self,
 		eTST_SizeOf,
 		eTST_New,
 		eTST_As,
@@ -125,9 +128,11 @@ namespace fluffy {
 		eTST_In,
 		eTST_While,
 		eTST_Do,
-		eTST_Error,
+		eTST_Try,
+		eTST_Catch,
+		eTST_Finally,
+		eTST_Panic,
 		eTST_Return,
-		eTST_Using,
 		eTST_Null,
 
 		/**
@@ -149,42 +154,42 @@ namespace fluffy {
 		eTST_Plus,					// +
 		eTST_Minus,					// -
 		eTST_Division,				// /
-		eTST_Multiplication,			// *
-		eTST_Modulo,					// %
+		eTST_Multiplication,		// *
+		eTST_Modulo,				// %
 
-		eTST_Assign,					// =
+		eTST_Assign,				// =
 
-		eTST_PlusAssign,				// +=
+		eTST_PlusAssign,			// +=
 		eTST_MinusAssign,			// -=
-		eTST_MultAssign,				// *=
+		eTST_MultAssign,			// *=
 		eTST_DivAssign,				// /=
 		eTST_BitWiseAndAssign,		// &=
 		eTST_BitWiseOrAssign,		// |=
 		eTST_BitWiseXorAssign,		// ^=
 		eTST_ModAssign,				// %=
-		eTST_BitWiseLShiftAssign,	// shl=
-		eTST_BitWiseRShiftAssign,	// shr=
+		eTST_BitWiseLShiftAssign,	// <<=
+		eTST_BitWiseRShiftAssign,	// >>=
 
 		eTST_GreaterThan,			// >
 		eTST_LessThan,				// <
-		eTST_GreaterThanOrEqual,		// >=
+		eTST_GreaterThanOrEqual,	// >=
 		eTST_LessThanOrEqual,		// <=
 		eTST_Equal,					// ==
 		eTST_NotEqual,				// !=
 
-		eTST_BitWiseLShift,			// shl
-		eTST_BitWiseRShift,			// shr
-		eTST_BitWiseAnd,				// &
+		eTST_BitWiseLShift,			// <<
+		eTST_BitWiseRShift,			// >>
+		eTST_BitWiseAnd,			// &
 		eTST_BitWiseOr,				// |
-		eTST_BitWiseXor,				// ^
-		eTST_BitWiseNot,				// ~
+		eTST_BitWiseXor,			// ^
+		eTST_BitWiseNot,			// ~
 
 		eTST_Colon,					// :
 		eTST_SemiColon,				// ;
 
-		eTST_LogicalAnd,				// &&
+		eTST_LogicalAnd,			// &&
 		eTST_LogicalOr,				// ||
-		eTST_LogicalNot,				// !
+		eTST_LogicalNot,			// !
 
 		eTST_Interrogation,			// ?
 
