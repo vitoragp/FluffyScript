@@ -631,4 +631,26 @@ namespace fluffy { namespace testing {
 
 		ASSERT_EQ(sizeof(detail::keywords) / sizeof(std::tuple<String, TokenSubType_e>), keywordsImplSet.size());
 	}
+
+	TEST_F(LexerTest, TestAllSymbolsImpl)
+	{
+		std::set<U32> symbolsImplSet;
+
+		lex->loadFromSource(".\\files\\source_6.txt");
+
+		while (true)
+		{
+			lex->parse(tok);
+			{
+				if (tok.type == eTT_Symbol) {
+					symbolsImplSet.insert(tok.subType);
+				}
+				if (tok.type == eTT_EOF) {
+					break;
+				}
+			}
+		}
+
+		ASSERT_EQ(46, symbolsImplSet.size());
+	}
 } }
