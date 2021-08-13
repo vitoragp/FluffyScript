@@ -62,7 +62,7 @@ namespace fluffy { namespace testing {
 	{
 		String src = "u64 id\r\nstring name";
 
-		buffer->loadFromFile(".\\files\\source_1.txt");
+		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
 
 		String str;
 		while (true)
@@ -127,7 +127,7 @@ namespace fluffy { namespace testing {
 	{
 		String src = "u64 id\r\nstring name";
 
-		buffer->loadFromFile(".\\files\\source_1.txt");
+		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
 
 		String str;
 		while (true)

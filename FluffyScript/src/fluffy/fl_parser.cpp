@@ -56,6 +56,16 @@ namespace fluffy { namespace parser {
 		return value;
 	}
 
+	const Bool Parser::expectConstantBool()
+	{
+		if (!LexUtils::isTrue(m_tok) && !LexUtils::isFalse(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const Bool value = LexUtils::isTrue(m_tok) ? true : false;
+		nextToken();
+		return value;
+	}
+
 	const I8 Parser::expectConstantI8()
 	{
 		if (!LexUtils::isConstantI8(m_tok)) {
@@ -308,7 +318,36 @@ namespace fluffy { namespace parser {
 
 	GeneralStmtPtr Parser::parseGeneralStmt()
 	{
+		Bool hasExport = false;
+
 		// Verifica se houve a declararao para exportar o elemento.
+		if (LexUtils::isExport(m_tok))
+		{
+			expectToken([this]() { return LexUtils::isExport(m_tok);  });
+			hasExport = true;
+		}
+
+		// Verifica qual declaracao processar.
+		switch (m_tok.subType)
+		{
+		case eTST_Class:
+			throw exceptions::not_implemented_feature_exception("parseClassDecl");
+		case eTST_Interface:
+			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
+		case eTST_Struct:
+			throw exceptions::not_implemented_feature_exception("parseStructDecl");
+		case eTST_Enum:
+			throw exceptions::not_implemented_feature_exception("parseEnumDecl");
+		case eTST_Trait:
+			throw exceptions::not_implemented_feature_exception("parseTraitDecl");
+		case eTST_Let:
+			throw exceptions::not_implemented_feature_exception("parseVariableDecl");
+		case eTST_Fn:			
+			throw exceptions::not_implemented_feature_exception("parseFunctionDecl");
+		default:
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+
 		return nullptr;
 	}
 

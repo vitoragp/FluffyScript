@@ -48,7 +48,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseConstants)
 	{
-		parser->loadSource("10i8 10u8 10i16 10u16 10i32 10u32 10i64 10u64 10.0f 10.0 10 \"10\" '1'");
+		parser->loadSource("10i8 10u8 10i16 10u16 10i32 10u32 10i64 10u64 10.0f 10.0 10 \"10\" '1' true false");
 
 		// Le o primeiro token.
 		parser->nextToken();
@@ -71,7 +71,11 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(parser->expectConstantI32(), 10);
 
 		EXPECT_EQ(parser->expectConstantString(), "10");
+
 		EXPECT_EQ(parser->expectConstantChar(), '1');
+
+		EXPECT_EQ(parser->expectConstantBool(), true);
+		EXPECT_EQ(parser->expectConstantBool(), false);
 	}
 
 	TEST_F(ParserTest, TestParseIncludeOnlyOneIdentifier)

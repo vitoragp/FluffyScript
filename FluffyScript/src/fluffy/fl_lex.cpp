@@ -8,6 +8,7 @@ namespace fluffy {
 	static const std::tuple<String, TokenSubType_e> keywords[] = {
 		std::make_tuple("include", 		eTST_Include),		// ok
 		std::make_tuple("from", 		eTST_From),			// ok
+		std::make_tuple("export", 		eTST_Export),		// ok
 		std::make_tuple("namespace",	eTST_Namespace),	// ok
 		std::make_tuple("class", 		eTST_Class),		// ok
 		std::make_tuple("extends", 		eTST_Extends),		// ok

@@ -17,6 +17,7 @@ namespace fluffy { namespace detail {
 	static const std::tuple<String, TokenSubType_e> keywords[] = {
 		std::make_tuple("include", 		eTST_Include),		// ok
 		std::make_tuple("from", 		eTST_From),			// ok
+		std::make_tuple("export", 		eTST_Export),		// ok
 		std::make_tuple("namespace",	eTST_Namespace),	// ok
 		std::make_tuple("class", 		eTST_Class),		// ok
 		std::make_tuple("extends", 		eTST_Extends),		// ok
@@ -212,7 +213,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestParseFile)
 	{
-		const std::string filename = ".\\files\\source_1.txt";
+		const std::string filename = ".\\files\\lexer\\source_1.txt";
 
 		lex->loadFromSource(filename);
 
@@ -259,7 +260,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestParseInvalidFile)
 	{
-		const std::string filename = ".\\files\\source_not_exist.txt";
+		const std::string filename = ".\\files\\lexer\\source_not_exist.txt";
 
 		try
 		{
@@ -267,7 +268,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::file_not_found_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "File not found: '.\\files\\source_not_exist.txt'");
+			EXPECT_STREQ(e.what(), "File not found: '.\\files\\lexer\\source_not_exist.txt'");
 		}
 	}
 
@@ -333,7 +334,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestSkipComments)
 	{
-		lex->loadFromSource(".\\files\\source_2.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_2.txt");
 
 		lex->parse(tok); // void
 		{
@@ -342,7 +343,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.subType, fluffy::eTST_Void);
 			EXPECT_EQ(tok.line, 7);
 			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, ".\\files\\source_2.txt");
+			EXPECT_EQ(tok.filename, ".\\files\\lexer\\source_2.txt");
 		}
 	}
 
@@ -350,7 +351,7 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadFromSource(".\\files\\source_3.txt");
+			lex->loadFromSource(".\\files\\lexer\\source_3.txt");
 			lex->parse(tok);
 
 			throw std::exception();
@@ -603,7 +604,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestComplexScript)
 	{
-		lex->loadFromSource(".\\files\\source_4.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_4.txt");
 
 		int tokenCount = 0;
 		while (true)
@@ -623,7 +624,7 @@ namespace fluffy { namespace testing {
 	{
 		std::set<U32> keywordsImplSet;
 
-		lex->loadFromSource(".\\files\\source_5.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_5.txt");
 
 		while (true)
 		{
@@ -645,7 +646,7 @@ namespace fluffy { namespace testing {
 	{
 		std::set<U32> symbolsImplSet;
 
-		lex->loadFromSource(".\\files\\source_6.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_6.txt");
 
 		while (true)
 		{
@@ -785,7 +786,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestParseFile)
 	{
-		const std::string filename = ".\\files\\source_1.txt";
+		const std::string filename = ".\\files\\lexer\\source_1.txt";
 
 		lex->loadFromSource(filename);
 
@@ -832,7 +833,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestParseInvalidFile)
 	{
-		const std::string filename = ".\\files\\source_not_exist.txt";
+		const std::string filename = ".\\files\\lexer\\source_not_exist.txt";
 
 		try
 		{
@@ -840,7 +841,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::file_not_found_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "File not found: '.\\files\\source_not_exist.txt'");
+			EXPECT_STREQ(e.what(), "File not found: '.\\files\\lexer\\source_not_exist.txt'");
 		}
 	}
 
@@ -906,7 +907,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestSkipComments)
 	{
-		lex->loadFromSource(".\\files\\source_2.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_2.txt");
 
 		lex->parse(tok); // void
 		{
@@ -915,7 +916,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.subType, fluffy::eTST_Void);
 			EXPECT_EQ(tok.line, 7);
 			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, ".\\files\\source_2.txt");
+			EXPECT_EQ(tok.filename, ".\\files\\lexer\\source_2.txt");
 		}
 	}
 
@@ -923,7 +924,7 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadFromSource(".\\files\\source_3.txt");
+			lex->loadFromSource(".\\files\\lexer\\source_3.txt");
 			lex->parse(tok);
 
 			throw std::exception();
@@ -1176,7 +1177,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestComplexScript)
 	{
-		lex->loadFromSource(".\\files\\source_4.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_4.txt");
 
 		int tokenCount = 0;
 		while (true)
@@ -1196,7 +1197,7 @@ namespace fluffy { namespace testing {
 	{
 		std::set<U32> keywordsImplSet;
 
-		lex->loadFromSource(".\\files\\source_5.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_5.txt");
 
 		while (true)
 		{
@@ -1218,7 +1219,7 @@ namespace fluffy { namespace testing {
 	{
 		std::set<U32> symbolsImplSet;
 
-		lex->loadFromSource(".\\files\\source_6.txt");
+		lex->loadFromSource(".\\files\\lexer\\source_6.txt");
 
 		while (true)
 		{

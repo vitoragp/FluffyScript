@@ -62,6 +62,7 @@ namespace fluffy {
 
 		 eTST_Include,
 		 eTST_From,
+		 eTST_Export,
 		 eTST_Namespace,
 		 eTST_Class,
 		 eTST_Extends,

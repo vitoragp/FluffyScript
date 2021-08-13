@@ -125,5 +125,23 @@ namespace fluffy {
 			sprintf_s(buffer, "Malphormed string constant at: line %d, column %d", m_line, m_column);
 			return buffer;
 		}
+
+		/**
+		 * not_implemented_feature_exception
+		 */
+
+		not_implemented_feature_exception::not_implemented_feature_exception(String feature)
+			: m_feature(feature)
+		{}
+
+		not_implemented_feature_exception::~not_implemented_feature_exception()
+		{}
+
+		const char* not_implemented_feature_exception::what() const noexcept
+		{
+			static char buffer[256];
+			sprintf_s(buffer, "this feature '%s' is not implemented", m_feature.c_str());
+			return buffer;
+		}
 	}
 }

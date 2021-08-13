@@ -3,7 +3,7 @@ include { * } from "UI";
 
 namespace com.application
 {
-	struct User
+	export struct User
 	{
 		let id: u64;
 		let name: string;

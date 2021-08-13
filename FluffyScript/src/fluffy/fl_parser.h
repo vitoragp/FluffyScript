@@ -39,6 +39,7 @@ namespace fluffy { namespace parser {
 
 		void					expectToken(std::function<bool()> callback);
 		String					expectIdentifier();
+		const Bool				expectConstantBool();
 		const I8				expectConstantI8();
 		const U8				expectConstantU8();
 		const I16				expectConstantI16();

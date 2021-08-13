@@ -65,6 +65,11 @@ namespace fluffy { namespace utils {
 
 									FLUFFY_IS_TOKEN_DECL(Namespace);							// namespace
 
+									FLUFFY_IS_TOKEN_DECL(Export);								// export
+
+									FLUFFY_IS_TOKEN_DECL(True);									// true
+									FLUFFY_IS_TOKEN_DECL(False);								// False
+
 									FLUFFY_IS_TOKEN_DECL_2(LeftBracket, LBracket);				// {
 									FLUFFY_IS_TOKEN_DECL_2(RightBracket, RBracket);				// }
 

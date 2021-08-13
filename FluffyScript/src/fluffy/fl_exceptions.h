@@ -11,10 +11,10 @@ namespace fluffy {
 		class file_not_found_exception : public std::exception
 		{
 		public:
-			file_not_found_exception(const String filename);
-			~file_not_found_exception();
+									file_not_found_exception(const String filename);
+									~file_not_found_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 
 		private:
 			String					m_filename;
@@ -27,11 +27,11 @@ namespace fluffy {
 		class unexpected_token_exception : public std::exception
 		{
 		public:
-			unexpected_token_exception(I8 token, U32 line, U32 column);
-			unexpected_token_exception(String token, U32 line, U32 column);
-			~unexpected_token_exception();
+									unexpected_token_exception(I8 token, U32 line, U32 column);
+									unexpected_token_exception(String token, U32 line, U32 column);
+									~unexpected_token_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 
 		private:
 			Bool					m_isChar;
@@ -48,10 +48,10 @@ namespace fluffy {
 		class unexpected_end_of_file_exception : public std::exception
 		{
 		public:
-			unexpected_end_of_file_exception();
-			~unexpected_end_of_file_exception();
+									unexpected_end_of_file_exception();
+									~unexpected_end_of_file_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 		};
 
 		/**
@@ -61,10 +61,10 @@ namespace fluffy {
 		class malformed_number_exception : public std::exception
 		{
 		public:
-			malformed_number_exception(U32 line, U32 column);
-			~malformed_number_exception();
+									malformed_number_exception(U32 line, U32 column);
+									~malformed_number_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 
 		private:
 			U32 					m_line;
@@ -78,10 +78,10 @@ namespace fluffy {
 		class malformed_character_constant_exception : public std::exception
 		{
 		public:
-			malformed_character_constant_exception(U32 line, U32 column);
-			~malformed_character_constant_exception();
+									malformed_character_constant_exception(U32 line, U32 column);
+									~malformed_character_constant_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 
 		private:
 			U32 					m_line;
@@ -95,14 +95,30 @@ namespace fluffy {
 		class malformed_string_constant_exception : public std::exception
 		{
 		public:
-			malformed_string_constant_exception(U32 line, U32 column);
-			~malformed_string_constant_exception();
+									malformed_string_constant_exception(U32 line, U32 column);
+									~malformed_string_constant_exception();
 
-			virtual const char* what() const noexcept override;
+			virtual const char*		what() const noexcept override;
 
 		private:
 			U32 					m_line;
 			U32 					m_column;
+		};
+
+		/**
+		 * not_implemented_feature_exception
+		 */
+
+		class not_implemented_feature_exception : public std::exception
+		{
+		public:
+									not_implemented_feature_exception(String feature);
+									~not_implemented_feature_exception();
+
+			virtual const char*		what() const noexcept override;
+
+		private:
+			String 					m_feature;
 		};
 	}
 }
