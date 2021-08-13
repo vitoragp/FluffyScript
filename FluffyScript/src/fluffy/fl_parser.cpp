@@ -77,6 +77,7 @@ namespace fluffy { namespace parser {
 			return program;
 		}
 
+		// Processa declaracoes de include.
 		while (true)
 		{
 			if (LexUtils::isEof(m_tok)) {
@@ -84,6 +85,20 @@ namespace fluffy { namespace parser {
 			}
 			if (LexUtils::isInclude(m_tok)) {
 				program->includeList.push_back(parseInclude());
+				continue;
+			}
+			break;
+		}
+
+		while (true)
+		{
+			if (LexUtils::isEof(m_tok)) {
+				return program;
+			}
+
+			// Processa namespaces.
+			if (LexUtils::isNamespace(m_tok)) {
+				program->namespaceList.push_back(parseNamespace());
 			}
 		}
 		return nullptr;
@@ -105,7 +120,7 @@ namespace fluffy { namespace parser {
 			if (LexUtils::isMultiplication(m_tok)) {
 				// Se existe identificaores declarados, o caractere coringa
 				// nao pode ser usado.
-				if (includeDecl->identifierList.size()) {
+				if (includeDecl->includedItemList.size()) {
 					throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
 				}
 
@@ -117,7 +132,7 @@ namespace fluffy { namespace parser {
 			}
 
 			// Consome identificador.
-			includeDecl->identifierList.push_back(expectIdentifier());
+			includeDecl->includedItemList.push_back(expectIdentifier());
 
 			// Verifica se ha mais declaracoes.
 			if (!LexUtils::isComma(m_tok)) {
@@ -134,12 +149,80 @@ namespace fluffy { namespace parser {
 		// Consome 'from'
 		expectToken([this]() { return LexUtils::isFrom(m_tok); });
 
-		// Consome constant string
-		includeDecl->from = expectConstantString();
+		// Consome o identificador do namespace.
+		includeDecl->fromNamespace = parseNamedDecl();
 
 		// Consome ';'
 		expectToken([this]() { return LexUtils::isSemiColon(m_tok); });
 
 		return includeDecl;
+	}
+
+	NamespacePtr Parser::parseNamespace()
+	{
+		auto namespaceDecl = std::make_unique<ast::Namespace>();
+
+		// Consome 'namespace'.
+		expectToken([this]() { return LexUtils::isNamespace(m_tok); });
+
+		// Consome o identficador com o nome do namespace.
+		namespaceDecl->name = expectIdentifier();
+
+		// Consome '{'.
+		expectToken([this]() { return LexUtils::isLeftBracket(m_tok); });
+
+		while (true)
+		{
+			// Verifica se chegou ao fim do namespace.
+			if (LexUtils::isRightBracket(m_tok))
+			{
+				break;
+			}
+
+			// Processa namespace.
+			if (LexUtils::isNamespace(m_tok))
+			{
+				namespaceDecl->namespaceList.push_back(parseNamespace());
+				continue;
+			}
+
+			// Processa declaracao geral.
+			namespaceDecl->generalDeclList.push_back(parseGeneralStmt());
+		}
+
+		// Consome '}'.
+		expectToken([this]() { return LexUtils::isRightBracket(m_tok); });
+
+		return namespaceDecl;
+	}
+
+	GeneralStmtPtr Parser::parseGeneralStmt()
+	{
+		// Verifica se houve a declararao para exportar o elemento.
+		return nullptr;
+	}
+
+	NamedDeclPtr Parser::parseNamedDecl()
+	{
+		auto namedDecl = std::make_unique<ast::NamedDecl>();
+
+		// Consome o identificador.
+		namedDecl->identifier = expectIdentifier();
+
+		while (true)
+		{
+			// Verifica se a resolucao de escopo.
+			if (!LexUtils::isScopeResolution(m_tok))
+			{
+				break;
+			}
+
+			// Consome '::'.
+			expectToken([this]() { return LexUtils::isScopeResolution(m_tok); });
+
+			// Consome o tailDecl.
+			namedDecl->tailDecl = parseNamedDecl();
+		}
+		return namedDecl;
 	}
 } }

@@ -30,8 +30,12 @@ namespace fluffy { namespace utils {
 
 									FLUFFY_IS_TOKEN_DECL(From);									// from
 
+									FLUFFY_IS_TOKEN_DECL(Namespace);							// namespace
+
 									FLUFFY_IS_TOKEN_DECL_2(LeftBracket, LBracket);				// {
 									FLUFFY_IS_TOKEN_DECL_2(RightBracket, RBracket);				// }
+
+									FLUFFY_IS_TOKEN_DECL(ScopeResolution);						// ::
 
 									FLUFFY_IS_TOKEN_DECL(SemiColon);							// ;
 

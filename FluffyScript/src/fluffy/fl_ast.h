@@ -6,10 +6,22 @@ namespace fluffy { namespace ast {
 	using std::vector;
 	using std::unique_ptr;
 
-	using StringList = vector<String>;
+	using StringList						= vector<String>;
 
-	using IncludePtr = unique_ptr<class Include>;
-	using IncludePtrList = vector<IncludePtr>;
+	using IncludePtr						= unique_ptr<class Include>;
+	using IncludePtrList					= vector<IncludePtr>;
+
+	using NamespacePtr						= unique_ptr<class Namespace>;
+	using NamespacePtrList					= vector<NamespacePtr>;
+
+	using GeneralStmtPtr					= unique_ptr<class GeneralStmt>;
+	using GeneralStmtPtrList				= vector<GeneralStmtPtr>;
+
+	using GenericTemplateDeclPtr			= unique_ptr<class GenericTemplateDecl>;
+	using GenericTemplateDeclPtrList		= vector<GenericTemplateDeclPtr>;
+
+	using NamedDeclPtr						= unique_ptr<class NamedDecl>;
+	using NamedDeclPtrList					= vector<NamedDeclPtr>;
 
 	/**
 	 * Program
@@ -22,6 +34,7 @@ namespace fluffy { namespace ast {
 								~Program();
 
 		IncludePtrList			includeList;
+		NamespacePtrList		namespaceList;
 	};
 
 	/**
@@ -34,8 +47,105 @@ namespace fluffy { namespace ast {
 								Include();
 								~Include();
 
-		StringList				identifierList;
+		StringList				includedItemList;
 		Bool					allFlag;
-		String					from;
-	};	
+		NamedDeclPtr			fromNamespace;
+	};
+
+	/**
+	 * Namespace
+	 */
+
+	class Namespace
+	{
+	public:
+								Namespace();
+								~Namespace();
+
+		String					name;
+		NamespacePtrList		namespaceList;
+		GeneralStmtPtrList		generalDeclList;
+	};
+
+	/**
+	 * GeneralStmt
+	 */
+
+	class GeneralStmt
+	{
+	public:
+		enum GeneralStmtType
+		{
+			eGST_Unknown,
+			eGST_ClassDecl,
+			eGST_InterfaceDecl,
+			eGST_StructDecl,
+			eGST_EnumDecl,
+			eGST_TraitDecl,
+			eGST_VariableDecl,
+			eGST_FunctionDecl
+		};
+
+	protected:
+								GeneralStmt(GeneralStmtType const type);
+
+	public:
+		virtual					~GeneralStmt();
+
+		GeneralStmtType			getType();
+
+	private:
+		GeneralStmtType			m_type;
+	};
+
+	/**
+	 * ClassDecl
+	 */
+
+	class ClassDecl : public GeneralStmt
+	{
+	public:
+								ClassDecl();
+		virtual					~ClassDecl();
+
+		Bool					isExported;
+		Bool					isAbstract;
+		String					name;
+		GenericTemplateDeclPtr	genericTemplateDecl;
+		// ImplementsDecl		implementsDecl;
+		// ExtendsDecl			extendsDecl;
+		// StaticVariableList	staticVariableList;
+		// VariableList			variableList;
+		// StaticFunctionList	staticFunctionList;
+		// FunctionList			functionList;
+		// ConstructorList		constructorList;
+		// DestructorDecl		destructorDecl;
+	};
+
+	/**
+	 * GenericTemplateDecl
+	 */
+
+	class GenericTemplateDecl
+	{
+	public:
+								GenericTemplateDecl();
+								~GenericTemplateDecl();
+
+		StringList				templateItemList;
+	};
+
+	/**
+	 * NamedDecl
+	 */
+
+	class NamedDecl
+	{
+	public:
+								NamedDecl();
+								~NamedDecl();
+
+		String					identifier;
+		NamedDeclPtr			tailDecl;
+	};
 } }

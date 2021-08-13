@@ -8,8 +8,11 @@ namespace fluffy { namespace parser {
 	using lexer::Lexer;
 	using std::unique_ptr;
 
-	using ProgramPtr = unique_ptr<ast::Program>;
-	using IncludePtr = unique_ptr<ast::Include>;
+	using ProgramPtr			= unique_ptr<ast::Program>;
+	using IncludePtr			= unique_ptr<ast::Include>;
+	using NamespacePtr			= unique_ptr<ast::Namespace>;
+	using GeneralStmtPtr		= unique_ptr<ast::GeneralStmt>;
+	using NamedDeclPtr			= unique_ptr<ast::NamedDecl>;
 
 	/**
 	 * Parser
@@ -34,6 +37,10 @@ namespace fluffy { namespace parser {
 
 		ProgramPtr				parseProgram();
 		IncludePtr				parseInclude();
+		NamespacePtr			parseNamespace();
+		GeneralStmtPtr			parseGeneralStmt();
+
+		NamedDeclPtr			parseNamedDecl();
 
 	private:
 		unique_ptr<Lexer>		m_lex;
