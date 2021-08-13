@@ -49,7 +49,7 @@ namespace fluffy { namespace ast {
 
 		StringList				includedItemList;
 		Bool					allFlag;
-		ScopedIdentifierDeclPtr fromNamespace;
+		ScopedIdentifierDeclPtr	fromNamespace;
 	};
 
 	/**

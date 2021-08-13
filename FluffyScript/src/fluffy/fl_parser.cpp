@@ -56,12 +56,122 @@ namespace fluffy { namespace parser {
 		return value;
 	}
 
+	const I8 Parser::expectConstantI8()
+	{
+		if (!LexUtils::isConstantI8(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I8 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const U8 Parser::expectConstantU8()
+	{
+		if (!LexUtils::isConstantU8(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const U8 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const I16 Parser::expectConstantI16()
+	{
+		if (!LexUtils::isConstantI16(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I16 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const U16 Parser::expectConstantU16()
+	{
+		if (!LexUtils::isConstantU16(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const U16 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const I32 Parser::expectConstantI32()
+	{
+		if (!LexUtils::isConstantI32(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I32 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const U32 Parser::expectConstantU32()
+	{
+		if (!LexUtils::isConstantU32(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I32 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const I64 Parser::expectConstantI64()
+	{
+		if (!LexUtils::isConstantI64(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I64 value = std::stol(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const U64 Parser::expectConstantU64()
+	{
+		if (!LexUtils::isConstantU64(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const U64 value = std::stoi(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const Fp32 Parser::expectConstantFp32()
+	{
+		if (!LexUtils::isConstantFp32(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const Fp32 value = std::stof(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const Fp64 Parser::expectConstantFp64()
+	{
+		if (!LexUtils::isConstantFp64(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const Fp64 value = std::stod(m_tok.value, nullptr);
+		nextToken();
+		return value;
+	}
+
+	const I8 Parser::expectConstantChar()
+	{
+		if (!LexUtils::isConstantChar(m_tok)) {
+			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+		}
+		const I8 value = m_tok.value[0];
+		nextToken();
+		return value;
+	}
+
 	String Parser::expectConstantString()
 	{
-		String value = m_tok.value;
 		if (!LexUtils::isConstantString(m_tok)) {
 			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
 		}
+		String value = m_tok.value;
 		nextToken();
 		return value;
 	}

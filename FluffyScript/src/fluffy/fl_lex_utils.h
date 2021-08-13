@@ -24,6 +24,39 @@ namespace fluffy { namespace utils {
 		Bool						isIdentifier(const Token_s& tok);
 
 		static
+		Bool						isConstantI8(const Token_s& tok);
+
+		static
+		Bool						isConstantU8(const Token_s& tok);
+
+		static
+		Bool						isConstantI16(const Token_s& tok);
+
+		static
+		Bool						isConstantU16(const Token_s& tok);
+
+		static
+		Bool						isConstantI32(const Token_s& tok);
+
+		static
+		Bool						isConstantU32(const Token_s& tok);
+
+		static
+		Bool						isConstantI64(const Token_s& tok);
+
+		static
+		Bool						isConstantU64(const Token_s& tok);
+
+		static
+		Bool						isConstantFp32(const Token_s& tok);
+
+		static
+		Bool						isConstantFp64(const Token_s& tok);
+
+		static
+		Bool						isConstantChar(const Token_s& tok);
+
+		static
 		Bool						isConstantString(const Token_s& tok);
 
 									FLUFFY_IS_TOKEN_DECL(Include);								// include

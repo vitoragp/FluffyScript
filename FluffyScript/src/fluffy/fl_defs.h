@@ -22,7 +22,7 @@ namespace fluffy {
 	typedef unsigned long long		U64;
 
 	typedef float					Fp32;
-	typedef float					Fp64;
+	typedef double					Fp64;
 
 	typedef void					Void;
 	typedef void* Pointer;
