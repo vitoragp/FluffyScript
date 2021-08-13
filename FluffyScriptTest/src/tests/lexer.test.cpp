@@ -7,7 +7,8 @@
 
 #include <memory>
 #include <set>
-#include <gtest/gtest.h>
+#include <filesystem>
+#include "gtest/gtest.h"
 #include "fl_lex.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -104,6 +105,10 @@ namespace fluffy { namespace testing {
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
+			if (std::filesystem::exists(".\\s_cache"))
+			{
+				std::filesystem::remove(".\\s_cache");
+			}
 			lex = std::make_unique<Lexer>(new DirectBuffer());
 		}
 	};
@@ -203,7 +208,6 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.column, 5);
 			EXPECT_EQ(tok.filename, "anom_block");
 		}
-
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseFile)

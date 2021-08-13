@@ -1,10 +1,3 @@
-/*
- * fl_buffer.cpp
- *
- *  Created on: 12 de ago. de 2021
- *      Author: NPShinigami
- */
-
 #include <filesystem>
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -128,11 +121,11 @@ namespace fluffy {
 		}
 
 		m_stream.seekg(0, std::fstream::end);
-		m_fileSize = m_stream.tellg();
+		m_fileSize = static_cast<U32>(m_stream.tellg());
 		m_stream.seekg(0, std::fstream::beg);
 
 		// Preenche o buffer inicial
-		m_stream.readsome(m_memory, m_length);
+		m_stream.read(m_memory, m_length);
 
 	}
 
@@ -160,7 +153,7 @@ namespace fluffy {
 			// Avanca ate o offset solicitado, le o byte e volta para a
 			// posicao inicial.
 			m_stream.seekg(cursor + offset - 1, std::fstream::beg);
-			m_stream.readsome(&ch, 1);
+			m_stream.read(&ch, 1);
 			m_stream.seekg(cursor, std::fstream::beg);
 
 			return ch;
@@ -170,13 +163,14 @@ namespace fluffy {
 		{
 			if (m_stream.good())
 			{
-				const U32 totalReadedBytes = m_stream.tellg();
-				size_t readedBytes = m_stream.readsome(
+				const U32 totalReadedBytes = static_cast<U32>(m_stream.tellg());
+				m_stream.read(
 					m_memory,
 					totalReadedBytes + m_length > m_fileSize
-						? m_fileSize - totalReadedBytes
-						: m_length
+					? m_fileSize - totalReadedBytes
+					: m_length
 				);
+				size_t readedBytes = m_stream.gcount();
 				if (readedBytes < m_length) {
 					m_memory[readedBytes] = 0;
 				}
@@ -200,7 +194,7 @@ namespace fluffy {
 		static U32 tempFileIndex = 0;
 		static I8 fileNameBuffer[64];
 
-		sprintf(fileNameBuffer, ".\\s_cache\\cache_%04d.lex", tempFileIndex++);
+		sprintf_s(fileNameBuffer, ".\\s_cache\\cache_%04d.lex", tempFileIndex++);
 
 		if (!std::filesystem::exists(".\\s_cache")) {
 			std::filesystem::create_directories(".\\s_cache");
@@ -221,6 +215,3 @@ namespace fluffy {
 		return m_cacheFileName.c_str();
 	}
 }
-
-
-

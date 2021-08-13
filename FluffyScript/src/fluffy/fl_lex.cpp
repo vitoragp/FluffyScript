@@ -1,10 +1,3 @@
-/*
- * fl_lex.cpp
- *
- *  Created on: 11 de ago. de 2021
- *      Author: NPShinigami
- */
-
 #include <tuple>
 #include <algorithm>
 
@@ -136,210 +129,212 @@ namespace fluffy {
 	static const auto isTab = [](char ch) -> bool { return ch == '\t'; };
 }
 
-namespace fluffy { namespace lexer {
-	Lexer::Lexer(BufferBase* const buffer)
-		: m_buffer(buffer)
-		, m_line(1)
-		, m_column(1)
-		, m_tabSpaces(4)
-		, m_eof(false)
-	{}
+namespace fluffy {
+	namespace lexer {
+		Lexer::Lexer(BufferBase* const buffer)
+			: m_buffer(buffer)
+			, m_line(1)
+			, m_column(1)
+			, m_tabSpaces(4)
+			, m_eof(false)
+		{}
 
-	Lexer::~Lexer()
-	{}
+		Lexer::~Lexer()
+		{}
 
-	void Lexer::loadSource(String source)
-	{
-		m_buffer->load(source.c_str(), source.length());
-		m_filename = "anom_block";
-	}
-
-	void Lexer::loadFromSource(String sourceFile)
-	{
-		m_buffer->loadFromFile(sourceFile.c_str());
-		m_filename = sourceFile;
-	}
-
-	void Lexer::parse(Token_s& tok)
-	{
-		// Salta: espacos, tabulacoes, carriages, novas linhas.
-		skip();
-
-		if (!m_eof) {
-			const I8 ch = readChar();
-
-			// Armazena inicio do token e nome do arquivo ou bloco.
-			tok.type = eTT_Unknown;
-			tok.subType = eTST_Unknown;
-			tok.line = m_line;
-			tok.column = m_column;
-			tok.filename = m_filename;
-			tok.value.clear();
-
-			// Processa token.
-			if (isidentifier(ch)) {
-				parseIdentifier(tok);
-				return;
-			}
-			if (issymbol(ch)) {
-				parseSymbols(tok);
-				return;
-			}
-			if (isnumber(ch)) {
-				parseNumbers(tok);
-				return;
-			}
-			if (ischar(ch)) {
-				parseChar(tok);
-				return;
-			}
-			if (isstring(ch)) {
-				parseString(tok);
-				return;
-			}
-			throw exceptions::unexpected_token_exception(ch, tok.line, tok.column);
-		}
-		else
+		void Lexer::loadSource(String source)
 		{
-			tok.line = 0;
-			tok.column = 0;
-			tok.filename = m_filename;
-			tok.value.clear();
-			tok.type = eTT_EOF;
-			tok.subType = eTST_Unknown;
+			m_buffer->load(source.c_str(), static_cast<U32>(source.length()));
+			m_filename = "anom_block";
 		}
-	}
 
-	void Lexer::setTabSpaces(U32 newTabSpaces)
-	{
-		m_tabSpaces = newTabSpaces;
-	}
-
-	I8 Lexer::readChar(U32 offset)
-	{
-		return m_buffer->readByte(offset);
-	}
-
-	I8 Lexer::readCharAndAdv()
-	{
-		const I8 ch = readChar();
-		nextChar();
-		return ch;
-	}
-
-	void Lexer::nextChar()
-	{
-		m_buffer->nextByte();
-
-		const U8 ch = readChar();
+		void Lexer::loadFromSource(String sourceFile)
 		{
-			if (ch == '\0') {
-				m_eof = true;
-			}
-			if (isNewLine(ch)) {
-				m_line++;
-				m_column = 0;
-				return;
-			}
-			if (isTab(ch)) {
-				m_column += m_tabSpaces;
-				return;
-			}
+			m_buffer->loadFromFile(sourceFile.c_str());
+			m_filename = sourceFile;
 		}
-		m_column++;
-	}
 
-	void Lexer::skip()
-	{
-		while (true) {
-			const I8 ch = readChar();
+		void Lexer::parse(Token_s& tok)
+		{
+			// Salta: espacos, tabulacoes, carriages, novas linhas.
+			skip();
 
-			// Sai se o primeiro for o fim do arquivo.
-			if (ch == '\0') {
-				return;
-			}
+			if (!m_eof) {
+				const I8 ch = readChar();
 
-			const I8 ch2 = readChar(1);
+				// Armazena inicio do token e nome do arquivo ou bloco.
+				tok.type = eTT_Unknown;
+				tok.subType = eTST_Unknown;
+				tok.line = m_line;
+				tok.column = m_column;
+				tok.filename = m_filename;
+				tok.value.clear();
 
-			// Comentario de linha
-			if (ch == '/' && ch2 == '/') {
-				while (true) {
-					const I8 nch = readChar();
-					if (nch == '\n') {
-						break;
-					}
-					if (m_eof) {
-						return;
-					}
-					nextChar();
+				// Processa token.
+				if (isidentifier(ch)) {
+					parseIdentifier(tok);
+					return;
 				}
-				nextChar();
-				continue;
-			}
-
-			// Comentario de bloco
-			if (ch == '/' && ch2 == '*') {
-				while (true) {
-					const I8 nch = readChar();
-
-					if (m_eof) {
-						throw exceptions::unexpected_end_of_file_exception();
-					}
-
-					const I8 nch2 = readChar(1);
-
-					if (nch == '*' && nch2 == '/') {
-						break;
-					}
-					nextChar();
+				if (issymbol(ch)) {
+					parseSymbols(tok);
+					return;
 				}
-				nextChar();
-				nextChar();
-				continue;
+				if (isnumber(ch)) {
+					parseNumbers(tok);
+					return;
+				}
+				if (ischar(ch)) {
+					parseChar(tok);
+					return;
+				}
+				if (isstring(ch)) {
+					parseString(tok);
+					return;
+				}
+				throw exceptions::unexpected_token_exception(ch, tok.line, tok.column);
 			}
-
-			// Espacos em branco, tabulacao, nova linha, carriage.
-			if (isSpace(ch) || isNewLine(ch) || isCarriage(ch) || isTab(ch)) {
-				nextChar();
-				continue;
+			else
+			{
+				tok.line = 0;
+				tok.column = 0;
+				tok.filename = m_filename;
+				tok.value.clear();
+				tok.type = eTT_EOF;
+				tok.subType = eTST_Unknown;
 			}
-			break;
 		}
-	}
 
-	void Lexer::parseIdentifier(Token_s& tok)
-	{
-		while (true)
+		void Lexer::setTabSpaces(U32 newTabSpaces)
 		{
+			m_tabSpaces = newTabSpaces;
+		}
+
+		I8 Lexer::readChar(U32 offset)
+		{
+			return m_buffer->readByte(offset);
+		}
+
+		I8 Lexer::readCharAndAdv()
+		{
+			const I8 ch = readChar();
+			nextChar();
+			return ch;
+		}
+
+		void Lexer::nextChar()
+		{
+			m_buffer->nextByte();
+
 			const U8 ch = readChar();
-			if (!isidentifier(ch) && !isdigit(ch)) {
+			{
+				if (ch == '\0') {
+					m_eof = true;
+				}
+				if (isNewLine(ch)) {
+					m_line++;
+					m_column = 0;
+					return;
+				}
+				if (isTab(ch)) {
+					m_column += m_tabSpaces;
+					return;
+				}
+			}
+			m_column++;
+		}
+
+		void Lexer::skip()
+		{
+			while (true) {
+				const I8 ch = readChar();
+
+				// Sai se o primeiro for o fim do arquivo.
+				if (ch == '\0') {
+					m_eof = true;
+					return;
+				}
+
+				const I8 ch2 = readChar(1);
+
+				// Comentario de linha
+				if (ch == '/' && ch2 == '/') {
+					while (true) {
+						const I8 nch = readChar();
+						if (nch == '\n') {
+							break;
+						}
+						if (m_eof) {
+							return;
+						}
+						nextChar();
+					}
+					nextChar();
+					continue;
+				}
+
+				// Comentario de bloco
+				if (ch == '/' && ch2 == '*') {
+					while (true) {
+						const I8 nch = readChar();
+
+						if (m_eof) {
+							throw exceptions::unexpected_end_of_file_exception();
+						}
+
+						const I8 nch2 = readChar(1);
+
+						if (nch == '*' && nch2 == '/') {
+							break;
+						}
+						nextChar();
+					}
+					nextChar();
+					nextChar();
+					continue;
+				}
+
+				// Espacos em branco, tabulacao, nova linha, carriage.
+				if (isSpace(ch) || isNewLine(ch) || isCarriage(ch) || isTab(ch)) {
+					nextChar();
+					continue;
+				}
 				break;
 			}
-			tok.value.push_back(readCharAndAdv());
 		}
 
-		// Verifica se o token e uma palavra reservada.
-		for (auto& keyword : keywords) {
-			if (std::get<0>(keyword) == tok.value) {
-				tok.type = eTT_Keyword;
-				tok.subType = std::get<1>(keyword);
-				return;
-			}
-		}
-		tok.type = eTT_Identifier;
-		tok.subType = eTST_Unknown;
-	}
-
-	void Lexer::parseSymbols(Token_s& tok)
-	{
-		const I8 ch = readChar();
-
-		tok.type = eTT_Symbol;
-
-		// Process symbol
-		switch (ch)
+		void Lexer::parseIdentifier(Token_s& tok)
 		{
-		case '>':
+			while (true)
+			{
+				const U8 ch = readChar();
+				if (!isidentifier(ch) && !isdigit(ch)) {
+					break;
+				}
+				tok.value.push_back(readCharAndAdv());
+			}
+
+			// Verifica se o token e uma palavra reservada.
+			for (auto& keyword : keywords) {
+				if (std::get<0>(keyword) == tok.value) {
+					tok.type = eTT_Keyword;
+					tok.subType = std::get<1>(keyword);
+					return;
+				}
+			}
+			tok.type = eTT_Identifier;
+			tok.subType = eTST_Unknown;
+		}
+
+		void Lexer::parseSymbols(Token_s& tok)
+		{
+			const I8 ch = readChar();
+
+			tok.type = eTT_Symbol;
+
+			// Process symbol
+			switch (ch)
+			{
+			case '>':
 			{
 				tok.subType = eTST_GreaterThan;
 				tok.value.push_back(readCharAndAdv());
@@ -360,7 +355,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '<':
+			case '<':
 			{
 				tok.subType = eTST_LessThan;
 				tok.value.push_back(readCharAndAdv());
@@ -381,7 +376,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case ':':
+			case ':':
 			{
 				tok.subType = eTST_Colon;
 				tok.value.push_back(readCharAndAdv());
@@ -392,7 +387,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '+':
+			case '+':
 			{
 				tok.subType = eTST_Plus;
 				tok.value.push_back(readCharAndAdv());
@@ -408,7 +403,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '-':
+			case '-':
 			{
 				tok.subType = eTST_Minus;
 				tok.value.push_back(readCharAndAdv());
@@ -429,7 +424,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '=':
+			case '=':
 			{
 				tok.subType = eTST_Assign;
 				tok.value.push_back(readCharAndAdv());
@@ -440,7 +435,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '!':
+			case '!':
 			{
 				tok.subType = eTST_LogicalNot;
 				tok.value.push_back(readCharAndAdv());
@@ -451,7 +446,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '&':
+			case '&':
 			{
 				tok.subType = eTST_BitWiseAnd;
 				tok.value.push_back(readCharAndAdv());
@@ -467,7 +462,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '|':
+			case '|':
 			{
 				tok.subType = eTST_BitWiseOr;
 				tok.value.push_back(readCharAndAdv());
@@ -483,49 +478,49 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '.':
+			case '.':
 			{
 				tok.subType = eTST_Dot;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '(':
+			case '(':
 			{
 				tok.subType = eTST_LParBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case ')':
+			case ')':
 			{
 				tok.subType = eTST_RParBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '[':
+			case '[':
 			{
 				tok.subType = eTST_LSquBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case ']':
+			case ']':
 			{
 				tok.subType = eTST_RSquBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '{':
+			case '{':
 			{
 				tok.subType = eTST_LBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '}':
+			case '}':
 			{
 				tok.subType = eTST_RBracket;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '/':
+			case '/':
 			{
 				tok.subType = eTST_Division;
 				tok.value.push_back(readCharAndAdv());
@@ -536,7 +531,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '*':
+			case '*':
 			{
 				tok.subType = eTST_Multiplication;
 				tok.value.push_back(readCharAndAdv());
@@ -547,7 +542,7 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '%':
+			case '%':
 			{
 				tok.subType = eTST_Modulo;
 				tok.value.push_back(readCharAndAdv());
@@ -558,13 +553,13 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case '~':
+			case '~':
 			{
 				tok.subType = eTST_BitWiseNot;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '^':
+			case '^':
 			{
 				tok.subType = eTST_BitWiseXor;
 				tok.value.push_back(readCharAndAdv());
@@ -575,222 +570,224 @@ namespace fluffy { namespace lexer {
 				}
 			}
 			break;
-		case ';':
+			case ';':
 			{
 				tok.subType = eTST_SemiColon;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case ',':
+			case ',':
 			{
 				tok.subType = eTST_Comma;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		case '?':
+			case '?':
 			{
 				tok.subType = eTST_Interrogation;
 				tok.value.push_back(readCharAndAdv());
 			}
 			break;
-		default:
-			throw exceptions::unexpected_token_exception(readChar(), tok.line, tok.column);
+			default:
+				throw exceptions::unexpected_token_exception(readChar(), tok.line, tok.column);
+			}
 		}
-	}
 
-	void Lexer::parseNumbers(Token_s& tok)
-	{
-		I8 ch = readChar();
-		I8 ch2 = readChar(1);
-
-		tok.type = eTT_Constant;
-
-		// Processa hexadecimal.
-		if (ch == '0' && (ch2 == 'x' || ch2 == 'X'))
+		void Lexer::parseNumbers(Token_s& tok)
 		{
-			nextChar(); // Consome 0
-			nextChar(); // Consome x ou X
+			I8 ch = readChar();
+			I8 ch2 = readChar(1);
 
-			tok.subType = eTST_ConstantHex;
+			tok.type = eTT_Constant;
 
-			bool isValid = false;
+			// Processa hexadecimal.
+			if (ch == '0' && (ch2 == 'x' || ch2 == 'X'))
+			{
+				nextChar(); // Consome 0
+				nextChar(); // Consome x ou X
+
+				tok.subType = eTST_ConstantHex;
+
+				bool isValid = false;
+				while (true)
+				{
+					ch = readChar();
+					if (!ishex(ch)) {
+						if (!isValid) {
+							throw exceptions::malformed_number_exception(tok.line, tok.column);
+						}
+						return;
+					}
+					isValid = true;
+					tok.value.push_back(ch);
+					nextChar();
+				}
+				return;
+			}
+
+			// Processa binario.
+			if (readChar() == '0' && (readChar(1) == 'b' || readChar(1) == 'B'))
+			{
+				nextChar(); // Consome 0
+				nextChar(); // Consome b ou B
+
+				tok.subType = eTST_ConstantBin;
+
+				Bool isValid = false;
+				while (true)
+				{
+					ch = readChar();
+					if (!isbin(ch)) {
+						if (!isValid) {
+							throw exceptions::malformed_number_exception(tok.line, tok.column);
+						}
+						return;
+					}
+					isValid = true;
+					tok.value.push_back(ch);
+					nextChar();
+				}
+				return;
+			}
+
+			// Inteiro ou real.
+			Bool isReal = false;
 			while (true)
 			{
 				ch = readChar();
-				if (!ishex(ch)) {
-					if (!isValid) {
-						throw exceptions::malformed_number_exception(tok.line, tok.column);
-					}
-					return;
+
+				if (!isnumber(ch) && ch != '.')
+				{
+					break;
 				}
-				isValid = true;
+				if (ch == '.') {
+					if (isReal) {
+						tok.subType = eTST_ConstantFp64;
+						return;
+					}
+					isReal = true;
+				}
 				tok.value.push_back(ch);
 				nextChar();
 			}
-			return;
-		}
 
-		// Processa binario.
-		if (readChar() == '0' && (readChar(1) == 'b' || readChar(1) == 'B'))
-		{
-			nextChar(); // Consome 0
-			nextChar(); // Consome b ou B
-
-			tok.subType = eTST_ConstantBin;
-
-			Bool isValid = false;
-			while (true)
-			{
+			if (isReal) {
 				ch = readChar();
-				if (!isbin(ch)) {
-					if (!isValid) {
-						throw exceptions::malformed_number_exception(tok.line, tok.column);
-					}
-					return;
+
+				if (ch == 'f' || ch == 'F') {
+					tok.subType = eTST_ConstantFp32;
+					nextChar();
 				}
-				isValid = true;
-				tok.value.push_back(ch);
-				nextChar();
-			}
-			return;
-		}
-
-		// Inteiro ou real.
-		Bool isReal = false;
-		while (true)
-		{
-			ch = readChar();
-
-			if (!isnumber(ch) && ch != '.')
-			{
-				break;
-			}
-			if (ch == '.') {
-				if (isReal) {
+				else {
 					tok.subType = eTST_ConstantFp64;
-					return;
 				}
-				isReal = true;
+				return;
 			}
-			tok.value.push_back(ch);
-			nextChar();
-		}
-
-		if (isReal) {
-			ch = readChar();
-
-			if (ch == 'f' || ch == 'F') {
-				tok.subType = eTST_ConstantFp32;
-				nextChar();
-			} else {
-				tok.subType = eTST_ConstantFp64;
-			}
-			return;
-		} else {
-			ch = readChar();
-
-			// Processa pos fixo.
-			if (ch == 'i' || ch == 'I')
-			{
-				nextChar();
+			else {
 				ch = readChar();
 
-				if (ch == '8') {
+				// Processa pos fixo.
+				if (ch == 'i' || ch == 'I')
+				{
 					nextChar();
-					tok.subType = eTST_ConstantI8;
-					return;
-				}
-				nextChar();
-				ch2 = readChar();
+					ch = readChar();
 
-				if (ch == '1' && ch2 == '6') {
+					if (ch == '8') {
+						nextChar();
+						tok.subType = eTST_ConstantI8;
+						return;
+					}
 					nextChar();
-					tok.subType = eTST_ConstantI16;
-					return;
+					ch2 = readChar();
+
+					if (ch == '1' && ch2 == '6') {
+						nextChar();
+						tok.subType = eTST_ConstantI16;
+						return;
+					}
+					if (ch == '3' && ch2 == '2') {
+						nextChar();
+						tok.subType = eTST_ConstantI32;
+						return;
+					}
+					if (ch == '6' && ch2 == '4') {
+						nextChar();
+						tok.subType = eTST_ConstantI64;
+						return;
+					}
+					throw exceptions::malformed_number_exception(tok.line, tok.column);
 				}
-				if (ch == '3' && ch2 == '2') {
+
+				// Processa pos fixo.
+				if (ch == 'u' || ch == 'U')
+				{
 					nextChar();
-					tok.subType = eTST_ConstantI32;
-					return;
-				}
-				if (ch == '6' && ch2 == '4') {
+					ch = readChar();
+
+					if (ch == '8') {
+						nextChar();
+						tok.subType = eTST_ConstantU8;
+						return;
+					}
 					nextChar();
-					tok.subType = eTST_ConstantI64;
-					return;
+					ch2 = readChar();
+
+					if (ch == '1' && ch2 == '6') {
+						nextChar();
+						tok.subType = eTST_ConstantU16;
+						return;
+					}
+					if (ch == '3' && ch2 == '2') {
+						nextChar();
+						tok.subType = eTST_ConstantU32;
+						return;
+					}
+					if (ch == '6' && ch2 == '4') {
+						nextChar();
+						tok.subType = eTST_ConstantU64;
+						return;
+					}
+					throw exceptions::malformed_number_exception(tok.line, tok.column);
 				}
-				throw exceptions::malformed_number_exception(tok.line, tok.column);
+
+				// Precisao padrao: inteiro 32bits sinalizado.
+				tok.subType = eTST_ConstantI32;
+				return;
 			}
-
-			// Processa pos fixo.
-			if (ch == 'u' || ch == 'U')
-			{
-				nextChar();
-				ch = readChar();
-
-				if (ch == '8') {
-					nextChar();
-					tok.subType = eTST_ConstantU8;
-					return;
-				}
-				nextChar();
-				ch2 = readChar();
-
-				if (ch == '1' && ch2 == '6') {
-					nextChar();
-					tok.subType = eTST_ConstantU16;
-					return;
-				}
-				if (ch == '3' && ch2 == '2') {
-					nextChar();
-					tok.subType = eTST_ConstantU32;
-					return;
-				}
-				if (ch == '6' && ch2 == '4') {
-					nextChar();
-					tok.subType = eTST_ConstantU64;
-					return;
-				}
-				throw exceptions::malformed_number_exception(tok.line, tok.column);
-			}
-
-			// Precisao padrao: inteiro 32bits sinalizado.
-			tok.subType = eTST_ConstantI32;
-			return;
 		}
-	}
 
-	void Lexer::parseChar(Token_s& tok)
-	{
-		tok.type = eTT_Constant;
-		tok.subType = eTST_ConstantChar;
-
-		nextChar(); // Consome '
-		tok.value.push_back(readCharAndAdv());
-		if (!ischar(readChar())) {
-			throw exceptions::malformed_character_constant_exception(tok.line, tok.column);
-		}
-		nextChar(); // Consome '
-	}
-
-	void Lexer::parseString(Token_s& tok)
-	{
-		tok.type = eTT_Constant;
-		tok.subType = eTST_ConstantString;
-
-		nextChar(); // Consome "
-		while (true)
+		void Lexer::parseChar(Token_s& tok)
 		{
-			const I8 ch = readChar();
+			tok.type = eTT_Constant;
+			tok.subType = eTST_ConstantChar;
 
-			if (ch == '\n' || ch == '\0') {
-				throw exceptions::malformed_string_constant_exception(tok.line, tok.column);
-			}
-			if (ch == '\"') {
-				break;
-			}
+			nextChar(); // Consome '
 			tok.value.push_back(readCharAndAdv());
+			if (!ischar(readChar())) {
+				throw exceptions::malformed_character_constant_exception(tok.line, tok.column);
+			}
+			nextChar(); // Consome '
 		}
-		nextChar(); // Consome "
-	}
-} }
 
+		void Lexer::parseString(Token_s& tok)
+		{
+			tok.type = eTT_Constant;
+			tok.subType = eTST_ConstantString;
+
+			nextChar(); // Consome "
+			while (true)
+			{
+				const I8 ch = readChar();
+
+				if (ch == '\n' || ch == '\0') {
+					throw exceptions::malformed_string_constant_exception(tok.line, tok.column);
+				}
+				if (ch == '\"') {
+					break;
+				}
+				tok.value.push_back(readCharAndAdv());
+			}
+			nextChar(); // Consome "
+		}
+	}
+}

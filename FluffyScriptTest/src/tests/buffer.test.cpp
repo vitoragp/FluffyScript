@@ -6,7 +6,8 @@
  */
 
 #include <memory>
-#include <gtest/gtest.h>
+#include <filesystem>
+#include "gtest/gtest.h"
 
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -21,9 +22,12 @@ namespace fluffy { namespace testing {
 	{
 		std::unique_ptr<BufferBase> buffer;
 
-		// Sets up the test fixture.
-		virtual void SetUp()
-		{
+		// Antes de cada test
+		virtual void SetUp() override {
+			if (std::filesystem::exists(".\\s_cache"))
+			{
+				std::filesystem::remove(".\\s_cache");
+			}
 			buffer = std::make_unique<DirectBuffer>();
 		}
 	};
@@ -36,7 +40,7 @@ namespace fluffy { namespace testing {
 	{
 		String src = "test";
 
-		buffer->load(src.c_str(), src.length());
+		buffer->load(src.c_str(), static_cast<U32>(src.length()));
 
 		String str;
 		while (true)
@@ -101,7 +105,7 @@ namespace fluffy { namespace testing {
 	{
 		String src = "test";
 
-		buffer->load(src.c_str(), src.length());
+		buffer->load(src.c_str(), static_cast<U32>(src.length()));
 
 		String str;
 		while (true)
