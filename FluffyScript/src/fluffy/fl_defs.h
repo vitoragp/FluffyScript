@@ -87,6 +87,8 @@ namespace fluffy {
 		eTST_Interface,
 		eTST_Struct,
 		eTST_Enum,
+		eTST_Match,
+		eTST_When,
 		eTST_Trait,
 		eTST_Static,
 		eTST_Const,

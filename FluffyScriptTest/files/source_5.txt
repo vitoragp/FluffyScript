@@ -83,6 +83,15 @@ namespace com.application
 		destructor()
 		{}
 		
+		fn testGender(): Result<string, string>
+		{
+			if this.gender == null
+			{
+				return Err("Invalid gender");
+			}
+			return Ok("Valid gender");
+		}
+		
 		virtual fn builder()
 		{
 			super.builder();
@@ -159,6 +168,12 @@ namespace com.application
 							panic("user cannot be validated!");
 						}
 						
+						match testGender()
+						{
+							when Ok(message) => {},
+							when Err(message) => {}
+						}
+						
 						switch this.gender
 						{
 							case 0:
@@ -214,5 +229,11 @@ namespace com.application
 	{
 		Male = "Male",
 		Female = "Female"
+	}
+	
+	enum Result<T, E>
+	{
+		Ok(T),
+		Err(E)
 	}
 }

@@ -33,6 +33,8 @@ namespace fluffy { namespace detail {
 		std::make_tuple("interface",	eTST_Interface),	// ok
 		std::make_tuple("struct",		eTST_Struct),		// ok
 		std::make_tuple("enum", 		eTST_Enum),			// ok
+		std::make_tuple("match", 		eTST_Match),		// ok
+		std::make_tuple("when", 		eTST_When),			// ok
 		std::make_tuple("trait", 		eTST_Trait),		// ok
 		std::make_tuple("static", 		eTST_Static),		// ok
 		std::make_tuple("const", 		eTST_Const),		// ok
