@@ -54,6 +54,7 @@ namespace fluffy { namespace ast {
 	ClassDecl::ClassDecl()
 		: GeneralStmt(GeneralStmt::eGST_ClassDecl)
 		, isExported(false)
+		, isAbstract(false)
 	{}
 
 	ClassDecl::~ClassDecl()
@@ -73,9 +74,9 @@ namespace fluffy { namespace ast {
 	 * NamedDecl
 	 */
 
-	NamedDecl::NamedDecl()
+	ScopedIdentifierDecl::ScopedIdentifierDecl()
 	{}
 
-	NamedDecl::~NamedDecl()
+	ScopedIdentifierDecl::~ScopedIdentifierDecl()
 	{}
 } }

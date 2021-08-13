@@ -20,8 +20,8 @@ namespace fluffy { namespace ast {
 	using GenericTemplateDeclPtr			= unique_ptr<class GenericTemplateDecl>;
 	using GenericTemplateDeclPtrList		= vector<GenericTemplateDeclPtr>;
 
-	using NamedDeclPtr						= unique_ptr<class NamedDecl>;
-	using NamedDeclPtrList					= vector<NamedDeclPtr>;
+	using ScopedIdentifierDeclPtr			= unique_ptr<class ScopedIdentifierDecl>;
+	using ScopedIdentifierDeclPtrList		= vector<ScopedIdentifierDeclPtr>;
 
 	/**
 	 * Program
@@ -49,7 +49,7 @@ namespace fluffy { namespace ast {
 
 		StringList				includedItemList;
 		Bool					allFlag;
-		NamedDeclPtr			fromNamespace;
+		ScopedIdentifierDeclPtr fromNamespace;
 	};
 
 	/**
@@ -136,16 +136,16 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
-	 * NamedDecl
+	 * ScopedIdentifierDecl
 	 */
 
-	class NamedDecl
+	class ScopedIdentifierDecl
 	{
 	public:
-								NamedDecl();
-								~NamedDecl();
+								ScopedIdentifierDecl();
+								~ScopedIdentifierDecl();
 
 		String					identifier;
-		NamedDeclPtr			tailDecl;
+		ScopedIdentifierDeclPtr	tailDecl;
 	};
 } }

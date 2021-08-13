@@ -150,7 +150,7 @@ namespace fluffy { namespace parser {
 		expectToken([this]() { return LexUtils::isFrom(m_tok); });
 
 		// Consome o identificador do namespace.
-		includeDecl->fromNamespace = parseNamedDecl();
+		includeDecl->fromNamespace = parseScopedIdentifierDecl();
 
 		// Consome ';'
 		expectToken([this]() { return LexUtils::isSemiColon(m_tok); });
@@ -202,12 +202,12 @@ namespace fluffy { namespace parser {
 		return nullptr;
 	}
 
-	NamedDeclPtr Parser::parseNamedDecl()
+	ScopedIdentifierDeclPtr Parser::parseScopedIdentifierDecl()
 	{
-		auto namedDecl = std::make_unique<ast::NamedDecl>();
+		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>();
 
 		// Consome o identificador.
-		namedDecl->identifier = expectIdentifier();
+		scopedIdentifierDecl->identifier = expectIdentifier();
 
 		while (true)
 		{
@@ -221,8 +221,8 @@ namespace fluffy { namespace parser {
 			expectToken([this]() { return LexUtils::isScopeResolution(m_tok); });
 
 			// Consome o tailDecl.
-			namedDecl->tailDecl = parseNamedDecl();
+			scopedIdentifierDecl->tailDecl = parseScopedIdentifierDecl();
 		}
-		return namedDecl;
+		return scopedIdentifierDecl;
 	}
 } }
