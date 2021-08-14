@@ -11,22 +11,28 @@ namespace fluffy { namespace parser_objects {
 	{
 		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>();
 
+		// Se o escopo vem antes identificador
+		if (parser->isScopeResolution())
+		{
+			// Consome '::'.
+			parser->expectToken([parser]() { return parser->isScopeResolution(); });
+			scopedIdentifierDecl->startFromRoot = true;
+		}
+
 		// Consome o identificador.
-		scopedIdentifierDecl->identifier = parser->expectIdentifier();
+		scopedIdentifierDecl->identifiers.push_back(parser->expectIdentifier());
 
 		while (true)
 		{
 			// Verifica se a resolucao de escopo.
-			if (!parser->isScopeResolution())
+			if (parser->isScopeResolution())
 			{
-				break;
+				// Consome '::'.
+				parser->expectToken([parser]() { return parser->isScopeResolution(); });
+				scopedIdentifierDecl->identifiers.push_back(parser->expectIdentifier());
+				continue;
 			}
-
-			// Consome '::'.
-			parser->expectToken([parser]() { return parser->isScopeResolution(); });
-
-			// Consome o tailDecl.
-			scopedIdentifierDecl->tailDecl = ParserObjectScopedIdentifier::parse(parser);
+			break;
 		}
 		return scopedIdentifierDecl;
 	}

@@ -7,9 +7,9 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectNamespace
 	 */
 
-	NamespacePtr ParserObjectNamespace::parse(Parser* parser)
+	NamespaceDeclPtr ParserObjectNamespace::parse(Parser* parser)
 	{
-		auto namespaceDecl = std::make_unique<ast::Namespace>();
+		auto namespaceDecl = std::make_unique<ast::NamespaceDecl>();
 
 		// Consome 'namespace'.
 		parser->expectToken([parser]() { return parser->isNamespace(); });
@@ -31,7 +31,7 @@ namespace fluffy { namespace parser_objects {
 			// Processa namespace.
 			if (parser->isNamespace())
 			{
-				namespaceDecl->namespaceList.push_back(ParserObjectNamespace::parse(parser));
+				namespaceDecl->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
 				continue;
 			}
 

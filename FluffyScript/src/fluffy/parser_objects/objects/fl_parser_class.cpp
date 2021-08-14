@@ -4,10 +4,10 @@
 
 namespace fluffy { namespace parser_objects {
 	/**
-	 * ParserObjectClass
+	 * ParserObjectClassDecl
 	 */
 
-	ClassDeclPtr ParserObjectClass::parse(Parser* parser, Bool hasExport, Bool hasAbstract)
+	ClassDeclPtr ParserObjectClassDecl::parse(Parser* parser, Bool hasExport, Bool hasAbstract)
 	{
 		auto classDecl = std::make_unique<ast::ClassDecl>();
 
@@ -23,22 +23,26 @@ namespace fluffy { namespace parser_objects {
 		// Verifica se a declaracao de generic.
 		if (parser->isLessThan())
 		{
-			throw exceptions::not_implemented_feature_exception("generic template parser");
+			classDecl->genericTemplateList = ParserObjectGenericTemplateDecl::parse(parser);
 		}
 
 		// Verifica se a declaracao de extends.
 		if (parser->isExtends())
 		{
-			throw exceptions::not_implemented_feature_exception("class extends declaration parser");
+			classDecl->baseClass = ParserObjectClassExtendsDecl::parse(parser);
 		}
 
-		// Verifica se a declaracao de generic.
+		// Verifica se a declaracao de interfaces.
 		if (parser->isImplements())
 		{
-			throw exceptions::not_implemented_feature_exception("class implements declarion parser");
+			classDecl->interfaceList = ParserObjectClassImplementsDecl::parse(parser);
 		}
 
-		throw exceptions::not_implemented_feature_exception("class block declaration");
+		// Consome '{'.
+		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+
+		// Consome '}'.
+		parser->expectToken([parser]() { return parser->isRightBracket(); });
 
 		return classDecl;
 	}

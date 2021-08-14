@@ -4,12 +4,12 @@
 
 namespace fluffy { namespace parser_objects {
 	/**
-	 * ParserObjectInclude
+	 * ParserObjectIncludeDecl
 	 */
 
-	IncludePtr ParserObjectInclude::parse(Parser* parser)
+	IncludeDeclPtr ParserObjectIncludeDecl::parse(Parser* parser)
 	{
-		auto includeDecl = std::make_unique<ast::Include>();
+		auto includeDecl = std::make_unique<ast::IncludeDecl>();
 
 		// Consome 'include'.
 		parser->expectToken([parser]() { return parser->isInclude(); });

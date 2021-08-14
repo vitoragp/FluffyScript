@@ -2,100 +2,101 @@
 #include <memory>
 #include <vector>
 #include "fl_defs.h"
-namespace fluffy { namespace ast {
-	using std::vector;
-	using std::unique_ptr;
+namespace fluffy {
+	namespace ast {
+		using std::vector;
+		using std::unique_ptr;
 
-	using StringList						= vector<String>;
+		using StringList					= vector<String>;
 
-	using IncludePtr						= unique_ptr<class Include>;
-	using IncludePtrList					= vector<IncludePtr>;
+		using IncludeDeclPtr				= unique_ptr<class IncludeDecl>;
+		using IncludeDeclPtrList			= vector<IncludeDeclPtr>;
 
-	using NamespacePtr						= unique_ptr<class Namespace>;
-	using NamespacePtrList					= vector<NamespacePtr>;
+		using NamespaceDeclPtr				= unique_ptr<class NamespaceDecl>;
+		using NamespaceDeclPtrList			= vector<NamespaceDeclPtr>;
 
-	using GeneralStmtPtr					= unique_ptr<class GeneralStmt>;
-	using GeneralStmtPtrList				= vector<GeneralStmtPtr>;
+		using GeneralStmtPtr				= unique_ptr<class GeneralStmt>;
+		using GeneralStmtPtrList			= vector<GeneralStmtPtr>;
 
-	using GenericTemplateDeclPtr			= unique_ptr<class GenericTemplateDecl>;
-	using GenericTemplateDeclPtrList		= vector<GenericTemplateDeclPtr>;
+		using ScopedIdentifierDeclPtr		= unique_ptr<class ScopedIdentifierDecl>;
+		using ScopedIdentifierDeclPtrList	= vector<ScopedIdentifierDeclPtr>;
 
-	using ScopedIdentifierDeclPtr			= unique_ptr<class ScopedIdentifierDecl>;
-	using ScopedIdentifierDeclPtrList		= vector<ScopedIdentifierDeclPtr>;
+		/**
+		 * Program
+		 */
 
-	/**
-	 * Program
-	 */
-
-	class Program
-	{
-	public:
-								Program();
-								~Program();
-
-		IncludePtrList			includeList;
-		NamespacePtrList		namespaceList;
-	};
-
-	/**
-	 * Include
-	 */
-
-	class Include
-	{
-	public:
-								Include();
-								~Include();
-
-		StringList				includedItemList;
-		Bool					allFlag;
-		ScopedIdentifierDeclPtr	fromNamespace;
-	};
-
-	/**
-	 * Namespace
-	 */
-
-	class Namespace
-	{
-	public:
-								Namespace();
-								~Namespace();
-
-		String					name;
-		NamespacePtrList		namespaceList;
-		GeneralStmtPtrList		generalDeclList;
-	};
-
-	/**
-	 * GeneralStmt
-	 */
-
-	class GeneralStmt
-	{
-	public:
-		enum class GeneralStmtType
+		class Program
 		{
-			eGST_Unknown,
-			eGST_ClassDecl,
-			eGST_InterfaceDecl,
-			eGST_StructDecl,
-			eGST_EnumDecl,
-			eGST_TraitDecl,
-			eGST_VariableDecl,
-			eGST_FunctionDecl
+		public:
+			Program() {}
+			~Program() {}
+
+			IncludeDeclPtrList				includeDeclList;
+			NamespaceDeclPtrList			namespaceDeclList;
 		};
 
-	protected:
-								GeneralStmt(GeneralStmtType const type);
+		/**
+		 * Include
+		 */
 
-	public:
-		virtual					~GeneralStmt();
+		class IncludeDecl
+		{
+		public:
+			IncludeDecl() : allFlag(false) {}
+			~IncludeDecl() {}
 
-		GeneralStmtType			getType();
+			StringList						includedItemList;
+			Bool							allFlag;
+			ScopedIdentifierDeclPtr			fromNamespace;
+		};
+
+		/**
+		 * NamespaceDecl
+		 */
+
+		class NamespaceDecl
+		{
+		public:
+			NamespaceDecl() {}
+			~NamespaceDecl() {}
+
+			String							name;
+			NamespaceDeclPtrList			namespaceDeclList;
+			GeneralStmtPtrList				generalDeclList;
+		};
+
+		/**
+		 * GeneralStmt
+		 */
+
+		class GeneralStmt
+		{
+		public:
+			enum class GeneralStmtType
+			{
+				eGST_Unknown,
+				eGST_ClassDecl,
+				eGST_InterfaceDecl,
+				eGST_StructDecl,
+				eGST_EnumDecl,
+				eGST_TraitDecl,
+				eGST_VariableDecl,
+				eGST_FunctionDecl
+			};
+
+		protected:
+			GeneralStmt(GeneralStmtType const type)
+				: m_type(type)
+			{}
+
+		public:
+			virtual	~GeneralStmt()
+			{}
+
+		GeneralStmtType						getType();
 
 	private:
-		GeneralStmtType			m_type;
+		GeneralStmtType						m_type;
 	};
 
 	/**
@@ -105,34 +106,27 @@ namespace fluffy { namespace ast {
 	class ClassDecl : public GeneralStmt
 	{
 	public:
-								ClassDecl();
-		virtual					~ClassDecl();
+		ClassDecl()
+			: GeneralStmt(GeneralStmt::GeneralStmtType::eGST_ClassDecl)
+			, isExported(false)
+			, isAbstract(false)
+		{}
 
-		Bool					isExported;
-		Bool					isAbstract;
-		String					name;
-		GenericTemplateDeclPtr	genericTemplateDecl;
-		// ImplementsDecl		implementsDecl;
-		// ExtendsDecl			extendsDecl;
-		// StaticVariableList	staticVariableList;
-		// VariableList			variableList;
-		// StaticFunctionList	staticFunctionList;
-		// FunctionList			functionList;
-		// ConstructorList		constructorList;
-		// DestructorDecl		destructorDecl;
-	};
+		virtual ~ClassDecl()
+		{}
 
-	/**
-	 * GenericTemplateDecl
-	 */
-
-	class GenericTemplateDecl
-	{
-	public:
-								GenericTemplateDecl();
-								~GenericTemplateDecl();
-
-		StringList				templateItemList;
+		Bool								isExported;
+		Bool								isAbstract;
+		String								name;
+		StringList							genericTemplateList;
+		ScopedIdentifierDeclPtr				baseClass;
+		ScopedIdentifierDeclPtrList			interfaceList;
+		// StaticVariableList				staticVariableList;
+		// VariableList						variableList;
+		// StaticFunctionList				staticFunctionList;
+		// FunctionList						functionList;
+		// ConstructorList					constructorList;
+		// DestructorDecl					destructorDecl;
 	};
 
 	/**
@@ -142,10 +136,14 @@ namespace fluffy { namespace ast {
 	class ScopedIdentifierDecl
 	{
 	public:
-								ScopedIdentifierDecl();
-								~ScopedIdentifierDecl();
+		ScopedIdentifierDecl()
+			: startFromRoot(false)
+		{}
 
-		String					identifier;
-		ScopedIdentifierDeclPtr	tailDecl;
+		~ScopedIdentifierDecl()
+		{}
+
+		StringList							identifiers;
+		Bool								startFromRoot;
 	};
 } }

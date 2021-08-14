@@ -5,15 +5,21 @@
 
 namespace fluffy { namespace parser_objects { 
 	using std::unique_ptr;
+	using std::vector;
+
 	using fluffy::parser::Parser;
 
+	using StringList						= vector<String>;
+
 	using ProgramPtr						= unique_ptr<ast::Program>;
-	using IncludePtr						= unique_ptr<ast::Include>;
-	using NamespacePtr						= unique_ptr<ast::Namespace>;
+	using IncludeDeclPtr					= unique_ptr<ast::IncludeDecl>;
+	using NamespaceDeclPtr					= unique_ptr<ast::NamespaceDecl>;
 	using GeneralStmtPtr					= unique_ptr<ast::GeneralStmt>;
 	using ClassDeclPtr						= unique_ptr<ast::ClassDecl>;
-	using ScopedIdentifierDeclPtr			= unique_ptr<ast::ScopedIdentifierDecl>;
 
+	using ScopedIdentifierDeclPtr			= unique_ptr<ast::ScopedIdentifierDecl>;
+	using ScopedIdentifierDeclPtrList		= vector<ast::ScopedIdentifierDeclPtr>;
+	
 	/**
 	 * ParserObjectProgram
 	 */
@@ -22,18 +28,18 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ProgramPtr				parse(Parser* parser);
+		ProgramPtr						parse(Parser* parser);
 	};
 
 	/**
-	 * ParserObjectInclude
+	 * ParserObjectIncludeDecl
 	 */
 
-	class ParserObjectInclude
+	class ParserObjectIncludeDecl
 	{
 	public:
 		static
-		IncludePtr				parse(Parser* parser);
+		IncludeDeclPtr					parse(Parser* parser);
 	};
 
 	/**
@@ -44,7 +50,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		NamespacePtr			parse(Parser* parser);
+		NamespaceDeclPtr				parse(Parser* parser);
 	};
 
 	/**
@@ -55,18 +61,51 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		GeneralStmtPtr			parse(Parser* parser);
+		GeneralStmtPtr					parse(Parser* parser);
 	};
 
 	/**
-	 * ParserObjectClass
+	 * ParserObjectClassDecl
 	 */
 
-	class ParserObjectClass
+	class ParserObjectClassDecl
 	{
 	public:
 		static
-		ClassDeclPtr			parse(Parser* parser, Bool hasExport, Bool hasAbstract);
+		ClassDeclPtr					parse(Parser* parser, Bool hasExport, Bool hasAbstract);
+	};
+
+	/**
+	 * ParserObjectGenericTemplateDecl
+	 */
+
+	class ParserObjectGenericTemplateDecl
+	{
+	public:
+		static
+		StringList						parse(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectClassExtendsDecl
+	 */
+
+	class ParserObjectClassExtendsDecl
+	{
+	public:
+		static
+		ScopedIdentifierDeclPtr			parse(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectClassImplementsDecl
+	 */
+
+	class ParserObjectClassImplementsDecl
+	{
+	public:
+		static
+		ScopedIdentifierDeclPtrList		parse(Parser* parser);
 	};
 
 	/**
@@ -77,6 +116,6 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ScopedIdentifierDeclPtr	parse(Parser* parser);
+		ScopedIdentifierDeclPtr			parse(Parser* parser);
 	};
 } }

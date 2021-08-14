@@ -37,7 +37,7 @@ namespace fluffy { namespace parser_objects {
 		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::eTST_Class:
-			return ParserObjectClass::parse(parser, hasExport, hasAbtract);
+			return ParserObjectClassDecl::parse(parser, hasExport, hasAbtract);
 		case TokenSubType_e::eTST_Interface:
 			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
 		case TokenSubType_e::eTST_Struct:

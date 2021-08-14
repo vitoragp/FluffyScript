@@ -24,7 +24,7 @@ namespace fluffy { namespace parser_objects {
 				return program;
 			}
 			if (parser->isInclude()) {
-				program->includeList.push_back(ParserObjectInclude::parse(parser));
+				program->includeDeclList.push_back(ParserObjectIncludeDecl::parse(parser));
 				continue;
 			}
 			break;
@@ -38,7 +38,7 @@ namespace fluffy { namespace parser_objects {
 
 			// Processa namespaces.
 			if (parser->isNamespace()) {
-				program->namespaceList.push_back(ParserObjectNamespace::parse(parser));
+				program->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
 			}
 		}
 		return nullptr;
