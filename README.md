@@ -6,6 +6,10 @@ TODO: Melhorar a qualidade das mensagens de erro.
 
   + Implementando uma forma de imprimir a linha onde o erro ocorreu.
   + Marcando o caractere onde o erro comecou.
+  
+Obs: Com a refatoracao do parser e mais facil testar cada recurso, pois agora o processamento
+de cada producao esta separado por objeto com uma funcao estatica publica, responsavel pela
+analise.
 
 Elaborado a versao inicial e provisoria da descricao formal da linguagem:
 
