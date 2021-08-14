@@ -100,6 +100,8 @@ namespace fluffy {
 		 eTST_Fp32,				// ok
 		 eTST_Fp64,				// ok
 		 eTST_String,			// ok
+		 eTST_Vector,			// ok
+		 eTST_Set,				// ok
 		 eTST_Map,				// ok
 		 eTST_Object,			// ok
 		 eTST_Fn,				// ok

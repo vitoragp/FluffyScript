@@ -46,6 +46,8 @@ namespace fluffy {
 		std::make_tuple("fp32",			TokenSubType_e::eTST_Fp32),			// ok
 		std::make_tuple("fp64",			TokenSubType_e::eTST_Fp64),			// ok
 		std::make_tuple("string", 		TokenSubType_e::eTST_String),		// ok
+		std::make_tuple("vector",		TokenSubType_e::eTST_Vector),		// ok
+		std::make_tuple("set", 			TokenSubType_e::eTST_Set),			// ok
 		std::make_tuple("map", 			TokenSubType_e::eTST_Map),			// ok
 		std::make_tuple("object", 		TokenSubType_e::eTST_Object),		// ok
 		std::make_tuple("fn", 			TokenSubType_e::eTST_Fn),			// ok
@@ -58,7 +60,7 @@ namespace fluffy {
 		std::make_tuple("is", 			TokenSubType_e::eTST_Is),			// ok
 		std::make_tuple("goto", 		TokenSubType_e::eTST_Goto),			// ok
 		std::make_tuple("if", 			TokenSubType_e::eTST_If),			// ok
-		std::make_tuple("else", 		TokenSubType_e::eTST_Else),			// ok		// ok
+		std::make_tuple("else", 		TokenSubType_e::eTST_Else),			// ok
 		std::make_tuple("continue", 	TokenSubType_e::eTST_Continue),		// ok
 		std::make_tuple("break", 		TokenSubType_e::eTST_Break),		// ok
 		std::make_tuple("for", 			TokenSubType_e::eTST_For),			// ok

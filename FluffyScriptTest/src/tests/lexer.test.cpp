@@ -55,6 +55,8 @@ namespace fluffy { namespace detail {
 		std::make_tuple("fp32",			TokenSubType_e::eTST_Fp32),			// ok
 		std::make_tuple("fp64",			TokenSubType_e::eTST_Fp64),			// ok
 		std::make_tuple("string", 		TokenSubType_e::eTST_String),		// ok
+		std::make_tuple("vector", 		TokenSubType_e::eTST_Vector),		// ok
+		std::make_tuple("set", 			TokenSubType_e::eTST_Set),			// ok
 		std::make_tuple("map", 			TokenSubType_e::eTST_Map),			// ok
 		std::make_tuple("object", 		TokenSubType_e::eTST_Object),		// ok
 		std::make_tuple("fn", 			TokenSubType_e::eTST_Fn),			// ok
@@ -619,7 +621,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestAllKeywordsImpl)
 	{
-		std::set<U32> keywordsImplSet;
+		std::set<TokenSubType_e> keywordsImplSet;
 
 		lex->loadFromSource(".\\files\\lexer\\source_5.txt");
 
@@ -628,11 +630,21 @@ namespace fluffy { namespace testing {
 			lex->parse(tok);
 			{
 				if (tok.type == TokenType_e::eTT_Keyword) {
-					keywordsImplSet.insert(static_cast<U32>(tok.subType));
+					keywordsImplSet.insert(tok.subType);
 				}
 				if (tok.type == TokenType_e::eTT_EOF) {
 					break;
 				}
+			}
+		}
+
+		for (int i = 0; i < detail::keywordsCount; i++)
+		{
+			auto keyword = keywordsImplSet.find(std::get<1>(detail::keywords[i]));
+
+			if (keyword == keywordsImplSet.end())
+			{
+				std::cerr << "[          ] keyword = " << std::get<0>(detail::keywords[i]) << std::endl;
 			}
 		}
 

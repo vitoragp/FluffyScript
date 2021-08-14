@@ -1,7 +1,7 @@
 include { print } from "stl";
 include { * } from "UI";
 
-namespace com.application
+namespace application
 {
 	export struct User
 	{
@@ -43,6 +43,11 @@ namespace com.application
 		
 		static fn validateUsers(list: User[]): bool
 		{
+			for let i = 0; i < 10; i++
+			{
+				
+			}
+
 			foreach let user in list
 			{
 				if user.age > 18
@@ -70,6 +75,10 @@ namespace com.application
 		protected let user: User?;
 		
 		protected let userMemoryAllocated: u64 = 0; 
+
+		protected let v1: vector<i32>;
+		protected let v2: set<i32>;
+		protected let v3: map<string, i32>;
 		
 		protected let icon: object?;
 	
@@ -92,7 +101,7 @@ namespace com.application
 			return Ok("Valid gender");
 		}
 		
-		virtual fn builder()
+		virtual fn builder(): void
 		{
 			super.builder();
 			
