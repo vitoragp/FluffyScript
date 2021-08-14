@@ -117,5 +117,9 @@ namespace fluffy { namespace parser_objects {
 	public:
 		static
 		ScopedIdentifierDeclPtr			parse(Parser* parser);
+
+	private:
+		static
+		ScopedIdentifierDeclPtr			parseChildScopedIdentifiers(Parser* parser);
 	};
 } }

@@ -11,6 +11,10 @@ Obs: Com a refatoracao do parser e mais facil testar cada recurso, pois agora o 
 de cada producao esta separado por objeto com uma funcao estatica publica, responsavel pela
 analise.
 
+Obs: Temporariamente alguns parsers estao incompletos: principalmente o generic. Porem a correcao
+vai ser aplicada quando o parser de tipos estiver completo, que sera implantado apos completar a declaracao
+de classe.
+
 Elaborado a versao inicial e provisoria da descricao formal da linguagem:
 
 ```

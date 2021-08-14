@@ -143,7 +143,9 @@ namespace fluffy {
 		~ScopedIdentifierDecl()
 		{}
 
-		StringList							identifiers;
+		String								identifier;
+		StringList							genericTemplateList;
+		ScopedIdentifierDeclPtr				tailIdentifier;
 		Bool								startFromRoot;
 	};
 } }
