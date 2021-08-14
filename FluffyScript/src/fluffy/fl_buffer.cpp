@@ -143,16 +143,23 @@ namespace fluffy {
 
 			// Salva a posicao atual.
 			size_t cursor = m_stream.tellg();
+			size_t requestedPosition = cursor + offset - 1;
 
 			// Verifica se o offset solicitado esta dentro do range.
-			if (cursor + offset > m_fileSize)
+			if (requestedPosition > m_fileSize)
 			{
 				throw std::out_of_range("Requested offset is out of range.");
 			}
 
+			// Chegou ao fim do arquivo.
+			if (requestedPosition == m_fileSize)
+			{
+				return 0;
+			}
+
 			// Avanca ate o offset solicitado, le o byte e volta para a
 			// posicao inicial.
-			m_stream.seekg(cursor + offset - 1, std::fstream::beg);
+			m_stream.seekg(requestedPosition, std::fstream::beg);
 			m_stream.read(&ch, 1);
 			m_stream.seekg(cursor, std::fstream::beg);
 

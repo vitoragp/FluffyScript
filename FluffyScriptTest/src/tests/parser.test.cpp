@@ -4,6 +4,7 @@
 
 #include "fl_parser.h"
 #include "fl_exceptions.h"
+#include "parser_objects/fl_parser_objects.h"
 
 
 namespace fluffy { namespace testing {
@@ -297,5 +298,12 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserTest, TestParseClassEmptyNoExportNoGenericNoExtendsNoImplements)
 	{
 		parser->loadSource("class Foo {}");
+		parser->nextToken();
+		
+		auto classObject = parser_objects::ParserObjectClass::parse(parser.get(), false, false);
+
+		ASSERT_FALSE(classObject == nullptr);
+
+		EXPECT_EQ(classObject->name, "Foo");
 	}
 } }

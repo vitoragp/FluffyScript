@@ -15,8 +15,8 @@ namespace fluffy {
 			using BufferBasePtr = std::unique_ptr<BufferBase>;
 
 		public:
-			Lexer(BufferBase* const buffer);
-			~Lexer();
+									Lexer(BufferBase* const buffer);
+									~Lexer();
 
 			void 					loadSource(String source);
 			void					loadFromSource(String sourceFile);

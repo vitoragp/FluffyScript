@@ -74,7 +74,7 @@ namespace fluffy { namespace ast {
 	class GeneralStmt
 	{
 	public:
-		enum GeneralStmtType
+		enum class GeneralStmtType
 		{
 			eGST_Unknown,
 			eGST_ClassDecl,

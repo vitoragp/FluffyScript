@@ -52,7 +52,7 @@ namespace fluffy { namespace ast {
 	 */
 
 	ClassDecl::ClassDecl()
-		: GeneralStmt(GeneralStmt::eGST_ClassDecl)
+		: GeneralStmt(GeneralStmt::GeneralStmtType::eGST_ClassDecl)
 		, isExported(false)
 	{}
 

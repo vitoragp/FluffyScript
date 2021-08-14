@@ -1,6 +1,6 @@
 #include "../../fl_ast.h"
 #include "../../fl_exceptions.h"
-#include "../fl_parser_object.h"
+#include "../fl_parser_objects.h"
 
 namespace fluffy { namespace parser_objects {
 	/**
@@ -10,19 +10,34 @@ namespace fluffy { namespace parser_objects {
 	GeneralStmtPtr ParserObjectGeneralStmt::parse(Parser* parser)
 	{
 		Bool hasExport = false;
+		Bool hasAbtract = false;
 
 		// Verifica se houve a declararao para exportar o elemento.
 		if (parser->isExport())
 		{
+			// Consome 'export'.
 			parser->expectToken([parser]() { return parser->isExport();  });
 			hasExport = true;
+		}
+
+		// Verifica se a declaracao para a classe ser abstrata.
+		if (parser->isAbstract())
+		{
+			// Consome 'abtract'.
+			parser->expectToken([parser]() { return parser->isAbstract();  });
+			hasAbtract = true;
+
+			// Obrigatoriamente 'abstract' deve se referir a uma classe.
+			if (!parser->isClass()) {
+				throw exceptions::unexpected_token_exception(parser->getTokenValue(), parser->getTokenLine(), parser->getTokenColumn());
+			}
 		}
 
 		// Verifica qual declaracao processar.
 		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::eTST_Class:
-			throw exceptions::not_implemented_feature_exception("parseClassDecl");
+			return ParserObjectClass::parse(parser, hasExport, hasAbtract);
 		case TokenSubType_e::eTST_Interface:
 			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
 		case TokenSubType_e::eTST_Struct:

@@ -60,75 +60,72 @@ namespace fluffy {
 		 * Keyword
 		 */
 
-		 eTST_Include,
-		 eTST_From,
-		 eTST_Export,
-		 eTST_Namespace,
-		 eTST_Class,
-		 eTST_Extends,
-		 eTST_Implements,
-		 eTST_Constructor,
-		 eTST_Destructor,
-		 eTST_Super,
-		 eTST_Public,
-		 eTST_Protected,
-		 eTST_Private,
-		 eTST_Final,
-		 eTST_Override,
-		 eTST_Abstract,
-		 eTST_Virtual,
-		 eTST_Interface,
-		 eTST_Struct,
-		 eTST_Enum,
-		 eTST_Match,
-		 eTST_When,
-		 eTST_Trait,
-		 eTST_Static,
-		 eTST_Const,
-		 eTST_True,
-		 eTST_False,
-		 eTST_Void,
-		 eTST_Bool,
-		 eTST_i8,
-		 eTST_u8,
-		 eTST_i16,
-		 eTST_u16,
-		 eTST_i32,
-		 eTST_u32,
-		 eTST_i64,
-		 eTST_u64,
-		 eTST_fp32,
-		 eTST_fp64,
-		 eTST_String,
-		 eTST_Map,
-		 eTST_Object,
-		 eTST_Fn,
-		 eTST_Let,
-		 eTST_This,
-		 eTST_Self,
-		 eTST_SizeOf,
-		 eTST_New,
-		 eTST_As,
-		 eTST_Is,
-		 eTST_Goto,
-		 eTST_If,
-		 eTST_Else,
-		 eTST_Switch,
-		 eTST_Case,
-		 eTST_Default,
-		 eTST_Continue,
-		 eTST_Break,
-		 eTST_For,
-		 eTST_Foreach,
-		 eTST_In,
-		 eTST_While,
-		 eTST_Do,
-		 eTST_Try,
-		 eTST_Catch,
-		 eTST_Finally,
-		 eTST_Panic,
-		 eTST_Return,
-		 eTST_Null,
+		 eTST_Include,			// ok
+		 eTST_From,				// ok
+		 eTST_Export,			// ok
+		 eTST_Namespace,		// ok
+		 eTST_Class,			// ok
+		 eTST_Extends,			// ok
+		 eTST_Implements,		// ok
+		 eTST_Constructor,		// ok
+		 eTST_Destructor,		// ok
+		 eTST_Super,			// ok
+		 eTST_Public,			// ok
+		 eTST_Protected,		// ok
+		 eTST_Private,			// ok
+		 eTST_Final,			// ok
+		 eTST_Override,			// ok
+		 eTST_Abstract,			// ok
+		 eTST_Virtual,			// ok
+		 eTST_Interface,		// ok
+		 eTST_Struct,			// ok
+		 eTST_Enum,				// ok
+		 eTST_Match,			// ok
+		 eTST_When,				// ok
+		 eTST_Trait,			// ok
+		 eTST_Static,			// ok
+		 eTST_Const,			// ok
+		 eTST_True,				// ok
+		 eTST_False,			// ok
+		 eTST_Void,				// ok
+		 eTST_Bool,				// ok
+		 eTST_I8,				// ok
+		 eTST_U8,				// ok
+		 eTST_I16,				// ok
+		 eTST_U16,				// ok
+		 eTST_I32,				// ok
+		 eTST_U32,				// ok
+		 eTST_I64,				// ok
+		 eTST_U64,				// ok
+		 eTST_Fp32,				// ok
+		 eTST_Fp64,				// ok
+		 eTST_String,			// ok
+		 eTST_Map,				// ok
+		 eTST_Object,			// ok
+		 eTST_Fn,				// ok
+		 eTST_Let,				// ok
+		 eTST_This,				// ok
+		 eTST_Self,				// ok
+		 eTST_SizeOf,			// ok
+		 eTST_New,				// ok
+		 eTST_As,				// ok
+		 eTST_Is,				// ok
+		 eTST_Goto,				// ok
+		 eTST_If,				// ok
+		 eTST_Else,				// ok
+		 eTST_Continue,			// ok
+		 eTST_Break,			// ok
+		 eTST_For,				// ok
+		 eTST_Foreach,			// ok
+		 eTST_In,				// ok
+		 eTST_While,			// ok
+		 eTST_Do,				// ok
+		 eTST_Try,				// ok
+		 eTST_Catch,			// ok
+		 eTST_Finally,			// ok
+		 eTST_Panic,			// ok
+		 eTST_Return,			// ok
+		 eTST_Null,				// ok
 
 		 /**
 		  * Symbols
@@ -137,7 +134,7 @@ namespace fluffy {
 		  eTST_ScopeResolution, 		// ::
 		  eTST_Increment,				// ++
 		  eTST_Decrement,				// --
-		  eTST_ReturnSet,				// ->
+		  eTST_Arrow,					// ->
 
 		  eTST_LParBracket,				// (
 		  eTST_RParBracket,				// )
@@ -156,8 +153,8 @@ namespace fluffy {
 
 		  eTST_PlusAssign,				// +=
 		  eTST_MinusAssign,				// -=
-		  eTST_MultAssign,				// *=
 		  eTST_DivAssign,				// /=
+		  eTST_MultAssign,				// *=
 		  eTST_BitWiseAndAssign,		// &=
 		  eTST_BitWiseOrAssign,			// |=
 		  eTST_BitWiseXorAssign,		// ^=

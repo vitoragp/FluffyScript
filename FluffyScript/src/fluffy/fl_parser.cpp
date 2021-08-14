@@ -2,7 +2,7 @@
 #include "fl_exceptions.h"
 #include "fl_parser.h"
 #include "fl_lex_utils.h"
-#include "parser_objects/fl_parser_object.h"
+#include "parser_objects/fl_parser_objects.h"
 namespace fluffy { namespace parser {
 	using utils::LexUtils;
 	using parser_objects::ParserObjectProgram;
@@ -278,14 +278,364 @@ namespace fluffy { namespace parser {
 		return LexUtils::isFrom(m_tok);
 	}
 
+	Bool Parser::isExport()
+	{
+		return LexUtils::isExport(m_tok);
+	}
+
 	Bool Parser::isNamespace()
 	{
 		return LexUtils::isNamespace(m_tok);
 	}
 
-	Bool Parser::isExport()
+	Bool Parser::isClass()
 	{
-		return LexUtils::isExport(m_tok);
+		return LexUtils::isClass(m_tok);
+	}
+
+	Bool Parser::isExtends()
+	{
+		return LexUtils::isExtends(m_tok);
+	}
+
+	Bool Parser::isImplements()
+	{
+		return LexUtils::isImplements(m_tok);
+	}
+
+	Bool Parser::isConstructor()
+	{
+		return LexUtils::isConstructor(m_tok);
+	}
+
+	Bool Parser::isDestructor()
+	{
+		return LexUtils::isDestructor(m_tok);
+	}
+
+	Bool Parser::isSuper()
+	{
+		return LexUtils::isSuper(m_tok);
+	}
+
+	Bool Parser::isPublic() 
+	{
+		return LexUtils::isPublic(m_tok);
+	}
+
+	Bool Parser::isProtected() 
+	{
+		return LexUtils::isProtected(m_tok);
+	}
+
+	Bool Parser::isPrivate() 
+	{
+		return LexUtils::isPrivate(m_tok);
+	}
+
+	Bool Parser::isFinal() 
+	{
+		return LexUtils::isFinal(m_tok);
+	}
+
+	Bool Parser::isOverride() 
+	{
+		return LexUtils::isOverride(m_tok);
+	}
+
+	Bool Parser::isAbstract()
+	{
+		return LexUtils::isAbstract(m_tok);
+	}
+
+	Bool Parser::isVirtual()
+	{
+		return LexUtils::isVirtual(m_tok);
+	}
+
+	Bool Parser::isInterface()
+	{
+		return LexUtils::isInterface(m_tok);
+	}
+
+	Bool Parser::isStruct()
+	{
+		return LexUtils::isStruct(m_tok);
+	}
+
+	Bool Parser::isEnum()
+	{
+		return LexUtils::isEnum(m_tok);
+	}
+
+	Bool Parser::isMatch()
+	{
+		return LexUtils::isMatch(m_tok);
+	}
+
+	Bool Parser::isWhen()
+	{
+		return LexUtils::isWhen(m_tok);
+	}
+
+	Bool Parser::isTrait()
+	{
+		return LexUtils::isTrait(m_tok);
+	}
+
+	Bool Parser::isStatic()
+	{
+		return LexUtils::isStatic(m_tok);
+	}
+
+	Bool Parser::isConst()
+	{
+		return LexUtils::isConst(m_tok);
+	}
+
+	Bool Parser::isTrue()
+	{
+		return LexUtils::isTrue(m_tok);
+	}
+
+	Bool Parser::isFalse()
+	{
+		return LexUtils::isFalse(m_tok);
+	}
+
+	Bool Parser::isVoid()
+	{
+		return LexUtils::isVoid(m_tok);
+	}
+
+	Bool Parser::isBool()
+	{
+		return LexUtils::isBool(m_tok);
+	}
+
+	Bool Parser::isI8()
+	{
+		return LexUtils::isI8(m_tok);
+	}
+
+	Bool Parser::isU8()
+	{
+		return LexUtils::isU8(m_tok);
+	}
+
+	Bool Parser::isI16()
+	{
+		return LexUtils::isI16(m_tok);
+	}
+
+	Bool Parser::isU16()
+	{
+		return LexUtils::isU16(m_tok);
+	}
+
+	Bool Parser::isI32()
+	{
+		return LexUtils::isI32(m_tok);
+	}
+
+	Bool Parser::isU32()
+	{
+		return LexUtils::isU32(m_tok);
+	}
+
+	Bool Parser::isI64()
+	{
+		return LexUtils::isI64(m_tok);
+	}
+
+	Bool Parser::isU64()
+	{
+		return LexUtils::isU64(m_tok);
+	}
+
+	Bool Parser::isFp32()
+	{
+		return LexUtils::isFp32(m_tok);
+	}
+
+	Bool Parser::isFp64()
+	{
+		return LexUtils::isFp64(m_tok);
+	}
+
+	Bool Parser::isString()
+	{
+		return LexUtils::isString(m_tok);
+	}
+
+	Bool Parser::isMap()
+	{
+		return LexUtils::isMap(m_tok);
+	}
+
+	Bool Parser::isObject()
+	{
+		return LexUtils::isObject(m_tok);
+	}
+
+	Bool Parser::isFn()
+	{
+		return LexUtils::isFn(m_tok);
+	}
+
+	Bool Parser::isLet()
+	{
+		return LexUtils::isLet(m_tok);
+	}
+
+	Bool Parser::isThis()
+	{
+		return LexUtils::isThis(m_tok);
+	}
+
+	Bool Parser::isSelf()
+	{
+		return LexUtils::isSelf(m_tok);
+	}
+
+	Bool Parser::isSizeOf()
+	{
+		return LexUtils::isSizeOf(m_tok);
+	}
+
+	Bool Parser::isNew()
+	{
+		return LexUtils::isNew(m_tok);
+	}
+
+	Bool Parser::isAs()
+	{
+		return LexUtils::isAs(m_tok);
+	}
+
+	Bool Parser::isIs()
+	{
+		return LexUtils::isIs(m_tok);
+	}
+
+	Bool Parser::isGoto()
+	{
+		return LexUtils::isGoto(m_tok);
+	}
+
+	Bool Parser::isIf()
+	{
+		return LexUtils::isIf(m_tok);
+	}
+
+	Bool Parser::isElse()
+	{
+		return LexUtils::isElse(m_tok);
+	}
+
+	Bool Parser::isContinue()
+	{
+		return LexUtils::isContinue(m_tok);
+	}
+
+	Bool Parser::isBreak()
+	{
+		return LexUtils::isBreak(m_tok);
+	}
+
+	Bool Parser::isFor()
+	{
+		return LexUtils::isFor(m_tok);
+	}
+
+	Bool Parser::isForeach()
+	{
+		return LexUtils::isForeach(m_tok);
+	}
+
+	Bool Parser::isIn()
+	{
+		return LexUtils::isIn(m_tok);
+	}
+
+	Bool Parser::isWhile()
+	{
+		return LexUtils::isWhile(m_tok);
+	}
+
+	Bool Parser::isDo()
+	{
+		return LexUtils::isDo(m_tok);
+	}
+
+	Bool Parser::isTry()
+	{
+		return LexUtils::isTry(m_tok);
+	}
+
+	Bool Parser::isCatch()
+	{
+		return LexUtils::isCatch(m_tok);
+	}
+
+	Bool Parser::isFinally()
+	{
+		return LexUtils::isFinally(m_tok);
+	}
+
+	Bool Parser::isPanic()
+	{
+		return LexUtils::isPanic(m_tok);
+	}
+
+	Bool Parser::isReturn()
+	{
+		return LexUtils::isReturn(m_tok);
+	}
+
+	Bool Parser::isNull()
+	{
+		return LexUtils::isNull(m_tok);
+	}
+
+	Bool Parser::isScopeResolution()
+	{
+		return LexUtils::isScopeResolution(m_tok);
+	}
+
+	Bool Parser::isIncrement()
+	{
+		return LexUtils::isIncrement(m_tok);
+	}
+
+	Bool Parser::isDecrement()
+	{
+		return LexUtils::isDecrement(m_tok);
+	}
+
+	Bool Parser::isArrow()
+	{
+		return LexUtils::isArrow(m_tok);
+	}
+
+	Bool Parser::isLeftParBracket()
+	{
+		return LexUtils::isLeftParBracket(m_tok);
+	}
+
+	Bool Parser::isRightParBracket()
+	{
+		return LexUtils::isRightParBracket(m_tok);
+	}
+
+	Bool Parser::isLeftSquBracket()
+	{
+		return LexUtils::isLeftSquBracket(m_tok);
+	}
+
+	Bool Parser::isRightSquBracket()
+	{
+		return LexUtils::isRightSquBracket(m_tok);
 	}
 
 	Bool Parser::isLeftBracket()
@@ -298,9 +648,149 @@ namespace fluffy { namespace parser {
 		return LexUtils::isRightBracket(m_tok);
 	}
 
-	Bool Parser::isScopeResolution()
+	Bool Parser::isPlus()
 	{
-		return LexUtils::isScopeResolution(m_tok);
+		return LexUtils::isPlus(m_tok);
+	}
+
+	Bool Parser::isMinus()
+	{
+		return LexUtils::isMinus(m_tok);
+	}
+
+	Bool Parser::isDivision()
+	{
+		return LexUtils::isDivision(m_tok);
+	}
+
+	Bool Parser::isMultiplication()
+	{
+		return LexUtils::isMultiplication(m_tok);
+	}
+
+	Bool Parser::isModulo()
+	{
+		return LexUtils::isModulo(m_tok);
+	}
+
+	Bool Parser::isAssign()
+	{
+		return LexUtils::isAssign(m_tok);
+	}
+
+	Bool Parser::isPlusAssign()
+	{
+		return LexUtils::isPlusAssign(m_tok);
+	}
+
+	Bool Parser::isMinusAssign()
+	{
+		return LexUtils::isMinusAssign(m_tok);
+	}
+
+	Bool Parser::isMultAssign()
+	{
+		return LexUtils::isMultAssign(m_tok);
+	}
+
+	Bool Parser::isDivAssign()
+	{
+		return LexUtils::isDivAssign(m_tok);
+	}
+
+	Bool Parser::isBitWiseAndAssign()
+	{
+		return LexUtils::isBitWiseAndAssign(m_tok);
+	}
+
+	Bool Parser::isBitWiseOrAssign()
+	{
+		return LexUtils::isBitWiseOrAssign(m_tok);
+	}
+
+	Bool Parser::isBitWiseXorAssign()
+	{
+		return LexUtils::isBitWiseXorAssign(m_tok);
+	}
+
+	Bool Parser::isModAssign()
+	{
+		return LexUtils::isModAssign(m_tok);
+	}
+
+	Bool Parser::isBitWiseLeftShiftAssign()
+	{
+		return LexUtils::isBitWiseLeftShiftAssign(m_tok);
+	}
+
+	Bool Parser::isBitWiseRightShiftAssign()
+	{
+		return LexUtils::isBitWiseRightShiftAssign(m_tok);
+	}
+
+	Bool Parser::isGreaterThan()
+	{
+		return LexUtils::isGreaterThan(m_tok);
+	}
+
+	Bool Parser::isLessThan()
+	{
+		return LexUtils::isLessThan(m_tok);
+	}
+
+	Bool Parser::isGreaterThanOrEqual()
+	{
+		return LexUtils::isGreaterThanOrEqual(m_tok);
+	}
+
+	Bool Parser::isLessThanOrEqual()
+	{
+		return LexUtils::isLessThanOrEqual(m_tok);
+	}
+
+	Bool Parser::isEqual()
+	{
+		return LexUtils::isEqual(m_tok);
+	}
+
+	Bool Parser::isNotEqual()
+	{
+		return LexUtils::isNotEqual(m_tok);
+	}
+
+	Bool Parser::isBitWiseLeftShift()
+	{
+		return LexUtils::isBitWiseLeftShift(m_tok);
+	}
+
+	Bool Parser::isBitWiseRightShift()
+	{
+		return LexUtils::isBitWiseRightShift(m_tok);
+	}
+
+	Bool Parser::isBitWiseAnd()
+	{
+		return LexUtils::isBitWiseAnd(m_tok);
+	}
+
+	Bool Parser::isBitWiseOr()
+	{
+		return LexUtils::isBitWiseOr(m_tok);
+	}
+
+	Bool Parser::isBitWiseXor()
+	{
+		return LexUtils::isBitWiseXor(m_tok);
+	}
+
+	Bool Parser::isBitWiseNot()
+	{
+		return LexUtils::isBitWiseNot(m_tok);
+	}
+
+	Bool Parser::isColon()
+	{
+		return LexUtils::isColon(m_tok);
 	}
 
 	Bool Parser::isSemiColon()
@@ -308,14 +798,34 @@ namespace fluffy { namespace parser {
 		return LexUtils::isSemiColon(m_tok);
 	}
 
+	Bool Parser::isLogicalAnd()
+	{
+		return LexUtils::isLogicalAnd(m_tok);
+	}
+
+	Bool Parser::isLogicalOr()
+	{
+		return LexUtils::isLogicalOr(m_tok);
+	}
+
+	Bool Parser::isLogicalNot()
+	{
+		return LexUtils::isLogicalNot(m_tok);
+	}
+
+	Bool Parser::isInterrogation()
+	{
+		return LexUtils::isInterrogation(m_tok);
+	}
+
 	Bool Parser::isComma()
 	{
 		return LexUtils::isComma(m_tok);
 	}
 
-	Bool Parser::isMultiplication()
+	Bool Parser::isDot()
 	{
-		return LexUtils::isMultiplication(m_tok);
+		return LexUtils::isDot(m_tok);
 	}
 
 	const String& Parser::getTokenValue()

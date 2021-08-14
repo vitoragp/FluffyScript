@@ -44,16 +44,16 @@ namespace fluffy { namespace detail {
 		std::make_tuple("false", 		TokenSubType_e::eTST_False),		// ok
 		std::make_tuple("void", 		TokenSubType_e::eTST_Void),			// ok
 		std::make_tuple("bool", 		TokenSubType_e::eTST_Bool),			// ok
-		std::make_tuple("i8", 			TokenSubType_e::eTST_i8),			// ok
-		std::make_tuple("u8", 			TokenSubType_e::eTST_u8),			// ok
-		std::make_tuple("i16", 			TokenSubType_e::eTST_i16),			// ok
-		std::make_tuple("u16", 			TokenSubType_e::eTST_u16),			// ok
-		std::make_tuple("i32", 			TokenSubType_e::eTST_i32),			// ok
-		std::make_tuple("u32", 			TokenSubType_e::eTST_u32),			// ok
-		std::make_tuple("i64", 			TokenSubType_e::eTST_i64),			// ok
-		std::make_tuple("u64", 			TokenSubType_e::eTST_u64),			// ok
-		std::make_tuple("fp32",			TokenSubType_e::eTST_fp32),			// ok
-		std::make_tuple("fp64",			TokenSubType_e::eTST_fp64),			// ok
+		std::make_tuple("i8", 			TokenSubType_e::eTST_I8),			// ok
+		std::make_tuple("u8", 			TokenSubType_e::eTST_U8),			// ok
+		std::make_tuple("i16", 			TokenSubType_e::eTST_I16),			// ok
+		std::make_tuple("u16", 			TokenSubType_e::eTST_U16),			// ok
+		std::make_tuple("i32", 			TokenSubType_e::eTST_I32),			// ok
+		std::make_tuple("u32", 			TokenSubType_e::eTST_U32),			// ok
+		std::make_tuple("i64", 			TokenSubType_e::eTST_I64),			// ok
+		std::make_tuple("u64", 			TokenSubType_e::eTST_U64),			// ok
+		std::make_tuple("fp32",			TokenSubType_e::eTST_Fp32),			// ok
+		std::make_tuple("fp64",			TokenSubType_e::eTST_Fp64),			// ok
 		std::make_tuple("string", 		TokenSubType_e::eTST_String),		// ok
 		std::make_tuple("map", 			TokenSubType_e::eTST_Map),			// ok
 		std::make_tuple("object", 		TokenSubType_e::eTST_Object),		// ok
@@ -68,9 +68,6 @@ namespace fluffy { namespace detail {
 		std::make_tuple("goto", 		TokenSubType_e::eTST_Goto),			// ok
 		std::make_tuple("if", 			TokenSubType_e::eTST_If),			// ok
 		std::make_tuple("else", 		TokenSubType_e::eTST_Else),			// ok
-		std::make_tuple("switch", 		TokenSubType_e::eTST_Switch),		// ok
-		std::make_tuple("case", 		TokenSubType_e::eTST_Case),			// ok
-		std::make_tuple("default", 		TokenSubType_e::eTST_Default),		// ok
 		std::make_tuple("continue", 	TokenSubType_e::eTST_Continue),		// ok
 		std::make_tuple("break", 		TokenSubType_e::eTST_Break),		// ok
 		std::make_tuple("for", 			TokenSubType_e::eTST_For),			// ok
@@ -194,7 +191,7 @@ namespace fluffy { namespace testing {
 		{
 			EXPECT_EQ(tok.value, "u32");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::eTT_Keyword);
-			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_u32);
+			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_U32);
 			EXPECT_EQ(tok.line, 2);
 			EXPECT_EQ(tok.column, 1);
 			EXPECT_EQ(tok.filename, "anom_block");
@@ -221,7 +218,7 @@ namespace fluffy { namespace testing {
 		{
 			EXPECT_EQ(tok.value, "u64");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::eTT_Keyword);
-			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_u64);
+			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_U64);
 			EXPECT_EQ(tok.line, 1);
 			EXPECT_EQ(tok.column, 1);
 			EXPECT_EQ(tok.filename, filename);
@@ -766,7 +763,7 @@ namespace fluffy { namespace testing {
 		{
 			EXPECT_EQ(tok.value, "u32");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::eTT_Keyword);
-			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_u32);
+			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_U32);
 			EXPECT_EQ(tok.line, 2);
 			EXPECT_EQ(tok.column, 1);
 			EXPECT_EQ(tok.filename, "anom_block");
@@ -794,7 +791,7 @@ namespace fluffy { namespace testing {
 		{
 			EXPECT_EQ(tok.value, "u64");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::eTT_Keyword);
-			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_u64);
+			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::eTST_U64);
 			EXPECT_EQ(tok.line, 1);
 			EXPECT_EQ(tok.column, 1);
 			EXPECT_EQ(tok.filename, filename);
