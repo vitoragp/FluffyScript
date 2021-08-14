@@ -11,11 +11,7 @@ namespace fluffy { namespace parser {
 	using lexer::Lexer;
 	using std::unique_ptr;
 
-	using ProgramPtr					= unique_ptr<ast::Program>;
-	using IncludePtr					= unique_ptr<ast::Include>;
-	using NamespacePtr					= unique_ptr<ast::Namespace>;
-	using GeneralStmtPtr				= unique_ptr<ast::GeneralStmt>;
-	using ScopedIdentifierDeclPtr		= unique_ptr<ast::ScopedIdentifierDecl>;
+	using ProgramPtr			= unique_ptr<ast::Program>;
 
 	/**
 	 * Parser
@@ -23,8 +19,6 @@ namespace fluffy { namespace parser {
 
 	class Parser
 	{
-		friend class			testing::ParserTest_TestParseConstants_Test;
-
 	public:
 								Parser(Lexer* const lex);
 								~Parser();
@@ -34,7 +28,6 @@ namespace fluffy { namespace parser {
 		void					loadSource(String source);
 		void					loadSourceFromFile(String sourceFile);
 
-	private:
 		void					nextToken();
 
 		void					expectToken(std::function<bool()> callback);
@@ -53,12 +46,38 @@ namespace fluffy { namespace parser {
 		const I8				expectConstantChar();
 		String					expectConstantString();
 
-		ProgramPtr				parseProgram();
-		IncludePtr				parseInclude();
-		NamespacePtr			parseNamespace();
-		GeneralStmtPtr			parseGeneralStmt();
+		Bool					isEof();
+		Bool					isIdentifier();		
+		Bool					isConstantI8();		
+		Bool					isConstantU8();		
+		Bool					isConstantI16();		
+		Bool					isConstantU16();		
+		Bool					isConstantI32();		
+		Bool					isConstantU32();		
+		Bool					isConstantI64();		
+		Bool					isConstantU64();		
+		Bool					isConstantFp32();		
+		Bool					isConstantFp64();		
+		Bool					isConstantChar();
+		Bool					isConstantString();
+		Bool					isConstantTrue();
+		Bool					isConstantFalse();
+		Bool					isInclude();
+		Bool					isFrom();
+		Bool					isNamespace();
+		Bool					isExport();
+		Bool					isLeftBracket();
+		Bool					isRightBracket();
+		Bool					isScopeResolution();
+		Bool					isSemiColon();
+		Bool					isComma();
+		Bool					isMultiplication();
 
-		ScopedIdentifierDeclPtr	parseScopedIdentifierDecl();
+		const String&			getTokenValue();
+		const TokenType_e		getTokenType();
+		const TokenSubType_e	getTokenSubType();
+		const U32				getTokenLine();
+		const U32				getTokenColumn();
 
 	private:
 		unique_ptr<Lexer>		m_lex;

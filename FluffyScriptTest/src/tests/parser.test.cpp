@@ -293,4 +293,9 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(treeAst->namespaceList[1]->generalDeclList.size(), 0);
 		EXPECT_EQ(treeAst->namespaceList[1]->namespaceList.size(), 0);
 	}
+
+	TEST_F(ParserTest, TestParseClassEmptyNoExportNoGenericNoExtendsNoImplements)
+	{
+		parser->loadSource("class Foo {}");
+	}
 } }

@@ -2,8 +2,10 @@
 #include "fl_exceptions.h"
 #include "fl_parser.h"
 #include "fl_lex_utils.h"
+#include "parser_objects/fl_parser_object.h"
 namespace fluffy { namespace parser {
 	using utils::LexUtils;
+	using parser_objects::ParserObjectProgram;
 
 	/**
 	 * Parser
@@ -18,7 +20,7 @@ namespace fluffy { namespace parser {
 
 	ProgramPtr Parser::parse()
 	{
-		return std::move(parseProgram());
+		return ParserObjectProgram::parse(this);
 	}
 
 	void Parser::loadSource(String source)
@@ -186,192 +188,158 @@ namespace fluffy { namespace parser {
 		return value;
 	}
 
-	ProgramPtr Parser::parseProgram()
+	Bool Parser::isEof()
 	{
-		auto program = std::make_unique<ast::Program>();
-
-		// Faz a analise do primeiro token.
-		nextToken();
-
-		if (LexUtils::isEof(m_tok)) {
-			return program;
-		}
-
-		// Processa declaracoes de include.
-		while (true)
-		{
-			if (LexUtils::isEof(m_tok)) {
-				return program;
-			}
-			if (LexUtils::isInclude(m_tok)) {
-				program->includeList.push_back(parseInclude());
-				continue;
-			}
-			break;
-		}
-
-		while (true)
-		{
-			if (LexUtils::isEof(m_tok)) {
-				return program;
-			}
-
-			// Processa namespaces.
-			if (LexUtils::isNamespace(m_tok)) {
-				program->namespaceList.push_back(parseNamespace());
-			}
-		}
-		return nullptr;
+		return LexUtils::isEof(m_tok);
 	}
 
-	IncludePtr Parser::parseInclude()
+	Bool Parser::isIdentifier()
 	{
-		auto includeDecl = std::make_unique<ast::Include>();
-
-		// Consome 'include'.
-		expectToken([this]() { return LexUtils::isInclude(m_tok); });
-
-		// Consome '{'
-		expectToken([this]() { return LexUtils::isLeftBracket(m_tok); });
-
-		// Consome Identificadores.
-		while (true)
-		{
-			if (LexUtils::isMultiplication(m_tok)) {
-				// Se existe identificaores declarados, o caractere coringa
-				// nao pode ser usado.
-				if (includeDecl->includedItemList.size()) {
-					throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
-				}
-
-				// Consome '*'
-				expectToken([this]() { return LexUtils::isMultiplication(m_tok);  });
-
-				includeDecl->allFlag = true;
-				break;
-			}
-
-			// Consome identificador.
-			includeDecl->includedItemList.push_back(expectIdentifier());
-
-			// Verifica se ha mais declaracoes.
-			if (!LexUtils::isComma(m_tok)) {
-				break;
-			}
-
-			// Consome ','
-			expectToken([this]() { return LexUtils::isComma(m_tok);  });
-		}
-
-		// Consome '}'
-		expectToken([this]() { return LexUtils::isRightBracket(m_tok); });
-
-		// Consome 'from'
-		expectToken([this]() { return LexUtils::isFrom(m_tok); });
-
-		// Consome o identificador do namespace.
-		includeDecl->fromNamespace = parseScopedIdentifierDecl();
-
-		// Consome ';'
-		expectToken([this]() { return LexUtils::isSemiColon(m_tok); });
-
-		return includeDecl;
+		return LexUtils::isIdentifier(m_tok);
 	}
 
-	NamespacePtr Parser::parseNamespace()
+	Bool Parser::isConstantI8()
 	{
-		auto namespaceDecl = std::make_unique<ast::Namespace>();
-
-		// Consome 'namespace'.
-		expectToken([this]() { return LexUtils::isNamespace(m_tok); });
-
-		// Consome o identficador com o nome do namespace.
-		namespaceDecl->name = expectIdentifier();
-
-		// Consome '{'.
-		expectToken([this]() { return LexUtils::isLeftBracket(m_tok); });
-
-		while (true)
-		{
-			// Verifica se chegou ao fim do namespace.
-			if (LexUtils::isRightBracket(m_tok))
-			{
-				break;
-			}
-
-			// Processa namespace.
-			if (LexUtils::isNamespace(m_tok))
-			{
-				namespaceDecl->namespaceList.push_back(parseNamespace());
-				continue;
-			}
-
-			// Processa declaracao geral.
-			namespaceDecl->generalDeclList.push_back(parseGeneralStmt());
-		}
-
-		// Consome '}'.
-		expectToken([this]() { return LexUtils::isRightBracket(m_tok); });
-
-		return namespaceDecl;
+		return LexUtils::isConstantI8(m_tok);
 	}
 
-	GeneralStmtPtr Parser::parseGeneralStmt()
+	Bool Parser::isConstantU8()
 	{
-		Bool hasExport = false;
-
-		// Verifica se houve a declararao para exportar o elemento.
-		if (LexUtils::isExport(m_tok))
-		{
-			expectToken([this]() { return LexUtils::isExport(m_tok);  });
-			hasExport = true;
-		}
-
-		// Verifica qual declaracao processar.
-		switch (m_tok.subType)
-		{
-		case eTST_Class:
-			throw exceptions::not_implemented_feature_exception("parseClassDecl");
-		case eTST_Interface:
-			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
-		case eTST_Struct:
-			throw exceptions::not_implemented_feature_exception("parseStructDecl");
-		case eTST_Enum:
-			throw exceptions::not_implemented_feature_exception("parseEnumDecl");
-		case eTST_Trait:
-			throw exceptions::not_implemented_feature_exception("parseTraitDecl");
-		case eTST_Let:
-			throw exceptions::not_implemented_feature_exception("parseVariableDecl");
-		case eTST_Fn:			
-			throw exceptions::not_implemented_feature_exception("parseFunctionDecl");
-		default:
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
-		}
-
-		return nullptr;
+		return LexUtils::isConstantU8(m_tok);
 	}
 
-	ScopedIdentifierDeclPtr Parser::parseScopedIdentifierDecl()
+	Bool Parser::isConstantI16()
 	{
-		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>();
+		return LexUtils::isConstantI16(m_tok);
+	}
 
-		// Consome o identificador.
-		scopedIdentifierDecl->identifier = expectIdentifier();
+	Bool Parser::isConstantU16()
+	{
+		return LexUtils::isConstantU16(m_tok);
+	}
 
-		while (true)
-		{
-			// Verifica se a resolucao de escopo.
-			if (!LexUtils::isScopeResolution(m_tok))
-			{
-				break;
-			}
+	Bool Parser::isConstantI32()
+	{
+		return LexUtils::isConstantI32(m_tok);
+	}
 
-			// Consome '::'.
-			expectToken([this]() { return LexUtils::isScopeResolution(m_tok); });
+	Bool Parser::isConstantU32()
+	{
+		return LexUtils::isConstantU32(m_tok);
+	}
 
-			// Consome o tailDecl.
-			scopedIdentifierDecl->tailDecl = parseScopedIdentifierDecl();
-		}
-		return scopedIdentifierDecl;
+	Bool Parser::isConstantI64()
+	{
+		return LexUtils::isConstantI64(m_tok);
+	}
+
+	Bool Parser::isConstantU64()
+	{
+		return LexUtils::isConstantU64(m_tok);
+	}
+
+	Bool Parser::isConstantFp32()
+	{
+		return LexUtils::isConstantFp32(m_tok);
+	}
+
+	Bool Parser::isConstantFp64()
+	{
+		return LexUtils::isConstantFp64(m_tok);
+	}
+
+	Bool Parser::isConstantChar()
+	{
+		return LexUtils::isConstantChar(m_tok);
+	}
+
+	Bool Parser::isConstantString()
+	{
+		return LexUtils::isConstantString(m_tok);
+	}
+
+	Bool Parser::isConstantTrue()
+	{
+		return LexUtils::isTrue(m_tok);
+	}
+
+	Bool Parser::isConstantFalse()
+	{
+		return LexUtils::isFalse(m_tok);
+	}
+
+	Bool Parser::isInclude()
+	{
+		return LexUtils::isInclude(m_tok);
+	}
+
+	Bool Parser::isFrom()
+	{
+		return LexUtils::isFrom(m_tok);
+	}
+
+	Bool Parser::isNamespace()
+	{
+		return LexUtils::isNamespace(m_tok);
+	}
+
+	Bool Parser::isExport()
+	{
+		return LexUtils::isExport(m_tok);
+	}
+
+	Bool Parser::isLeftBracket()
+	{
+		return LexUtils::isLeftBracket(m_tok);
+	}
+
+	Bool Parser::isRightBracket()
+	{
+		return LexUtils::isRightBracket(m_tok);
+	}
+
+	Bool Parser::isScopeResolution()
+	{
+		return LexUtils::isScopeResolution(m_tok);
+	}
+
+	Bool Parser::isSemiColon()
+	{
+		return LexUtils::isSemiColon(m_tok);
+	}
+
+	Bool Parser::isComma()
+	{
+		return LexUtils::isComma(m_tok);
+	}
+
+	Bool Parser::isMultiplication()
+	{
+		return LexUtils::isMultiplication(m_tok);
+	}
+
+	const String& Parser::getTokenValue()
+	{
+		return m_tok.value;
+	}
+
+	const TokenType_e Parser::getTokenType()
+	{
+		return m_tok.type;
+	}
+
+	const TokenSubType_e Parser::getTokenSubType()
+	{
+		return m_tok.subType;
+	}
+
+	const U32 Parser::getTokenLine()
+	{
+		return m_tok.line;
+	}
+
+	const U32 Parser::getTokenColumn()
+	{
+		return m_tok.column;
 	}
 } }

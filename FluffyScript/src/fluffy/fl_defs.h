@@ -34,7 +34,7 @@ namespace fluffy {
 	 * Define o tipo de token.
 	 */
 
-	enum TokenType_e
+	enum class TokenType_e
 	{
 		eTT_Unknown,
 
@@ -52,7 +52,7 @@ namespace fluffy {
 	 * Define a especializacao do tipo.
 	 */
 
-	enum TokenSubType_e
+	enum class TokenSubType_e
 	{
 		eTST_Unknown,
 
@@ -139,57 +139,57 @@ namespace fluffy {
 		  eTST_Decrement,				// --
 		  eTST_ReturnSet,				// ->
 
-		  eTST_LParBracket,			// (
-		  eTST_RParBracket,			// )
-		  eTST_LSquBracket,			// [
-		  eTST_RSquBracket,			// ]
+		  eTST_LParBracket,				// (
+		  eTST_RParBracket,				// )
+		  eTST_LSquBracket,				// [
+		  eTST_RSquBracket,				// ]
 		  eTST_LBracket,				// {
 		  eTST_RBracket,				// }
 
 		  eTST_Plus,					// +
 		  eTST_Minus,					// -
 		  eTST_Division,				// /
-		  eTST_Multiplication,		// *
-		  eTST_Modulo,				// %
+		  eTST_Multiplication,			// *
+		  eTST_Modulo,					// %
 
-		  eTST_Assign,				// =
+		  eTST_Assign,					// =
 
-		  eTST_PlusAssign,			// +=
-		  eTST_MinusAssign,			// -=
-		  eTST_MultAssign,			// *=
+		  eTST_PlusAssign,				// +=
+		  eTST_MinusAssign,				// -=
+		  eTST_MultAssign,				// *=
 		  eTST_DivAssign,				// /=
 		  eTST_BitWiseAndAssign,		// &=
-		  eTST_BitWiseOrAssign,		// |=
+		  eTST_BitWiseOrAssign,			// |=
 		  eTST_BitWiseXorAssign,		// ^=
 		  eTST_ModAssign,				// %=
-		  eTST_BitWiseLShiftAssign,	// <<=
-		  eTST_BitWiseRShiftAssign,	// >>=
+		  eTST_BitWiseLShiftAssign,		// <<=
+		  eTST_BitWiseRShiftAssign,		// >>=
 
-		  eTST_GreaterThan,			// >
+		  eTST_GreaterThan,				// >
 		  eTST_LessThan,				// <
-		  eTST_GreaterThanOrEqual,	// >=
-		  eTST_LessThanOrEqual,		// <=
+		  eTST_GreaterThanOrEqual,		// >=
+		  eTST_LessThanOrEqual,			// <=
 		  eTST_Equal,					// ==
 		  eTST_NotEqual,				// !=
 
 		  eTST_BitWiseLShift,			// <<
 		  eTST_BitWiseRShift,			// >>
-		  eTST_BitWiseAnd,			// &
+		  eTST_BitWiseAnd,				// &
 		  eTST_BitWiseOr,				// |
-		  eTST_BitWiseXor,			// ^
-		  eTST_BitWiseNot,			// ~
+		  eTST_BitWiseXor,				// ^
+		  eTST_BitWiseNot,				// ~
 
 		  eTST_Colon,					// :
 		  eTST_SemiColon,				// ;
 
-		  eTST_LogicalAnd,			// &&
+		  eTST_LogicalAnd,				// &&
 		  eTST_LogicalOr,				// ||
-		  eTST_LogicalNot,			// !
+		  eTST_LogicalNot,				// !
 
 		  eTST_Interrogation,			// ?
 
 		  eTST_Comma,					// ,
-		  eTST_Dot,					// .
+		  eTST_Dot,						// .
 
 		  /**
 		   * Constant
