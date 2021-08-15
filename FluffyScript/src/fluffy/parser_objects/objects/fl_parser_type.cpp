@@ -462,7 +462,7 @@ namespace fluffy { namespace parser_objects {
 		// Consome '>>' e decrementa o generic level.
 		if (parser->isBitWiseRightShift()) {
 			m_genericLevel -= 1;
-			parser->setPosition(parser->m_tok.position + 1);
+			parser->setPosition(parser->getTokenPosition() + 1);
 			parser->nextToken();
 			return;
 		}
@@ -470,7 +470,7 @@ namespace fluffy { namespace parser_objects {
 		// Consome '>>=' e decrementa o generic level.
 		if (parser->isBitWiseRightShiftAssign()) {
 			m_genericLevel -= 1;
-			parser->setPosition(parser->m_tok.position + 1);
+			parser->setPosition(parser->getTokenPosition() + 1);
 			parser->nextToken();
 			return;
 		}
