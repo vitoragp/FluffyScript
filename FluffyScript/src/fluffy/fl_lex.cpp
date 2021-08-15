@@ -154,7 +154,7 @@ namespace fluffy {
 			m_filename = sourceFile;
 		}
 
-		void Lexer::parse(Token_s& tok, Bool isType)
+		void Lexer::parse(Token_s& tok)
 		{
 			// Salta: espacos, tabulacoes, carriages, novas linhas.
 			skip();
@@ -167,6 +167,7 @@ namespace fluffy {
 				tok.subType = TokenSubType_e::eTST_Unknown;
 				tok.line = m_line;
 				tok.column = m_column;
+				tok.position = m_buffer->getPosition();
 				tok.filename = m_filename;
 				tok.value.clear();
 
@@ -176,7 +177,7 @@ namespace fluffy {
 					return;
 				}
 				if (issymbol(ch)) {
-					parseSymbols(tok, isType);
+					parseSymbols(tok);
 					return;
 				}
 				if (isnumber(ch)) {
@@ -207,6 +208,16 @@ namespace fluffy {
 		void Lexer::setTabSpaces(U32 newTabSpaces)
 		{
 			m_tabSpaces = newTabSpaces;
+		}
+
+		U32 Lexer::getPosition()
+		{
+			return m_buffer->getPosition();
+		}
+
+		void Lexer::setPosition(U32 position)
+		{
+			m_buffer->reset(position);
 		}
 
 		I8 Lexer::readChar(U32 offset)
@@ -325,7 +336,7 @@ namespace fluffy {
 			tok.subType = TokenSubType_e::eTST_Unknown;
 		}
 
-		void Lexer::parseSymbols(Token_s& tok, Bool isType)
+		void Lexer::parseSymbols(Token_s& tok)
 		{
 			const I8 ch = readChar();
 
@@ -335,271 +346,261 @@ namespace fluffy {
 			switch (ch)
 			{
 			case '>':
-			{
-				tok.subType = TokenSubType_e::eTST_GreaterThan;
-				tok.value.push_back(readCharAndAdv());
-
-				// Se o processamento for para tipo nao verificar outras simbolos.
-				if (isType) {
-					return;
-				}
-
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_GreaterThanOrEqual;
+				{
+					tok.subType = TokenSubType_e::eTST_GreaterThan;
 					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-				if (readChar() == '>') {
-					tok.subType = TokenSubType_e::eTST_BitWiseRShift;
-					tok.value.push_back(readCharAndAdv());
+
 					if (readChar() == '=') {
-						tok.subType = TokenSubType_e::eTST_BitWiseRShiftAssign;
+						tok.subType = TokenSubType_e::eTST_GreaterThanOrEqual;
 						tok.value.push_back(readCharAndAdv());
 						return;
 					}
-					return;
+					if (readChar() == '>') {
+						tok.subType = TokenSubType_e::eTST_BitWiseRShift;
+						tok.value.push_back(readCharAndAdv());
+						if (readChar() == '=') {
+							tok.subType = TokenSubType_e::eTST_BitWiseRShiftAssign;
+							tok.value.push_back(readCharAndAdv());
+							return;
+						}
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '<':
-			{
-				tok.subType = TokenSubType_e::eTST_LessThan;
-				tok.value.push_back(readCharAndAdv());
-
-				// Se o processamento for para tipo nao verificar outras simbolos.
-				if (isType) {
-					return;
-				}
-
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_LessThanOrEqual;
+				{
+					tok.subType = TokenSubType_e::eTST_LessThan;
 					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-				if (readChar() == '<') {
-					tok.subType = TokenSubType_e::eTST_BitWiseLShift;
-					tok.value.push_back(readCharAndAdv());
+
 					if (readChar() == '=') {
-						tok.subType = TokenSubType_e::eTST_BitWiseLShiftAssign;
+						tok.subType = TokenSubType_e::eTST_LessThanOrEqual;
 						tok.value.push_back(readCharAndAdv());
 						return;
 					}
-					return;
+					if (readChar() == '<') {
+						tok.subType = TokenSubType_e::eTST_BitWiseLShift;
+						tok.value.push_back(readCharAndAdv());
+						if (readChar() == '=') {
+							tok.subType = TokenSubType_e::eTST_BitWiseLShiftAssign;
+							tok.value.push_back(readCharAndAdv());
+							return;
+						}
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case ':':
-			{
-				tok.subType = TokenSubType_e::eTST_Colon;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == ':') {
-					tok.subType = TokenSubType_e::eTST_ScopeResolution;
+				{
+					tok.subType = TokenSubType_e::eTST_Colon;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == ':') {
+						tok.subType = TokenSubType_e::eTST_ScopeResolution;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '+':
-			{
-				tok.subType = TokenSubType_e::eTST_Plus;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '+') {
-					tok.subType = TokenSubType_e::eTST_Increment;
+				{
+					tok.subType = TokenSubType_e::eTST_Plus;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '+') {
+						tok.subType = TokenSubType_e::eTST_Increment;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_PlusAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_PlusAssign;
-					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-			}
-			break;
+				break;
 			case '-':
-			{
-				tok.subType = TokenSubType_e::eTST_Minus;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '-') {
-					tok.subType = TokenSubType_e::eTST_Decrement;
+				{
+					tok.subType = TokenSubType_e::eTST_Minus;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '-') {
+						tok.subType = TokenSubType_e::eTST_Decrement;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_MinusAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+					if (readChar() == '>') {
+						tok.subType = TokenSubType_e::eTST_Arrow;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_MinusAssign;
-					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-				if (readChar() == '>') {
-					tok.subType = TokenSubType_e::eTST_Arrow;
-					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-			}
-			break;
+				break;
 			case '=':
-			{
-				tok.subType = TokenSubType_e::eTST_Assign;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_Equal;
+				{
+					tok.subType = TokenSubType_e::eTST_Assign;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_Equal;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '!':
-			{
-				tok.subType = TokenSubType_e::eTST_LogicalNot;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_NotEqual;
+				{
+					tok.subType = TokenSubType_e::eTST_LogicalNot;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_NotEqual;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '&':
-			{
-				tok.subType = TokenSubType_e::eTST_BitWiseAnd;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '&') {
-					tok.subType = TokenSubType_e::eTST_LogicalAnd;
+				{
+					tok.subType = TokenSubType_e::eTST_BitWiseAnd;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '&') {
+						tok.subType = TokenSubType_e::eTST_LogicalAnd;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_BitWiseAndAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_BitWiseAndAssign;
-					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-			}
-			break;
+				break;
 			case '|':
-			{
-				tok.subType = TokenSubType_e::eTST_BitWiseOr;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '|') {
-					tok.subType = TokenSubType_e::eTST_LogicalOr;
+				{
+					tok.subType = TokenSubType_e::eTST_BitWiseOr;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '|') {
+						tok.subType = TokenSubType_e::eTST_LogicalOr;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_BitWiseOrAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_BitWiseOrAssign;
-					tok.value.push_back(readCharAndAdv());
-					return;
-				}
-			}
-			break;
+				break;
 			case '.':
-			{
-				tok.subType = TokenSubType_e::eTST_Dot;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_Dot;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '(':
-			{
-				tok.subType = TokenSubType_e::eTST_LParBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_LParBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case ')':
-			{
-				tok.subType = TokenSubType_e::eTST_RParBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_RParBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '[':
-			{
-				tok.subType = TokenSubType_e::eTST_LSquBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_LSquBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case ']':
-			{
-				tok.subType = TokenSubType_e::eTST_RSquBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_RSquBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '{':
-			{
-				tok.subType = TokenSubType_e::eTST_LBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_LBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '}':
-			{
-				tok.subType = TokenSubType_e::eTST_RBracket;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_RBracket;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '/':
-			{
-				tok.subType = TokenSubType_e::eTST_Division;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_DivAssign;
+				{
+					tok.subType = TokenSubType_e::eTST_Division;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_DivAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '*':
-			{
-				tok.subType = TokenSubType_e::eTST_Multiplication;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_MultAssign;
+				{
+					tok.subType = TokenSubType_e::eTST_Multiplication;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_MultAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '%':
-			{
-				tok.subType = TokenSubType_e::eTST_Modulo;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_ModAssign;
+				{
+					tok.subType = TokenSubType_e::eTST_Modulo;
 					tok.value.push_back(readCharAndAdv());
-					return;
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_ModAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
 				}
-			}
-			break;
+				break;
 			case '~':
-			{
-				tok.subType = TokenSubType_e::eTST_BitWiseNot;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
-			case '^':
-			{
-				tok.subType = TokenSubType_e::eTST_BitWiseXor;
-				tok.value.push_back(readCharAndAdv());
-				if (readChar() == '=') {
-					tok.subType = TokenSubType_e::eTST_BitWiseXorAssign;
+				{
+					tok.subType = TokenSubType_e::eTST_BitWiseNot;
 					tok.value.push_back(readCharAndAdv());
-					return;
 				}
-			}
-			break;
+				break;
+			case '^':
+				{
+					tok.subType = TokenSubType_e::eTST_BitWiseXor;
+					tok.value.push_back(readCharAndAdv());
+					if (readChar() == '=') {
+						tok.subType = TokenSubType_e::eTST_BitWiseXorAssign;
+						tok.value.push_back(readCharAndAdv());
+						return;
+					}
+				}
+				break;
 			case ';':
-			{
-				tok.subType = TokenSubType_e::eTST_SemiColon;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_SemiColon;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case ',':
-			{
-				tok.subType = TokenSubType_e::eTST_Comma;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_Comma;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			case '?':
-			{
-				tok.subType = TokenSubType_e::eTST_Interrogation;
-				tok.value.push_back(readCharAndAdv());
-			}
-			break;
+				{
+					tok.subType = TokenSubType_e::eTST_Interrogation;
+					tok.value.push_back(readCharAndAdv());
+				}
+				break;
 			default:
 				throw exceptions::unexpected_token_exception(readChar(), tok.line, tok.column);
 			}

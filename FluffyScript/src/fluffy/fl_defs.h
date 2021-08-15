@@ -227,6 +227,7 @@ namespace fluffy {
 
 		U32 line;
 		U32 column;
+		U32 position;
 
 		String filename;
 	};

@@ -542,6 +542,7 @@ namespace fluffy { namespace testing {
 		parser->loadSourceFromFile("./files/parser/source_1.txt");
 		parser->nextToken();
 
+		std::vector<std::unique_ptr<ast::TypeDecl>> typeList;
 		int typeCount = 0;
 		while (true)
 		{
@@ -549,10 +550,9 @@ namespace fluffy { namespace testing {
 			{
 				break;
 			}
-			ParserObjectTypeDecl::parse(parser.get());
+			typeList.push_back(ParserObjectTypeDecl::parse(parser.get()));
 			typeCount++;
 		}
-
 		ASSERT_EQ(typeCount, 13);
 	}
 } }

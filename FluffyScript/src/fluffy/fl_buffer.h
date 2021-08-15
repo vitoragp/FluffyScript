@@ -16,8 +16,10 @@ namespace fluffy
 
 		virtual void			load(const I8* sourcePtr, const U32 len) = 0;
 		virtual void			loadFromFile(const I8* fileName) = 0;
+		virtual U32				getPosition() = 0;
 		virtual const I8		readByte(U8 offset = 0) = 0;
 		virtual void			nextByte() = 0;
+		virtual void			reset(U32 position) = 0;
 	};
 
 	/**
@@ -32,8 +34,10 @@ namespace fluffy
 
 		virtual void			load(const I8* sourcePtr, const U32 len) override;
 		virtual void			loadFromFile(const I8* fileName) override;
+		virtual U32				getPosition() override;
 		virtual const I8		readByte(U8 offset) override;
 		virtual void			nextByte() override;
+		virtual void			reset(U32 position) override;
 
 	private:
 		I8* m_memory;
@@ -54,8 +58,10 @@ namespace fluffy
 
 		virtual void			load(const I8* sourcePtr, const U32 len) override;
 		virtual void			loadFromFile(const I8* fileName) override;
+		virtual U32				getPosition() override;
 		virtual const I8		readByte(U8 offset = 0) override;
 		virtual void			nextByte() override;
+		virtual void			reset(U32 position) override;
 
 	private:
 		const I8* cacheSourceFile(const I8* sourcePtr, const U32 len);

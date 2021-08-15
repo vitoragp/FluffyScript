@@ -5,6 +5,7 @@
 #include "parser_objects/fl_parser_objects.h"
 namespace fluffy { namespace parser {
 	using utils::LexUtils;
+
 	using parser_objects::ParserObjectProgram;
 
 	/**
@@ -24,16 +25,6 @@ namespace fluffy { namespace parser {
 		return ParserObjectProgram::parse(this);
 	}
 
-	void Parser::enableTypeMode()
-	{
-		m_typeModeLock++;
-	}
-
-	void Parser::disableTypeMode()
-	{
-		m_typeModeLock--;
-	}
-
 	void Parser::loadSource(String source)
 	{
 		assert(m_lex != nullptr);
@@ -48,7 +39,7 @@ namespace fluffy { namespace parser {
 
 	void Parser::nextToken()
 	{
-		m_lex->parse(m_tok, m_typeModeLock > 0);
+		m_lex->parse(m_tok);
 	}
 
 	void Parser::expectToken(std::function<bool()> callback)
@@ -872,5 +863,10 @@ namespace fluffy { namespace parser {
 	const U32 Parser::getTokenColumn()
 	{
 		return m_tok.column;
+	}
+
+	void Parser::setPosition(U32 position)
+	{
+		m_lex->setPosition(position);
 	}
 } }

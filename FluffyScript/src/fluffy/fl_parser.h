@@ -5,13 +5,15 @@
 #include "fl_ast.h"
 #include "fl_lex.h"
 
-namespace fluffy { namespace testing { class ParserTest_TestParseConstants_Test; } }
+namespace fluffy { namespace parser_objects { class ParserObjectTypeDecl; } }
 
 namespace fluffy { namespace parser {
 	using lexer::Lexer;
 	using std::unique_ptr;
+	using fluffy::parser_objects::ParserObjectTypeDecl;
 
 	using ProgramPtr			= unique_ptr<ast::Program>;
+	using TypeDeclPtr			= unique_ptr<ast::TypeDecl>;
 
 	/**
 	 * Parser
@@ -19,14 +21,13 @@ namespace fluffy { namespace parser {
 
 	class Parser
 	{
+		friend class			ParserObjectTypeDecl;
+
 	public:
 								Parser(Lexer* const lex);
 								~Parser();
 
 		ProgramPtr				parse();
-
-		void					enableTypeMode();
-		void					disableTypeMode();
 
 		void					loadSource(String source);
 		void					loadSourceFromFile(String sourceFile);
@@ -187,6 +188,10 @@ namespace fluffy { namespace parser {
 		const TokenSubType_e	getTokenSubType();
 		const U32				getTokenLine();
 		const U32				getTokenColumn();
+
+	private:
+		void					setPosition(U32 position);
+
 
 	private:
 		unique_ptr<Lexer>		m_lex;

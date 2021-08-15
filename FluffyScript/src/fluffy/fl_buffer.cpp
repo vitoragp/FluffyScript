@@ -65,6 +65,11 @@ namespace fluffy {
 		fileStream.close();
 	}
 
+	U32 DirectBuffer::getPosition()
+	{
+		return m_cursor;
+	}
+
 	const I8 DirectBuffer::readByte(U8 offset)
 	{
 		return m_memory[m_cursor + offset];
@@ -73,6 +78,11 @@ namespace fluffy {
 	void DirectBuffer::nextByte()
 	{
 		m_cursor++;
+	}
+
+	void DirectBuffer::reset(U32 position)
+	{
+		m_cursor = position;
 	}
 
 	/**
@@ -127,6 +137,17 @@ namespace fluffy {
 		// Preenche o buffer inicial
 		m_stream.read(m_memory, m_length);
 
+		// Se o conteudo do arquivo e menor que o buffer
+		// implanta no buffer o caractere nulo no final do conteudo.
+		if (m_length > m_fileSize)
+		{
+			m_memory[m_fileSize] = 0;
+		}
+	}
+
+	U32 LazyBuffer::getPosition()
+	{
+		return static_cast<U32>(m_stream.tellg()) + m_cursor;
 	}
 
 	const I8 LazyBuffer::readByte(U8 offset)
@@ -194,6 +215,33 @@ namespace fluffy {
 	void LazyBuffer::nextByte()
 	{
 		m_cursor++;
+	}
+
+	void LazyBuffer::reset(U32 position)
+	{
+		// Vai para a posicao indicada.
+		m_stream.seekg(position, std::fstream::beg);
+
+		// Recarrega o buffer.
+		if (m_stream.good())
+		{
+			const U32 totalReadedBytes = static_cast<U32>(m_stream.tellg());
+			m_stream.read(
+				m_memory,
+				totalReadedBytes + m_length > m_fileSize
+				? m_fileSize - totalReadedBytes
+				: m_length
+			);
+			size_t readedBytes = m_stream.gcount();
+			if (readedBytes < m_length) {
+				m_memory[readedBytes] = 0;
+			}
+			m_cursor = 0;
+		}
+		else
+		{
+			throw std::out_of_range("Failed to read source file");
+		}
 	}
 
 	const I8* LazyBuffer::cacheSourceFile(const I8* sourcePtr, const U32 len)

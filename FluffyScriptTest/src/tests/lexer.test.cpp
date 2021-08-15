@@ -686,7 +686,7 @@ namespace fluffy { namespace testing {
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
-			lex = std::make_unique<Lexer>(new LazyBuffer(5));
+			lex = std::make_unique<Lexer>(new LazyBuffer(2048));
 		}
 	};
 

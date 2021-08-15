@@ -123,30 +123,29 @@ namespace fluffy { namespace parser_objects {
 		static
 		TypeDeclPtr						parse(Parser* parser);
 
-		static
+	private:
+										ParserObjectTypeDecl();
+										~ParserObjectTypeDecl();
+
+		TypeDeclPtr						parseType(Parser* parser);
 		TypeDeclPtr						parseVectorType(Parser* parser);
-
-		static
 		TypeDeclPtr						parseSetType(Parser* parser);
-
-		static
 		TypeDeclPtr						parseMapType(Parser* parser);
-
-		static
 		TypeDeclPtr						parseFunctionType(Parser* parser);
-
-		static
 		TypeDeclPtr						parseVariableType(Parser* parser);
-
-		static
 		TypeDeclPtr						parseNamedType(Parser* parser);
 
-	private:
-		static
 		ArrayDeclPtr					parseArrayDecl(Parser* parser);
 
-		static
 		TypeDeclNamedPtr				parseInternalNamedType(Parser* parser);
+
+		void							enterGenericDefinition(Parser* parser);
+		void							exitGenericDefinition(Parser* parser);
+
+	private:
+		U32								m_genericLevel;
+		U32								m_line;
+		U32								m_column;
 	};
 
 	/**
