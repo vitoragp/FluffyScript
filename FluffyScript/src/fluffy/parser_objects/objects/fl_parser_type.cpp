@@ -2,6 +2,26 @@
 #include "../../fl_exceptions.h"
 #include "../fl_parser_objects.h"
 
+namespace {
+	struct TypeModeController
+	{
+		const std::function<void()> enable_callback;
+		const std::function<void()> disable_callback;
+
+		TypeModeController(std::function<void()> enable, std::function<void()> disable)
+			: enable_callback(std::move(enable))
+			, disable_callback(std::move(disable))
+		{
+			enable_callback();
+		}
+
+		~TypeModeController()
+		{
+			disable_callback();
+		}
+	};
+}
+
 namespace fluffy { namespace parser_objects {
 	/**
 	 * ParserObjectTypeDecl
@@ -9,6 +29,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parse(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		TypeDeclPtr typeDecl;
 
 		const U32 line = parser->getTokenLine();
@@ -144,6 +169,8 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseVectorType(Parser* parser)
 	{
+
+
 		auto vectorTypeDecl = std::make_unique<ast::TypeDeclVector>();
 
 		// Consome 'vector'
@@ -163,6 +190,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseSetType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto setTypeDecl = std::make_unique<ast::TypeDeclSet>();
 
 		// Consome 'set'
@@ -182,6 +214,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseMapType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto mapTypeDecl = std::make_unique<ast::TypeDeclMap>();
 
 		// Consome 'map'
@@ -207,7 +244,13 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseFunctionType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto functionTypeDecl = std::make_unique<ast::TypeDeclFunction>();
+
 		// Consome 'fn'
 		parser->expectToken([parser]() { return parser->isFn(); });
 
@@ -266,6 +309,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseVariableType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto typeDecl = ParserObjectTypeDecl::parse(parser);
 
 		if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
@@ -280,6 +328,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseNamedType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>();
 
 		// Verifica se inicia pelo escopo global.
@@ -340,6 +393,11 @@ namespace fluffy { namespace parser_objects {
 
 	ArrayDeclPtr ParserObjectTypeDecl::parseArrayDecl(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		// Consome '['
 		parser->expectToken([parser]() { return parser->isLeftSquBracket(); });
 
@@ -363,6 +421,11 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclNamedPtr ParserObjectTypeDecl::parseInternalNamedType(Parser* parser)
 	{
+		TypeModeController typeModeCtrl(
+			[parser]() { parser->enableTypeMode(); },
+			[parser]() { parser->disableTypeMode(); }
+		);
+
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>();
 
 		// Consome '::'.

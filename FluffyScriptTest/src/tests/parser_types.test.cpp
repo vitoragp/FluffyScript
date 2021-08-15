@@ -534,4 +534,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(namedTypeDecl->genericDefList[1]->typeID, ast::TypeDecl::TypeDeclID_e::I32);
 		EXPECT_EQ(namedTypeDecl->genericDefList[1]->nullable, true);
 	}
+
+	TEST_F(ParserTypesTest, TestManyProdutionsPass)
+	{
+		using namespace parser_objects;
+
+		parser->loadSourceFromFile("./files/parser/source_1.txt");
+		parser->nextToken();
+
+		int typeCount = 0;
+		while (true)
+		{
+			if (parser->isEof())
+			{
+				break;
+			}
+			ParserObjectTypeDecl::parse(parser.get());
+			typeCount++;
+		}
+
+		ASSERT_EQ(typeCount, 13);
+	}
 } }

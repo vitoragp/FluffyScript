@@ -21,7 +21,7 @@ namespace fluffy {
 			void 					loadSource(String source);
 			void					loadFromSource(String sourceFile);
 
-			void 					parse(Token_s& tok);
+			void 					parse(Token_s& tok, Bool isType = false);
 
 			void					setTabSpaces(U32 newTabSpaces);
 
@@ -32,7 +32,7 @@ namespace fluffy {
 			void					skip();
 
 			void					parseIdentifier(Token_s& tok);
-			void					parseSymbols(Token_s& tok);
+			void					parseSymbols(Token_s& tok, Bool isType);
 			void					parseNumbers(Token_s& tok);
 			void					parseChar(Token_s& tok);
 			void					parseString(Token_s& tok);

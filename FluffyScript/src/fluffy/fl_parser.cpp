@@ -13,6 +13,7 @@ namespace fluffy { namespace parser {
 
 	Parser::Parser(Lexer* const lex)
 		: m_lex(lex)
+		, m_typeModeLock(0)
 	{}
 
 	Parser::~Parser()
@@ -21,6 +22,16 @@ namespace fluffy { namespace parser {
 	ProgramPtr Parser::parse()
 	{
 		return ParserObjectProgram::parse(this);
+	}
+
+	void Parser::enableTypeMode()
+	{
+		m_typeModeLock++;
+	}
+
+	void Parser::disableTypeMode()
+	{
+		m_typeModeLock--;
 	}
 
 	void Parser::loadSource(String source)
@@ -37,7 +48,7 @@ namespace fluffy { namespace parser {
 
 	void Parser::nextToken()
 	{
-		m_lex->parse(m_tok);
+		m_lex->parse(m_tok, m_typeModeLock > 0);
 	}
 
 	void Parser::expectToken(std::function<bool()> callback)

@@ -25,6 +25,9 @@ namespace fluffy { namespace parser {
 
 		ProgramPtr				parse();
 
+		void					enableTypeMode();
+		void					disableTypeMode();
+
 		void					loadSource(String source);
 		void					loadSourceFromFile(String sourceFile);
 
@@ -188,5 +191,6 @@ namespace fluffy { namespace parser {
 	private:
 		unique_ptr<Lexer>		m_lex;
 		Token_s					m_tok;
+		I32						m_typeModeLock;
 	};
 } }

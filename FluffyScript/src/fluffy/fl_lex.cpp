@@ -154,7 +154,7 @@ namespace fluffy {
 			m_filename = sourceFile;
 		}
 
-		void Lexer::parse(Token_s& tok)
+		void Lexer::parse(Token_s& tok, Bool isType)
 		{
 			// Salta: espacos, tabulacoes, carriages, novas linhas.
 			skip();
@@ -176,7 +176,7 @@ namespace fluffy {
 					return;
 				}
 				if (issymbol(ch)) {
-					parseSymbols(tok);
+					parseSymbols(tok, isType);
 					return;
 				}
 				if (isnumber(ch)) {
@@ -325,7 +325,7 @@ namespace fluffy {
 			tok.subType = TokenSubType_e::eTST_Unknown;
 		}
 
-		void Lexer::parseSymbols(Token_s& tok)
+		void Lexer::parseSymbols(Token_s& tok, Bool isType)
 		{
 			const I8 ch = readChar();
 
@@ -338,6 +338,12 @@ namespace fluffy {
 			{
 				tok.subType = TokenSubType_e::eTST_GreaterThan;
 				tok.value.push_back(readCharAndAdv());
+
+				// Se o processamento for para tipo nao verificar outras simbolos.
+				if (isType) {
+					return;
+				}
+
 				if (readChar() == '=') {
 					tok.subType = TokenSubType_e::eTST_GreaterThanOrEqual;
 					tok.value.push_back(readCharAndAdv());
@@ -359,6 +365,12 @@ namespace fluffy {
 			{
 				tok.subType = TokenSubType_e::eTST_LessThan;
 				tok.value.push_back(readCharAndAdv());
+
+				// Se o processamento for para tipo nao verificar outras simbolos.
+				if (isType) {
+					return;
+				}
+
 				if (readChar() == '=') {
 					tok.subType = TokenSubType_e::eTST_LessThanOrEqual;
 					tok.value.push_back(readCharAndAdv());
