@@ -7,7 +7,7 @@
 	{ \
 	public: \
 		TypeDecl##type() \
-			: TypeDecl(TypeDecl::TypeDeclID_e::##type) \
+			: TypeDecl(TypeDecl::TypeDeclID_e::type) \
 		{} \
 		virtual ~TypeDecl##type() \
 		{} \
@@ -158,6 +158,8 @@ namespace fluffy {
 	public:
 		enum class TypeDeclID_e
 		{
+			Unknown,
+
 			Void,
 			Bool,
 			I8,			
@@ -225,7 +227,6 @@ namespace fluffy {
 	public:
 		TypeDeclArray()
 			: TypeDecl(TypeDecl::TypeDeclID_e::Array)
-			, length(0)
 		{}
 
 		virtual ~TypeDeclArray()
@@ -233,7 +234,6 @@ namespace fluffy {
 
 		ArrayDeclPtrList					arrayDeclList;
 		TypeDeclPtr							valueType;
-		I32									length;
 	};
 
 	/**
@@ -323,7 +323,7 @@ namespace fluffy {
 
 		String								identifier;
 		TypeDeclNamedPtr					internalIdentifier;
-		TypeDeclPtrList						genericSpecList;
+		TypeDeclPtrList						genericDefList;
 		Bool								startFromRoot;
 	};
 
@@ -377,7 +377,7 @@ namespace fluffy {
 	{
 	public:
 		UnsizedArrayDecl()
-			: ArrayDecl(ArrayDecl::ArrayType_e::Sized)
+			: ArrayDecl(ArrayDecl::ArrayType_e::Unsized)
 		{}
 
 		virtual ~UnsizedArrayDecl()

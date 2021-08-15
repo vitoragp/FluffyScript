@@ -468,6 +468,16 @@ namespace fluffy { namespace parser {
 		return LexUtils::isString(m_tok);
 	}
 
+	Bool Parser::isVector()
+	{
+		return LexUtils::isVector(m_tok);
+	}
+
+	Bool Parser::isSet()
+	{
+		return LexUtils::isSet(m_tok);
+	}
+
 	Bool Parser::isMap()
 	{
 		return LexUtils::isMap(m_tok);

@@ -100,6 +100,8 @@ namespace fluffy { namespace utils {
 									FLUFFY_IS_TOKEN_DECL(Fp32);
 									FLUFFY_IS_TOKEN_DECL(Fp64);
 									FLUFFY_IS_TOKEN_DECL(String);
+									FLUFFY_IS_TOKEN_DECL(Vector);
+									FLUFFY_IS_TOKEN_DECL(Set);
 									FLUFFY_IS_TOKEN_DECL(Map);
 									FLUFFY_IS_TOKEN_DECL(Object);
 									FLUFFY_IS_TOKEN_DECL(Fn);

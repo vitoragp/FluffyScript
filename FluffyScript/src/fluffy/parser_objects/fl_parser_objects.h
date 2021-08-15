@@ -18,6 +18,7 @@ namespace fluffy { namespace parser_objects {
 	using ClassDeclPtr						= unique_ptr<ast::ClassDecl>;
 
 	using TypeDeclPtr						= unique_ptr<ast::TypeDecl>;
+	using TypeDeclNamedPtr					= unique_ptr<ast::TypeDeclNamed>;
 
 	using ArrayDeclPtr						= unique_ptr<ast::ArrayDecl>;
 
@@ -123,20 +124,29 @@ namespace fluffy { namespace parser_objects {
 		TypeDeclPtr						parse(Parser* parser);
 
 		static
-		TypeDeclPtr						parserVectorType(Parser* parser);
+		TypeDeclPtr						parseVectorType(Parser* parser);
 
 		static
-		TypeDeclPtr						parserSetType(Parser* parser);
+		TypeDeclPtr						parseSetType(Parser* parser);
 
 		static
-		TypeDeclPtr						parserMapType(Parser* parser);
+		TypeDeclPtr						parseMapType(Parser* parser);
 
 		static
-		TypeDeclPtr						parserFunctionType(Parser* parser);
+		TypeDeclPtr						parseFunctionType(Parser* parser);
+
+		static
+		TypeDeclPtr						parseVariableType(Parser* parser);
+
+		static
+		TypeDeclPtr						parseNamedType(Parser* parser);
 
 	private:
 		static
 		ArrayDeclPtr					parseArrayDecl(Parser* parser);
+
+		static
+		TypeDeclNamedPtr				parseInternalNamedType(Parser* parser);
 	};
 
 	/**

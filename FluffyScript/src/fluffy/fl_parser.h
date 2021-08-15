@@ -103,6 +103,8 @@ namespace fluffy { namespace parser {
 		Bool					isFp32();
 		Bool					isFp64();
 		Bool					isString();
+		Bool					isVector();
+		Bool					isSet();
 		Bool					isMap();
 		Bool					isObject();
 		Bool					isFn();

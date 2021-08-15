@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <set>
-#include <filesystem>
 #include "gtest/gtest.h"
 #include "fl_lex.h"
 #include "fl_buffer.h"
@@ -105,10 +104,6 @@ namespace fluffy { namespace testing {
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
-			if (std::filesystem::exists(".\\s_cache"))
-			{
-				std::filesystem::remove(".\\s_cache");
-			}
 			lex = std::make_unique<Lexer>(new DirectBuffer());
 		}
 	};
@@ -638,7 +633,7 @@ namespace fluffy { namespace testing {
 			}
 		}
 
-		for (int i = 0; i < detail::keywordsCount; i++)
+		for (int i = 0; i < static_cast<int>(detail::keywordsCount); i++)
 		{
 			auto keyword = keywordsImplSet.find(std::get<1>(detail::keywords[i]));
 

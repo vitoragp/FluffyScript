@@ -1,5 +1,4 @@
 #include <memory>
-#include <filesystem>
 #include "gtest/gtest.h"
 
 #include "fl_parser.h"
@@ -23,11 +22,6 @@ namespace fluffy { namespace testing {
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
-			if (std::filesystem::exists(".\\s_cache"))
-			{
-				std::filesystem::remove(".\\s_cache");
-			}
-
 			parser = std::make_unique<Parser>(
 				new Lexer(
 					new DirectBuffer()

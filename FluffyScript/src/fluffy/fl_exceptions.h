@@ -120,5 +120,58 @@ namespace fluffy {
 		private:
 			String 					m_feature;
 		};
+
+		/**
+		 * unexpected_type_exception
+		 */
+
+		class unexpected_type_exception : public std::exception
+		{
+		public:
+									unexpected_type_exception(String type, U32 line, U32 column);
+									~unexpected_type_exception();
+
+			virtual const char*		what() const noexcept override;
+
+		private:
+			const U32 				m_line;
+			const U32 				m_column;
+			const String			m_type;
+		};
+
+		/**
+		 * expected_type_exception
+		 */
+
+		class expected_type_exception : public std::exception
+		{
+		public:
+									expected_type_exception(U32 line, U32 column);
+									~expected_type_exception();
+
+			virtual const char*		what() const noexcept override;
+
+		private:
+			const U32 				m_line;
+			const U32 				m_column;
+		};
+
+		/**
+		 * custom_exception
+		 */
+
+		class custom_exception : public std::exception
+		{
+		public:
+									custom_exception(String message, U32 line, U32 column);
+									~custom_exception();
+
+			virtual const char*		what() const noexcept override;
+
+		private:
+			const String			m_message;
+			const U32 				m_line;
+			const U32 				m_column;
+		};
 	}
 }
