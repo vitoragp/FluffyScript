@@ -67,6 +67,7 @@ namespace fluffy {
 		 eTST_Class,			// ok
 		 eTST_Extends,			// ok
 		 eTST_Implements,		// ok
+		 eTST_Where,			// ok
 		 eTST_Constructor,		// ok
 		 eTST_Destructor,		// ok
 		 eTST_Super,			// ok

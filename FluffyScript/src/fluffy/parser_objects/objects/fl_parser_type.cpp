@@ -9,36 +9,10 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parse(Parser* parser)
 	{
-		ParserObjectTypeDecl parserTypeDecl = ParserObjectTypeDecl();
-
-		// Processa o tipo.
-		auto typeDecl = parserTypeDecl.parseType(parser);
-
-		// Verifica se os niveis de generics estao balanceados.
-		if (parserTypeDecl.m_genericLevel != 0) {
-			throw exceptions::custom_exception("Malformed generic definition",
-				parserTypeDecl.m_line,
-				parserTypeDecl.m_column
-			);
-		}
-		return typeDecl;
-	}
-
-	ParserObjectTypeDecl::ParserObjectTypeDecl()
-		: m_genericLevel(0)
-		, m_line(0)
-		, m_column(0)
-	{}
-
-	ParserObjectTypeDecl::~ParserObjectTypeDecl()
-	{}
-
-	TypeDeclPtr ParserObjectTypeDecl::parseType(Parser* parser)
-	{
 		TypeDeclPtr typeDecl;
 
-		m_line = parser->getTokenLine();
-		m_column = parser->getTokenColumn();
+		const U32 line = parser->getTokenLine();
+		const U32 column = parser->getTokenColumn();
 
 		switch (parser->getTokenSubType())
 		{
@@ -127,8 +101,8 @@ namespace fluffy { namespace parser_objects {
 			if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
 			{
 				throw exceptions::custom_exception("'void' type can't be nullable",
-					m_line,
-					m_column
+					line,
+					column
 				);
 			}
 
@@ -168,6 +142,17 @@ namespace fluffy { namespace parser_objects {
 		return typeDecl;
 	}
 
+	TypeDeclPtr ParserObjectTypeDecl::parseOnlyNamedType(Parser* parser)
+	{
+		auto typeDecl = ParserObjectTypeDecl::parseNamedType(parser);
+
+		if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
+		{
+			throw exceptions::unexpected_type_exception("void", parser->getTokenLine(), parser->getTokenColumn());
+		}
+		return typeDecl;
+	}
+
 	TypeDeclPtr ParserObjectTypeDecl::parseVectorType(Parser* parser)
 	{
 		auto vectorTypeDecl = std::make_unique<ast::TypeDeclVector>();
@@ -176,13 +161,20 @@ namespace fluffy { namespace parser_objects {
 		parser->expectToken([parser]() { return parser->isVector(); });
 
 		// Consome '<'
-		enterGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isLessThan(); });
 
 		// Consome o tipo do valor
 		vectorTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
 
+		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
+		// serao quebrados em tokens menores.
+		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		{
+			ParserObjectTypeDecl::reinterpretToken(parser);
+		}
+
 		// Consome '>'
-		exitGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isGreaterThan(); });
 
 		return vectorTypeDecl;
 	}
@@ -195,13 +187,20 @@ namespace fluffy { namespace parser_objects {
 		parser->expectToken([parser]() { return parser->isSet(); });
 
 		// Consome '<'
-		enterGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isLessThan(); });
 
 		// Consome o tipo do valor
 		setTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
 
+		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
+		// serao quebrados em tokens menores.
+		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		{
+			ParserObjectTypeDecl::reinterpretToken(parser);
+		}
+
 		// Consome '>'
-		exitGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isGreaterThan(); });
 
 		return setTypeDecl;
 	}
@@ -214,7 +213,7 @@ namespace fluffy { namespace parser_objects {
 		parser->expectToken([parser]() { return parser->isMap(); });
 
 		// Consome '<'
-		enterGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isLessThan(); });
 
 		// Consome o tipo da chave.
 		mapTypeDecl->keyType = ParserObjectTypeDecl::parseVariableType(parser);
@@ -225,8 +224,15 @@ namespace fluffy { namespace parser_objects {
 		// Consome o tipo do valor
 		mapTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
 
+		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
+		// serao quebrados em tokens menores.
+		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		{
+			ParserObjectTypeDecl::reinterpretToken(parser);
+		}
+
 		// Consome '>'
-		exitGenericDefinition(parser);
+		parser->expectToken([parser]() { return parser->isGreaterThan(); });
 
 		return mapTypeDecl;
 	}
@@ -267,7 +273,7 @@ namespace fluffy { namespace parser_objects {
 				// Consome '->'
 				parser->expectToken([parser]() { return parser->isArrow(); });
 
-				functionTypeDecl->returnType = parseType(parser);
+				functionTypeDecl->returnType = parse(parser);
 
 				hasReturnExplicit = true;
 				break;
@@ -293,7 +299,7 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseVariableType(Parser* parser)
 	{
-		auto typeDecl = parseType(parser);
+		auto typeDecl = parse(parser);
 
 		if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
 		{
@@ -324,30 +330,37 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isLessThan())
 		{
 			// Consome '<'.
-			enterGenericDefinition(parser);
+			parser->expectToken([parser]() { return parser->isLessThan(); });
 
 			while (true)
 			{
+				// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
+				// serao quebrados em tokens menores.
+				if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				{
+					ParserObjectTypeDecl::reinterpretToken(parser);
+				}
+
 				// Verifica se terminou a definicao dos generics
-				if (parser->isGreaterThan() || parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				if (parser->isGreaterThan())
 				{
 					break;
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefList.push_back(parseType(parser));
+				namedTypeDecl->genericDefList.push_back(ParserObjectTypeDecl::parse(parser));
 
 				// Verifica se ha mais definicoes de generic
 				if (parser->isComma())
 				{
-					// Consome '<'.
+					// Consome ','.
 					parser->expectToken([parser]() { return parser->isComma(); });
 					continue;
 				}
 			}
 
 			// Consome '>'.
-			exitGenericDefinition(parser);
+			parser->expectToken([parser]() { return parser->isGreaterThan(); });
 		}
 
 		// Verifica se ha identificadores internos.
@@ -394,19 +407,26 @@ namespace fluffy { namespace parser_objects {
 		// Verefica se a definicao de generic.
 		if (parser->isLessThan())
 		{
-			// Entra na definicao de generic.
-			enterGenericDefinition(parser);
+			// Consome '<'.
+			parser->expectToken([parser]() { return parser->isLessThan(); });
 
 			while (true)
 			{
+				// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
+				// serao quebrados em tokens menores.
+				if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				{
+					ParserObjectTypeDecl::reinterpretToken(parser);
+				}
+
 				// Verifica se terminou a definicao dos generics
-				if (parser->isGreaterThan() || parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				if (parser->isGreaterThan())
 				{
 					break;
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefList.push_back(parseType(parser));
+				namedTypeDecl->genericDefList.push_back(ParserObjectTypeDecl::parse(parser));
 
 				// Verifica se ha mais definicoes de generic
 				if (parser->isComma())
@@ -417,8 +437,8 @@ namespace fluffy { namespace parser_objects {
 				}
 			}
 
-			// Sai da definicao de generic.
-			exitGenericDefinition(parser);
+			// Consome '>'.
+			parser->expectToken([parser]() { return parser->isGreaterThan(); });
 		}
 
 		// Verifica se ha identificadores internos.
@@ -429,56 +449,21 @@ namespace fluffy { namespace parser_objects {
 		return namedTypeDecl;
 	}
 
-	void ParserObjectTypeDecl::enterGenericDefinition(Parser* parser)
+	void ParserObjectTypeDecl::reinterpretToken(Parser* parser)
 	{
-		// Consome '<' e incrementa o generic level.
-		if (parser->isLessThan()) {
-			parser->expectToken([parser]() { return parser->isLessThan(); });
-			m_genericLevel++;
-			return;
+		switch (parser->getTokenSubType())
+		{
+		case TokenSubType_e::eTST_BitWiseRShift:		// >>
+		case TokenSubType_e::eTST_GreaterThanOrEqual:	// >=
+		case TokenSubType_e::eTST_BitWiseRShiftAssign:	// >>=
+			parser->reinterpretToken(
+				TokenType_e::eTT_Keyword,
+				TokenSubType_e::eTST_GreaterThan,
+				1
+			);
+			break;
+		default:
+			break;
 		}
-
-		throw exceptions::unexpected_token_exception(
-			parser->getTokenValue(),
-			parser->getTokenLine(),
-			parser->getTokenColumn()
-		);
-	}
-
-	void ParserObjectTypeDecl::exitGenericDefinition(Parser* parser)
-	{
-		// Se o nivel ja esta zerado apenas retorna.
-		if (m_genericLevel == 0) {
-			return;
-		}
-
-		// Consome '>' e decrementa o generic level.
-		if (parser->isGreaterThan()) {
-			parser->expectToken([parser]() { return parser->isGreaterThan(); });
-			m_genericLevel--;
-			return;
-		}
-
-		// Consome '>>' e decrementa o generic level.
-		if (parser->isBitWiseRightShift()) {
-			m_genericLevel -= 1;
-			parser->setPosition(parser->getTokenPosition() + 1);
-			parser->nextToken();
-			return;
-		}
-
-		// Consome '>>=' e decrementa o generic level.
-		if (parser->isBitWiseRightShiftAssign()) {
-			m_genericLevel -= 1;
-			parser->setPosition(parser->getTokenPosition() + 1);
-			parser->nextToken();
-			return;
-		}
-
-		throw exceptions::unexpected_token_exception(
-			parser->getTokenValue(),
-			parser->getTokenLine(),
-			parser->getTokenColumn()
-		);
 	}
 } }

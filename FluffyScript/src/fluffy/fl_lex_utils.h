@@ -66,6 +66,7 @@ namespace fluffy { namespace utils {
 									FLUFFY_IS_TOKEN_DECL(Class);								// class
 									FLUFFY_IS_TOKEN_DECL(Extends);								// extends
 									FLUFFY_IS_TOKEN_DECL(Implements);							// implements
+									FLUFFY_IS_TOKEN_DECL(Where);								// where
 									FLUFFY_IS_TOKEN_DECL(Constructor);							// 
 									FLUFFY_IS_TOKEN_DECL(Destructor);							// 
 									FLUFFY_IS_TOKEN_DECL(Super);								// 

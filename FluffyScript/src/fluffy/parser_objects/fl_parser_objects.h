@@ -17,7 +17,12 @@ namespace fluffy { namespace parser_objects {
 	using GeneralStmtPtr					= unique_ptr<ast::GeneralStmt>;
 	using ClassDeclPtr						= unique_ptr<ast::ClassDecl>;
 
+	using GenericDeclPtr					= unique_ptr<ast::GenericDecl>;
+	using GenericDeclPtrList				= vector<GenericDeclPtr>;
+
 	using TypeDeclPtr						= unique_ptr<ast::TypeDecl>;
+	using TypeDeclPtrList					= vector<ast::TypeDeclPtr>;
+
 	using TypeDeclNamedPtr					= unique_ptr<ast::TypeDeclNamed>;
 
 	using ArrayDeclPtr						= unique_ptr<ast::ArrayDecl>;
@@ -88,7 +93,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		StringList						parse(Parser* parser);
+		GenericDeclPtrList				parse(Parser* parser);
 	};
 
 	/**
@@ -99,7 +104,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ScopedIdentifierDeclPtr			parse(Parser* parser);
+		TypeDeclPtr						parse(Parser * parser);
 	};
 
 	/**
@@ -110,7 +115,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ScopedIdentifierDeclPtrList		parse(Parser* parser);
+		TypeDeclPtrList					parse(Parser* parser);
 	};
 
 	/**
@@ -123,29 +128,29 @@ namespace fluffy { namespace parser_objects {
 		static
 		TypeDeclPtr						parse(Parser* parser);
 
-	private:
-										ParserObjectTypeDecl();
-										~ParserObjectTypeDecl();
+		static
+		TypeDeclPtr						parseOnlyNamedType(Parser* parser);
 
-		TypeDeclPtr						parseType(Parser* parser);
+	private:
+		static 
 		TypeDeclPtr						parseVectorType(Parser* parser);
+		static 
 		TypeDeclPtr						parseSetType(Parser* parser);
+		static 
 		TypeDeclPtr						parseMapType(Parser* parser);
+		static 
 		TypeDeclPtr						parseFunctionType(Parser* parser);
+		static 
 		TypeDeclPtr						parseVariableType(Parser* parser);
+		static 
 		TypeDeclPtr						parseNamedType(Parser* parser);
-
+		static
 		ArrayDeclPtr					parseArrayDecl(Parser* parser);
-
+		static
 		TypeDeclNamedPtr				parseInternalNamedType(Parser* parser);
+		static
+		void							reinterpretToken(Parser* parser);
 
-		void							enterGenericDefinition(Parser* parser);
-		void							exitGenericDefinition(Parser* parser);
-
-	private:
-		U32								m_genericLevel;
-		U32								m_line;
-		U32								m_column;
 	};
 
 	/**

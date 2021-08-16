@@ -29,6 +29,9 @@ namespace fluffy {
 		using GeneralStmtPtr				= unique_ptr<class GeneralStmt>;
 		using GeneralStmtPtrList			= vector<GeneralStmtPtr>;
 
+		using GenericDeclPtr				= unique_ptr<class GenericDecl>;
+		using GenericDeclPtrList			= vector<GenericDeclPtr>;
+
 		using TypeDeclPtr					= unique_ptr<class TypeDecl>;
 		using TypeDeclPtrList				= vector<TypeDeclPtr>;
 
@@ -62,11 +65,10 @@ namespace fluffy {
 		class IncludeDecl
 		{
 		public:
-			IncludeDecl() : allFlag(false) {}
+			IncludeDecl() {}
 			~IncludeDecl() {}
 
 			StringList						includedItemList;
-			Bool							allFlag;
 			ScopedIdentifierDeclPtr			fromNamespace;
 		};
 
@@ -138,15 +140,32 @@ namespace fluffy {
 		Bool								isExported;
 		Bool								isAbstract;
 		String								name;
-		StringList							genericTemplateList;
-		ScopedIdentifierDeclPtr				baseClass;
-		ScopedIdentifierDeclPtrList			interfaceList;
+		GenericDeclPtrList					genericTemplateList;
+		TypeDeclPtr							baseClass;
+		TypeDeclPtrList						interfaceList;
 		// StaticVariableList				staticVariableList;
 		// VariableList						variableList;
 		// StaticFunctionList				staticFunctionList;
 		// FunctionList						functionList;
 		// ConstructorList					constructorList;
 		// DestructorDecl					destructorDecl;
+	};
+
+	/**
+	 * GenericDecl
+	 */
+
+	class GenericDecl
+	{
+	public:
+		GenericDecl()
+		{}
+
+		~GenericDecl()
+		{}
+
+		String								identifier;
+		TypeDeclPtrList						whereTypeList;
 	};
 
 	/**
@@ -399,7 +418,6 @@ namespace fluffy {
 		{}
 
 		String								identifier;
-		StringList							genericTemplateList;
 		ScopedIdentifierDeclPtr				tailIdentifier;
 		Bool								startFromRoot;
 	};

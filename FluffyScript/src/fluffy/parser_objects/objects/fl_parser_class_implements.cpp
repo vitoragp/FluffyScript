@@ -7,9 +7,9 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectClassImplementsDecl
 	 */
 
-	ScopedIdentifierDeclPtrList ParserObjectClassImplementsDecl::parse(Parser* parser)
+	TypeDeclPtrList ParserObjectClassImplementsDecl::parse(Parser* parser)
 	{
-		ScopedIdentifierDeclPtrList interfaceList;
+		TypeDeclPtrList interfaceList;
 
 		// Consome 'implements'
 		parser->expectToken([parser]() { return parser->isImplements(); });
@@ -17,7 +17,7 @@ namespace fluffy { namespace parser_objects {
 		while (true)
 		{
 			// Consome o identificador com escopo.
-			interfaceList.push_back(ParserObjectScopedIdentifier::parse(parser));
+			interfaceList.push_back(ParserObjectTypeDecl::parse(parser));
 
 			if (parser->isComma())
 			{

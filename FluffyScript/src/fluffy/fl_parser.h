@@ -23,6 +23,8 @@ namespace fluffy { namespace parser {
 		void							loadSource(String source);
 		void							loadSourceFromFile(String sourceFile);
 
+		void							reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset);
+
 		void							nextToken();
 
 		void							expectToken(std::function<bool()> callback);
@@ -64,6 +66,7 @@ namespace fluffy { namespace parser {
 		Bool							isNamespace();
 		Bool							isClass();
 		Bool							isExtends();
+		Bool							isWhere();
 		Bool							isImplements();
 		Bool							isConstructor();
 		Bool							isDestructor();
@@ -180,8 +183,6 @@ namespace fluffy { namespace parser {
 		const U32						getTokenPosition();
 		const U32						getTokenLine();
 		const U32						getTokenColumn();
-
-		void							setPosition(U32 position);
 
 	private:
 		std::unique_ptr<lexer::Lexer>	m_lex;

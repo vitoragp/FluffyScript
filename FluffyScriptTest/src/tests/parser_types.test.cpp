@@ -553,6 +553,6 @@ namespace fluffy { namespace testing {
 			typeList.push_back(ParserObjectTypeDecl::parse(parser.get()));
 			typeCount++;
 		}
-		ASSERT_EQ(typeCount, 13);
+		ASSERT_EQ(typeCount, 14);
 	}
 } }

@@ -29,8 +29,6 @@ namespace fluffy { namespace parser_objects {
 
 				// Consome '*'
 				parser->expectToken([parser]() { return parser->isMultiplication(); });
-
-				includeDecl->allFlag = true;
 				break;
 			}
 

@@ -7,10 +7,10 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectClassExtendsDecl
 	 */
 
-	ScopedIdentifierDeclPtr ParserObjectClassExtendsDecl::parse(Parser* parser)
+	TypeDeclPtr ParserObjectClassExtendsDecl::parse(Parser* parser)
 	{
 		// Consome 'extends'
 		parser->expectToken([parser]() { return parser->isExtends(); });
-		return ParserObjectScopedIdentifier::parse(parser);
+		return ParserObjectTypeDecl::parse(parser);
 	}
 } }

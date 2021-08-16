@@ -22,12 +22,6 @@ namespace fluffy { namespace parser_objects {
 		// Consome o identificador.
 		scopedIdentifierDecl->identifier = parser->expectIdentifier();
 
-		// Verifica se o identificador possui declaracao de generic
-		if (parser->isLessThan())
-		{
-			scopedIdentifierDecl->genericTemplateList = ParserObjectGenericTemplateDecl::parse(parser);
-		}
-
 		// Verifica se a mais declaracoes de escopo.
 		if (parser->isScopeResolution())
 		{
@@ -45,12 +39,6 @@ namespace fluffy { namespace parser_objects {
 
 		// Consome o identificador.
 		scopedIdentifierDecl->identifier = parser->expectIdentifier();
-
-		// Verifica se o identificador possui declaracao de generic
-		if (parser->isLessThan())
-		{
-			scopedIdentifierDecl->genericTemplateList = ParserObjectGenericTemplateDecl::parse(parser);
-		}
 
 		// Verifica se a mais declaracoes de escopo.
 		if (parser->isScopeResolution())

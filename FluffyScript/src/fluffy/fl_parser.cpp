@@ -33,6 +33,14 @@ namespace fluffy { namespace parser {
 		m_lex->loadFromSource(sourceFile);
 	}
 
+	void Parser::reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset)
+	{
+		m_tok.type = type;
+		m_tok.subType = subType;
+
+		m_lex->setPosition(m_tok.position + offset);
+	}
+
 	void Parser::nextToken()
 	{
 		m_lex->parse(m_tok);
@@ -292,6 +300,11 @@ namespace fluffy { namespace parser {
 	}
 
 	Bool Parser::isExtends()
+	{
+		return utils::LexUtils::isExtends(m_tok);
+	}
+
+	Bool Parser::isWhere()
 	{
 		return utils::LexUtils::isExtends(m_tok);
 	}
@@ -864,10 +877,5 @@ namespace fluffy { namespace parser {
 	const U32 Parser::getTokenColumn()
 	{
 		return m_tok.column;
-	}
-
-	void Parser::setPosition(U32 position)
-	{
-		m_lex->setPosition(position);
 	}
 } }

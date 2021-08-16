@@ -21,6 +21,7 @@ namespace fluffy { namespace detail {
 		std::make_tuple("class", 		TokenSubType_e::eTST_Class),		// ok
 		std::make_tuple("extends", 		TokenSubType_e::eTST_Extends),		// ok
 		std::make_tuple("implements",	TokenSubType_e::eTST_Implements),	// ok
+		std::make_tuple("where",		TokenSubType_e::eTST_Where),		// ok
 		std::make_tuple("constructor",	TokenSubType_e::eTST_Constructor),	// ok
 		std::make_tuple("destructor",	TokenSubType_e::eTST_Destructor),	// ok
 		std::make_tuple("super",		TokenSubType_e::eTST_Super),		// ok
