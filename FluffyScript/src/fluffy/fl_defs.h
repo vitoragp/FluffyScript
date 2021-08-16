@@ -36,15 +36,13 @@ namespace fluffy {
 
 	enum class TokenType_e
 	{
-		eTT_Unknown,
+		Unknown,
 
-		eTT_Identifier,
-		eTT_Keyword,
-		eTT_Symbol,
-		eTT_Constant,
-		eTT_EOF,
-
-		eTT_TypeCount
+		Identifier,
+		Keyword,
+		Symbol,
+		Constant,
+		Eof
 	};
 
 	/**
@@ -54,164 +52,162 @@ namespace fluffy {
 
 	enum class TokenSubType_e
 	{
-		eTST_Unknown,
+		Unknown,
 
 		/**
 		 * Keyword
 		 */
 
-		 eTST_Include,			// ok
-		 eTST_From,				// ok
-		 eTST_Export,			// ok
-		 eTST_Namespace,		// ok
-		 eTST_Class,			// ok
-		 eTST_Extends,			// ok
-		 eTST_Implements,		// ok
-		 eTST_Where,			// ok
-		 eTST_Constructor,		// ok
-		 eTST_Destructor,		// ok
-		 eTST_Super,			// ok
-		 eTST_Public,			// ok
-		 eTST_Protected,		// ok
-		 eTST_Private,			// ok
-		 eTST_Final,			// ok
-		 eTST_Override,			// ok
-		 eTST_Abstract,			// ok
-		 eTST_Virtual,			// ok
-		 eTST_Interface,		// ok
-		 eTST_Struct,			// ok
-		 eTST_Enum,				// ok
-		 eTST_Match,			// ok
-		 eTST_When,				// ok
-		 eTST_Trait,			// ok
-		 eTST_Static,			// ok
-		 eTST_Const,			// ok
-		 eTST_True,				// ok
-		 eTST_False,			// ok
-		 eTST_Void,				// ok
-		 eTST_Bool,				// ok
-		 eTST_I8,				// ok
-		 eTST_U8,				// ok
-		 eTST_I16,				// ok
-		 eTST_U16,				// ok
-		 eTST_I32,				// ok
-		 eTST_U32,				// ok
-		 eTST_I64,				// ok
-		 eTST_U64,				// ok
-		 eTST_Fp32,				// ok
-		 eTST_Fp64,				// ok
-		 eTST_String,			// ok
-		 eTST_Vector,			// ok
-		 eTST_Set,				// ok
-		 eTST_Map,				// ok
-		 eTST_Object,			// ok
-		 eTST_Fn,				// ok
-		 eTST_Let,				// ok
-		 eTST_This,				// ok
-		 eTST_Self,				// ok
-		 eTST_SizeOf,			// ok
-		 eTST_New,				// ok
-		 eTST_As,				// ok
-		 eTST_Is,				// ok
-		 eTST_Goto,				// ok
-		 eTST_If,				// ok
-		 eTST_Else,				// ok
-		 eTST_Continue,			// ok
-		 eTST_Break,			// ok
-		 eTST_For,				// ok
-		 eTST_Foreach,			// ok
-		 eTST_In,				// ok
-		 eTST_While,			// ok
-		 eTST_Do,				// ok
-		 eTST_Try,				// ok
-		 eTST_Catch,			// ok
-		 eTST_Finally,			// ok
-		 eTST_Panic,			// ok
-		 eTST_Return,			// ok
-		 eTST_Null,				// ok
+		 Include,			// ok
+		 From,				// ok
+		 Export,			// ok
+		 Namespace,			// ok
+		 Class,				// ok
+		 Extends,			// ok
+		 Implements,		// ok
+		 Where,				// ok
+		 Constructor,		// ok
+		 Destructor,		// ok
+		 Super,				// ok
+		 Public,			// ok
+		 Protected,			// ok
+		 Private,			// ok
+		 Final,				// ok
+		 Override,			// ok
+		 Abstract,			// ok
+		 Virtual,			// ok
+		 Interface,			// ok
+		 Struct,			// ok
+		 Enum,				// ok
+		 Match,				// ok
+		 When,				// ok
+		 Trait,				// ok
+		 Static,			// ok
+		 Const,				// ok
+		 True,				// ok
+		 False,				// ok
+		 Void,				// ok
+		 Bool,				// ok
+		 I8,				// ok
+		 U8,				// ok
+		 I16,				// ok
+		 U16,				// ok
+		 I32,				// ok
+		 U32,				// ok
+		 I64,				// ok
+		 U64,				// ok
+		 Fp32,				// ok
+		 Fp64,				// ok
+		 String,			// ok
+		 Vector,			// ok
+		 Set,				// ok
+		 Map,				// ok
+		 Object,			// ok
+		 Fn,				// ok
+		 Let,				// ok
+		 This,				// ok
+		 Self,				// ok
+		 SizeOf,			// ok
+		 New,				// ok
+		 As,				// ok
+		 Is,				// ok
+		 Goto,				// ok
+		 If,				// ok
+		 Else,				// ok
+		 Continue,			// ok
+		 Break,				// ok
+		 For,				// ok
+		 Foreach,			// ok
+		 In,				// ok
+		 While,				// ok
+		 Do,				// ok
+		 Try,				// ok
+		 Catch,				// ok
+		 Finally,			// ok
+		 Panic,				// ok
+		 Return,			// ok
+		 Null,				// ok
 
 		 /**
 		  * Symbols
 		  */
 
-		  eTST_ScopeResolution, 		// ::
-		  eTST_Increment,				// ++
-		  eTST_Decrement,				// --
-		  eTST_Arrow,					// ->
+		  ScopeResolution, 			// ::
+		  Increment,				// ++
+		  Decrement,				// --
+		  Arrow,					// ->
 
-		  eTST_LParBracket,				// (
-		  eTST_RParBracket,				// )
-		  eTST_LSquBracket,				// [
-		  eTST_RSquBracket,				// ]
-		  eTST_LBracket,				// {
-		  eTST_RBracket,				// }
+		  LParBracket,				// (
+		  RParBracket,				// )
+		  LSquBracket,				// [
+		  RSquBracket,				// ]
+		  LBracket,					// {
+		  RBracket,					// }
 
-		  eTST_Plus,					// +
-		  eTST_Minus,					// -
-		  eTST_Division,				// /
-		  eTST_Multiplication,			// *
-		  eTST_Modulo,					// %
+		  Plus,						// +
+		  Minus,						// -
+		  Division,					// /
+		  Multiplication,			// *
+		  Modulo,					// %
 
-		  eTST_Assign,					// =
+		  Assign,					// =
 
-		  eTST_PlusAssign,				// +=
-		  eTST_MinusAssign,				// -=
-		  eTST_DivAssign,				// /=
-		  eTST_MultAssign,				// *=
-		  eTST_BitWiseAndAssign,		// &=
-		  eTST_BitWiseOrAssign,			// |=
-		  eTST_BitWiseXorAssign,		// ^=
-		  eTST_ModAssign,				// %=
-		  eTST_BitWiseLShiftAssign,		// <<=
-		  eTST_BitWiseRShiftAssign,		// >>=
+		  PlusAssign,				// +=
+		  MinusAssign,				// -=
+		  DivAssign,				// /=
+		  MultAssign,				// *=
+		  BitWiseAndAssign,			// &=
+		  BitWiseOrAssign,			// |=
+		  BitWiseXorAssign,			// ^=
+		  ModAssign,				// %=
+		  BitWiseLShiftAssign,		// <<=
+		  BitWiseRShiftAssign,		// >>=
 
-		  eTST_GreaterThan,				// >
-		  eTST_LessThan,				// <
-		  eTST_GreaterThanOrEqual,		// >=
-		  eTST_LessThanOrEqual,			// <=
-		  eTST_Equal,					// ==
-		  eTST_NotEqual,				// !=
+		  GreaterThan,				// >
+		  LessThan,					// <
+		  GreaterThanOrEqual,		// >=
+		  LessThanOrEqual,			// <=
+		  Equal,					// ==
+		  NotEqual,					// !=
 
-		  eTST_BitWiseLShift,			// <<
-		  eTST_BitWiseRShift,			// >>
-		  eTST_BitWiseAnd,				// &
-		  eTST_BitWiseOr,				// |
-		  eTST_BitWiseXor,				// ^
-		  eTST_BitWiseNot,				// ~
+		  BitWiseLShift,			// <<
+		  BitWiseRShift,			// >>
+		  BitWiseAnd,				// &
+		  BitWiseOr,				// |
+		  BitWiseXor,				// ^
+		  BitWiseNot,				// ~
 
-		  eTST_Colon,					// :
-		  eTST_SemiColon,				// ;
+		  Colon,					// :
+		  SemiColon,				// ;
 
-		  eTST_LogicalAnd,				// &&
-		  eTST_LogicalOr,				// ||
-		  eTST_LogicalNot,				// !
+		  LogicalAnd,				// &&
+		  LogicalOr,				// ||
+		  LogicalNot,				// !
 
-		  eTST_Interrogation,			// ?
+		  Interrogation,			// ?
 
-		  eTST_Comma,					// ,
-		  eTST_Dot,						// .
+		  Comma,					// ,
+		  Dot,						// .
 
 		  /**
 		   * Constant
 		   */
 
-		   eTST_ConstantI8,
-		   eTST_ConstantU8,
-		   eTST_ConstantI16,
-		   eTST_ConstantU16,
-		   eTST_ConstantI32,
-		   eTST_ConstantU32,
-		   eTST_ConstantI64,
-		   eTST_ConstantU64,
-		   eTST_ConstantFp32,
-		   eTST_ConstantFp64,
-		   eTST_ConstantBin,
-		   eTST_ConstantHex,
+		   ConstantI8,
+		   ConstantU8,
+		   ConstantI16,
+		   ConstantU16,
+		   ConstantI32,
+		   ConstantU32,
+		   ConstantI64,
+		   ConstantU64,
+		   ConstantFp32,
+		   ConstantFp64,
+		   ConstantBin,
+		   ConstantHex,
 
-		   eTST_ConstantChar,
-		   eTST_ConstantString,
-
-		   eTST_SubTypeCount
+		   ConstantChar,
+		   ConstantString
 	};
 
 	/**

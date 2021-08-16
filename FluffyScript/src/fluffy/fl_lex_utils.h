@@ -4,13 +4,13 @@
 #define FLUFFY_IS_TOKEN_DECL(tokId) \
 	static \
 	Bool is##tokId(const Token_s& tok) { \
-		return tok.subType == TokenSubType_e::eTST_##tokId; \
+		return tok.subType == TokenSubType_e::tokId; \
 	}
 
 #define FLUFFY_IS_TOKEN_DECL_2(name, tokId) \
 	static \
 	Bool is##name(const Token_s& tok) { \
-		return tok.subType == TokenSubType_e::eTST_##tokId; \
+		return tok.subType == TokenSubType_e::tokId; \
 	}
 
 namespace fluffy { namespace utils {

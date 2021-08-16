@@ -16,68 +16,68 @@ namespace fluffy { namespace parser_objects {
 
 		switch (parser->getTokenSubType())
 		{
-		case TokenSubType_e::eTST_Void:
+		case TokenSubType_e::Void:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclVoid>();
 			break;
-		case TokenSubType_e::eTST_I8:
+		case TokenSubType_e::I8:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI8>();
 			break;
-		case TokenSubType_e::eTST_U8:
+		case TokenSubType_e::U8:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU8>();
 			break;
-		case TokenSubType_e::eTST_I16:
+		case TokenSubType_e::I16:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI16>();
 			break;
-		case TokenSubType_e::eTST_U16:
+		case TokenSubType_e::U16:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU16>();
 			break;
-		case TokenSubType_e::eTST_I32:
+		case TokenSubType_e::I32:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI32>();
 			break;
-		case TokenSubType_e::eTST_U32:
+		case TokenSubType_e::U32:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU32>();
 			break;
-		case TokenSubType_e::eTST_I64:
+		case TokenSubType_e::I64:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI64>();
 			break;
-		case TokenSubType_e::eTST_U64:
+		case TokenSubType_e::U64:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU64>();
 			break;
-		case TokenSubType_e::eTST_Fp32:
+		case TokenSubType_e::Fp32:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp32>();
 			break;
-		case TokenSubType_e::eTST_Fp64:
+		case TokenSubType_e::Fp64:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp64>();
 			break;
-		case TokenSubType_e::eTST_String:
+		case TokenSubType_e::String:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclString>();
 			break;
-		case TokenSubType_e::eTST_Object:
+		case TokenSubType_e::Object:
 			parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclObject>();
 			break;
-		case TokenSubType_e::eTST_Vector:
+		case TokenSubType_e::Vector:
 			typeDecl = ParserObjectTypeDecl::parseVectorType(parser);
 			break;
-		case TokenSubType_e::eTST_Set:
+		case TokenSubType_e::Set:
 			typeDecl = ParserObjectTypeDecl::parseSetType(parser);
 			break;
-		case TokenSubType_e::eTST_Map:
+		case TokenSubType_e::Map:
 			typeDecl = ParserObjectTypeDecl::parseMapType(parser);
 			break;
-		case TokenSubType_e::eTST_Fn:
+		case TokenSubType_e::Fn:
 			typeDecl = ParserObjectTypeDecl::parseFunctionType(parser);
 			break;
 		default:
@@ -98,7 +98,7 @@ namespace fluffy { namespace parser_objects {
 		// Verifica se o tipo e anulavel.
 		if (parser->isInterrogation())
 		{
-			if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
+			if (typeDecl->typeID == ast::TypeDeclID_e::Void)
 			{
 				throw exceptions::custom_exception("'void' type can't be nullable",
 					line,
@@ -146,7 +146,7 @@ namespace fluffy { namespace parser_objects {
 	{
 		auto typeDecl = ParserObjectTypeDecl::parseNamedType(parser);
 
-		if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
+		if (typeDecl->typeID == ast::TypeDeclID_e::Void)
 		{
 			throw exceptions::unexpected_type_exception("void", parser->getTokenLine(), parser->getTokenColumn());
 		}
@@ -301,7 +301,7 @@ namespace fluffy { namespace parser_objects {
 	{
 		auto typeDecl = parse(parser);
 
-		if (typeDecl->typeID == ast::TypeDecl::TypeDeclID_e::Void)
+		if (typeDecl->typeID == ast::TypeDeclID_e::Void)
 		{
 			throw exceptions::unexpected_type_exception("void",
 				parser->getTokenLine(),
@@ -348,7 +348,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefList.push_back(ParserObjectTypeDecl::parse(parser));
+				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parse(parser));
 
 				// Verifica se ha mais definicoes de generic
 				if (parser->isComma())
@@ -426,7 +426,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefList.push_back(ParserObjectTypeDecl::parse(parser));
+				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parse(parser));
 
 				// Verifica se ha mais definicoes de generic
 				if (parser->isComma())
@@ -453,12 +453,12 @@ namespace fluffy { namespace parser_objects {
 	{
 		switch (parser->getTokenSubType())
 		{
-		case TokenSubType_e::eTST_BitWiseRShift:		// >>
-		case TokenSubType_e::eTST_GreaterThanOrEqual:	// >=
-		case TokenSubType_e::eTST_BitWiseRShiftAssign:	// >>=
+		case TokenSubType_e::BitWiseRShift:		// >>
+		case TokenSubType_e::GreaterThanOrEqual:	// >=
+		case TokenSubType_e::BitWiseRShiftAssign:	// >>=
 			parser->reinterpretToken(
-				TokenType_e::eTT_Keyword,
-				TokenSubType_e::eTST_GreaterThan,
+				TokenType_e::Keyword,
+				TokenSubType_e::GreaterThan,
 				1
 			);
 			break;

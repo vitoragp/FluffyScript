@@ -163,13 +163,13 @@ namespace fluffy {
 		class custom_exception : public std::exception
 		{
 		public:
-									custom_exception(String message, U32 line, U32 column);
+									custom_exception(String message, U32 line, U32 column, ...);
 									~custom_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
-			const String			m_message;
+			String					m_message;
 			const U32 				m_line;
 			const U32 				m_column;
 		};

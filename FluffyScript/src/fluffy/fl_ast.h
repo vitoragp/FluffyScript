@@ -7,7 +7,7 @@
 	{ \
 	public: \
 		TypeDecl##type() \
-			: TypeDecl(TypeDecl::TypeDeclID_e::type) \
+			: TypeDecl(TypeDeclID_e::type) \
 		{} \
 		virtual ~TypeDecl##type() \
 		{} \
@@ -18,31 +18,109 @@ namespace fluffy {
 		using std::vector;
 		using std::unique_ptr;
 
-		using StringList					= vector<String>;
+		using StringList						= vector<String>;
 
-		using IncludeDeclPtr				= unique_ptr<class IncludeDecl>;
-		using IncludeDeclPtrList			= vector<IncludeDeclPtr>;
+		using IncludeDeclPtr					= unique_ptr<class IncludeDecl>;
+		using IncludeDeclPtrList				= vector<IncludeDeclPtr>;
 
-		using NamespaceDeclPtr				= unique_ptr<class NamespaceDecl>;
-		using NamespaceDeclPtrList			= vector<NamespaceDeclPtr>;
+		using NamespaceDeclPtr					= unique_ptr<class NamespaceDecl>;
+		using NamespaceDeclPtrList				= vector<NamespaceDeclPtr>;
 
-		using GeneralStmtPtr				= unique_ptr<class GeneralStmt>;
-		using GeneralStmtPtrList			= vector<GeneralStmtPtr>;
+		using GeneralStmtPtr					= unique_ptr<class GeneralStmt>;
+		using GeneralStmtPtrList				= vector<GeneralStmtPtr>;
 
-		using GenericDeclPtr				= unique_ptr<class GenericDecl>;
-		using GenericDeclPtrList			= vector<GenericDeclPtr>;
+		using ClassFunctionDeclPtr				= unique_ptr<class ClassFunctionDecl>;
+		using ClassFunctionDeclPtrList			= vector<ClassFunctionDeclPtr>;
 
-		using TypeDeclPtr					= unique_ptr<class TypeDecl>;
-		using TypeDeclPtrList				= vector<TypeDeclPtr>;
+		using ClassFunctionParameterDeclPtr		= unique_ptr<class ClassFunctionParameterDecl>;
+		using ClassFunctionParameterDeclPtrList = vector<ClassFunctionParameterDeclPtr>;		
 
-		using TypeDeclNamedPtr				= unique_ptr<class TypeDeclNamed>;
+		using GenericDeclPtr					= unique_ptr<class GenericDecl>;
+		using GenericDeclPtrList				= vector<GenericDeclPtr>;
 
-		using ArrayDeclPtr					= unique_ptr<class ArrayDecl>;
-		using ArrayDeclPtrList				= vector<ArrayDeclPtr>;
-		
+		using TypeDeclPtr						= unique_ptr<class TypeDecl>;
+		using TypeDeclPtrList					= vector<TypeDeclPtr>;
 
-		using ScopedIdentifierDeclPtr		= unique_ptr<class ScopedIdentifierDecl>;
-		using ScopedIdentifierDeclPtrList	= vector<ScopedIdentifierDeclPtr>;
+		using TypeDeclNamedPtr					= unique_ptr<class TypeDeclNamed>;
+
+		using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
+		using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
+
+		using ScopedIdentifierDeclPtr			= unique_ptr<class ScopedIdentifierDecl>;
+		using ScopedIdentifierDeclPtrList		= vector<ScopedIdentifierDeclPtr>;
+
+		/**
+		 * Enumerations
+		 */
+
+		enum class GeneralStmtType_e
+		{
+			Unknown,
+			ClassDecl,
+			InterfaceDecl,
+			StructDecl,
+			EnumDecl,
+			TraitDecl,
+			VariableDecl,
+			FunctionDecl
+		};
+
+		enum class ClassMemberType_e
+		{
+			Unknown,
+
+			Constructor,
+			Destructor,
+
+			StaticFunction,
+			Function,
+
+			StaticVariable,
+			Variable,
+
+			StaticConst,
+			Const
+		};
+
+		enum class ClassMemberAccessModifier_e
+		{
+			Unknown,
+
+			Public,
+			Protected,
+			Private
+		};
+
+
+		enum class TypeDeclID_e
+		{
+			Unknown,
+
+			Void,
+			Bool,
+			I8,
+			U8,
+			I16,
+			U16,
+			I32,
+			U32,
+			I64,
+			U64,
+			Fp32,
+			Fp64,
+			String,
+			Object,
+
+			Array,
+
+			Vector,
+			Set,
+			Map,
+
+			Function,
+
+			Named			// Classes, interfaces, trait, enum...
+		};
 
 		/**
 		 * Program
@@ -93,32 +171,16 @@ namespace fluffy {
 
 		class GeneralStmt
 		{
-		public:
-			enum class GeneralStmtType
-			{
-				eGST_Unknown,
-				eGST_ClassDecl,
-				eGST_InterfaceDecl,
-				eGST_StructDecl,
-				eGST_EnumDecl,
-				eGST_TraitDecl,
-				eGST_VariableDecl,
-				eGST_FunctionDecl
-			};
-
 		protected:
-			GeneralStmt(GeneralStmtType const type)
-				: m_type(type)
+			GeneralStmt(GeneralStmtType_e type)
+				: type(type)
 			{}
 
 		public:
 			virtual	~GeneralStmt()
 			{}
 
-		GeneralStmtType						getType();
-
-	private:
-		GeneralStmtType						m_type;
+			GeneralStmtType_e				type;
 	};
 
 	/**
@@ -129,7 +191,7 @@ namespace fluffy {
 	{
 	public:
 		ClassDecl()
-			: GeneralStmt(GeneralStmt::GeneralStmtType::eGST_ClassDecl)
+			: GeneralStmt(GeneralStmtType_e::ClassDecl)
 			, isExported(false)
 			, isAbstract(false)
 		{}
@@ -143,12 +205,86 @@ namespace fluffy {
 		GenericDeclPtrList					genericTemplateList;
 		TypeDeclPtr							baseClass;
 		TypeDeclPtrList						interfaceList;
+		ClassFunctionDeclPtrList			staticFunctionList;
+		ClassFunctionDeclPtrList			functionList;
 		// StaticVariableList				staticVariableList;
 		// VariableList						variableList;
-		// StaticFunctionList				staticFunctionList;
-		// FunctionList						functionList;
 		// ConstructorList					constructorList;
 		// DestructorDecl					destructorDecl;
+	};
+
+	/**
+	 * ClassMemberDecl
+	 */
+
+	class ClassMemberDecl
+	{
+	protected:
+		ClassMemberDecl(ClassMemberType_e type)
+			: type(type)
+			, accessModifier(ClassMemberAccessModifier_e::Unknown)
+		{}
+
+	public:
+		virtual ~ClassMemberDecl()
+		{}
+
+		const ClassMemberType_e				type;
+
+		ClassMemberAccessModifier_e			accessModifier;
+	};
+
+	/**
+	 * ClassFunctionDecl
+	 */
+
+	class ClassFunctionDecl : public ClassMemberDecl
+	{
+	public:
+		ClassFunctionDecl()
+			: ClassMemberDecl(ClassMemberType_e::Function)
+			, isStatic(false)
+			, isVirtual(false)
+			, isAbstract(false)
+			, isOverride(false)
+			, isFinal(false)
+		{}
+
+		virtual ~ClassFunctionDecl()
+		{}
+
+		String								identifier;
+
+		Bool								isStatic;
+		Bool								isVirtual;
+		Bool								isAbstract;
+		Bool								isOverride;
+		Bool								isFinal;
+
+		GenericDeclPtrList					genericTemplateList;
+
+		ClassFunctionParameterDeclPtrList	parameterList;
+		TypeDeclPtr							returnType;
+
+		// BlockDeclPtr						blockDecl;
+	};
+
+	/**
+	 * ClassFunctionParameterDecl
+	 */
+
+	class ClassFunctionParameterDecl
+	{
+	public:
+		ClassFunctionParameterDecl()
+		{}
+
+		~ClassFunctionParameterDecl()
+		{}
+
+		TypeDeclPtr							typeDecl;
+		String								identifier;
+		// ExpressionPtr					defaultValueDecl;
 	};
 
 	/**
@@ -174,37 +310,6 @@ namespace fluffy {
 
 	class TypeDecl
 	{
-	public:
-		enum class TypeDeclID_e
-		{
-			Unknown,
-
-			Void,
-			Bool,
-			I8,			
-			U8,
-			I16,
-			U16,
-			I32,
-			U32,
-			I64,
-			U64,
-			Fp32,
-			Fp64,
-			String,
-			Object,
-
-			Array,
-
-			Vector,
-			Set,
-			Map,
-
-			Function,
-
-			Named			// Classes, interfaces, trait, enum...
-		};
-
 	protected:
 		TypeDecl(TypeDeclID_e typeID)
 			: typeID(typeID)
@@ -245,7 +350,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclArray()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Array)
+			: TypeDecl(TypeDeclID_e::Array)
 		{}
 
 		virtual ~TypeDeclArray()
@@ -263,7 +368,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclVector()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Vector)
+			: TypeDecl(TypeDeclID_e::Vector)
 		{}
 
 		virtual ~TypeDeclVector()
@@ -280,7 +385,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclSet()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Set)
+			: TypeDecl(TypeDeclID_e::Set)
 		{}
 
 		virtual ~TypeDeclSet()
@@ -297,7 +402,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclMap()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Map)
+			: TypeDecl(TypeDeclID_e::Map)
 		{}
 
 		virtual ~TypeDeclMap()
@@ -315,7 +420,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclFunction()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Function)
+			: TypeDecl(TypeDeclID_e::Function)
 		{}
 
 		virtual ~TypeDeclFunction()
@@ -333,7 +438,7 @@ namespace fluffy {
 	{
 	public:
 		TypeDeclNamed()
-			: TypeDecl(TypeDecl::TypeDeclID_e::Named)
+			: TypeDecl(TypeDeclID_e::Named)
 			, startFromRoot(false)
 		{}
 
@@ -342,7 +447,7 @@ namespace fluffy {
 
 		String								identifier;
 		TypeDeclNamedPtr					internalIdentifier;
-		TypeDeclPtrList						genericDefList;
+		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
 	};
 

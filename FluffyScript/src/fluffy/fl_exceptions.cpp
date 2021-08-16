@@ -1,3 +1,4 @@
+#include <cstdarg>
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace exceptions {
@@ -186,18 +187,27 @@ namespace fluffy { namespace exceptions {
 	 * custom_exception
 	 */
 
-	custom_exception::custom_exception(String message, U32 line, U32 column)
-		: m_message(message)
+	custom_exception::custom_exception(String message, U32 line, U32 column, ...)
+		: m_message()
 		, m_line(line)
 		, m_column(column)
-	{}
+	{
+		static char buffer[512];
+		va_list list;
+
+		va_start(list, column);
+		vsprintf_s(buffer, 512, message.c_str(), list);
+		va_end(list);
+
+		m_message = buffer;
+	}
 
 	custom_exception::~custom_exception()
 	{}
 
 	const char* custom_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[600];
 		sprintf_s(buffer, "%s at: line %d, column %d", m_message.c_str(), m_line, m_column);
 		return buffer;
 	}

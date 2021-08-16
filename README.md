@@ -41,7 +41,7 @@ NamespaceDecl(OK)
 	;	"namespace" Identifier "{" GlobalDeclList? "}"
 	;
 	
-GlobalDeclList
+GlobalDeclList(OK)
 	:	GlobalDecl GlobalDeclList?
 	|	GlobalDecl
 	;
@@ -56,7 +56,7 @@ GlobalDecl
 	|	ExportDecl? FunctionDecl
 	;
 	
-ExportDecl
+ExportDecl(OK)
 	:	"export"
 	;
 	
@@ -64,19 +64,19 @@ ExportDecl
 // Class
 ///////////////////////////////////////////////////////////////////////////////
 	
-ClassDecl
+ClassDecl(OK)
 	:	"class" Identifier GenericDecl? ExtendsDecl? ImplementsDecl? ClassBlock
 	;
 	
-ExtendsDecl
+ExtendsDecl(OK)
 	:	"extends" NamedTypeDecl
 	;
 	
-ImplementsDecl
+ImplementsDecl)OK_
 	:	"implements" ImplementItemDeclList
 	;
 	
-ImplementItemDeclList
+ImplementItemDeclList(OK)
 	:	NamedTypeDecl "," ImplementItemDeclList?
 	|	NamedTypeDecl
 	;

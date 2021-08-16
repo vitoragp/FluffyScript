@@ -52,7 +52,18 @@ namespace fluffy { namespace parser_objects {
 
 				while (true)
 				{
-					genericDecl->whereTypeList.push_back(ParserObjectTypeDecl::parse(parser));
+					auto whereTypeDecl = ParserObjectTypeDecl::parse(parser);
+
+					if (whereTypeDecl->nullable)
+					{
+						throw exceptions::custom_exception(
+							"Where types can't be nullable",
+							line,
+							column
+						);
+					}
+
+					genericDecl->whereTypeList.push_back(std::move(whereTypeDecl));
 
 					// Verifica se a outras declaracoes.
 					if (parser->isBitWiseOr())
@@ -83,12 +94,12 @@ namespace fluffy { namespace parser_objects {
 			{
 				switch (parser->getTokenSubType())
 				{
-				case TokenSubType_e::eTST_BitWiseRShift:		// >>
-				case TokenSubType_e::eTST_GreaterThanOrEqual:	// >=
-				case TokenSubType_e::eTST_BitWiseRShiftAssign:	// >>=
+				case TokenSubType_e::BitWiseRShift:		// >>
+				case TokenSubType_e::GreaterThanOrEqual:	// >=
+				case TokenSubType_e::BitWiseRShiftAssign:	// >>=
 					parser->reinterpretToken(
-						TokenType_e::eTT_Keyword,
-						TokenSubType_e::eTST_GreaterThan,
+						TokenType_e::Keyword,
+						TokenSubType_e::GreaterThan,
 						1
 					);
 					break;

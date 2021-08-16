@@ -58,38 +58,38 @@ namespace fluffy { namespace testing {
 		auto typeObjectDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeVoidDecl->nullable, false);
-		EXPECT_EQ(typeVoidDecl->typeID, ast::TypeDecl::TypeDeclID_e::Void);
+		EXPECT_EQ(typeVoidDecl->typeID, ast::TypeDeclID_e::Void);
 
 		EXPECT_EQ(typeI8Decl->nullable, false);
-		EXPECT_EQ(typeI8Decl->typeID, ast::TypeDecl::TypeDeclID_e::I8);
+		EXPECT_EQ(typeI8Decl->typeID, ast::TypeDeclID_e::I8);
 		EXPECT_EQ(typeU8Decl->nullable, false);
-		EXPECT_EQ(typeU8Decl->typeID, ast::TypeDecl::TypeDeclID_e::U8);
+		EXPECT_EQ(typeU8Decl->typeID, ast::TypeDeclID_e::U8);
 
 		EXPECT_EQ(typeI16Decl->nullable, false);
-		EXPECT_EQ(typeI16Decl->typeID, ast::TypeDecl::TypeDeclID_e::I16);
+		EXPECT_EQ(typeI16Decl->typeID, ast::TypeDeclID_e::I16);
 		EXPECT_EQ(typeU16Decl->nullable, false);
-		EXPECT_EQ(typeU16Decl->typeID, ast::TypeDecl::TypeDeclID_e::U16);
+		EXPECT_EQ(typeU16Decl->typeID, ast::TypeDeclID_e::U16);
 
 		EXPECT_EQ(typeI32Decl->nullable, false);
-		EXPECT_EQ(typeI32Decl->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(typeI32Decl->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(typeU32Decl->nullable, false);
-		EXPECT_EQ(typeU32Decl->typeID, ast::TypeDecl::TypeDeclID_e::U32);
+		EXPECT_EQ(typeU32Decl->typeID, ast::TypeDeclID_e::U32);
 
 		EXPECT_EQ(typeI64Decl->nullable, false);
-		EXPECT_EQ(typeI64Decl->typeID, ast::TypeDecl::TypeDeclID_e::I64);
+		EXPECT_EQ(typeI64Decl->typeID, ast::TypeDeclID_e::I64);
 		EXPECT_EQ(typeU64Decl->nullable, false);
-		EXPECT_EQ(typeU64Decl->typeID, ast::TypeDecl::TypeDeclID_e::U64);
+		EXPECT_EQ(typeU64Decl->typeID, ast::TypeDeclID_e::U64);
 
 		EXPECT_EQ(typeFp32Decl->nullable, false);
-		EXPECT_EQ(typeFp32Decl->typeID, ast::TypeDecl::TypeDeclID_e::Fp32);
+		EXPECT_EQ(typeFp32Decl->typeID, ast::TypeDeclID_e::Fp32);
 		EXPECT_EQ(typeFp64Decl->nullable, false);
-		EXPECT_EQ(typeFp64Decl->typeID, ast::TypeDecl::TypeDeclID_e::Fp64);
+		EXPECT_EQ(typeFp64Decl->typeID, ast::TypeDeclID_e::Fp64);
 
 		EXPECT_EQ(typeStringDecl->nullable, false);
-		EXPECT_EQ(typeStringDecl->typeID, ast::TypeDecl::TypeDeclID_e::String);
+		EXPECT_EQ(typeStringDecl->typeID, ast::TypeDeclID_e::String);
 
 		EXPECT_EQ(typeObjectDecl->nullable, false);
-		EXPECT_EQ(typeObjectDecl->typeID, ast::TypeDecl::TypeDeclID_e::Object);
+		EXPECT_EQ(typeObjectDecl->typeID, ast::TypeDeclID_e::Object);
 	}
 
 	TEST_F(ParserTypesTest, TestNullableVoidType)
@@ -120,7 +120,7 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::I32);
 	}
 
 	TEST_F(ParserTypesTest, TestPrimitiveUnsizedArrayType)
@@ -133,14 +133,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, false);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 1);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 	}
@@ -155,14 +155,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, true);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 1);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 	}
@@ -177,14 +177,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, false);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 1);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 	}
@@ -199,14 +199,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, true);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 1);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 	}
@@ -221,14 +221,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, false);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 2);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[1]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
@@ -244,14 +244,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, false);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 1);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Sized);
 		
@@ -272,14 +272,14 @@ namespace fluffy { namespace testing {
 		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
-		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeI32NullableDecl->typeID, ast::TypeDeclID_e::Array);
 
 		ast::TypeDeclArray* arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeI32NullableDecl.get());
 
 		ASSERT_TRUE(arrayTypeDecl != nullptr);
 
 		EXPECT_EQ(arrayTypeDecl->valueType->nullable, false);
-		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(arrayTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList.size(), 2);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[0]->arrayType, ast::ArrayDecl::ArrayType_e::Unsized);
 		EXPECT_EQ(arrayTypeDecl->arrayDeclList[1]->arrayType, ast::ArrayDecl::ArrayType_e::Sized);
@@ -300,14 +300,14 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Vector);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Vector);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto vectorTypeDecl = reinterpret_cast<ast::TypeDeclVector*>(typeDecl.get());
 
 		ASSERT_TRUE(vectorTypeDecl != nullptr);
 
-		EXPECT_EQ(vectorTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(vectorTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(vectorTypeDecl->valueType->nullable, false);
 	}
 
@@ -320,14 +320,14 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Set);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Set);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto setTypeDecl = reinterpret_cast<ast::TypeDeclSet*>(typeDecl.get());
 
 		ASSERT_TRUE(setTypeDecl != nullptr);
 
-		EXPECT_EQ(setTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(setTypeDecl->valueType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(setTypeDecl->valueType->nullable, false);
 	}
 
@@ -340,17 +340,17 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Map);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Map);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto mapTypeDecl = reinterpret_cast<ast::TypeDeclMap*>(typeDecl.get());
 
 		ASSERT_TRUE(mapTypeDecl != nullptr);
 
-		EXPECT_EQ(mapTypeDecl->keyType->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(mapTypeDecl->keyType->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(mapTypeDecl->keyType->nullable, false);
 
-		EXPECT_EQ(mapTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::String);
+		EXPECT_EQ(mapTypeDecl->valueType->typeID, ast::TypeDeclID_e::String);
 		EXPECT_EQ(mapTypeDecl->valueType->nullable, false);
 	}
 
@@ -363,31 +363,31 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Function);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Function);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto functionTypeDecl = reinterpret_cast<ast::TypeDeclFunction*>(typeDecl.get());
 
 		ASSERT_TRUE(functionTypeDecl != nullptr);
 
-		EXPECT_EQ(functionTypeDecl->returnType->typeID, ast::TypeDecl::TypeDeclID_e::Fp32);
+		EXPECT_EQ(functionTypeDecl->returnType->typeID, ast::TypeDeclID_e::Fp32);
 		EXPECT_EQ(functionTypeDecl->returnType->nullable, false);
 
 		EXPECT_EQ(functionTypeDecl->parameterTypeList.size(), 3);
-		EXPECT_EQ(functionTypeDecl->parameterTypeList[0]->typeID, ast::TypeDecl::TypeDeclID_e::I32);
+		EXPECT_EQ(functionTypeDecl->parameterTypeList[0]->typeID, ast::TypeDeclID_e::I32);
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[0]->nullable, false);
 
-		EXPECT_EQ(functionTypeDecl->parameterTypeList[1]->typeID, ast::TypeDecl::TypeDeclID_e::String);
+		EXPECT_EQ(functionTypeDecl->parameterTypeList[1]->typeID, ast::TypeDeclID_e::String);
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[1]->nullable, false);
 
-		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->typeID, ast::TypeDecl::TypeDeclID_e::Vector);
+		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->typeID, ast::TypeDeclID_e::Vector);
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->nullable, true);
 
 		auto vectorTypeDecl = reinterpret_cast<ast::TypeDeclVector*>(functionTypeDecl->parameterTypeList[2].get());
 
 		ASSERT_TRUE(vectorTypeDecl != nullptr);
 
-		EXPECT_EQ(vectorTypeDecl->valueType->typeID, ast::TypeDecl::TypeDeclID_e::I8);
+		EXPECT_EQ(vectorTypeDecl->valueType->typeID, ast::TypeDeclID_e::I8);
 	}
 
 	TEST_F(ParserTypesTest, TestNamedType)
@@ -399,7 +399,7 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(typeDecl.get());
@@ -408,7 +408,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
 		EXPECT_EQ(namedTypeDecl->internalIdentifier, nullptr);
-		EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 	}
@@ -422,7 +422,7 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(typeDecl.get());
@@ -431,7 +431,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
 		EXPECT_EQ(namedTypeDecl->internalIdentifier, nullptr);
-		EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
 	}
@@ -445,7 +445,7 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Array);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeDecl.get());
@@ -461,7 +461,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
 		EXPECT_EQ(namedTypeDecl->internalIdentifier, nullptr);
-		EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 	}
@@ -475,7 +475,7 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Array);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Array);
 		EXPECT_EQ(typeDecl->nullable, true);
 
 		auto arrayTypeDecl = reinterpret_cast<ast::TypeDeclArray*>(typeDecl.get());
@@ -491,7 +491,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
 		EXPECT_EQ(namedTypeDecl->internalIdentifier, nullptr);
-		EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 	}
@@ -505,7 +505,7 @@ namespace fluffy { namespace testing {
 
 		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
 
-		EXPECT_EQ(typeDecl->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(typeDecl->typeID, ast::TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(typeDecl.get());
@@ -514,25 +514,25 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
 		EXPECT_EQ(namedTypeDecl->internalIdentifier, nullptr);
-		EXPECT_EQ(namedTypeDecl->genericDefList.size(), 2);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 2);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-		EXPECT_EQ(namedTypeDecl->genericDefList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
-		EXPECT_EQ(namedTypeDecl->genericDefList[0]->nullable, false);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, ast::TypeDeclID_e::Named);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->nullable, false);
 
-		auto namedParamType = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefList[0].get());
+		auto namedParamType = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefinitionList[0].get());
 
 		ASSERT_TRUE(namedParamType != nullptr);
 
 		EXPECT_EQ(namedParamType->identifier, "T");
 		EXPECT_EQ(namedParamType->internalIdentifier, nullptr);
-		EXPECT_EQ(namedParamType->genericDefList.size(), 0);
+		EXPECT_EQ(namedParamType->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedParamType->nullable, false);
 		EXPECT_EQ(namedParamType->startFromRoot, false);
 
-		EXPECT_EQ(namedTypeDecl->genericDefList[1]->typeID, ast::TypeDecl::TypeDeclID_e::I32);
-		EXPECT_EQ(namedTypeDecl->genericDefList[1]->nullable, true);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList[1]->typeID, ast::TypeDeclID_e::I32);
+		EXPECT_EQ(namedTypeDecl->genericDefinitionList[1]->nullable, true);
 	}
 
 	TEST_F(ParserTypesTest, TestManyProdutionsPass)

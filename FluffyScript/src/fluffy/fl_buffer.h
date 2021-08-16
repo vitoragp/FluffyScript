@@ -11,7 +11,7 @@ namespace fluffy
 	class BufferBase
 	{
 	public:
-		BufferBase();
+								BufferBase();
 		virtual					~BufferBase();
 
 		virtual void			load(const I8* sourcePtr, const U32 len) = 0;
@@ -29,7 +29,7 @@ namespace fluffy
 	class DirectBuffer : public BufferBase
 	{
 	public:
-		DirectBuffer();
+								DirectBuffer();
 		virtual					~DirectBuffer();
 
 		virtual void			load(const I8* sourcePtr, const U32 len) override;
@@ -40,7 +40,7 @@ namespace fluffy
 		virtual void			reset(U32 position) override;
 
 	private:
-		I8* m_memory;
+		I8*						m_memory;
 		U32						m_cursor;
 		U32						m_length;
 
@@ -53,7 +53,7 @@ namespace fluffy
 	class LazyBuffer : public BufferBase
 	{
 	public:
-		LazyBuffer(const U32 bufferSize = 512);
+								LazyBuffer(const U32 bufferSize = 512);
 		virtual					~LazyBuffer();
 
 		virtual void			load(const I8* sourcePtr, const U32 len) override;
@@ -64,12 +64,12 @@ namespace fluffy
 		virtual void			reset(U32 position) override;
 
 	private:
-		const I8* cacheSourceFile(const I8* sourcePtr, const U32 len);
+		const I8*				cacheSourceFile(const I8* sourcePtr, const U32 len);
 
 	private:
 		std::ifstream			m_stream;
 		String					m_cacheFileName;
-		I8* m_memory;
+		I8*						m_memory;
 		U32						m_cursor;
 		U32						m_length;
 		U32						m_fileSize;

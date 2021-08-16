@@ -306,7 +306,7 @@ namespace fluffy { namespace parser {
 
 	Bool Parser::isWhere()
 	{
-		return utils::LexUtils::isExtends(m_tok);
+		return utils::LexUtils::isWhere(m_tok);
 	}
 
 	Bool Parser::isImplements()

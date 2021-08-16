@@ -36,19 +36,19 @@ namespace fluffy { namespace parser_objects {
 		// Verifica qual declaracao processar.
 		switch (parser->getTokenSubType())
 		{
-		case TokenSubType_e::eTST_Class:
+		case TokenSubType_e::Class:
 			return ParserObjectClassDecl::parse(parser, hasExport, hasAbtract);
-		case TokenSubType_e::eTST_Interface:
+		case TokenSubType_e::Interface:
 			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
-		case TokenSubType_e::eTST_Struct:
+		case TokenSubType_e::Struct:
 			throw exceptions::not_implemented_feature_exception("parseStructDecl");
-		case TokenSubType_e::eTST_Enum:
+		case TokenSubType_e::Enum:
 			throw exceptions::not_implemented_feature_exception("parseEnumDecl");
-		case TokenSubType_e::eTST_Trait:
+		case TokenSubType_e::Trait:
 			throw exceptions::not_implemented_feature_exception("parseTraitDecl");
-		case TokenSubType_e::eTST_Let:
+		case TokenSubType_e::Let:
 			throw exceptions::not_implemented_feature_exception("parseVariableDecl");
-		case TokenSubType_e::eTST_Fn:
+		case TokenSubType_e::Fn:
 			throw exceptions::not_implemented_feature_exception("parseFunctionDecl");
 		default:
 			throw exceptions::unexpected_token_exception(parser->getTokenValue(), parser->getTokenLine(), parser->getTokenColumn());

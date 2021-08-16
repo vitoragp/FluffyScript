@@ -76,7 +76,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->genericTemplateList[1]->identifier, "R");
 		EXPECT_EQ(classObject->genericTemplateList[1]->whereTypeList.size(), 0);
 		
-		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDeclID_e::Named);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
 
@@ -95,7 +95,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDeclID_e::Named);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
 
@@ -126,26 +126,26 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
 			EXPECT_EQ(namedTypeDecl->identifier, "Clickable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-			EXPECT_EQ(namedTypeDecl->genericDefList.size(), 1);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 1);
 
-			EXPECT_EQ(namedTypeDecl->genericDefList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, ast::TypeDeclID_e::Named);
 
-			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefList[0].get());
+			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefinitionList[0].get());
 
 			EXPECT_EQ(genericTypeDecl->identifier, "T");
 			EXPECT_EQ(genericTypeDecl->startFromRoot, false);
-			EXPECT_EQ(genericTypeDecl->genericDefList.size(), 0);
+			EXPECT_EQ(genericTypeDecl->genericDefinitionList.size(), 0);
 		}
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
@@ -154,15 +154,15 @@ namespace fluffy { namespace testing {
 
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefList.size(), 1);
+			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 1);
 
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList[0]->typeID, ast::TypeDeclID_e::Named);
 
-			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->internalIdentifier->genericDefList[0].get());
+			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->internalIdentifier->genericDefinitionList[0].get());
 
 			EXPECT_EQ(genericTypeDecl->identifier, "R");
 			EXPECT_EQ(genericTypeDecl->startFromRoot, false);
-			EXPECT_EQ(genericTypeDecl->genericDefList.size(), 0);
+			EXPECT_EQ(genericTypeDecl->genericDefinitionList.size(), 0);
 		}
 	}
 
@@ -185,18 +185,18 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
 			EXPECT_EQ(namedTypeDecl->identifier, "Clickable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-			EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		}
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
@@ -205,7 +205,7 @@ namespace fluffy { namespace testing {
 
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 0);
 		}
 	}
 
@@ -224,7 +224,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->genericTemplateList[1]->identifier, "R");
 		EXPECT_EQ(classObject->genericTemplateList[1]->whereTypeList.size(), 0);
 				
-		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->typeID, ast::TypeDeclID_e::Named);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
 
@@ -235,18 +235,18 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
 			EXPECT_EQ(namedTypeDecl->identifier, "Clickable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-			EXPECT_EQ(namedTypeDecl->genericDefList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		}
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->typeID, ast::TypeDeclID_e::Named);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
@@ -255,7 +255,7 @@ namespace fluffy { namespace testing {
 
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 0);
 		}
 	}
 
@@ -281,71 +281,5 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(genericTemplateList[0]->identifier, "T");
 		EXPECT_EQ(genericTemplateList[1]->identifier, "R");
-	}
-
-	TEST_F(ParserClassTest, TestClassExtendsDeclaration)
-	{
-		parser->loadSource("extends ::Window");
-		parser->nextToken();
-
-		auto extendsClass = parser_objects::ParserObjectClassExtendsDecl::parse(parser.get());
-
-		EXPECT_EQ(extendsClass->typeID, ast::TypeDecl::TypeDeclID_e::Named);
-
-		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(extendsClass.get());
-
-		EXPECT_EQ(namedTypeDecl->identifier, "Window");
-		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-	}
-
-	TEST_F(ParserClassTest, TestClassImplementsWithOnlyOneDeclaration)
-	{
-		parser->loadSource("implements ::Clickable");
-		parser->nextToken();
-
-		auto interfaceList = parser_objects::ParserObjectClassImplementsDecl::parse(parser.get());
-
-		EXPECT_EQ(interfaceList.size(), 1);
-
-		EXPECT_EQ(interfaceList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
-
-		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(interfaceList[0].get());
-
-		EXPECT_EQ(namedTypeDecl->identifier, "Clickable");
-		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-	}
-
-	TEST_F(ParserClassTest, TestClassImplementsWithTwoDeclarations)
-	{
-		parser->loadSource("implements ::Clickable, UI::Viewable");
-		parser->nextToken();
-
-		auto interfaceList = parser_objects::ParserObjectClassImplementsDecl::parse(parser.get());
-
-		EXPECT_EQ(interfaceList.size(), 2);
-			
-		// Clickable
-		{
-			EXPECT_EQ(interfaceList[0]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
-
-			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(interfaceList[0].get());
-
-			EXPECT_EQ(namedTypeDecl->identifier, "Clickable");
-			EXPECT_EQ(namedTypeDecl->startFromRoot, true);
-		}
-
-		// Clickable
-		{
-			EXPECT_EQ(interfaceList[1]->typeID, ast::TypeDecl::TypeDeclID_e::Named);
-
-			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(interfaceList[1].get());
-
-			EXPECT_EQ(namedTypeDecl->identifier, "UI");
-			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
-
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefList.size(), 0);
-		}
 	}
 } }
