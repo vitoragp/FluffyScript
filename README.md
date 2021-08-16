@@ -106,20 +106,20 @@ AccessModifierDecl
 	;
 	
 ClassStaticMember
-	:	"static" "let" Identifier ":" TypeDecl "=" ExpressionDecl ";"
-	|	"static" "let" Identifier ":" TypeDecl ";"
-	|	"static" "let" Identifier "=" ExpressionDecl ";"
-	|	"static" "const" Identifier ":" TypeDecl "=" ExpressionDecl ";"
-	|	"static" "const" Identifier "=" ExpressionDecl ";"
+	:	"static" "let" ReferenceModifier? Identifier ":" TypeDecl "=" ExpressionDecl ";"
+	|	"static" "let" ReferenceModifier? Identifier ":" TypeDecl ";"
+	|	"static" "let" ReferenceModifier? Identifier "=" ExpressionDecl ";"
+	|	"static" "const" ReferenceModifier? Identifier ":" TypeDecl "=" ExpressionDecl ";"
+	|	"static" "const" ReferenceModifier? Identifier "=" ExpressionDecl ";"
 	;
 	
 ClassMember
-	:	"let" Identifier ":" TypeDecl "=" ExpressionDecl ";"
-	|	"let" Identifier ":" TypeDecl ";"
-	|	"let" Identifier "=" ExpressionDecl ";"
-	|	"const" Identifier ":" TypeDecl "=" ExpressionDecl ";"
-	|	"const" Identifier ":" TypeDecl ";"
-	|	"const" Identifier "=" ExpressionDecl ";"
+	:	"let" ReferenceModifier? Identifier ":" TypeDecl "=" ExpressionDecl ";"
+	|	"let" ReferenceModifier? Identifier ":" TypeDecl ";"
+	|	"let" ReferenceModifier? Identifier "=" ExpressionDecl ";"
+	|	"const" ReferenceModifier? Identifier ":" TypeDecl "=" ExpressionDecl ";"
+	|	"const" ReferenceModifier? Identifier ":" TypeDecl ";"
+	|	"const" ReferenceModifier? Identifier "=" ExpressionDecl ";"
 	;
 	
 ClassStaticFunction
@@ -324,8 +324,8 @@ ArgListDecl
 	;
 	
 ArgDecl
-	:	Identifier ":" TypeDecl "=" ExpressionDecl
-	|	Identifier ":" TypeDecl
+	:	ReferenceModifier? Identifier ":" TypeDecl "=" ExpressionDecl
+	|	ReferenceModifier? Identifier ":" TypeDecl
 	;
 	
 GenericDecl
@@ -357,6 +357,10 @@ GenericDefinitionDecl
 GenericDefinitionDeclList
 	:	ReturnTypeDecl "," GenericDefinitionDeclList?
 	|	ReturnTypeDecl
+	;
+	
+ReferenceModifier
+	:	"ref"
 	;
 	
 ScopeResolutionOp
