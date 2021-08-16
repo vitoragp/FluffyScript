@@ -69,7 +69,7 @@ ClassDecl
 	;
 	
 ExtendsDecl
-	:	"extends" ScopedIdentifierDecl
+	:	"extends" NamedTypeDecl
 	;
 	
 ImplementsDecl
@@ -77,8 +77,8 @@ ImplementsDecl
 	;
 	
 ImplementItemDeclList
-	:	ScopedIdentifierDecl "," ImplementItemDeclList?
-	|	ScopedIdentifierDecl
+	:	NamedTypeDecl "," ImplementItemDeclList?
+	|	NamedTypeDecl
 	;
 	
 ClassBlock
@@ -266,6 +266,55 @@ FunctionDecl
 	;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Type
+///////////////////////////////////////////////////////////////////////////////
+
+TypeDecl
+	:	"void"
+	|	ParameterDecl
+	;
+	
+ParameterDecl
+	:	PrimitiveTypeDecl ArrayDecl? NullableOperator?
+	|	CompoundTypeDecl ArrayDecl? NullableOperator?
+	|	NamedTypeDecl ArrayDecl? NullableOperator?
+	;
+	
+PrimitiveTypeDecl
+	:	"bool"
+	|	"i8"
+	|	"u8"
+	|	"i16"
+	|	"u16"
+	|	"i32"
+	|	"u32"
+	|	"i64"
+	|	"u64"
+	|	"fp32"
+	|	"fp64"
+	|	"string"
+	|	"object"
+	;
+	
+CompoundTypeDecl
+	:	"set" "<" TypeDecl ">"
+	|	"vector" "<" TypeDecl ">"
+	|	"map" "<" TypeDecl ">"
+	;
+	
+ArrayDecl
+	:	"[" "]" ArrayDecl?
+	|	"[" ConstantInteger "]" ArrayDecl?
+	|	"[" "]"
+	|	"[" ConstantInteger "]"
+	;
+	
+NamedTypeDecl
+	:	ScopeResolutionOp Identifier NamedTypeDecl? GenericDefinitionDecl?
+	|	Identifier GenericDefinitionDecl?
+	;
+
+///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -289,7 +338,44 @@ GenericParamsList
 	;
 	
 GenericParams
-	:	Identifier
+	:	Identifier WhereClause?
+	|	Identifier
+	;
+	
+WhereClause
+	:	":" "where" Identifier "is" TypeDecl WhereClauseOr?
+	;
+	
+WhereClauseOr	
+	:	"|" TypeDecl
+	;
+	
+GenericDefinitionDecl
+	:	"<" GenericDefinitionDeclList ">"
+	;
+	
+GenericDefinitionDeclList
+	:	ReturnTypeDecl "," GenericDefinitionDeclList?
+	|	ReturnTypeDecl
+	;
+	
+ScopeResolutionOp
+	:	"::"
+	;
+	
+NullableOperator
+	:	"?"
+	;
+	
+ConstantInteger
+	:	ConstantI8
+	|	ConstantU8
+	|	ConstantI16
+	|	ConstantU16
+	|	ConstantI32
+	|	ConstantU32
+	|	ConstantI64
+	|	ConstantU64
 	;
 
 ScopedIdentifierDecl
