@@ -101,4 +101,21 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
 		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::I32);
 	}
+
+	TEST_F(ParserClassVariableTest, TestConstFunctionTypeWithFunctionExpr)
+	{
+		parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = fn (a) { }; }");
+		parser->nextToken();
+
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+
+		EXPECT_EQ(classDecl->variableList.size(), 1);
+		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
+		EXPECT_EQ(classDecl->variableList[0]->identifier, "Foo");
+		EXPECT_EQ(classDecl->variableList[0]->isConst, true);
+		EXPECT_EQ(classDecl->variableList[0]->isReference, true);
+		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
+		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::Function);
+	}
 } }

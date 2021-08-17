@@ -51,7 +51,7 @@ namespace fluffy { namespace parser {
 	void Parser::expectToken(std::function<bool()> callback)
 	{
 		if (!callback()) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(m_tok.value, m_tok.line, m_tok.column);
 		}
 		nextToken();
 	}
