@@ -110,7 +110,6 @@ namespace fluffy { namespace utils {
 									FLUFFY_IS_TOKEN_DECL(This);
 									FLUFFY_IS_TOKEN_DECL(Ref);
 									FLUFFY_IS_TOKEN_DECL(Self);
-									FLUFFY_IS_TOKEN_DECL(SizeOf);
 									FLUFFY_IS_TOKEN_DECL(New);
 									FLUFFY_IS_TOKEN_DECL(As);
 									FLUFFY_IS_TOKEN_DECL(Is);

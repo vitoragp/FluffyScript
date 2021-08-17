@@ -108,7 +108,6 @@ namespace fluffy {
 		 This,				// ok
 		 Ref,				// ok
 		 Self,				// ok
-		 SizeOf,			// ok
 		 New,				// ok
 		 As,				// ok
 		 Is,				// ok

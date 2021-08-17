@@ -206,6 +206,9 @@ namespace fluffy { namespace parser_objects {
 
 		static
 		BlockDeclPtr						parseExprBlock(Parser* parser);
+
+		static
+		BlockDeclPtr						parseBlockOrExprBlock(Parser* parser);
 	};
 
 	/**

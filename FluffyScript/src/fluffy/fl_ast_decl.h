@@ -23,6 +23,9 @@ namespace fluffy {
 		using IncludeDeclPtr					= unique_ptr<class IncludeDecl>;
 		using IncludeDeclPtrList				= vector<IncludeDeclPtr>;
 
+		using CodeUnitPtr						= unique_ptr<class CodeUnit>;
+		using CodeUnitPtrList					= vector<CodeUnitPtr>;
+
 		using NamespaceDeclPtr					= unique_ptr<class NamespaceDecl>;
 		using NamespaceDeclPtrList				= vector<NamespaceDeclPtr>;
 
@@ -153,7 +156,7 @@ namespace fluffy {
 			~Program() {}
 
 			IncludeDeclPtrList				includeDeclList;
-			NamespaceDeclPtrList			namespaceDeclList;
+			CodeUnitPtrList					codeUnits;			
 		};
 
 		/**
@@ -168,6 +171,24 @@ namespace fluffy {
 
 			StringList						includedItemList;
 			ScopedIdentifierDeclPtr			fromNamespace;
+		};
+
+		/**
+		 * CodeUnit
+		 */
+
+		class CodeUnit
+		{
+		public:
+			CodeUnit(const String& name)
+				: name(name)
+			{}
+
+			~CodeUnit()
+			{}
+
+			const String					name;
+			NamespaceDeclPtrList			namespaceDeclList;
 		};
 
 		/**

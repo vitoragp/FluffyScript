@@ -87,7 +87,6 @@ namespace application
 			: subTitle("janela")
 		{
 			super(title + subTitle);
-			this.userMemoryAllocated += sizeof User;
 		}
 		
 		destructor()

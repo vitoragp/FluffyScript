@@ -25,12 +25,14 @@ namespace fluffy { namespace parser {
 	{
 		assert(m_lex != nullptr);
 		m_lex->loadSource(source);
+		m_fileName = "anomblock";
 	}
 
 	void Parser::loadSourceFromFile(String sourceFile)
 	{
 		assert(m_lex != nullptr);
 		m_lex->loadFromSource(sourceFile);
+		m_fileName = sourceFile;
 	}
 
 	void Parser::reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset)
@@ -524,11 +526,6 @@ namespace fluffy { namespace parser {
 		return utils::LexUtils::isSelf(m_tok);
 	}
 
-	Bool Parser::isSizeOf()
-	{
-		return utils::LexUtils::isSizeOf(m_tok);
-	}
-
 	Bool Parser::isNew()
 	{
 		return utils::LexUtils::isNew(m_tok);
@@ -852,6 +849,11 @@ namespace fluffy { namespace parser {
 	Bool Parser::isDot()
 	{
 		return utils::LexUtils::isDot(m_tok);
+	}
+
+	const String& Parser::getFilename()
+	{
+		return m_fileName;
 	}
 
 	const String& Parser::getTokenValue()

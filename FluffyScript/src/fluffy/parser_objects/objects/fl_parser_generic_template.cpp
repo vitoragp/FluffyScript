@@ -41,9 +41,10 @@ namespace fluffy { namespace parser_objects {
 				if (genericDecl->identifier != identifier)
 				{
 					throw exceptions::custom_exception(
-						"Where identifier must be like generic identifier: " + genericDecl->identifier,
+						"Where identifier must be like generic identifier: %s",
 						line,
-						column
+						column,
+						genericDecl->identifier.c_str()
 					);
 				}
 

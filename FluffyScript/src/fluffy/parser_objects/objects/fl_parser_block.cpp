@@ -19,4 +19,10 @@ namespace fluffy { namespace parser_objects {
 		throw exceptions::not_implemented_feature_exception("Block expression");
 		return nullptr;
 	}
+
+	BlockDeclPtr ParserObjectBlockDecl::parseBlockOrExprBlock(Parser* parser)
+	{
+		throw exceptions::not_implemented_feature_exception("Block or Block expression");
+		return nullptr;
+	}
 } }

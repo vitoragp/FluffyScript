@@ -110,7 +110,6 @@ namespace fluffy { namespace parser {
 		Bool							isThis();
 		Bool							isRef();
 		Bool							isSelf();
-		Bool							isSizeOf();
 		Bool							isNew();
 		Bool							isAs();
 		Bool							isIs();
@@ -178,6 +177,8 @@ namespace fluffy { namespace parser {
 		Bool							isComma();
 		Bool							isDot();
 
+		const String&					getFilename();
+
 		const String&					getTokenValue();
 		const TokenType_e				getTokenType();
 		const TokenSubType_e			getTokenSubType();
@@ -189,5 +190,6 @@ namespace fluffy { namespace parser {
 		std::unique_ptr<lexer::Lexer>	m_lex;
 		Token_s							m_tok;
 		I32								m_typeModeLock;
+		String							m_fileName;
 	};
 } }

@@ -1,4 +1,5 @@
 #include "../../fl_ast_expr.h"
+#include "../../fl_ast_decl.h"
 #include "../../fl_exceptions.h"
 #include "../fl_parser_objects.h"
 
@@ -9,11 +10,11 @@ namespace fluffy {
 
 	enum OperatorPrecLevel_e : U32
 	{
-		MinPrec		= 1,
-		SizeOf		= 2,
-		Unary		= 12,
-		CaseExpr	= 14,
-		Max			= 15
+		MinPrec			= 1,
+		Interrogation	= 2,
+		Unary			= 12,
+		Increment		= 14,
+		Max				= 15
 	};
 
 	/**
@@ -57,7 +58,6 @@ namespace fluffy {
 		case TokenSubType_e::Decrement:
 		case TokenSubType_e::As:
 		case TokenSubType_e::Is:
-		case TokenSubType_e::SizeOf:
 		case TokenSubType_e::LSquBracket:
 		case TokenSubType_e::LParBracket:
 		case TokenSubType_e::Dot:
@@ -300,12 +300,453 @@ namespace fluffy { namespace parser_objects {
 			
 			// Consome o operador.
 			parser->nextToken();
+
+			// Processa chamada de funcao ou indexacao de dados.
+			switch (op)
+			{
+			case TokenSubType_e::LParBracket:
+				{
+					// Se nao ha parametros e uma expressao unaria posfixa f().
+					if (parser->isRightParBracket())
+					{
+						// Consome ')'
+						parser->expectToken([parser]() { return parser->isRightParBracket(); });
+
+						auto functionCallExpr = std::make_unique<ExpressionFunctionCall>(
+							line,
+							column
+						);
+
+						functionCallExpr->leftDecl = std::move(lhs);
+
+						lhs = std::move(functionCallExpr);
+						continue;
+					}
+
+					auto functionCallExpr = std::make_unique<ExpressionFunctionCall>(
+						line,
+						column
+					);
+
+					functionCallExpr->leftDecl = std::move(lhs);
+					functionCallExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
+
+					// Consome ')'
+					parser->expectToken([parser]() { return parser->isRightParBracket(); });
+
+					lhs = std::move(functionCallExpr);
+					continue;
+				}
+				break;
+			case TokenSubType_e::LSquBracket:
+				{
+					auto indexAddressExpr = std::make_unique<ExpressionIndexAddress>(
+						line,
+						column
+					);
+
+					indexAddressExpr->leftDecl = std::move(lhs);
+					indexAddressExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
+
+					// Consome ']'
+					parser->expectToken([parser]() { return parser->isRightSquBracket(); });
+
+					lhs = std::move(indexAddressExpr);
+					continue;
+				}
+				break;
+			default:
+				break;
+			}
+
+			// Processa expressao a direira.
+			rhs = parseExpression(parser, nextMinPrec);
+
+			// Verifica se a operacao e ternaria
+			if (op == TokenSubType_e::Interrogation)
+			{
+				auto ternaryExprDecl = std::make_unique<ExpressionTernaryDecl>(
+					line,
+					column
+				);
+
+				// Consome ':'
+				parser->expectToken([parser]() { return parser->isColon(); });
+
+				ternaryExprDecl->conditionDecl = std::move(lhs);
+				ternaryExprDecl->leftDecl = std::move(rhs);
+				ternaryExprDecl->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
+
+				lhs = std::move(ternaryExprDecl);
+				break;
+			}
+
+			// Processa operador binario.
+			auto binaryExprDecl = std::make_unique<ExpressionBinaryDecl>(
+				line,
+				column
+			);
+
+			binaryExprDecl->op = op;
+			binaryExprDecl->leftDecl = std::move(lhs);
+			binaryExprDecl->rightDecl = std::move(rhs);
+
+			lhs = std::move(binaryExprDecl);
 		}
 		return lhs;
 	}
 
 	ExpressionDeclPtr ParserObjectExpressionDecl::parseAtom(Parser* parser)
 	{
-		return nullptr;
+		const U32 line = parser->getTokenLine();
+		const U32 column = parser->getTokenColumn();
+
+		// Processa expressao entre parenteses.
+		if (parser->isLeftParBracket())
+		{
+			// Consome '('
+			parser->expectToken([parser]() { return parser->isLeftParBracket(); });
+
+			// Processa expressao.
+			auto expr = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
+
+			// Ajusta a posicao inicial
+			expr->line = line;
+			expr->column = column;
+
+			// Consome ')'
+			parser->expectToken([parser]() { return parser->isRightParBracket(); });
+
+			return expr;
+		}
+
+		// Processa declaracao de funcao anonima.
+		if (parser->isFn())
+		{
+			auto functionDecl = std::make_unique<ExpressionFunctionDecl>(
+				line,
+				column
+			);
+
+			// Consome 'fn'
+			parser->expectToken([parser]() { return parser->isFn(); });
+
+			// Consome '('
+			parser->expectToken([parser]() { return parser->isLeftParBracket(); });
+
+			// Uma funcao anonima pode ter parametros tipados ou nao, depende do contexto.
+			// Por exemplo se a funcao esta sendo passada como parametro, seus tipos podem ser
+			// deduzidos com base no tipo do parametro, o mesmo pode ocorrer na declaracao de variaveis
+			// ou ainda atribui-la a um membro de classe, struct.
+			// Porem ha casos onde a tipagem de faz necessaria por exemplo ao usar uma declaracao de variavel
+			// ou constate onde o tipo e omitido, logo, nao se poderia fazer a deducao.
+
+			if (parser->isIdentifier()) {
+
+				// Consome o identificador.
+				auto identifier = parser->expectIdentifier();
+
+				// Verifica se o proximo token e ':'
+				if (parser->isColon())
+				{
+					// Consome ':'
+					parser->expectToken([parser]() { return parser->isColon(); });
+
+					U32 paramLine = parser->getTokenLine();
+					U32 paramColumn = parser->getTokenColumn();
+
+					auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+						paramLine,
+						paramColumn
+					);
+
+					paramDecl->identifierDecl = identifier;
+					paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+
+					// Parametro nao podem ter tipo nulo.
+					if (paramDecl->typeDecl->typeID == ast::TypeDeclID_e::Void)
+					{
+						throw exceptions::custom_exception(
+							"Parameter '%s' can't have void type",
+							paramLine,
+							paramColumn,
+							identifier.c_str()
+						);
+					}
+
+					// Adiciona o parametro a lista
+					functionDecl->parametersDecl.push_back(std::move(paramDecl));
+
+					// Processa o restante do parametros se houver.
+					while (true)
+					{
+						if (parser->isRightParBracket())
+						{
+							break;
+						}
+
+						// Consome ','
+						parser->expectToken([parser]() { return parser->isComma(); });
+
+						U32 paramLine = parser->getTokenLine();
+						U32 paramColumn = parser->getTokenColumn();
+
+						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+							paramLine,
+							paramColumn
+						);
+
+						paramDecl->identifierDecl = parser->expectIdentifier();
+
+						// Consome ':'
+						parser->expectToken([parser]() { return parser->isColon(); });
+
+						paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+
+						// Parametro nao podem ter tipo nulo.
+						if (paramDecl->typeDecl->typeID == ast::TypeDeclID_e::Void)
+						{
+							throw exceptions::custom_exception(
+								"Parameter '%s' can't have void type",
+								paramLine,
+								paramColumn,
+								identifier.c_str()
+							);
+						}
+
+						// Adiciona o parametro a lista
+						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+					}
+				} else {
+					auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+						parser->getTokenLine(),
+						parser->getTokenColumn()
+					);
+
+					paramDecl->identifierDecl = identifier;
+
+					// Adiciona o parametro a lista
+					functionDecl->parametersDecl.push_back(std::move(paramDecl));
+
+					// Processa o restante do parametros se houver.
+					while (true)
+					{
+						if (parser->isRightParBracket())
+						{
+							break;
+						}
+
+						// Consome ','
+						parser->expectToken([parser]() { return parser->isComma(); });
+
+						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+							parser->getTokenLine(),
+							parser->getTokenColumn()
+						);
+
+						paramDecl->identifierDecl = parser->expectIdentifier();
+
+						// Adiciona o parametro a lista
+						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+					}
+				}
+			}
+
+			// Consome ')'
+			parser->expectToken([parser]() { return parser->isRightParBracket(); });
+
+			// Verifica se o tipo de retorno e explicito.
+			if (parser->isArrow()) {
+				// Consome '->'
+				parser->expectToken([parser]() { return parser->isArrow(); });
+
+				functionDecl->returnTypeDecl = ParserObjectTypeDecl::parse(parser);
+			} else {
+				functionDecl->returnTypeDecl = std::make_unique<ast::TypeDeclVoid>();
+			}
+
+			// Consome '{'
+			parser->expectToken([parser]() { return parser->isLeftBracket(); });
+
+			// Consome o block de codigo.
+			if (!parser->isRightBracket())
+			{
+				functionDecl->blockDecl = ParserObjectBlockDecl::parseBlockOrExprBlock(parser);
+			}
+
+			// Consome '}'
+			parser->expectToken([parser]() { return parser->isRightBracket(); });
+
+			return functionDecl;
+		}
+
+		// Processa this.
+		if (parser->isThis())
+		{
+			// Consome 'this'
+			parser->expectToken([parser]() { return parser->isThis(); });
+
+			return std::make_unique<ExpressionThisDecl>(line,column);
+		}
+
+		// Processa super.
+		if (parser->isSuper())
+		{
+			// Consome 'super'
+			parser->expectToken([parser]() { return parser->isSuper(); });
+
+			return std::make_unique<ExpressionSuperDecl>(line, column);
+		}
+
+		// Processa null.
+		if (parser->isNull())
+		{
+			// Consome 'null'
+			parser->expectToken([parser]() { return parser->isNull(); });
+
+			return std::make_unique<ExpressionConstantNullDecl>(line, column);
+		}
+
+		// Processa algumas constantes
+		switch (parser->getTokenSubType())
+		{
+		case TokenSubType_e::False:
+		case TokenSubType_e::True:
+			{
+				auto constantBoolDecl = std::make_unique<ExpressionConstantBoolDecl>(line, column);
+				constantBoolDecl->valueDecl = parser->getTokenSubType() == TokenSubType_e::True ? true : false;
+				parser->nextToken();
+				return constantBoolDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantI8:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::I8;
+				constantIntegerDecl->valueDecl = parser->expectConstantI8();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantU8:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::U8;
+				constantIntegerDecl->valueDecl = parser->expectConstantU8();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantI16:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::I16;
+				constantIntegerDecl->valueDecl = parser->expectConstantI16();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantU16:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::U16;
+				constantIntegerDecl->valueDecl = parser->expectConstantU16();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantI32:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::I32;
+				constantIntegerDecl->valueDecl = parser->expectConstantI32();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantU32:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::U32;
+				constantIntegerDecl->valueDecl = parser->expectConstantU32();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantI64:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::I64;
+				constantIntegerDecl->valueDecl = parser->expectConstantI64();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantU64:
+			{
+				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
+				constantIntegerDecl->valueType = ast::TypeDeclID_e::U64;
+				constantIntegerDecl->valueDecl = parser->expectConstantU64();
+				return constantIntegerDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantFp32:
+			{
+				auto constantRealDecl = std::make_unique<ExpressionConstantRealDecl>(line, column);
+				constantRealDecl->valueType = ast::TypeDeclID_e::Fp32;
+				constantRealDecl->valueDecl = parser->expectConstantFp32();
+				return constantRealDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantFp64:
+			{
+				auto constantRealDecl = std::make_unique<ExpressionConstantRealDecl>(line, column);
+				constantRealDecl->valueType = ast::TypeDeclID_e::Fp64;
+				constantRealDecl->valueDecl = parser->expectConstantFp64();
+				return constantRealDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantString:
+			{
+				auto constantStringDecl = std::make_unique<ExpressionConstantStringDecl>(line, column);
+				constantStringDecl->valueDecl = parser->expectConstantString();
+				return constantStringDecl;
+			}
+			break;
+		case TokenSubType_e::ConstantChar:
+			{
+				auto constantCharDecl = std::make_unique<ExpressionConstantCharDecl>(line, column);
+				constantCharDecl->valueDecl = parser->expectConstantChar();
+				return constantCharDecl;
+			}
+			break;
+		default:
+			break;
+		}
+
+		// Resolucao de escopo unaria, indica acesso ao escopo global.
+		if (parser->isScopeResolution())
+		{
+			// Consome '::'
+			parser->expectToken([parser]() { return parser->isScopeResolution(); });
+
+			auto namedExpressionDecl = std::make_unique<ExpressionConstantIdentifierDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
+			namedExpressionDecl->identifierDecl = parser->expectIdentifier();
+			namedExpressionDecl->startFromRoot = true;
+			return namedExpressionDecl;
+		}
+
+		// Processa expressao named
+		if (parser->isIdentifier())
+		{
+			auto namedExpressionDecl = std::make_unique<ExpressionConstantIdentifierDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
+			namedExpressionDecl->identifierDecl = parser->expectIdentifier();
+			return namedExpressionDecl;
+		}
+		
+		throw exceptions::unexpected_token_exception(
+			parser->getTokenValue(),
+			line,
+			column
+		);
 	}
 } }

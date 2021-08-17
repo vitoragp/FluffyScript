@@ -56,7 +56,6 @@ namespace fluffy {
 		std::make_tuple("this", 		TokenSubType_e::This),			// ok
 		std::make_tuple("ref", 			TokenSubType_e::Ref),			// ok
 		std::make_tuple("self", 		TokenSubType_e::Self),			// ok
-		std::make_tuple("sizeof", 		TokenSubType_e::SizeOf),		// ok
 		std::make_tuple("new", 			TokenSubType_e::New),			// ok
 		std::make_tuple("as", 			TokenSubType_e::As),			// ok
 		std::make_tuple("is", 			TokenSubType_e::Is),			// ok
