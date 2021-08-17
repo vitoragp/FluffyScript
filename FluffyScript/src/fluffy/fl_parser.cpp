@@ -514,6 +514,11 @@ namespace fluffy { namespace parser {
 		return utils::LexUtils::isThis(m_tok);
 	}
 
+	Bool Parser::isRef()
+	{
+		return utils::LexUtils::isRef(m_tok);
+	}
+
 	Bool Parser::isSelf()
 	{
 		return utils::LexUtils::isSelf(m_tok);

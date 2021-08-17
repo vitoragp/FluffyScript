@@ -2,7 +2,7 @@
 #include <memory>
 #include <functional>
 #include "fl_defs.h"
-#include "fl_ast.h"
+#include "fl_ast_decl.h"
 #include "fl_lex.h"
 
 namespace fluffy { namespace parser {
@@ -108,6 +108,7 @@ namespace fluffy { namespace parser {
 		Bool							isFn();
 		Bool							isLet();
 		Bool							isThis();
+		Bool							isRef();
 		Bool							isSelf();
 		Bool							isSizeOf();
 		Bool							isNew();

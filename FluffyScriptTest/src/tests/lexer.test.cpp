@@ -17,31 +17,31 @@ namespace fluffy { namespace detail {
 		std::make_tuple("include", 		TokenSubType_e::Include),		// ok
 		std::make_tuple("from", 		TokenSubType_e::From),			// ok
 		std::make_tuple("export", 		TokenSubType_e::Export),		// ok
-		std::make_tuple("namespace",	TokenSubType_e::Namespace),	// ok
-		std::make_tuple("class", 		TokenSubType_e::Class),		// ok
+		std::make_tuple("namespace",	TokenSubType_e::Namespace),		// ok
+		std::make_tuple("class", 		TokenSubType_e::Class),			// ok
 		std::make_tuple("extends", 		TokenSubType_e::Extends),		// ok
 		std::make_tuple("implements",	TokenSubType_e::Implements),	// ok
-		std::make_tuple("where",		TokenSubType_e::Where),		// ok
+		std::make_tuple("where",		TokenSubType_e::Where),			// ok
 		std::make_tuple("constructor",	TokenSubType_e::Constructor),	// ok
 		std::make_tuple("destructor",	TokenSubType_e::Destructor),	// ok
-		std::make_tuple("super",		TokenSubType_e::Super),		// ok
+		std::make_tuple("super",		TokenSubType_e::Super),			// ok
 		std::make_tuple("public", 		TokenSubType_e::Public),		// ok
-		std::make_tuple("protected",	TokenSubType_e::Protected),	// ok
+		std::make_tuple("protected",	TokenSubType_e::Protected),		// ok
 		std::make_tuple("private", 		TokenSubType_e::Private),		// ok
-		std::make_tuple("final",		TokenSubType_e::Final),		// ok
+		std::make_tuple("final",		TokenSubType_e::Final),			// ok
 		std::make_tuple("override", 	TokenSubType_e::Override),		// ok
 		std::make_tuple("abstract", 	TokenSubType_e::Abstract),		// ok
 		std::make_tuple("virtual", 		TokenSubType_e::Virtual),		// ok
-		std::make_tuple("interface",	TokenSubType_e::Interface),	// ok
+		std::make_tuple("interface",	TokenSubType_e::Interface),		// ok
 		std::make_tuple("struct",		TokenSubType_e::Struct),		// ok
 		std::make_tuple("enum", 		TokenSubType_e::Enum),			// ok
-		std::make_tuple("match", 		TokenSubType_e::Match),		// ok
+		std::make_tuple("match", 		TokenSubType_e::Match),			// ok
 		std::make_tuple("when", 		TokenSubType_e::When),			// ok
-		std::make_tuple("trait", 		TokenSubType_e::Trait),		// ok
+		std::make_tuple("trait", 		TokenSubType_e::Trait),			// ok
 		std::make_tuple("static", 		TokenSubType_e::Static),		// ok
-		std::make_tuple("const", 		TokenSubType_e::Const),		// ok
+		std::make_tuple("const", 		TokenSubType_e::Const),			// ok
 		std::make_tuple("true", 		TokenSubType_e::True),			// ok
-		std::make_tuple("false", 		TokenSubType_e::False),		// ok
+		std::make_tuple("false", 		TokenSubType_e::False),			// ok
 		std::make_tuple("void", 		TokenSubType_e::Void),			// ok
 		std::make_tuple("bool", 		TokenSubType_e::Bool),			// ok
 		std::make_tuple("i8", 			TokenSubType_e::I8),			// ok
@@ -62,6 +62,7 @@ namespace fluffy { namespace detail {
 		std::make_tuple("fn", 			TokenSubType_e::Fn),			// ok
 		std::make_tuple("let", 			TokenSubType_e::Let),			// ok
 		std::make_tuple("this", 		TokenSubType_e::This),			// ok
+		std::make_tuple("ref", 			TokenSubType_e::Ref),			// ok
 		std::make_tuple("self", 		TokenSubType_e::Self),			// ok
 		std::make_tuple("sizeof", 		TokenSubType_e::SizeOf),		// ok
 		std::make_tuple("new", 			TokenSubType_e::New),			// ok
@@ -71,16 +72,16 @@ namespace fluffy { namespace detail {
 		std::make_tuple("if", 			TokenSubType_e::If),			// ok
 		std::make_tuple("else", 		TokenSubType_e::Else),			// ok
 		std::make_tuple("continue", 	TokenSubType_e::Continue),		// ok
-		std::make_tuple("break", 		TokenSubType_e::Break),		// ok
+		std::make_tuple("break", 		TokenSubType_e::Break),			// ok
 		std::make_tuple("for", 			TokenSubType_e::For),			// ok
 		std::make_tuple("foreach", 		TokenSubType_e::Foreach),		// ok
 		std::make_tuple("in",			TokenSubType_e::In),			// ok
-		std::make_tuple("while", 		TokenSubType_e::While),		// ok
+		std::make_tuple("while", 		TokenSubType_e::While),			// ok
 		std::make_tuple("do", 			TokenSubType_e::Do),			// ok
 		std::make_tuple("try", 			TokenSubType_e::Try),			// ok
-		std::make_tuple("catch",		TokenSubType_e::Catch),		// ok
+		std::make_tuple("catch",		TokenSubType_e::Catch),			// ok
 		std::make_tuple("finally",		TokenSubType_e::Finally),		// ok
-		std::make_tuple("panic", 		TokenSubType_e::Panic),		// ok
+		std::make_tuple("panic", 		TokenSubType_e::Panic),			// ok
 		std::make_tuple("return", 		TokenSubType_e::Return),		// ok
 		std::make_tuple("null", 		TokenSubType_e::Null)			// ok
 	};

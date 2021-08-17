@@ -1,4 +1,4 @@
-#include "../../fl_ast.h"
+#include "../../fl_ast_decl.h"
 #include "../../fl_exceptions.h"
 #include "../fl_parser_objects.h"
 

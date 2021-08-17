@@ -7,6 +7,13 @@ class Foo
 	virtual fn Foo(a: i32) -> i32 {}
 	virtual fn Foo(a: i32, b: i32) -> i32 {}
 
+	static fn Foo() {}
+	static fn Foo(a: i32) {}
+	static fn Foo(a: i32, b: i32) {}
+	static fn Foo() -> i32 {}
+	static fn Foo(a: i32) -> i32 {}
+	static fn Foo(a: i32, b: i32) -> i32 {}
+
 	virtual fn Foo() override {}
 	virtual fn Foo(a: i32) override {}
 	virtual fn Foo(a: i32, b: i32) override {}

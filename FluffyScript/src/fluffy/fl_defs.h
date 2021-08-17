@@ -106,6 +106,7 @@ namespace fluffy {
 		 Fn,				// ok
 		 Let,				// ok
 		 This,				// ok
+		 Ref,				// ok
 		 Self,				// ok
 		 SizeOf,			// ok
 		 New,				// ok

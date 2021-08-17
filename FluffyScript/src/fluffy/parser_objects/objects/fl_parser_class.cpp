@@ -1,4 +1,4 @@
-#include "../../fl_ast.h"
+#include "../../fl_ast_decl.h"
 #include "../../fl_exceptions.h"
 #include "../fl_parser_objects.h"
 
@@ -88,6 +88,7 @@ namespace fluffy { namespace parser_objects {
 						parser->getTokenColumn()
 					);
 				}
+				goto processFunction;
 
 			case TokenSubType_e::Fn:
 			processFunction:
@@ -97,6 +98,22 @@ namespace fluffy { namespace parser_objects {
 					classDecl->functionList.push_back(parseFunction(parser, accessModifier));
 				}
 				break;
+
+			case TokenSubType_e::Const:
+			case TokenSubType_e::Let:
+				if (staticModifier) {
+					classDecl->staticVariableList.push_back(parseVariable(parser, accessModifier, staticModifier));
+				} else {
+					classDecl->variableList.push_back(parseVariable(parser, accessModifier, staticModifier));
+				}
+				break;
+
+			default:
+				throw exceptions::unexpected_token_exception(
+					parser->getTokenValue(),
+					parser->getTokenLine(),
+					parser->getTokenColumn()
+				);
 			}
 		}
 
@@ -155,6 +172,8 @@ namespace fluffy { namespace parser_objects {
 		case TokenSubType_e::Public:
 			classFunctionPtr->accessModifier = ast::ClassMemberAccessModifier_e::Public;
 			break;
+		default:
+			break;
 		}
 
 		// Consome 'fn'
@@ -187,10 +206,14 @@ namespace fluffy { namespace parser_objects {
 			classFunctionPtr->returnType = std::make_unique<ast::TypeDeclVoid>();
 		}
 
-		// TODO: Processar bloco.
-
 		// Consome '{'
 		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+
+		// Console bloco se houver.
+		if (!parser->isRightBracket())
+		{
+			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+		}
 
 		// Consome '}'
 		parser->expectToken([parser]() { return parser->isRightBracket(); });
@@ -228,6 +251,8 @@ namespace fluffy { namespace parser_objects {
 			break;
 		case TokenSubType_e::Public:
 			classFunctionPtr->accessModifier = ast::ClassMemberAccessModifier_e::Public;
+			break;
+		default:
 			break;
 		}
 
@@ -291,6 +316,8 @@ namespace fluffy { namespace parser_objects {
 			parser->expectToken([parser]() { return parser->isFinal(); });
 			classFunctionPtr->isFinal = true;
 			break;
+		default:
+			break;
 		}
 
 		if (classFunctionPtr->isAbstract)
@@ -300,15 +327,113 @@ namespace fluffy { namespace parser_objects {
 			return classFunctionPtr;
 		}
 
-		// TODO: Processar bloco.
-
 		// Consome '{'
 		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+
+		// Console bloco se houver.
+		if (!parser->isRightBracket())
+		{
+			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+		}
 
 		// Consome '}'
 		parser->expectToken([parser]() { return parser->isRightBracket(); });
 
 		return classFunctionPtr;
+	}
+
+	ClassVariableDeclPtr ParserObjectClassDecl::parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic)
+	{
+		auto variableDecl = std::make_unique<ast::ClassVariableDecl>();
+
+		// Define a variavel como estatica.
+		variableDecl->isStatic = isStatic;
+
+		// Atribui modificadores de acesso.
+		switch (accessModifier) {
+		case TokenSubType_e::Protected:
+			variableDecl->accessModifier = ast::ClassMemberAccessModifier_e::Protected;
+			break;
+		case TokenSubType_e::Private:
+		case TokenSubType_e::Unknown:
+			variableDecl->accessModifier = ast::ClassMemberAccessModifier_e::Private;
+			break;
+		case TokenSubType_e::Public:
+			variableDecl->accessModifier = ast::ClassMemberAccessModifier_e::Public;
+			break;
+		default:
+			break;
+		}
+
+		// Consome 'let' ou 'const'
+		switch (parser->getTokenSubType())
+		{
+		case TokenSubType_e::Let:
+			parser->expectToken([parser]() { return parser->isLet(); });
+			variableDecl->isConst = false;
+			break;
+		case TokenSubType_e::Const:
+			parser->expectToken([parser]() { return parser->isConst(); });
+			variableDecl->isConst = true;
+			break;
+		default:
+			break;
+		}
+
+		// Verifica se o modificador 'ref' foi declarado.
+		if (parser->isRef())
+		{
+			// Consome 'ref'.
+			parser->expectToken([parser]() { return parser->isRef(); });
+			variableDecl->isReference = true;
+		}
+
+		// Consome identificador.
+		variableDecl->identifier = parser->expectIdentifier();
+
+		Bool mustHaveInitExpression = variableDecl->isConst ? true : false;
+
+		// Verifica se o tipo foi declarado.
+		if (parser->isColon())
+		{
+			// Consome ':'.
+			parser->expectToken([parser]() { return parser->isColon(); });
+
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
+
+			// Consome o tipo.
+			variableDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+
+			// Verifica se o tipo e valido.
+			if (variableDecl->typeDecl->typeID == ast::TypeDeclID_e::Void)
+			{
+				throw exceptions::custom_exception(
+					"Variables or constant can't have void type",
+					line,
+					column
+				);
+			}
+		} else {
+			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
+			mustHaveInitExpression = true;
+		}
+
+		// Consome a expressao de inicializacao.
+		if (mustHaveInitExpression)
+		{
+			// Consome '='.
+			parser->expectToken([parser]() { return parser->isAssign(); });
+
+			// TODO: Processa expressao.
+			// variableDecl->initExpression = ParserObjectExpression::parse(parser);
+		}
+
+		// Toda declaracao de variavel ou constante deve terminar com ';'
+		// Consome ';'.
+		parser->expectToken([parser]() { return parser->isSemiColon(); });
+
+		return variableDecl;
 	}
 
 	ClassFunctionParameterDeclPtrList ParserObjectClassDecl::parseParameterList(Parser* parser)

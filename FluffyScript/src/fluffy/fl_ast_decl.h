@@ -32,6 +32,9 @@ namespace fluffy {
 		using ClassFunctionDeclPtr				= unique_ptr<class ClassFunctionDecl>;
 		using ClassFunctionDeclPtrList			= vector<ClassFunctionDeclPtr>;
 
+		using ClassVariableDeclPtr				= unique_ptr<class ClassVariableDecl>;
+		using ClassVariableDeclPtrList			= vector<ClassVariableDeclPtr>;
+
 		using ClassFunctionParameterDeclPtr		= unique_ptr<class ClassFunctionParameterDecl>;
 		using ClassFunctionParameterDeclPtrList = vector<ClassFunctionParameterDeclPtr>;		
 
@@ -42,6 +45,8 @@ namespace fluffy {
 		using TypeDeclPtrList					= vector<TypeDeclPtr>;
 
 		using TypeDeclNamedPtr					= unique_ptr<class TypeDeclNamed>;
+
+		using BlockDeclPtr						= unique_ptr<class BlockDecl>;
 
 		using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
 		using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
@@ -65,6 +70,10 @@ namespace fluffy {
 			FunctionDecl
 		};
 
+		/**
+		 * ClassMemberType_e
+		 */
+
 		enum class ClassMemberType_e
 		{
 			Unknown,
@@ -72,15 +81,13 @@ namespace fluffy {
 			Constructor,
 			Destructor,
 
-			StaticFunction,
 			Function,
-
-			StaticVariable,
-			Variable,
-
-			StaticConst,
-			Const
+			Variable
 		};
+
+		/**
+		 * ClassMemberAccessModifier_e
+		 */
 
 		enum class ClassMemberAccessModifier_e
 		{
@@ -91,6 +98,9 @@ namespace fluffy {
 			Private
 		};
 
+		/**
+		 * TypeDeclID_e
+		 */
 
 		enum class TypeDeclID_e
 		{
@@ -120,6 +130,16 @@ namespace fluffy {
 			Function,
 
 			Named			// Classes, interfaces, trait, enum...
+		};
+
+		/**
+		 * BlockType_e
+		 */
+
+		enum class BlockType_e
+		{
+			Default,
+			Expression
 		};
 
 		/**
@@ -207,8 +227,8 @@ namespace fluffy {
 		TypeDeclPtrList						interfaceList;
 		ClassFunctionDeclPtrList			staticFunctionList;
 		ClassFunctionDeclPtrList			functionList;
-		// StaticVariableList				staticVariableList;
-		// VariableList						variableList;
+		ClassVariableDeclPtrList			staticVariableList;
+		ClassVariableDeclPtrList			variableList;
 		// ConstructorList					constructorList;
 		// DestructorDecl					destructorDecl;
 	};
@@ -266,7 +286,7 @@ namespace fluffy {
 		ClassFunctionParameterDeclPtrList	parameterList;
 		TypeDeclPtr							returnType;
 
-		// BlockDeclPtr						blockDecl;
+		BlockDeclPtr						blockDecl;
 	};
 
 	/**
@@ -285,6 +305,31 @@ namespace fluffy {
 		TypeDeclPtr							typeDecl;
 		String								identifier;
 		// ExpressionPtr					defaultValueDecl;
+	};
+
+	/**
+	 * ClassVariableDecl
+	 */
+
+	class ClassVariableDecl : public ClassMemberDecl
+	{
+	public:
+		ClassVariableDecl()
+			: ClassMemberDecl(ClassMemberType_e::Variable)
+			, isConst(false)
+			, isReference(false)
+			, isStatic(false)
+		{}
+
+		virtual ~ClassVariableDecl()
+		{}
+
+		String								identifier;
+		Bool								isConst;
+		Bool								isReference;
+		Bool								isStatic;
+		TypeDeclPtr							typeDecl;
+		// ExpressionDeclPtr				initExpression;
 	};
 
 	/**
@@ -525,5 +570,23 @@ namespace fluffy {
 		String								identifier;
 		ScopedIdentifierDeclPtr				tailIdentifier;
 		Bool								startFromRoot;
+	};
+
+	/**
+	 * BlockDecl
+	 */
+
+	class BlockDecl
+	{
+	protected:
+		BlockDecl(BlockType_e type)
+			: type(type)
+		{}
+
+	public:
+		virtual ~BlockDecl()
+		{}
+
+		const BlockType_e					type;
 	};
 } }

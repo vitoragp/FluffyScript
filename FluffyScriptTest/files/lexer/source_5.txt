@@ -42,7 +42,7 @@ namespace application
 			return this.age > 18;
 		}
 		
-		static fn validateUsers(list: User[]): bool
+		static fn validateUsers(ref list: User[]): bool
 		{
 			for let i = 0; i < 10; i++
 			{
