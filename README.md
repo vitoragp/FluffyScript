@@ -2,7 +2,8 @@
 
 Toy script para estudo de compiladores.
 
-TODO: Melhorar a qualidade das mensagens de erro.
+TODO: Melhorar a qualidade das mensagens de erro**.
+OBS: Priorizar qualidade das mensagens de erro para facilitar testes.
 
   + Implementando uma forma de imprimir a linha onde o erro ocorreu.
   + Marcando o caractere onde o erro comecou.
