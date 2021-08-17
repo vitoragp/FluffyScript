@@ -16,6 +16,24 @@ Obs: Temporariamente alguns parsers estao incompletos: principalmente o generic.
 vai ser aplicada quando o parser de tipos estiver completo, que sera implantado apos completar a declaracao
 de classe.
 
+Obs: Ocorreu um grande problema na analise de expressoes, uma ambiguidade entre a definicao de generics e os operadores < e >,
+que ate o momento nao encontrei uma solucao possivel com apenas 1 fase de analise, exemplo:
+
+Sendo foo um objeto com um funcao com generic a seguinte expressao pode ser facilmente interpretada de 2 formas:
+
+```
+	foo.count<Moo>(2);
+```
+	
+Primeiro: o objeto <foo> acessa a propriedade <count> e compara com o identificador Moo e compara novamente com a expressao <(2)>.
+
+Segundo: o objeto <foo> acessa a funcao <count> e passa <Moo> como generic, chamando a funcao com o parametro <2>.
+
+Uma possivel solucao que estou estudando, seria dividir o processo de gerar a AST em 2 fases, na primeira processado apenas os elementos
+estruturais(classes, interfaces, etc...) e junto seria criado um mapeamento de todos os tipo para considerar o escopo para a 2 fase de analise,
+onde seria analisado os trechos onde houver codigo.
+
+
 Elaborado a versao inicial e provisoria da descricao formal da linguagem:
 
 ```
