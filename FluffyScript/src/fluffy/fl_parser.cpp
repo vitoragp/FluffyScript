@@ -48,10 +48,17 @@ namespace fluffy { namespace parser {
 		m_lex->parse(m_tok);
 	}
 
-	void Parser::expectToken(std::function<bool()> callback)
+	void Parser::expectToken(std::function<TokenSubType_e()> callback)
 	{
-		if (!callback()) {
-			throw exceptions::custom_exception(m_tok.value, m_tok.line, m_tok.column);
+		auto expectedToken = callback();
+		if (m_tok.subType != expectedToken) {
+			throw exceptions::custom_exception(
+				"Expected token '%s', received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_lex->getTokenString(expectedToken),
+				m_tok.value.c_str()
+			);
 		}
 		nextToken();
 	}
@@ -60,7 +67,12 @@ namespace fluffy { namespace parser {
 	{
 		String value = m_tok.value;
 		if (!utils::LexUtils::isIdentifier(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an identifier, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		nextToken();
 		return value;
@@ -69,7 +81,12 @@ namespace fluffy { namespace parser {
 	const Bool Parser::expectConstantBool()
 	{
 		if (!utils::LexUtils::isTrue(m_tok) && !utils::LexUtils::isFalse(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an boolean constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const Bool value = utils::LexUtils::isTrue(m_tok) ? true : false;
 		nextToken();
@@ -79,7 +96,12 @@ namespace fluffy { namespace parser {
 	const I8 Parser::expectConstantI8()
 	{
 		if (!utils::LexUtils::isConstantI8(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an integer 8-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I8 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -89,7 +111,12 @@ namespace fluffy { namespace parser {
 	const U8 Parser::expectConstantU8()
 	{
 		if (!utils::LexUtils::isConstantU8(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an unsigned integer 8-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const U8 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -99,7 +126,12 @@ namespace fluffy { namespace parser {
 	const I16 Parser::expectConstantI16()
 	{
 		if (!utils::LexUtils::isConstantI16(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an integer 16-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I16 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -109,7 +141,12 @@ namespace fluffy { namespace parser {
 	const U16 Parser::expectConstantU16()
 	{
 		if (!utils::LexUtils::isConstantU16(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an unsigned integer 16-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const U16 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -119,7 +156,12 @@ namespace fluffy { namespace parser {
 	const I32 Parser::expectConstantI32()
 	{
 		if (!utils::LexUtils::isConstantI32(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an integer 32-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I32 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -129,7 +171,12 @@ namespace fluffy { namespace parser {
 	const U32 Parser::expectConstantU32()
 	{
 		if (!utils::LexUtils::isConstantU32(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an unsigned integer 32-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I32 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -139,7 +186,12 @@ namespace fluffy { namespace parser {
 	const I64 Parser::expectConstantI64()
 	{
 		if (!utils::LexUtils::isConstantI64(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an integer 64-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I64 value = std::stol(m_tok.value, nullptr);
 		nextToken();
@@ -149,7 +201,12 @@ namespace fluffy { namespace parser {
 	const U64 Parser::expectConstantU64()
 	{
 		if (!utils::LexUtils::isConstantU64(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected an unsigned integer 64-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const U64 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
@@ -159,7 +216,12 @@ namespace fluffy { namespace parser {
 	const Fp32 Parser::expectConstantFp32()
 	{
 		if (!utils::LexUtils::isConstantFp32(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected a real 32-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const Fp32 value = std::stof(m_tok.value, nullptr);
 		nextToken();
@@ -169,7 +231,12 @@ namespace fluffy { namespace parser {
 	const Fp64 Parser::expectConstantFp64()
 	{
 		if (!utils::LexUtils::isConstantFp64(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected a real 64-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const Fp64 value = std::stod(m_tok.value, nullptr);
 		nextToken();
@@ -179,7 +246,12 @@ namespace fluffy { namespace parser {
 	const I8 Parser::expectConstantChar()
 	{
 		if (!utils::LexUtils::isConstantChar(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected a character constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		const I8 value = m_tok.value[0];
 		nextToken();
@@ -189,7 +261,12 @@ namespace fluffy { namespace parser {
 	String Parser::expectConstantString()
 	{
 		if (!utils::LexUtils::isConstantString(m_tok)) {
-			throw exceptions::unexpected_token_exception(m_tok.value, m_tok.line, m_tok.column);
+			throw exceptions::custom_exception(
+				"Expected a string 32-bits constant, received '%s'",
+				m_tok.line,
+				m_tok.column,
+				m_tok.value.c_str()
+			);
 		}
 		String value = m_tok.value;
 		nextToken();

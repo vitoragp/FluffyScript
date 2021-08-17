@@ -5,7 +5,7 @@
 #include "fl_exceptions.h"
 
 namespace fluffy {
-	static const std::tuple<String, TokenSubType_e> keywords[] = {
+	static const std::tuple<const I8*, TokenSubType_e> keywords[] = {
 		std::make_tuple("include", 		TokenSubType_e::Include),		// ok
 		std::make_tuple("from", 		TokenSubType_e::From),			// ok
 		std::make_tuple("export", 		TokenSubType_e::Export),		// ok
@@ -197,10 +197,10 @@ namespace fluffy {
 			}
 			else
 			{
-				tok.line = 0;
-				tok.column = 0;
+				tok.line = m_line;
+				tok.column = m_column;
 				tok.filename = m_filename;
-				tok.value.clear();
+				tok.value = "<eof>";
 				tok.type = TokenType_e::Eof;
 				tok.subType = TokenSubType_e::Unknown;
 			}
@@ -209,6 +209,85 @@ namespace fluffy {
 		void Lexer::setTabSpaces(U32 newTabSpaces)
 		{
 			m_tabSpaces = newTabSpaces;
+		}
+
+		const I8* Lexer::getTokenString(TokenSubType_e tokenSubType)
+		{
+			// Busca nas palavras chaves.
+			for (auto& token : keywords)
+			{
+				if (std::get<1>(token) == tokenSubType)
+				{
+					return std::get<0>(token);
+				}
+			}
+
+			// Busca nos simbolos.
+			switch (tokenSubType)
+			{
+				case TokenSubType_e::ScopeResolution: 			return "::";
+				case TokenSubType_e::Increment:					return "++";
+				case TokenSubType_e::Decrement:					return "--";
+				case TokenSubType_e::Arrow:						return "->";
+				case TokenSubType_e::LParBracket:				return "(";
+				case TokenSubType_e::RParBracket:				return ")";
+				case TokenSubType_e::LSquBracket:				return "[";
+				case TokenSubType_e::RSquBracket:				return "]";
+				case TokenSubType_e::LBracket:					return "{";
+				case TokenSubType_e::RBracket:					return "}";
+				case TokenSubType_e::Plus:						return "+";
+				case TokenSubType_e::Minus:						return "-";
+				case TokenSubType_e::Division:					return "/";
+				case TokenSubType_e::Multiplication:			return "*";
+				case TokenSubType_e::Modulo:					return "%";
+				case TokenSubType_e::Assign:					return "=";
+				case TokenSubType_e::PlusAssign:				return "+=";
+				case TokenSubType_e::MinusAssign:				return "-=";
+				case TokenSubType_e::DivAssign:					return "/=";
+				case TokenSubType_e::MultAssign:				return "*=";
+				case TokenSubType_e::BitWiseAndAssign:			return "&=";
+				case TokenSubType_e::BitWiseOrAssign:			return "|=";
+				case TokenSubType_e::BitWiseXorAssign:			return "^=";
+				case TokenSubType_e::ModAssign:					return "%=";
+				case TokenSubType_e::BitWiseLShiftAssign:		return "<<=";
+				case TokenSubType_e::BitWiseRShiftAssign:		return ">>=";
+				case TokenSubType_e::GreaterThan:				return ">";
+				case TokenSubType_e::LessThan:					return "<";
+				case TokenSubType_e::GreaterThanOrEqual:		return ">=";
+				case TokenSubType_e::LessThanOrEqual:			return "<=";
+				case TokenSubType_e::Equal:						return "==";
+				case TokenSubType_e::NotEqual:					return "!=";
+				case TokenSubType_e::BitWiseLShift:				return "<<";
+				case TokenSubType_e::BitWiseRShift:				return ">>";
+				case TokenSubType_e::BitWiseAnd:				return "&";
+				case TokenSubType_e::BitWiseOr:					return "|";
+				case TokenSubType_e::BitWiseXor:				return "^";
+				case TokenSubType_e::BitWiseNot:				return "~";
+				case TokenSubType_e::Colon:						return ":";
+				case TokenSubType_e::SemiColon:					return ";";
+				case TokenSubType_e::LogicalAnd:				return "&&";
+				case TokenSubType_e::LogicalOr:					return "||";
+				case TokenSubType_e::LogicalNot:				return "!";
+				case TokenSubType_e::Interrogation:				return "?";
+				case TokenSubType_e::Comma:						return ":";
+				case TokenSubType_e::Dot:						return ".";
+				case TokenSubType_e::ConstantI8:				return "i8 constant";
+				case TokenSubType_e::ConstantU8:				return "u8 constant";
+				case TokenSubType_e::ConstantI16:				return "i16 constant";
+				case TokenSubType_e::ConstantU16:				return "u16 constant";
+				case TokenSubType_e::ConstantI32:				return "i32 constant";
+				case TokenSubType_e::ConstantU32:				return "u32 constant";
+				case TokenSubType_e::ConstantI64:				return "i64 constant";
+				case TokenSubType_e::ConstantU64:				return "u64 constant";
+				case TokenSubType_e::ConstantFp32:				return "fp32 constant";
+				case TokenSubType_e::ConstantFp64:				return "fp64 constant";
+				case TokenSubType_e::ConstantBin:				return "binary constant";
+				case TokenSubType_e::ConstantHex:				return "hex constant";
+				case TokenSubType_e::ConstantChar:				return "char constant";
+				case TokenSubType_e::ConstantString:			return "string constant";
+				default:
+					return "Unknown token";
+			}
 		}
 
 		U32 Lexer::getPosition()

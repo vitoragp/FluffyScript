@@ -215,7 +215,7 @@ namespace fluffy { namespace parser_objects {
 					matchExprDecl->exprDecl = parseExpression(parser, OperatorPrecLevel_e::Unary);
 
 					// Consome '{'
-					parser->expectToken([parser]() { return parser->isLeftBracket(); });
+					parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 					// Processa declaracao 'when'
 					while (true)
@@ -223,20 +223,20 @@ namespace fluffy { namespace parser_objects {
 						auto whenDecl = std::make_unique<ExpressionMatchWhenDecl>();
 
 						// Consome 'when'
-						parser->expectToken([parser]() { return parser->isWhen(); });
+						parser->expectToken([parser]() { return TokenSubType_e::When; });
 
 						// Consome pattern.
 						whenDecl->patternDecl = ParserObjectPatternDecl::parse(parser);
 
 						// Consome '->'
-						parser->expectToken([parser]() { return parser->isArrow(); });
+						parser->expectToken([parser]() { return TokenSubType_e::Arrow; });
 
 						// Console o bloco de codigo de expressao.
 						whenDecl->blockDecl = ParserObjectBlockDecl::parseExprBlock(parser);
 					}
 
 					// Consome '}'
-					parser->expectToken([parser]() { return parser->isRightBracket(); });
+					parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 					return matchExprDecl;
 				}
@@ -310,7 +310,7 @@ namespace fluffy { namespace parser_objects {
 					if (parser->isRightParBracket())
 					{
 						// Consome ')'
-						parser->expectToken([parser]() { return parser->isRightParBracket(); });
+						parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 
 						auto functionCallExpr = std::make_unique<ExpressionFunctionCall>(
 							line,
@@ -332,7 +332,7 @@ namespace fluffy { namespace parser_objects {
 					functionCallExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
 
 					// Consome ')'
-					parser->expectToken([parser]() { return parser->isRightParBracket(); });
+					parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 
 					lhs = std::move(functionCallExpr);
 					continue;
@@ -349,7 +349,7 @@ namespace fluffy { namespace parser_objects {
 					indexAddressExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
 
 					// Consome ']'
-					parser->expectToken([parser]() { return parser->isRightSquBracket(); });
+					parser->expectToken([parser]() { return TokenSubType_e::RSquBracket; });
 
 					lhs = std::move(indexAddressExpr);
 					continue;
@@ -371,7 +371,7 @@ namespace fluffy { namespace parser_objects {
 				);
 
 				// Consome ':'
-				parser->expectToken([parser]() { return parser->isColon(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 				ternaryExprDecl->conditionDecl = std::move(lhs);
 				ternaryExprDecl->leftDecl = std::move(rhs);
@@ -405,7 +405,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isLeftParBracket())
 		{
 			// Consome '('
-			parser->expectToken([parser]() { return parser->isLeftParBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::LParBracket; });
 
 			// Processa expressao.
 			auto expr = parseExpression(parser, OperatorPrecLevel_e::MinPrec);
@@ -415,7 +415,7 @@ namespace fluffy { namespace parser_objects {
 			expr->column = column;
 
 			// Consome ')'
-			parser->expectToken([parser]() { return parser->isRightParBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 
 			return expr;
 		}
@@ -429,10 +429,10 @@ namespace fluffy { namespace parser_objects {
 			);
 
 			// Consome 'fn'
-			parser->expectToken([parser]() { return parser->isFn(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Fn; });
 
 			// Consome '('
-			parser->expectToken([parser]() { return parser->isLeftParBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::LParBracket; });
 
 			// Uma funcao anonima pode ter parametros tipados ou nao, depende do contexto.
 			// Por exemplo se a funcao esta sendo passada como parametro, seus tipos podem ser
@@ -450,7 +450,7 @@ namespace fluffy { namespace parser_objects {
 				if (parser->isColon())
 				{
 					// Consome ':'
-					parser->expectToken([parser]() { return parser->isColon(); });
+					parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 					U32 paramLine = parser->getTokenLine();
 					U32 paramColumn = parser->getTokenColumn();
@@ -486,7 +486,7 @@ namespace fluffy { namespace parser_objects {
 						}
 
 						// Consome ','
-						parser->expectToken([parser]() { return parser->isComma(); });
+						parser->expectToken([parser]() { return TokenSubType_e::Comma; });
 
 						U32 paramLine = parser->getTokenLine();
 						U32 paramColumn = parser->getTokenColumn();
@@ -499,7 +499,7 @@ namespace fluffy { namespace parser_objects {
 						paramDecl->identifierDecl = parser->expectIdentifier();
 
 						// Consome ':'
-						parser->expectToken([parser]() { return parser->isColon(); });
+						parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 						paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 
@@ -537,7 +537,7 @@ namespace fluffy { namespace parser_objects {
 						}
 
 						// Consome ','
-						parser->expectToken([parser]() { return parser->isComma(); });
+						parser->expectToken([parser]() { return TokenSubType_e::Comma; });
 
 						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
 							parser->getTokenLine(),
@@ -553,12 +553,12 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome ')'
-			parser->expectToken([parser]() { return parser->isRightParBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 
 			// Verifica se o tipo de retorno e explicito.
 			if (parser->isArrow()) {
 				// Consome '->'
-				parser->expectToken([parser]() { return parser->isArrow(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Arrow; });
 
 				functionDecl->returnTypeDecl = ParserObjectTypeDecl::parse(parser);
 			} else {
@@ -566,7 +566,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '{'
-			parser->expectToken([parser]() { return parser->isLeftBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 			// Consome o block de codigo.
 			if (!parser->isRightBracket())
@@ -575,7 +575,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '}'
-			parser->expectToken([parser]() { return parser->isRightBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 			return functionDecl;
 		}
@@ -584,7 +584,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isThis())
 		{
 			// Consome 'this'
-			parser->expectToken([parser]() { return parser->isThis(); });
+			parser->expectToken([parser]() { return TokenSubType_e::This; });
 
 			return std::make_unique<ExpressionThisDecl>(line,column);
 		}
@@ -593,7 +593,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isSuper())
 		{
 			// Consome 'super'
-			parser->expectToken([parser]() { return parser->isSuper(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Super; });
 
 			return std::make_unique<ExpressionSuperDecl>(line, column);
 		}
@@ -602,7 +602,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isNull())
 		{
 			// Consome 'null'
-			parser->expectToken([parser]() { return parser->isNull(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Null; });
 
 			return std::make_unique<ExpressionConstantNullDecl>(line, column);
 		}
@@ -721,7 +721,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isScopeResolution())
 		{
 			// Consome '::'
-			parser->expectToken([parser]() { return parser->isScopeResolution(); });
+			parser->expectToken([parser]() { return TokenSubType_e::ScopeResolution; });
 
 			auto namedExpressionDecl = std::make_unique<ExpressionConstantIdentifierDecl>(
 				parser->getTokenLine(),

@@ -16,7 +16,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isExport())
 		{
 			// Consome 'export'.
-			parser->expectToken([parser]() { return parser->isExport();  });
+			parser->expectToken([parser]() { return TokenSubType_e::Export;  });
 			hasExport = true;
 		}
 
@@ -24,7 +24,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isAbstract())
 		{
 			// Consome 'abtract'.
-			parser->expectToken([parser]() { return parser->isAbstract();  });
+			parser->expectToken([parser]() { return TokenSubType_e::Abstract;  });
 			hasAbtract = true;
 
 			// Obrigatoriamente 'abstract' deve se referir a uma classe.

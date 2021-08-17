@@ -12,13 +12,13 @@ namespace fluffy { namespace parser_objects {
 		auto namespaceDecl = std::make_unique<ast::NamespaceDecl>();
 
 		// Consome 'namespace'.
-		parser->expectToken([parser]() { return parser->isNamespace(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Namespace; });
 
 		// Consome o identficador com o nome do namespace.
 		namespaceDecl->name = parser->expectIdentifier();
 
 		// Consome '{'.
-		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 		while (true)
 		{
@@ -40,7 +40,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken([parser]() { return parser->isRightBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 		return namespaceDecl;
 	}

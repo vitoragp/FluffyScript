@@ -25,6 +25,8 @@ namespace fluffy {
 
 			void					setTabSpaces(U32 newTabSpaces);
 
+			const I8*				getTokenString(TokenSubType_e tokenSubType);
+
 			U32						getPosition();
 			void					setPosition(U32 position);
 

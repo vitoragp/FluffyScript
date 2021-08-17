@@ -15,7 +15,7 @@ namespace fluffy { namespace parser_objects {
 		classDecl->isAbstract = hasAbstract;
 
 		// Consome 'class'.
-		parser->expectToken([parser]() { return parser->isClass(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Class; });
 
 		// Consome o nome da classe.
 		classDecl->name = parser->expectIdentifier();
@@ -39,7 +39,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'.
-		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 		while (true)
 		{
@@ -118,7 +118,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken([parser]() { return parser->isRightBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 		return classDecl;
 	}
@@ -126,7 +126,7 @@ namespace fluffy { namespace parser_objects {
 	TypeDeclPtr ParserObjectClassDecl::parseExtends(Parser* parser)
 	{
 		// Consome 'extends'
-		parser->expectToken([parser]() { return parser->isExtends(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Extends; });
 		return ParserObjectTypeDecl::parse(parser);
 	}
 
@@ -135,7 +135,7 @@ namespace fluffy { namespace parser_objects {
 		TypeDeclPtrList interfaceList;
 
 		// Consome 'implements'
-		parser->expectToken([parser]() { return parser->isImplements(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Implements; });
 
 		while (true)
 		{
@@ -145,7 +145,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isComma())
 			{
 				// Consome ','
-				parser->expectToken([parser]() { return parser->isComma(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Comma; });
 				continue;
 			}
 			break;
@@ -177,7 +177,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		parser->expectToken([parser]() { return parser->isFn(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Fn; });
 
 		// Consome o identificador.
 		classFunctionPtr->identifier = parser->expectIdentifier();
@@ -195,7 +195,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken([parser]() { return parser->isArrow(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Arrow; });
 
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
@@ -207,7 +207,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'
-		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 		// Console bloco se houver.
 		if (!parser->isRightBracket())
@@ -216,7 +216,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'
-		parser->expectToken([parser]() { return parser->isRightBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 		return classFunctionPtr;
 	}
@@ -229,11 +229,11 @@ namespace fluffy { namespace parser_objects {
 		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Abstract:
-			parser->expectToken([parser]() { return parser->isAbstract(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Abstract; });
 			classFunctionPtr->isAbstract = true;
 			break;
 		case TokenSubType_e::Virtual:
-			parser->expectToken([parser]() { return parser->isVirtual(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Virtual; });
 			classFunctionPtr->isVirtual = true;
 			break;
 		default:
@@ -257,7 +257,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		parser->expectToken([parser]() { return parser->isFn(); });
+		parser->expectToken([parser]() { return TokenSubType_e::Fn; });
 
 		// Consome o identificador.
 		classFunctionPtr->identifier = parser->expectIdentifier();
@@ -275,7 +275,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken([parser]() { return parser->isArrow(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Arrow; });
 
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
@@ -299,7 +299,7 @@ namespace fluffy { namespace parser_objects {
 					classFunctionPtr->identifier.c_str()
 				);
 			}
-			parser->expectToken([parser]() { return parser->isOverride(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Override; });
 			classFunctionPtr->isOverride = true;
 			break;
 		case TokenSubType_e::Final:
@@ -313,7 +313,7 @@ namespace fluffy { namespace parser_objects {
 					classFunctionPtr->identifier.c_str()
 				);
 			}
-			parser->expectToken([parser]() { return parser->isFinal(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Final; });
 			classFunctionPtr->isFinal = true;
 			break;
 		default:
@@ -323,12 +323,12 @@ namespace fluffy { namespace parser_objects {
 		if (classFunctionPtr->isAbstract)
 		{
 			// Consome ';'
-			parser->expectToken([parser]() { return parser->isSemiColon(); });
+			parser->expectToken([parser]() { return TokenSubType_e::SemiColon; });
 			return classFunctionPtr;
 		}
 
 		// Consome '{'
-		parser->expectToken([parser]() { return parser->isLeftBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
 
 		// Console bloco se houver.
 		if (!parser->isRightBracket())
@@ -337,7 +337,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'
-		parser->expectToken([parser]() { return parser->isRightBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
 
 		return classFunctionPtr;
 	}
@@ -369,11 +369,11 @@ namespace fluffy { namespace parser_objects {
 		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Let:
-			parser->expectToken([parser]() { return parser->isLet(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Let; });
 			variableDecl->isConst = false;
 			break;
 		case TokenSubType_e::Const:
-			parser->expectToken([parser]() { return parser->isConst(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Const; });
 			variableDecl->isConst = true;
 			break;
 		default:
@@ -384,7 +384,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			parser->expectToken([parser]() { return parser->isRef(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Ref; });
 			variableDecl->isReference = true;
 		}
 
@@ -397,7 +397,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken([parser]() { return parser->isColon(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 			const U32 line = parser->getTokenLine();
 			const U32 column = parser->getTokenColumn();
@@ -423,7 +423,7 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			parser->expectToken([parser]() { return parser->isAssign(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Assign; });
 
 			// Processa expressao.
 			variableDecl->initExpression = ParserObjectExpressionDecl::parse(parser);
@@ -431,7 +431,7 @@ namespace fluffy { namespace parser_objects {
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		parser->expectToken([parser]() { return parser->isSemiColon(); });
+		parser->expectToken([parser]() { return TokenSubType_e::SemiColon; });
 
 		return variableDecl;
 	}
@@ -441,13 +441,13 @@ namespace fluffy { namespace parser_objects {
 		ClassFunctionParameterDeclPtrList parameterDeclList;
 
 		// Consome '('
-		parser->expectToken([parser]() { return parser->isLeftParBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LParBracket; });
 
 		// Finaliza declaracao da lista de parametros.
 		if (parser->isRightParBracket())
 		{
 			// Consome ')'
-			parser->expectToken([parser]() { return parser->isRightParBracket(); });
+			parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 			return parameterDeclList;
 		}
 
@@ -461,7 +461,7 @@ namespace fluffy { namespace parser_objects {
 			parameterDecl->identifier = parser->expectIdentifier();
 
 			// Consome ':'
-			parser->expectToken([parser]() { return parser->isColon(); });
+			parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 			// Consome tipo
 			parameterDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
@@ -483,7 +483,7 @@ namespace fluffy { namespace parser_objects {
 			// Consome ','
 			if (parser->isComma())
 			{
-				parser->expectToken([parser]() { return parser->isComma(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Comma; });
 				continue;
 			}
 
@@ -500,7 +500,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome ')'
-		parser->expectToken([parser]() { return parser->isRightParBracket(); });
+		parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
 
 		return parameterDeclList;
 	}

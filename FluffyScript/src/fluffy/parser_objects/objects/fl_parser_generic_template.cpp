@@ -12,7 +12,7 @@ namespace fluffy { namespace parser_objects {
 		GenericDeclPtrList templateDeclList;
 
 		// Consome '<'
-		parser->expectToken([parser]() { return parser->isLessThan(); });
+		parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
 
 		while (true)
 		{
@@ -25,10 +25,10 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isColon())
 			{
 				// Consome ':'
-				parser->expectToken([parser]() { return parser->isColon(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Colon; });
 
 				// Consome 'where'
-				parser->expectToken([parser]() { return parser->isWhere(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Where; });
 
 				const U32 line = parser->getTokenLine();
 				const U32 column = parser->getTokenColumn();
@@ -49,7 +49,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome 'is'
-				parser->expectToken([parser]() { return parser->isIs(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Is; });
 
 				while (true)
 				{
@@ -70,7 +70,7 @@ namespace fluffy { namespace parser_objects {
 					if (parser->isBitWiseOr())
 					{
 						// Consome '|'
-						parser->expectToken([parser]() { return parser->isBitWiseOr(); });
+						parser->expectToken([parser]() { return TokenSubType_e::BitWiseOr; });
 						continue;
 					}
 					break;
@@ -85,7 +85,7 @@ namespace fluffy { namespace parser_objects {
 			// Consome ',' e processa proxima declaracao.
 			if (parser->isComma())
 			{
-				parser->expectToken([parser]() { return parser->isComma(); });
+				parser->expectToken([parser]() { return TokenSubType_e::Comma; });
 				continue;
 			}
 
@@ -110,7 +110,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '>'
-			parser->expectToken([parser]() { return parser->isGreaterThan(); });
+			parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
 			break;
 		}
 		return templateDeclList;
