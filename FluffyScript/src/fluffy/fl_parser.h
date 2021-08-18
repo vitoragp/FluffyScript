@@ -8,6 +8,8 @@
 namespace fluffy { namespace parser {
 	using ProgramPtr					= std::unique_ptr<ast::Program>;
 
+	using ErrCallback					= std::function<void()>;
+
 	/**
 	 * Parser
 	 */
@@ -27,7 +29,9 @@ namespace fluffy { namespace parser {
 
 		void							nextToken();
 
-		void							expectToken(std::function<TokenSubType_e()> callback);
+		void							expectToken(TokenSubType_e expectedToken);
+		void							expectToken(TokenSubType_e expectedToken, ErrCallback errcallback);
+
 		String							expectIdentifier();
 		const Bool						expectConstantBool();
 		const I8						expectConstantI8();

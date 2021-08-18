@@ -9,16 +9,19 @@ namespace fluffy { namespace parser_objects {
 
 	NamespaceDeclPtr ParserObjectNamespace::parse(Parser* parser)
 	{
-		auto namespaceDecl = std::make_unique<ast::NamespaceDecl>();
+		auto namespaceDecl = std::make_unique<ast::NamespaceDecl>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'namespace'.
-		parser->expectToken([parser]() { return TokenSubType_e::Namespace; });
+		parser->expectToken(TokenSubType_e::Namespace);
 
 		// Consome o identficador com o nome do namespace.
 		namespaceDecl->name = parser->expectIdentifier();
 
 		// Consome '{'.
-		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
@@ -36,11 +39,11 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Processa declaracao geral.
-			namespaceDecl->generalDeclList.push_back(ParserObjectGeneralStmt::parse(parser));
+			namespaceDecl->generalDeclList.push_back(ParserObjectGeneralDecl::parse(parser));
 		}
 
 		// Consome '}'.
-		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return namespaceDecl;
 	}

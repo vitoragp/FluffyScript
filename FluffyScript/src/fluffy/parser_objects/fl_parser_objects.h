@@ -18,13 +18,21 @@ namespace fluffy { namespace parser_objects {
 	using ProgramPtr						= unique_ptr<ast::Program>;
 	using IncludeDeclPtr					= unique_ptr<ast::IncludeDecl>;
 	using NamespaceDeclPtr					= unique_ptr<ast::NamespaceDecl>;
-	using GeneralStmtPtr					= unique_ptr<ast::GeneralStmt>;
+	using GeneralStmtPtr					= unique_ptr<ast::GeneralDecl>;
 	using ClassDeclPtr						= unique_ptr<ast::ClassDecl>;
 	using ClassFunctionDeclPtr				= unique_ptr<ast::ClassFunctionDecl>;
 	using ClassVariableDeclPtr				= unique_ptr<ast::ClassVariableDecl>;
+	using ClassConstructorDeclPtr			= unique_ptr<ast::ClassConstructorDecl>;
+	using ClassDestructorDeclPtr			= unique_ptr<ast::ClassDestructorDecl>;
+	using InterfaceDeclPtr					= unique_ptr<ast::InterfaceDecl>;
+	using InterfaceFunctionDeclPtr			= unique_ptr<ast::InterfaceFunctionDecl>;
+	using StructDeclPtr						= unique_ptr<ast::StructDecl>;
+	using StructVariableDeclPtr				= unique_ptr<ast::StructVariableDecl>;
+	using EnumDeclPtr						= unique_ptr<ast::EnumDecl>;
+	using EnumItemDeclPtr					= unique_ptr<ast::EnumItemDecl>;
 
-	using ClassFunctionParameterDeclPtr		= unique_ptr<ast::ClassFunctionParameterDecl>;
-	using ClassFunctionParameterDeclPtrList = vector<ClassFunctionParameterDeclPtr>;
+	using FunctionParameterDeclPtr			= unique_ptr<ast::FunctionParameterDecl>;
+	using FunctionParameterDeclPtrList		= vector<FunctionParameterDeclPtr>;
 
 	using GenericDeclPtr					= unique_ptr<ast::GenericDecl>;
 	using GenericDeclPtrList				= vector<GenericDeclPtr>;
@@ -79,10 +87,10 @@ namespace fluffy { namespace parser_objects {
 	};
 
 	/**
-	 * ParserObjectGeneralStmt
+	 * ParserObjectGeneralDecl
 	 */
 
-	class ParserObjectGeneralStmt
+	class ParserObjectGeneralDecl
 	{
 	public:
 		static
@@ -116,14 +124,73 @@ namespace fluffy { namespace parser_objects {
 		ClassVariableDeclPtr				parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic);
 
 		static
-		ClassFunctionParameterDeclPtrList	parseParameterList(Parser* parser);
+		ClassConstructorDeclPtr				parseConstructor(Parser* parser, TokenSubType_e accessModifier);
+
+		static
+		ClassDestructorDeclPtr				parseDestructor(Parser* parser);
 	};
 
 	/**
-	 * ParserObjectGenericTemplateDecl
+	 * ParserObjectInterfaceDecl
 	 */
 
-	class ParserObjectGenericTemplateDecl
+	class ParserObjectInterfaceDecl
+	{
+	public:
+		static
+		InterfaceDeclPtr					parse(Parser* parser, Bool hasExport);
+
+	private:
+		static
+		InterfaceFunctionDeclPtr			parserFunction(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectStructDecl
+	 */
+
+	class ParserObjectStructDecl
+	{
+	public:
+		static
+		StructDeclPtr						parse(Parser* parser, Bool hasExport);
+
+	private:
+		static
+		StructVariableDeclPtr				parserVariable(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectEnumDecl
+	 */
+
+	class ParserObjectEnumDecl
+	{
+	public:
+		static
+		EnumDeclPtr						parse(Parser* parser, Bool hasExport);
+
+	private:
+		static
+		EnumItemDeclPtr					parserEnum(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectFunctionParameter
+	 */
+
+	class ParserObjectFunctionParameter
+	{
+	public:
+		static
+		FunctionParameterDeclPtrList		parse(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectGenericDecl
+	 */
+
+	class ParserObjectGenericDecl
 	{
 	public:
 		static
@@ -146,20 +213,31 @@ namespace fluffy { namespace parser_objects {
 	private:
 		static 
 		TypeDeclPtr							parseVectorType(Parser* parser);
+
 		static 
 		TypeDeclPtr							parseSetType(Parser* parser);
+
 		static 
 		TypeDeclPtr							parseMapType(Parser* parser);
+
 		static 
 		TypeDeclPtr							parseFunctionType(Parser* parser);
+
 		static 
 		TypeDeclPtr							parseVariableType(Parser* parser);
+
+		static
+		TypeDeclPtr							parseTupleType(Parser* parser);
+
 		static 
 		TypeDeclPtr							parseNamedType(Parser* parser);
+
 		static
 		ArrayDeclPtr						parseArrayDecl(Parser* parser);
+
 		static
 		TypeDeclNamedPtr					parseInternalNamedType(Parser* parser);
+
 		static
 		void								reinterpretToken(Parser* parser);
 
@@ -175,12 +253,21 @@ namespace fluffy { namespace parser_objects {
 		static
 		ExpressionDeclPtr					parse(Parser* parser);
 
-	private:
 		static
-		ExpressionDeclPtr					parseExpression(Parser* parser, U32 prec);
+		ExpressionDeclPtr					skip(Parser* parser);
 
 		static
-		ExpressionDeclPtr					parseAtom(Parser* parser);
+		ExpressionDeclPtr					parseEnumExpr(Parser* parser);
+
+		static
+		ExpressionDeclPtr					skipEnumExpr(Parser* parser);
+
+	private:
+		static
+		ExpressionDeclPtr					parseExpression(Parser* parser, U32 prec, Bool skipOnly);
+
+		static
+		ExpressionDeclPtr					parseAtom(Parser* parser, Bool skipOnly);
 	};
 
 	/**
@@ -205,10 +292,19 @@ namespace fluffy { namespace parser_objects {
 		BlockDeclPtr						parse(Parser* parser);
 
 		static
+		BlockDeclPtr						skip(Parser* parser);
+
+		static
 		BlockDeclPtr						parseExprBlock(Parser* parser);
 
 		static
+		BlockDeclPtr						skipExprBlock(Parser* parser);
+
+		static
 		BlockDeclPtr						parseBlockOrExprBlock(Parser* parser);
+
+		static
+		BlockDeclPtr						skipBlockOrExprBlock(Parser* parser);
 	};
 
 	/**

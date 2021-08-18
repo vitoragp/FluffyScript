@@ -7,16 +7,19 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectGenericTemplate
 	 */
 
-	GenericDeclPtrList ParserObjectGenericTemplateDecl::parse(Parser* parser)
+	GenericDeclPtrList ParserObjectGenericDecl::parse(Parser* parser)
 	{
 		GenericDeclPtrList templateDeclList;
 
 		// Consome '<'
-		parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+		parser->expectToken(TokenSubType_e::LessThan);
 
 		while (true)
 		{
-			auto genericDecl = std::make_unique<ast::GenericDecl>();
+			auto genericDecl = std::make_unique<ast::GenericDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 
 			// Consome o identificador.
 			genericDecl->identifier = parser->expectIdentifier();
@@ -25,10 +28,10 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isColon())
 			{
 				// Consome ':'
-				parser->expectToken([parser]() { return TokenSubType_e::Colon; });
+				parser->expectToken(TokenSubType_e::Colon);
 
 				// Consome 'where'
-				parser->expectToken([parser]() { return TokenSubType_e::Where; });
+				parser->expectToken(TokenSubType_e::Where);
 
 				const U32 line = parser->getTokenLine();
 				const U32 column = parser->getTokenColumn();
@@ -49,7 +52,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome 'is'
-				parser->expectToken([parser]() { return TokenSubType_e::Is; });
+				parser->expectToken(TokenSubType_e::Is);
 
 				while (true)
 				{
@@ -70,7 +73,7 @@ namespace fluffy { namespace parser_objects {
 					if (parser->isBitWiseOr())
 					{
 						// Consome '|'
-						parser->expectToken([parser]() { return TokenSubType_e::BitWiseOr; });
+						parser->expectToken(TokenSubType_e::BitWiseOr);
 						continue;
 					}
 					break;
@@ -85,7 +88,7 @@ namespace fluffy { namespace parser_objects {
 			// Consome ',' e processa proxima declaracao.
 			if (parser->isComma())
 			{
-				parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+				parser->expectToken(TokenSubType_e::Comma);
 				continue;
 			}
 
@@ -110,7 +113,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '>'
-			parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+			parser->expectToken(TokenSubType_e::GreaterThan);
 			break;
 		}
 		return templateDeclList;

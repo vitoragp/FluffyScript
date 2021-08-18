@@ -376,6 +376,26 @@ namespace fluffy { namespace ast { namespace expr {
 	};
 
 	/**
+	 * ExpressionDeclMark
+	 */
+
+	class ExpressionDeclMark : public ExpressionDecl
+	{
+	public:
+		ExpressionDeclMark(const U32 line, const U32 column, const U32 beginPosition, const U32 endPopsition)
+			: ExpressionDecl(ExpressionDeclType_e::ConstantIdentifier, line, column)
+			, beginPosition(beginPosition)
+			, endPopsition(endPopsition)
+		{}
+
+		~ExpressionDeclMark()
+		{}
+
+		const U32								beginPosition;
+		const U32								endPopsition;
+	};
+
+	/**
 	 * ExpressionMatchWhenDecl
 	 */
 

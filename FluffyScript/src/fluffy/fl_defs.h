@@ -260,10 +260,10 @@ namespace fluffy {
 	};
 
 	/**
-		 * GeneralStmtType_e
+		 * GeneralDeclType_e
 		 */
 
-	enum class GeneralStmtType_e
+	enum class GeneralDeclType_e
 	{
 		Unknown,
 		ClassDecl,
@@ -334,6 +334,8 @@ namespace fluffy {
 
 		Function,
 
+		Tuple,
+
 		Named			// Classes, interfaces, trait, enum...
 	};
 
@@ -358,6 +360,20 @@ namespace fluffy {
 	};
 
 	/**
+	 * OperatorPrecLevel_e
+	 */
+
+	enum OperatorPrecLevel_e : U32
+	{
+		MinPrec			= 1,
+		Interrogation	= 2,
+		EnumExpr		= 3,
+		Unary			= 12,
+		Increment		= 14,
+		Max				= 15
+	};
+
+	/**
 	 * Token
 	 * Estrutura basica de informacao do compilador.
 	 */
@@ -375,4 +391,10 @@ namespace fluffy {
 
 		String filename;
 	};
+
+	/**
+	 * Funcoes auxiliares
+	 */
+
+	const I8* getTokenString(const TokenSubType_e tokenSubType);
 }

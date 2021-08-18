@@ -6,8 +6,8 @@
 	class TypeDecl##type : public TypeDecl \
 	{ \
 	public: \
-		TypeDecl##type() \
-			: TypeDecl(TypeDeclID_e::type) \
+		TypeDecl##type(U32 line, U32 column) \
+			: TypeDecl(TypeDeclID_e::type, line, column) \
 		{} \
 		virtual ~TypeDecl##type() \
 		{} \
@@ -32,9 +32,11 @@ namespace fluffy { namespace ast {
 	class TypeDecl
 	{
 	protected:
-		TypeDecl(TypeDeclID_e typeID)
+		TypeDecl(TypeDeclID_e typeID, U32 line, U32 column)
 			: typeID(typeID)
 			, nullable(false)
+			, line(line)
+			, column(column)
 		{}
 
 	public:
@@ -43,6 +45,8 @@ namespace fluffy { namespace ast {
 
 		const TypeDeclID_e					typeID;
 		Bool								nullable;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -70,8 +74,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclArray : public TypeDecl
 	{
 	public:
-		TypeDeclArray()
-			: TypeDecl(TypeDeclID_e::Array)
+		TypeDeclArray(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Array, line, column)
 		{}
 
 		virtual ~TypeDeclArray()
@@ -88,8 +92,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclVector : public TypeDecl
 	{
 	public:
-		TypeDeclVector()
-			: TypeDecl(TypeDeclID_e::Vector)
+		TypeDeclVector(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Vector, line, column)
 		{}
 
 		virtual ~TypeDeclVector()
@@ -105,8 +109,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclSet : public TypeDecl
 	{
 	public:
-		TypeDeclSet()
-			: TypeDecl(TypeDeclID_e::Set)
+		TypeDeclSet(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Set, line, column)
 		{}
 
 		virtual ~TypeDeclSet()
@@ -122,8 +126,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclMap : public TypeDecl
 	{
 	public:
-		TypeDeclMap()
-			: TypeDecl(TypeDeclID_e::Map)
+		TypeDeclMap(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Map, line, column)
 		{}
 
 		virtual ~TypeDeclMap()
@@ -140,8 +144,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclFunction : public TypeDecl
 	{
 	public:
-		TypeDeclFunction()
-			: TypeDecl(TypeDeclID_e::Function)
+		TypeDeclFunction(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Function, line, column)
 		{}
 
 		virtual ~TypeDeclFunction()
@@ -152,14 +156,31 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
+	 * TypeDeclTuple
+	 */
+
+	class TypeDeclTuple : public TypeDecl
+	{
+	public:
+		TypeDeclTuple(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Tuple, line, column)
+		{}
+
+		virtual ~TypeDeclTuple()
+		{}
+
+		TypeDeclPtrList						tupleItemList;
+	};
+
+	/**
 	 * TypeDeclNamed
 	 */
 
 	class TypeDeclNamed : public TypeDecl
 	{
 	public:
-		TypeDeclNamed()
-			: TypeDecl(TypeDeclID_e::Named)
+		TypeDeclNamed(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Named, line, column)
 			, startFromRoot(false)
 		{}
 
@@ -179,14 +200,18 @@ namespace fluffy { namespace ast {
 	class ArrayDecl
 	{
 	public:
-		ArrayDecl(ArrayType_e arrayType)
+		ArrayDecl(ArrayType_e arrayType, U32 line, U32 column)
 			: arrayType(arrayType)
+			, line(line)
+			, column(column)
 		{}
 
 		virtual ~ArrayDecl()
 		{}
 
 		const ArrayType_e					arrayType;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -196,8 +221,8 @@ namespace fluffy { namespace ast {
 	class SizedArrayDecl : public ArrayDecl
 	{
 	public:
-		SizedArrayDecl()
-			: ArrayDecl(ArrayType_e::Sized)
+		SizedArrayDecl(U32 line, U32 column)
+			: ArrayDecl(ArrayType_e::Sized, line, column)
 			, size(0)
 		{}
 
@@ -214,8 +239,8 @@ namespace fluffy { namespace ast {
 	class UnsizedArrayDecl : public ArrayDecl
 	{
 	public:
-		UnsizedArrayDecl()
-			: ArrayDecl(ArrayType_e::Unsized)
+		UnsizedArrayDecl(U32 line, U32 column)
+			: ArrayDecl(ArrayType_e::Unsized, line, column)
 		{}
 
 		virtual ~UnsizedArrayDecl()

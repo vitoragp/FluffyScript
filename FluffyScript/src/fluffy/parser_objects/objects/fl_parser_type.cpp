@@ -18,55 +18,94 @@ namespace fluffy { namespace parser_objects {
 		{
 		case TokenSubType_e::Void:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclVoid>();
+			typeDecl = std::make_unique<ast::TypeDeclVoid>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::I8:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI8>();
+			typeDecl = std::make_unique<ast::TypeDeclI8>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::U8:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU8>();
+			typeDecl = std::make_unique<ast::TypeDeclU8>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::I16:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI16>();
+			typeDecl = std::make_unique<ast::TypeDeclI16>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::U16:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU16>();
+			typeDecl = std::make_unique<ast::TypeDeclU16>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::I32:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI32>();
+			typeDecl = std::make_unique<ast::TypeDeclI32>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::U32:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU32>();
+			typeDecl = std::make_unique<ast::TypeDeclU32>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::I64:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI64>();
+			typeDecl = std::make_unique<ast::TypeDeclI64>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::U64:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU64>();
+			typeDecl = std::make_unique<ast::TypeDeclU64>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::Fp32:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclFp32>();
+			typeDecl = std::make_unique<ast::TypeDeclFp32>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::Fp64:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclFp64>();
+			typeDecl = std::make_unique<ast::TypeDeclFp64>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::String:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclString>();
+			typeDecl = std::make_unique<ast::TypeDeclString>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::Object:
 			parser->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclObject>();
+			typeDecl = std::make_unique<ast::TypeDeclObject>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 			break;
 		case TokenSubType_e::Vector:
 			typeDecl = ParserObjectTypeDecl::parseVectorType(parser);
@@ -79,6 +118,9 @@ namespace fluffy { namespace parser_objects {
 			break;
 		case TokenSubType_e::Fn:
 			typeDecl = ParserObjectTypeDecl::parseFunctionType(parser);
+			break;
+		case TokenSubType_e::LParBracket:
+			typeDecl = ParserObjectTypeDecl::parseTupleType(parser);
 			break;
 		default:
 			// NamedType
@@ -107,7 +149,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '?'
-			parser->expectToken([parser]() { return TokenSubType_e::Interrogation; });
+			parser->expectToken(TokenSubType_e::Interrogation);
 
 			typeDecl->nullable = true;
 		}
@@ -115,7 +157,10 @@ namespace fluffy { namespace parser_objects {
 		// Verifica se e um array
 		if (parser->isLeftSquBracket())
 		{
-			auto arrayType = std::make_unique<ast::TypeDeclArray>();
+			auto arrayType = std::make_unique<ast::TypeDeclArray>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 
 			// Adiciona o tipo base ao tipo array
 			arrayType->valueType = std::move(typeDecl);
@@ -133,7 +178,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isInterrogation())
 			{
 				// Consome '?'
-				parser->expectToken([parser]() { return TokenSubType_e::Interrogation; });
+				parser->expectToken(TokenSubType_e::Interrogation);
 
 				arrayType->nullable = true;
 			}
@@ -155,13 +200,16 @@ namespace fluffy { namespace parser_objects {
 
 	TypeDeclPtr ParserObjectTypeDecl::parseVectorType(Parser* parser)
 	{
-		auto vectorTypeDecl = std::make_unique<ast::TypeDeclVector>();
+		auto vectorTypeDecl = std::make_unique<ast::TypeDeclVector>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'vector'
-		parser->expectToken([parser]() { return TokenSubType_e::Vector; });
+		parser->expectToken(TokenSubType_e::Vector);
 
 		// Consome '<'
-		parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+		parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo do valor
 		vectorTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
@@ -174,20 +222,23 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '>'
-		parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+		parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return vectorTypeDecl;
 	}
 
 	TypeDeclPtr ParserObjectTypeDecl::parseSetType(Parser* parser)
 	{
-		auto setTypeDecl = std::make_unique<ast::TypeDeclSet>();
+		auto setTypeDecl = std::make_unique<ast::TypeDeclSet>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'set'
-		parser->expectToken([parser]() { return TokenSubType_e::Set; });
+		parser->expectToken(TokenSubType_e::Set);
 
 		// Consome '<'
-		parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+		parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo do valor
 		setTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
@@ -200,26 +251,29 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '>'
-		parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+		parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return setTypeDecl;
 	}
 
 	TypeDeclPtr ParserObjectTypeDecl::parseMapType(Parser* parser)
 	{
-		auto mapTypeDecl = std::make_unique<ast::TypeDeclMap>();
+		auto mapTypeDecl = std::make_unique<ast::TypeDeclMap>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'map'
-		parser->expectToken([parser]() { return TokenSubType_e::Map; });
+		parser->expectToken(TokenSubType_e::Map);
 
 		// Consome '<'
-		parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+		parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo da chave.
 		mapTypeDecl->keyType = ParserObjectTypeDecl::parseVariableType(parser);
 
 		// Consome ','
-		parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+		parser->expectToken(TokenSubType_e::Comma);
 
 		// Consome o tipo do valor
 		mapTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
@@ -232,20 +286,23 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '>'
-		parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+		parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return mapTypeDecl;
 	}
 
 	TypeDeclPtr ParserObjectTypeDecl::parseFunctionType(Parser* parser)
 	{
-		auto functionTypeDecl = std::make_unique<ast::TypeDeclFunction>();
+		auto functionTypeDecl = std::make_unique<ast::TypeDeclFunction>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'fn'
-		parser->expectToken([parser]() { return TokenSubType_e::Fn; });
+		parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome '('
-		parser->expectToken([parser]() { return TokenSubType_e::LParBracket; });
+		parser->expectToken(TokenSubType_e::LParBracket);
 
 		Bool hasReturnExplicit = false;
 		while (true)
@@ -262,7 +319,7 @@ namespace fluffy { namespace parser_objects {
 
 				// Verifica se ha mais parametros e consome ','
 				if (parser->isComma()) {
-					parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+					parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
@@ -271,7 +328,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isArrow())
 			{
 				// Consome '->'
-				parser->expectToken([parser]() { return TokenSubType_e::Arrow; });
+				parser->expectToken(TokenSubType_e::Arrow);
 
 				functionTypeDecl->returnType = parse(parser);
 
@@ -288,11 +345,14 @@ namespace fluffy { namespace parser_objects {
 		// Se nao ha retorno explicito void e o tipo padrao.
 		if (!hasReturnExplicit)
 		{
-			functionTypeDecl->returnType = std::make_unique<ast::TypeDeclVoid>();
+			functionTypeDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 		}
 
 		// Consome ')'
-		parser->expectToken([parser]() { return TokenSubType_e::RParBracket; });
+		parser->expectToken(TokenSubType_e::RParBracket);
 
 		return functionTypeDecl;
 	}
@@ -311,15 +371,80 @@ namespace fluffy { namespace parser_objects {
 		return typeDecl;
 	}
 
+	TypeDeclPtr ParserObjectTypeDecl::parseTupleType(Parser* parser)
+	{
+		auto tupleTypeDecl = std::make_unique<ast::TypeDeclTuple>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
+
+		// Consome '('.
+		parser->expectToken(TokenSubType_e::LParBracket);
+
+		// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
+		if (auto tupleItemDecl = ParserObjectTypeDecl::parse(parser))
+		{
+			if (tupleItemDecl->typeID == TypeDeclID_e::Void)
+			{
+				throw exceptions::unexpected_type_exception("void",
+					parser->getTokenLine(),
+					parser->getTokenColumn()
+				);
+			}
+			tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
+		}
+
+		while (true)
+		{
+			if (parser->isRightBracket())
+			{
+				break;
+			}
+
+			if (parser->isComma())
+			{
+				// Consome ','.
+				parser->expectToken(TokenSubType_e::Comma);
+
+				// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
+				if (auto tupleItemDecl = ParserObjectTypeDecl::parse(parser))
+				{
+					if (tupleItemDecl->typeID == TypeDeclID_e::Void)
+					{
+						throw exceptions::unexpected_type_exception("void",
+							parser->getTokenLine(),
+							parser->getTokenColumn()
+						);
+					}
+					tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
+				}
+				continue;
+			}
+
+			throw exceptions::unexpected_token_exception(
+				parser->getTokenValue(),
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
+		}
+
+		// Consome ')'.
+		parser->expectToken(TokenSubType_e::RParBracket);
+		return tupleTypeDecl;
+	}
+
 	TypeDeclPtr ParserObjectTypeDecl::parseNamedType(Parser* parser)
 	{
-		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>();
+		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Verifica se inicia pelo escopo global.
 		if (parser->isScopeResolution())
 		{
 			// Consome '::'.
-			parser->expectToken([parser]() { return TokenSubType_e::ScopeResolution; });
+			parser->expectToken(TokenSubType_e::ScopeResolution);
 			namedTypeDecl->startFromRoot = true;
 		}
 
@@ -330,7 +455,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isLessThan())
 		{
 			// Consome '<'.
-			parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+			parser->expectToken(TokenSubType_e::LessThan);
 
 			while (true)
 			{
@@ -354,13 +479,13 @@ namespace fluffy { namespace parser_objects {
 				if (parser->isComma())
 				{
 					// Consome ','.
-					parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+					parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
 
 			// Consome '>'.
-			parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+			parser->expectToken(TokenSubType_e::GreaterThan);
 		}
 
 		// Verifica se ha identificadores internos.
@@ -374,32 +499,42 @@ namespace fluffy { namespace parser_objects {
 	ArrayDeclPtr ParserObjectTypeDecl::parseArrayDecl(Parser* parser)
 	{
 		// Consome '['
-		parser->expectToken([parser]() { return TokenSubType_e::LSquBracket; });
+		parser->expectToken(TokenSubType_e::LSquBracket);
 
 		// Unsized array
 		if (parser->isRightSquBracket()) {
 			// Consome ']'
-			parser->expectToken([parser]() { return TokenSubType_e::RSquBracket; });
-			return std::make_unique<ast::UnsizedArrayDecl>();
+			parser->expectToken(TokenSubType_e::RSquBracket);
+			return std::make_unique<ast::UnsizedArrayDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 		}
-		auto sizedArrayDecl = std::make_unique<ast::SizedArrayDecl>();
+
+		auto sizedArrayDecl = std::make_unique<ast::SizedArrayDecl>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 		
 		// TODO: Futuramente vai fazer o parse de uma expressao em tempode compilacao.
 		// mas por hora vai fazer o parse de um I32.
 		sizedArrayDecl->size = parser->expectConstantI32();
 
 		// Consome ']'
-		parser->expectToken([parser]() { return TokenSubType_e::RSquBracket; });
+		parser->expectToken(TokenSubType_e::RSquBracket);
 
 		return sizedArrayDecl;
 	}
 
 	TypeDeclNamedPtr ParserObjectTypeDecl::parseInternalNamedType(Parser* parser)
 	{
-		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>();
+		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome '::'.
-		parser->expectToken([parser]() { return TokenSubType_e::ScopeResolution; });
+		parser->expectToken(TokenSubType_e::ScopeResolution);
 
 		// Consome o identificador.
 		namedTypeDecl->identifier = parser->expectIdentifier();
@@ -408,7 +543,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isLessThan())
 		{
 			// Consome '<'.
-			parser->expectToken([parser]() { return TokenSubType_e::LessThan; });
+			parser->expectToken(TokenSubType_e::LessThan);
 
 			while (true)
 			{
@@ -432,13 +567,13 @@ namespace fluffy { namespace parser_objects {
 				if (parser->isComma())
 				{
 					// Consome ','.
-					parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+					parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
 
 			// Consome '>'.
-			parser->expectToken([parser]() { return TokenSubType_e::GreaterThan; });
+			parser->expectToken(TokenSubType_e::GreaterThan);
 		}
 
 		// Verifica se ha identificadores internos.

@@ -1,5 +1,7 @@
 #pragma once
 #include <exception>
+#include <vector>
+#include <string>
 #include "fl_defs.h"
 
 namespace fluffy {
@@ -37,6 +39,24 @@ namespace fluffy {
 			Bool					m_isChar;
 			I8 						m_tokenChar;
 			String					m_tokenString;
+			U32 					m_line;
+			U32 					m_column;
+		};
+
+		/**
+		 * unexpected_with_possibilities_token_exception
+		 */
+
+		class unexpected_with_possibilities_token_exception : public std::exception
+		{
+		public:
+									unexpected_with_possibilities_token_exception(String token, std::vector<TokenSubType_e> possibilities, U32 line, U32 column);
+									~unexpected_with_possibilities_token_exception();
+
+			virtual const char*		what() const noexcept override;
+
+		private:
+			String					m_out;
 			U32 					m_line;
 			U32 					m_column;
 		};

@@ -53,9 +53,9 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->genericTemplateList.size(), 1);
-		EXPECT_EQ(classObject->genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericTemplateList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList.size(), 1);
+		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 		EXPECT_EQ(classObject->interfaceList.size(), 0);
@@ -70,11 +70,11 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->genericTemplateList.size(), 2);
-		EXPECT_EQ(classObject->genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericTemplateList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericTemplateList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericTemplateList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList.size(), 2);
+		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
 		
 		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
 
@@ -114,11 +114,11 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->genericTemplateList.size(), 2);
-		EXPECT_EQ(classObject->genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericTemplateList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericTemplateList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericTemplateList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList.size(), 2);
+		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 
@@ -175,7 +175,7 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 
@@ -218,11 +218,11 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->name, "Foo");
 
-		EXPECT_EQ(classObject->genericTemplateList.size(), 2);
-		EXPECT_EQ(classObject->genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericTemplateList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericTemplateList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericTemplateList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList.size(), 2);
+		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
 				
 		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
 
@@ -264,10 +264,10 @@ namespace fluffy { namespace testing {
 		parser->loadSource("<T>");
 		parser->nextToken();
 
-		auto genericTemplateList = parser_objects::ParserObjectGenericTemplateDecl::parse(parser.get());
+		auto genericDeclList = parser_objects::ParserObjectGenericDecl::parse(parser.get());
 
-		EXPECT_EQ(genericTemplateList.size(), 1);
-		EXPECT_EQ(genericTemplateList[0]->identifier, "T");
+		EXPECT_EQ(genericDeclList.size(), 1);
+		EXPECT_EQ(genericDeclList[0]->identifier, "T");
 	}
 
 	TEST_F(ParserClassTest, TestGenericTemplateWithTwoDeclaration)
@@ -275,11 +275,22 @@ namespace fluffy { namespace testing {
 		parser->loadSource("<T, R>");
 		parser->nextToken();
 
-		auto genericTemplateList = parser_objects::ParserObjectGenericTemplateDecl::parse(parser.get());
+		auto genericDeclList = parser_objects::ParserObjectGenericDecl::parse(parser.get());
 
-		EXPECT_EQ(genericTemplateList.size(), 2);
+		EXPECT_EQ(genericDeclList.size(), 2);
 
-		EXPECT_EQ(genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(genericTemplateList[1]->identifier, "R");
+		EXPECT_EQ(genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(genericDeclList[1]->identifier, "R");
+	}
+
+	TEST_F(ParserClassTest, TestFullClassDeclaration)
+	{
+		parser->loadSourceFromFile(".\\files\\parser\\source_4.txt");
+		parser->nextToken();
+
+		while (!parser->isEof())
+		{
+			parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		}
 	}
 } }

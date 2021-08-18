@@ -22,7 +22,7 @@ namespace fluffy { namespace ast {
 	using NamespaceDeclPtr					= unique_ptr<class NamespaceDecl>;
 	using NamespaceDeclPtrList				= vector<NamespaceDeclPtr>;
 
-	using GeneralStmtPtr					= unique_ptr<class GeneralStmt>;
+	using GeneralStmtPtr					= unique_ptr<class GeneralDecl>;
 	using GeneralStmtPtrList				= vector<GeneralStmtPtr>;
 
 	using ClassFunctionDeclPtr				= unique_ptr<class ClassFunctionDecl>;
@@ -31,8 +31,26 @@ namespace fluffy { namespace ast {
 	using ClassVariableDeclPtr				= unique_ptr<class ClassVariableDecl>;
 	using ClassVariableDeclPtrList			= vector<ClassVariableDeclPtr>;
 
-	using ClassFunctionParameterDeclPtr		= unique_ptr<class ClassFunctionParameterDecl>;
-	using ClassFunctionParameterDeclPtrList = vector<ClassFunctionParameterDeclPtr>;		
+	using ClassConstructorDeclPtr			= unique_ptr<class ClassConstructorDecl>;
+	using ClassConstructorDeclPtrList		= vector<ClassConstructorDeclPtr>;
+
+	using ClassDestructorDeclPtr			= unique_ptr<class ClassDestructorDecl>;
+	using ClassDestructorDeclPtrList		= vector<ClassDestructorDeclPtr>;
+
+	using ClassVariableInitDeclPtr			= unique_ptr<class ClassVariableInitDecl>;
+	using ClassVariableInitDeclPtrList		= vector<ClassVariableInitDeclPtr>;
+
+	using InterfaceFunctionDeclPtr			= unique_ptr<class InterfaceFunctionDecl>;
+	using InterfaceFunctionDeclPtrList		= vector<InterfaceFunctionDeclPtr>;
+
+	using StructVariableDeclPtr				= unique_ptr<class StructVariableDecl>;
+	using StructVariableDeclPtrList			= vector<StructVariableDeclPtr>;
+
+	using EnumItemDeclPtr					= unique_ptr<class EnumItemDecl>;
+	using EnumItemDeclPtrList				= vector<EnumItemDeclPtr>;
+
+	using FunctionParameterDeclPtr			= unique_ptr<class FunctionParameterDecl>;
+	using FunctionParameterDeclPtrList		= vector<FunctionParameterDeclPtr>;		
 
 	using GenericDeclPtr					= unique_ptr<class GenericDecl>;
 	using GenericDeclPtrList				= vector<GenericDeclPtr>;
@@ -62,8 +80,8 @@ namespace fluffy { namespace ast {
 		Program() {}
 		~Program() {}
 
-		IncludeDeclPtrList				includeDeclList;
-		CodeUnitPtrList					codeUnits;			
+		IncludeDeclPtrList					includeDeclList;
+		CodeUnitPtrList						codeUnitList;
 	};
 
 	/**
@@ -73,11 +91,18 @@ namespace fluffy { namespace ast {
 	class IncludeDecl
 	{
 	public:
-		IncludeDecl() {}
-		~IncludeDecl() {}
+		IncludeDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
 
-		StringList						includedItemList;
-		ScopedIdentifierDeclPtr			fromNamespace;
+		~IncludeDecl()
+		{}
+
+		StringList							includedItemList;
+		ScopedIdentifierDeclPtr				fromNamespace;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -94,8 +119,8 @@ namespace fluffy { namespace ast {
 		~CodeUnit()
 		{}
 
-		const String					name;
-		NamespaceDeclPtrList			namespaceDeclList;
+		const String						name;
+		NamespaceDeclPtrList				namespaceDeclList;
 	};
 
 	/**
@@ -105,41 +130,53 @@ namespace fluffy { namespace ast {
 	class NamespaceDecl
 	{
 	public:
-		NamespaceDecl() {}
-		~NamespaceDecl() {}
+		NamespaceDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
 
-		String							name;
-		NamespaceDeclPtrList			namespaceDeclList;
-		GeneralStmtPtrList				generalDeclList;
+		~NamespaceDecl()
+		{}
+
+		String								name;
+		NamespaceDeclPtrList				namespaceDeclList;
+		GeneralStmtPtrList					generalDeclList;
+		U32									line;
+		U32									column;
 	};
 
 	/**
-		* GeneralStmt
+		* GeneralDecl
 		*/
 
-	class GeneralStmt
+	class GeneralDecl
 	{
 	protected:
-		GeneralStmt(GeneralStmtType_e type)
+		GeneralDecl(GeneralDeclType_e type, U32 line, U32 column)
 			: type(type)
+			, line(line)
+			, column(column)
 		{}
 
 	public:
-		virtual	~GeneralStmt()
+		virtual	~GeneralDecl()
 		{}
 
-		GeneralStmtType_e				type;
+		const GeneralDeclType_e				type;
+		U32									line;
+		U32									column;
+
 	};
 
 	/**
 	 * ClassDecl
 	 */
 
-	class ClassDecl : public GeneralStmt
+	class ClassDecl : public GeneralDecl
 	{
 	public:
-		ClassDecl()
-			: GeneralStmt(GeneralStmtType_e::ClassDecl)
+		ClassDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::ClassDecl, line, column)
 			, isExported(false)
 			, isAbstract(false)
 		{}
@@ -150,15 +187,15 @@ namespace fluffy { namespace ast {
 		Bool								isExported;
 		Bool								isAbstract;
 		String								name;
-		GenericDeclPtrList					genericTemplateList;
+		GenericDeclPtrList					genericDeclList;
 		TypeDeclPtr							baseClass;
 		TypeDeclPtrList						interfaceList;
 		ClassFunctionDeclPtrList			staticFunctionList;
 		ClassFunctionDeclPtrList			functionList;
 		ClassVariableDeclPtrList			staticVariableList;
 		ClassVariableDeclPtrList			variableList;
-		// ConstructorList					constructorList;
-		// DestructorDecl					destructorDecl;
+		ClassConstructorDeclPtrList			constructorList;
+		ClassDestructorDeclPtr				destructorDecl;
 	};
 
 	/**
@@ -168,9 +205,11 @@ namespace fluffy { namespace ast {
 	class ClassMemberDecl
 	{
 	protected:
-		ClassMemberDecl(ClassMemberType_e type)
+		ClassMemberDecl(ClassMemberType_e type, U32 line, U32 column)
 			: type(type)
 			, accessModifier(ClassMemberAccessModifier_e::Unknown)
+			, line(line)
+			, column(column)
 		{}
 
 	public:
@@ -180,6 +219,8 @@ namespace fluffy { namespace ast {
 		const ClassMemberType_e				type;
 
 		ClassMemberAccessModifier_e			accessModifier;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -189,8 +230,8 @@ namespace fluffy { namespace ast {
 	class ClassFunctionDecl : public ClassMemberDecl
 	{
 	public:
-		ClassFunctionDecl()
-			: ClassMemberDecl(ClassMemberType_e::Function)
+		ClassFunctionDecl(U32 line, U32 column)
+			: ClassMemberDecl(ClassMemberType_e::Function, line, column)
 			, isStatic(false)
 			, isVirtual(false)
 			, isAbstract(false)
@@ -209,30 +250,12 @@ namespace fluffy { namespace ast {
 		Bool								isOverride;
 		Bool								isFinal;
 
-		GenericDeclPtrList					genericTemplateList;
+		GenericDeclPtrList					genericDeclList;
 
-		ClassFunctionParameterDeclPtrList	parameterList;
+		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
 
 		BlockDeclPtr						blockDecl;
-	};
-
-	/**
-	 * ClassFunctionParameterDecl
-	 */
-
-	class ClassFunctionParameterDecl
-	{
-	public:
-		ClassFunctionParameterDecl()
-		{}
-
-		~ClassFunctionParameterDecl()
-		{}
-
-		TypeDeclPtr							typeDecl;
-		String								identifier;
-		// ExpressionDeclPtr					defaultValueDecl;
 	};
 
 	/**
@@ -242,8 +265,8 @@ namespace fluffy { namespace ast {
 	class ClassVariableDecl : public ClassMemberDecl
 	{
 	public:
-		ClassVariableDecl()
-			: ClassMemberDecl(ClassMemberType_e::Variable)
+		ClassVariableDecl(U32 line, U32 column)
+			: ClassMemberDecl(ClassMemberType_e::Variable, line, column)
 			, isConst(false)
 			, isReference(false)
 			, isStatic(false)
@@ -261,13 +284,232 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
+	 * ClassConstructorDecl
+	 */
+
+	class ClassConstructorDecl : public ClassMemberDecl
+	{
+	public:
+		ClassConstructorDecl(U32 line, U32 column)
+			: ClassMemberDecl(ClassMemberType_e::Constructor, line, column)
+		{}
+
+		virtual ~ClassConstructorDecl()
+		{}
+
+		FunctionParameterDeclPtrList		parameterList;
+		ExpressionDeclPtr					superParameters;
+		ClassVariableInitDeclPtrList		variableInitDeclList;
+		BlockDeclPtr						blockDecl;
+	};
+
+	/**
+	 * ClassDestructorDecl
+	 */
+
+	class ClassDestructorDecl : public ClassMemberDecl
+	{
+	public:
+		ClassDestructorDecl(U32 line, U32 column)
+			: ClassMemberDecl(ClassMemberType_e::Destructor, line, column)
+		{}
+
+		virtual ~ClassDestructorDecl()
+		{}
+
+		BlockDeclPtr						blockDecl;
+	};
+
+	/**
+	 * ClassVariableInitDecl
+	 */
+
+	class ClassVariableInitDecl
+	{
+	public:
+		ClassVariableInitDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
+
+		~ClassVariableInitDecl()
+		{}
+
+		String								identifier;
+		ExpressionDeclPtr					initExpression;
+		U32									line;
+		U32									column;
+	};
+
+	/**
+	 * InterfaceDecl
+	 */
+
+	class InterfaceDecl : public GeneralDecl
+	{
+	public:
+		InterfaceDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::InterfaceDecl, line, column)
+			, isExported(false)
+		{}
+
+		virtual ~InterfaceDecl()
+		{}
+
+		Bool								isExported;
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		InterfaceFunctionDeclPtrList		functionDeclList;
+	};
+
+	/**
+	 * InterfaceFunctionDecl
+	 */
+
+	class InterfaceFunctionDecl
+	{
+	public:
+		InterfaceFunctionDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
+
+		~InterfaceFunctionDecl()
+		{}
+
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		FunctionParameterDeclPtrList		parameterList;
+		TypeDeclPtr							returnType;
+		U32									line;
+		U32									column;
+	};
+
+	/**
+	 * StructDecl
+	 */
+
+	class StructDecl : public GeneralDecl
+	{
+	public:
+		StructDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::StructDecl, line, column)
+			, isExported(false)
+		{}
+
+		virtual ~StructDecl()
+		{}
+
+		Bool								isExported;
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		StructVariableDeclPtrList			variableList;
+	};
+
+	/**
+	 * StructVariableDecl
+	 */
+
+	class StructVariableDecl
+	{
+	public:
+		StructVariableDecl(U32 line, U32 column)
+			: isConst(false)
+			, isReference(false)
+			, line(line)
+			, column(column)
+		{}
+
+		~StructVariableDecl()
+		{}
+
+		Bool								isConst;
+		Bool								isReference;
+		String								identifier;
+		TypeDeclPtr							typeDecl;
+		ExpressionDeclPtr					initExpression;
+		U32									line;
+		U32									column;
+	};
+
+	/**
+	 * EnumDecl
+	 */
+
+	class EnumDecl : public GeneralDecl
+	{
+	public:
+		EnumDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::EnumDecl, line, column)
+			, isExported(false)
+		{}
+
+		virtual ~EnumDecl()
+		{}
+
+		Bool								isExported;
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		EnumItemDeclPtrList					enumItemDeclList;
+	};
+
+	/**
+	 * EnumItemDecl 
+	 */
+
+	class EnumItemDecl
+	{
+	public:
+		EnumItemDecl(U32 line, U32 column)
+			: hasData(false)
+			, hasValue(false)
+			, line(line)
+			, column(column)
+		{}
+
+		~EnumItemDecl()
+		{}
+
+		Bool								hasData;
+		Bool								hasValue;
+		String								identifier;
+		TypeDeclPtrList						dataTypeDeclList;
+		ExpressionDeclPtr					valueExpression;
+		U32									line;
+		U32									column;
+	};
+
+	/**
+	 * FunctionParameterDecl
+	 */
+
+	class FunctionParameterDecl
+	{
+	public:
+		FunctionParameterDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
+
+		~FunctionParameterDecl()
+		{}
+
+		TypeDeclPtr							typeDecl;
+		String								identifier;
+		U32									line;
+		U32									column;
+	};
+
+	/**
 	 * GenericDecl
 	 */
 
 	class GenericDecl
 	{
 	public:
-		GenericDecl()
+		GenericDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
 		{}
 
 		~GenericDecl()
@@ -275,6 +517,8 @@ namespace fluffy { namespace ast {
 
 		String								identifier;
 		TypeDeclPtrList						whereTypeList;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -284,8 +528,10 @@ namespace fluffy { namespace ast {
 	class ScopedIdentifierDecl
 	{
 	public:
-		ScopedIdentifierDecl()
+		ScopedIdentifierDecl(U32 line, U32 column)
 			: startFromRoot(false)
+			, line(line)
+			, column(column)
 		{}
 
 		~ScopedIdentifierDecl()
@@ -294,6 +540,8 @@ namespace fluffy { namespace ast {
 		String								identifier;
 		ScopedIdentifierDeclPtr				tailIdentifier;
 		Bool								startFromRoot;
+		U32									line;
+		U32									column;
 	};
 
 	/**
@@ -303,8 +551,10 @@ namespace fluffy { namespace ast {
 	class BlockDecl
 	{
 	protected:
-		BlockDecl(BlockType_e type)
+		BlockDecl(BlockType_e type, U32 line, U32 column)
 			: type(type)
+			, line(line)
+			, column(column)
 		{}
 
 	public:
@@ -312,5 +562,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		const BlockType_e					type;
+		U32									line;
+		U32									column;
 	};
 } }

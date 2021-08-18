@@ -54,7 +54,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 0);
 
@@ -81,7 +81,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 1);
 
@@ -111,7 +111,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -144,7 +144,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -177,7 +177,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, true);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -210,7 +210,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, true);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -243,7 +243,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, true);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -276,7 +276,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->functionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
 
@@ -309,7 +309,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->staticFunctionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->staticFunctionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList.size(), 0);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList.size(), 2);
 
@@ -342,13 +342,13 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->staticFunctionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->staticFunctionList[0]->isOverride, false);
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList.size(), 1);
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->identifier, "T");
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->whereTypeList.size(), 2);
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->whereTypeList[0]->typeID, TypeDeclID_e::I32);
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->whereTypeList[0]->nullable, false);
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->whereTypeList[1]->typeID, TypeDeclID_e::Fp32);
-		EXPECT_EQ(classObject->staticFunctionList[0]->genericTemplateList[0]->whereTypeList[1]->nullable, false);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList.size(), 1);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->whereTypeList.size(), 2);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->whereTypeList[0]->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->whereTypeList[0]->nullable, false);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->whereTypeList[1]->typeID, TypeDeclID_e::Fp32);
+		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList[0]->whereTypeList[1]->nullable, false);
 
 		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList.size(), 2);
 

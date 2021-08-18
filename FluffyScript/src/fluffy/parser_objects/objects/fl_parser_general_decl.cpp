@@ -4,10 +4,10 @@
 
 namespace fluffy { namespace parser_objects {
 	/**
-	 * ParserObjectGeneralStmt
+	 * ParserObjectGeneralDecl
 	 */
 
-	GeneralStmtPtr ParserObjectGeneralStmt::parse(Parser* parser)
+	GeneralStmtPtr ParserObjectGeneralDecl::parse(Parser* parser)
 	{
 		Bool hasExport = false;
 		Bool hasAbtract = false;
@@ -16,7 +16,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isExport())
 		{
 			// Consome 'export'.
-			parser->expectToken([parser]() { return TokenSubType_e::Export;  });
+			parser->expectToken(TokenSubType_e::Export);
 			hasExport = true;
 		}
 
@@ -24,7 +24,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isAbstract())
 		{
 			// Consome 'abtract'.
-			parser->expectToken([parser]() { return TokenSubType_e::Abstract;  });
+			parser->expectToken(TokenSubType_e::Abstract);
 			hasAbtract = true;
 
 			// Obrigatoriamente 'abstract' deve se referir a uma classe.
@@ -33,15 +33,17 @@ namespace fluffy { namespace parser_objects {
 			}
 		}
 
+		// export, abstract, class, interface, struct, enum, trait, let, fn
+
 		// Verifica qual declaracao processar.
 		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Class:
 			return ParserObjectClassDecl::parse(parser, hasExport, hasAbtract);
 		case TokenSubType_e::Interface:
-			throw exceptions::not_implemented_feature_exception("parseInterfaceDecl");
+			return ParserObjectInterfaceDecl::parse(parser, hasExport);
 		case TokenSubType_e::Struct:
-			throw exceptions::not_implemented_feature_exception("parseStructDecl");
+			return ParserObjectStructDecl::parse(parser, hasExport);
 		case TokenSubType_e::Enum:
 			throw exceptions::not_implemented_feature_exception("parseEnumDecl");
 		case TokenSubType_e::Trait:
@@ -51,7 +53,20 @@ namespace fluffy { namespace parser_objects {
 		case TokenSubType_e::Fn:
 			throw exceptions::not_implemented_feature_exception("parseFunctionDecl");
 		default:
-			throw exceptions::unexpected_token_exception(parser->getTokenValue(), parser->getTokenLine(), parser->getTokenColumn());
+			throw exceptions::unexpected_with_possibilities_token_exception(
+				parser->getTokenValue(),
+				{
+					TokenSubType_e::Class,
+					TokenSubType_e::Interface,
+					TokenSubType_e::Struct,
+					TokenSubType_e::Enum,
+					TokenSubType_e::Trait,
+					TokenSubType_e::Let,
+					TokenSubType_e::Fn
+				},
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 		}
 
 		return nullptr;

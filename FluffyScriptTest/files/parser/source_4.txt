@@ -1,0 +1,21 @@
+class Foo<T: where T is ::Dimple>
+	extends ::Simple<T>
+	implements ::Clickable, ::Viewable<T>
+{
+	static let value1 = 10;
+	let value2: i32;
+
+	public constructor()
+		: super("simple")
+		, value2(0)
+	{}
+
+	destructor()
+	{}
+
+	fn init<W>()
+	{}
+
+	static fn initStatic() -> i32[]
+	{}
+}

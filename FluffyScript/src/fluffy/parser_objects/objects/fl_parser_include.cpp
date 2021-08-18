@@ -9,13 +9,16 @@ namespace fluffy { namespace parser_objects {
 
 	IncludeDeclPtr ParserObjectIncludeDecl::parse(Parser* parser)
 	{
-		auto includeDecl = std::make_unique<ast::IncludeDecl>();
+		auto includeDecl = std::make_unique<ast::IncludeDecl>(
+			parser->getTokenLine(),
+			parser->getTokenColumn()
+		);
 
 		// Consome 'include'.
-		parser->expectToken([parser]() { return TokenSubType_e::Include; });
+		parser->expectToken(TokenSubType_e::Include);
 
 		// Consome '{'
-		parser->expectToken([parser]() { return TokenSubType_e::LBracket; });
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		// Consome Identificadores.
 		while (true)
@@ -28,7 +31,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome '*'
-				parser->expectToken([parser]() { return TokenSubType_e::Multiplication; });
+				parser->expectToken(TokenSubType_e::Multiplication);
 				break;
 			}
 
@@ -41,20 +44,20 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome ','
-			parser->expectToken([parser]() { return TokenSubType_e::Comma; });
+			parser->expectToken(TokenSubType_e::Comma);
 		}
 
 		// Consome '}'
-		parser->expectToken([parser]() { return TokenSubType_e::RBracket; });
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		// Consome 'from'
-		parser->expectToken([parser]() { return TokenSubType_e::From; });
+		parser->expectToken(TokenSubType_e::From);
 
 		// Consome o identificador do namespace.
 		includeDecl->fromNamespace = ParserObjectScopedIdentifier::parse(parser);
 
 		// Consome ';'
-		parser->expectToken([parser]() { return TokenSubType_e::SemiColon; });
+		parser->expectToken(TokenSubType_e::SemiColon);
 
 		return includeDecl;
 	}

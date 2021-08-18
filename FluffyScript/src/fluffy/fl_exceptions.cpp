@@ -1,4 +1,5 @@
 #include <cstdarg>
+#include <sstream>
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace exceptions {
@@ -53,8 +54,43 @@ namespace fluffy { namespace exceptions {
 	}
 
 	/**
-		* unexpected_end_of_file_exception
-		*/
+	 * unexpected_with_possibilities_token_exception
+	 */
+
+	unexpected_with_possibilities_token_exception::unexpected_with_possibilities_token_exception(String token, std::vector<TokenSubType_e> possibilities, U32 line, U32 column)
+		: m_line(line)
+		, m_column(column)
+	{
+		std::stringstream stream;
+		{
+			stream << "Unexpected token '" << token << "', expected ";
+
+			for (U32 i = 0; i < static_cast<U32>(possibilities.size()); i++)
+			{
+				stream << "'" << getTokenString(possibilities[i]) << "'";
+
+				if (i < possibilities.size() - 1) {
+					stream << ", ";
+				}
+			}
+
+			stream << " token at: line: " << line << ", column: " << column;
+		}
+		m_out = stream.str();
+	}
+
+	unexpected_with_possibilities_token_exception::~unexpected_with_possibilities_token_exception()
+	{}
+
+	const char* unexpected_with_possibilities_token_exception::what() const noexcept
+	{
+		return m_out.c_str();
+	}
+
+
+	/**
+	 * unexpected_end_of_file_exception
+	 */
 
 	unexpected_end_of_file_exception::unexpected_end_of_file_exception()
 	{}

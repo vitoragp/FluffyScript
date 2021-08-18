@@ -323,4 +323,17 @@ namespace fluffy { namespace testing {
 		}
 		ASSERT_EQ(exprCount, 20);
 	}
+
+	TEST_F(ParserExpressionTest, TestExpressionGeneric)
+	{
+		parser->loadSource("t.foo<T>(2)");
+		parser->nextToken();
+
+		parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+
+		if (!parser->isEof())
+		{
+			throw std::exception();
+		}
+	}
 } }

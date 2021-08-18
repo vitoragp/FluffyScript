@@ -48,9 +48,8 @@ namespace fluffy { namespace parser {
 		m_lex->parse(m_tok);
 	}
 
-	void Parser::expectToken(std::function<TokenSubType_e()> callback)
+	void Parser::expectToken(TokenSubType_e expectedToken)
 	{
-		auto expectedToken = callback();
 		if (m_tok.subType != expectedToken) {
 			throw exceptions::custom_exception(
 				"Expected token '%s', received '%s'",
@@ -59,6 +58,14 @@ namespace fluffy { namespace parser {
 				m_lex->getTokenString(expectedToken),
 				m_tok.value.c_str()
 			);
+		}
+		nextToken();
+	}
+
+	void Parser::expectToken(TokenSubType_e expectedToken, ErrCallback errcallback)
+	{
+		if (m_tok.subType != expectedToken) {
+			errcallback();
 		}
 		nextToken();
 	}

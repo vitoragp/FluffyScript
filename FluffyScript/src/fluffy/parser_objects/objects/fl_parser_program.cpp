@@ -30,20 +30,21 @@ namespace fluffy { namespace parser_objects {
 			break;
 		}
 
-		auto codeUnit = std::make_unique<ast::CodeUnit>(parser->getFilename());
-
-		while (true)
+		if (auto codeUnit = std::make_unique<ast::CodeUnit>(parser->getFilename()))
 		{
-			if (parser->isEof()) {
-				program->codeUnits.push_back(std::move(codeUnit));
-				return program;
-			}
-						
-			// Processa namespaces.
-			if (parser->isNamespace()) {
-				codeUnit->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
+			while (true)
+			{
+				if (parser->isEof()) {
+					program->codeUnitList.push_back(std::move(codeUnit));
+					break;
+				}
+
+				// Processa namespaces.
+				if (parser->isNamespace()) {
+					codeUnit->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
+				}
 			}
 		}
-		return nullptr;
+		return program;
 	}
 } }

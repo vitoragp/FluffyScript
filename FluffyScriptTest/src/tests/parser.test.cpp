@@ -79,7 +79,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 1);
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0], "print");
@@ -97,7 +97,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
@@ -117,7 +117,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 0);
 
@@ -137,7 +137,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
@@ -167,7 +167,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 0);
 				
@@ -190,7 +190,7 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
-		EXPECT_EQ(treeAst->codeUnits.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList.size(), 0);
 
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
@@ -216,10 +216,10 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList.size(), 1);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList.size(), 1);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->name, "application");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->name, "application");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesNamespaceEmpty)
@@ -230,13 +230,13 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList.size(), 2);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList.size(), 2);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->name, "application");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->name, "application");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->name, "testing");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->name, "testing");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
 	}
 
 	TEST_F(ParserTest, TestParseOnlyOneNamespaceOnlyOneChildNamespace)
@@ -247,13 +247,13 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList.size(), 1);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList.size(), 1);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->name, "application");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->name, "application");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesNamespaceOnlyOneChildNamespace)
@@ -264,17 +264,17 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList.size(), 2);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList.size(), 2);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->name, "application");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->name, "application");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->name, "testing");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->namespaceDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->name, "testing");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->namespaceDeclList.size(), 0);
 	}
 
 	TEST_F(ParserTest, TestParseMixedIncludeAndNamespace)
@@ -285,21 +285,21 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList.size(), 2);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList.size(), 2);
 
 		// Include
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 1);
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0], "print");
 
 		// Namespace
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->name, "application");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->name, "application");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList.size(), 1);
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[0]->namespaceDeclList[0]->name, "detail");
 
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->name, "testing");
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
-		EXPECT_EQ(treeAst->codeUnits[0]->namespaceDeclList[1]->namespaceDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->name, "testing");
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->generalDeclList.size(), 0);
+		EXPECT_EQ(treeAst->codeUnitList[0]->namespaceDeclList[1]->namespaceDeclList.size(), 0);
 	}
 } }
