@@ -1,4 +1,3 @@
-#include <filesystem>
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
@@ -94,7 +93,6 @@ namespace fluffy {
 		, m_cursor(0)
 		, m_length(bufferSize)
 		, m_fileSize(0)
-		, m_hasCache(false)
 	{
 		m_memory = reinterpret_cast<I8*>(malloc(bufferSize));
 	}
@@ -104,23 +102,17 @@ namespace fluffy {
 		if (m_stream.is_open()) {
 			m_stream.close();
 		}
-		if (m_hasCache) {
-			std::filesystem::remove(m_cacheFileName);
-			std::filesystem::remove(".\\s_cache");
-		}
 		if (m_memory != nullptr) {
 			free(m_memory);
 			m_memory = nullptr;
 		}
 		m_cursor = 0;
 		m_length = 0;
-		m_hasCache = false;
-		m_cacheFileName.clear();
 	}
 
 	void LazyBuffer::load(const I8* sourcePtr, const U32 len)
 	{
-		loadFromFile(cacheSourceFile(sourcePtr, len));
+		throw exceptions::not_implemented_feature_exception("LazyBuffer works with files only");
 	}
 
 	void LazyBuffer::loadFromFile(const I8* fileName)
@@ -242,31 +234,5 @@ namespace fluffy {
 		{
 			throw std::out_of_range("Failed to read source file");
 		}
-	}
-
-	const I8* LazyBuffer::cacheSourceFile(const I8* sourcePtr, const U32 len)
-	{
-		static U32 tempFileIndex = 0;
-		static I8 fileNameBuffer[64];
-
-		sprintf_s(fileNameBuffer, ".\\s_cache\\cache_%04d.lex", tempFileIndex++);
-
-		if (!std::filesystem::exists(".\\s_cache")) {
-			std::filesystem::create_directories(".\\s_cache");
-		}
-
-		std::ofstream outFileStream(fileNameBuffer, std::fstream::binary);
-		if (!outFileStream.is_open()) {
-			throw exceptions::file_not_found_exception(fileNameBuffer);
-		}
-
-		outFileStream.write(sourcePtr, len);
-		outFileStream.put('\0');
-		outFileStream.close();
-
-		m_hasCache = true;
-		m_cacheFileName = fileNameBuffer;
-
-		return m_cacheFileName.c_str();
 	}
 }

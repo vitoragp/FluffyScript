@@ -7,54 +7,55 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectGeneralDecl
 	 */
 
-	GeneralStmtPtr ParserObjectGeneralDecl::parse(Parser* parser)
+	GeneralStmtPtr ParserObjectGeneralDecl::parse(CompilationContext_t* ctx)
 	{
 		Bool hasExport = false;
 		Bool hasAbtract = false;
 
 		// Verifica se houve a declararao para exportar o elemento.
-		if (parser->isExport())
+		if (ctx->parser->isExport())
 		{
 			// Consome 'export'.
-			parser->expectToken(TokenSubType_e::Export);
+			ctx->parser->expectToken(TokenSubType_e::Export);
 			hasExport = true;
 		}
 
 		// Verifica se a declaracao para a classe ser abstrata.
-		if (parser->isAbstract())
+		if (ctx->parser->isAbstract())
 		{
 			// Consome 'abtract'.
-			parser->expectToken(TokenSubType_e::Abstract);
+			ctx->parser->expectToken(TokenSubType_e::Abstract);
 			hasAbtract = true;
 
 			// Obrigatoriamente 'abstract' deve se referir a uma classe.
-			if (!parser->isClass()) {
-				throw exceptions::unexpected_token_exception(parser->getTokenValue(), parser->getTokenLine(), parser->getTokenColumn());
+			if (!ctx->parser->isClass()) {
+				throw exceptions::unexpected_token_exception(ctx->parser->getTokenValue(), ctx->parser->getTokenLine(), ctx->parser->getTokenColumn());
 			}
 		}
 
 		// export, abstract, class, interface, struct, enum, trait, let, fn
 
 		// Verifica qual declaracao processar.
-		switch (parser->getTokenSubType())
+		switch (ctx->parser->getTokenSubType())
 		{
 		case TokenSubType_e::Class:
-			return ParserObjectClassDecl::parse(parser, hasExport, hasAbtract);
+			return ParserObjectClassDecl::parse(ctx, hasExport, hasAbtract);
 		case TokenSubType_e::Interface:
-			return ParserObjectInterfaceDecl::parse(parser, hasExport);
+			return ParserObjectInterfaceDecl::parse(ctx, hasExport);
 		case TokenSubType_e::Struct:
-			return ParserObjectStructDecl::parse(parser, hasExport);
+			return ParserObjectStructDecl::parse(ctx, hasExport);
 		case TokenSubType_e::Enum:
-			throw exceptions::not_implemented_feature_exception("parseEnumDecl");
+			return ParserObjectEnumDecl::parse(ctx, hasExport);
 		case TokenSubType_e::Trait:
-			throw exceptions::not_implemented_feature_exception("parseTraitDecl");
-		case TokenSubType_e::Let:
-			throw exceptions::not_implemented_feature_exception("parseVariableDecl");
+			return ParserObjectTraitDecl::parse(ctx, hasExport);
 		case TokenSubType_e::Fn:
-			throw exceptions::not_implemented_feature_exception("parseFunctionDecl");
+			return ParserObjectFunctionDecl::parse(ctx, hasExport);
+		case TokenSubType_e::Const:
+		case TokenSubType_e::Let:
+			return ParserObjectVariableDecl::parse(ctx, hasExport);
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				parser->getTokenValue(),
+				ctx->parser->getTokenValue(),
 				{
 					TokenSubType_e::Class,
 					TokenSubType_e::Interface,
@@ -62,10 +63,11 @@ namespace fluffy { namespace parser_objects {
 					TokenSubType_e::Enum,
 					TokenSubType_e::Trait,
 					TokenSubType_e::Let,
+					TokenSubType_e::Const,
 					TokenSubType_e::Fn
 				},
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 

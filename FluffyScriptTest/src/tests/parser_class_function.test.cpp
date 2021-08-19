@@ -19,6 +19,8 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
 
+		CompilationContext_t ctx;
+
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
@@ -26,7 +28,9 @@ namespace fluffy { namespace testing {
 				new Lexer(
 					new DirectBuffer()
 				)
-			);
+				);
+
+			ctx.parser = parser.get();
 		}
 	};
 
@@ -36,10 +40,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModNoParamsNoRet)
 	{
-		parser->loadSource("class Foo { fn Foo() {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { fn Foo() {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -63,10 +67,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithOnlyOneParamNoRet)
 	{
-		parser->loadSource("class Foo { fn Foo(test: i32) {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { fn Foo(test: i32) {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -93,10 +97,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsNoRet)
 	{
-		parser->loadSource("class Foo { fn Foo(test: i32, test2: string) {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { fn Foo(test: i32, test2: string) {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -126,10 +130,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRet)
 	{
-		parser->loadSource("class Foo { fn Foo(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { fn Foo(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -159,10 +163,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithOverride)
 	{
-		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 override {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 override {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -192,10 +196,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithFinal)
 	{
-		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -225,10 +229,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestVirtualFunctionWithModWithMultiplesParamsWithRetWithFinal)
 	{
-		parser->loadSource("class Foo { protected virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { protected virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -258,10 +262,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestAbstractFunctionWithModWithMultiplesParamsWithRetWithFinal)
 	{
-		parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32; }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32; }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 0);
@@ -291,10 +295,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestStaticFunctionNoModWithMultiplesParamsWithRet)
 	{
-		parser->loadSource("class Foo { static fn Foo(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { static fn Foo(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 0);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 1);
@@ -324,10 +328,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestStaticFunctionNoModWithMultiplesParamsWithRetWithGeneric)
 	{
-		parser->loadSource("class Foo { static fn Foo<T: where T is i32 | fp32>(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { static fn Foo<T: where T is i32 | fp32>(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 0);
 		EXPECT_EQ(classObject->staticFunctionList.size(), 1);
@@ -363,12 +367,12 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestInvalidStaticFunctionWithVirtual)
 	{
-		parser->loadSource("class Foo { static virtual fn Foo(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { static virtual fn Foo(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
 		try
 		{
-			auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+			auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 			throw std::exception();
 		}
 		catch (exceptions::custom_exception& e)
@@ -379,12 +383,12 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestInvalidStaticFunctionWithAbstact)
 	{
-		parser->loadSource("class Foo { static abstract fn Foo(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { static abstract fn Foo(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
 		try
 		{
-			auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+			auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 			throw std::exception();
 		}
 		catch (exceptions::custom_exception& e)
@@ -395,12 +399,12 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestInvalidAbstractFunction)
 	{
-		parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32 {} }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32 {} }");
+		ctx.parser->nextToken();
 
 		try
 		{
-			auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+			auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 			throw std::exception();
 		}
 		catch (exceptions::unexpected_token_exception& e)
@@ -415,9 +419,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestStaticFunctionAndFunctionPass)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_2.txt");
-		parser->nextToken();
+		ctx.parser->loadSourceFromFile(".\\files\\parser\\source_2.txt");
+		ctx.parser->nextToken();
 
-		parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 	}
 } }

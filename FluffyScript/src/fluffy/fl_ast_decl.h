@@ -49,6 +49,9 @@ namespace fluffy { namespace ast {
 	using EnumItemDeclPtr					= unique_ptr<class EnumItemDecl>;
 	using EnumItemDeclPtrList				= vector<EnumItemDeclPtr>;
 
+	using TraitFunctionDeclPtr				= unique_ptr<class TraitFunctionDecl>;
+	using TraitFunctionDeclPtrList			= vector<TraitFunctionDeclPtr>;
+
 	using FunctionParameterDeclPtr			= unique_ptr<class FunctionParameterDecl>;
 	using FunctionParameterDeclPtrList		= vector<FunctionParameterDeclPtr>;		
 
@@ -477,6 +480,116 @@ namespace fluffy { namespace ast {
 		ExpressionDeclPtr					valueExpression;
 		U32									line;
 		U32									column;
+	};
+
+	/**
+	 * TraitDecl
+	 */
+
+	class TraitDecl : public GeneralDecl
+	{
+	public:
+		TraitDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::TraitDecl, line, column)
+			, isExported(false)
+			, isDefinition(false)
+		{}
+
+		virtual ~TraitDecl()
+		{}
+
+		Bool								isExported;
+		Bool								isDefinition;
+		TypeDeclPtr							typeDefinitionDecl;
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		TraitFunctionDeclPtrList			functionDeclList;
+	};
+
+	/**
+	 * TraitFunctionDecl
+	 */
+
+	class TraitFunctionDecl
+	{
+	public:
+		TraitFunctionDecl(U32 line, U32 column)
+			: line(line)
+			, column(column)
+		{}
+
+		~TraitFunctionDecl()
+		{}
+
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		FunctionParameterDeclPtrList		parameterList;
+		TypeDeclPtr							returnType;
+		U32									line;
+		U32									column;
+	};
+
+	/**
+	 * TraitSelfTypeDecl
+	 */
+
+	class TraitSelfTypeDecl : public TypeDecl
+	{
+	public:
+		TraitSelfTypeDecl(U32 line, U32 column)
+			: TypeDecl(TypeDeclID_e::Self, line, column)
+		{}
+
+		virtual ~TraitSelfTypeDecl()
+		{}
+	};
+
+	/**
+	 * FunctionDecl
+	 */
+
+	class FunctionDecl : public GeneralDecl
+	{
+	public:
+		FunctionDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::FunctionDecl, line, column)
+			, isExported(false)
+		{}
+
+		virtual ~FunctionDecl()
+		{}
+
+		Bool								isExported;
+		String								identifier;
+		GenericDeclPtrList					genericDeclList;
+		FunctionParameterDeclPtrList		parameterList;
+		TypeDeclPtr							returnType;
+		BlockDeclPtr						blockDecl;
+	};
+
+	/**
+	 * VariableDecl
+	 */
+
+	class VariableDecl : public GeneralDecl
+	{
+	public:
+		VariableDecl(U32 line, U32 column)
+			: GeneralDecl(GeneralDeclType_e::VariableDecl, line, column)
+			, isExported(false)
+			, isConst(false)
+			, isReference(false)
+		{}
+
+		virtual ~VariableDecl()
+		{}
+
+		Bool								isExported;
+		Bool								isConst;
+		Bool								isReference;
+		String								identifier;
+		TypeDeclPtr							typeDecl;
+		ExpressionDeclPtr					initExpression;
 	};
 
 	/**

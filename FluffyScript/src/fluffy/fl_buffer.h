@@ -64,15 +64,10 @@ namespace fluffy
 		virtual void			reset(U32 position) override;
 
 	private:
-		const I8*				cacheSourceFile(const I8* sourcePtr, const U32 len);
-
-	private:
 		std::ifstream			m_stream;
-		String					m_cacheFileName;
 		I8*						m_memory;
 		U32						m_cursor;
 		U32						m_length;
 		U32						m_fileSize;
-		Bool					m_hasCache;
 	};
 }

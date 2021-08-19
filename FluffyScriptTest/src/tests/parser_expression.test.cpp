@@ -134,6 +134,8 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
 
+		CompilationContext_t ctx;
+
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
@@ -141,7 +143,9 @@ namespace fluffy { namespace testing {
 				new Lexer(
 					new DirectBuffer()
 				)
-			);
+				);
+
+			ctx.parser = parser.get();
 		}
 	};
 
@@ -151,10 +155,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpression)
 	{
-		parser->loadSource("2 + 2 * 3");
-		parser->nextToken();
+		ctx.parser->loadSource("2 + 2 * 3");
+		ctx.parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(&ctx);
 
 		// [2 + 2 * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
@@ -194,10 +198,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionWithParent)
 	{
-		parser->loadSource("(2 + 5) * 3");
-		parser->nextToken();
+		ctx.parser->loadSource("(2 + 5) * 3");
+		ctx.parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(&ctx);
 
 		// [(2 + 5) * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
@@ -238,10 +242,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionTernary)
 	{
-		parser->loadSource("a > 5 ? 5 : 3 * 4");
-		parser->nextToken();
+		ctx.parser->loadSource("a > 5 ? 5 : 3 * 4");
+		ctx.parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(&ctx);
 
 		// [a > 5 ? 5 : 3 * 4]
 		validateTerExpr(exprDecl.get(), [](ExpressionTernaryDecl* terExpr) {
@@ -307,18 +311,18 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionPass)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_3.txt");
-		parser->nextToken();
+		ctx.parser->loadSourceFromFile(".\\files\\parser\\source_3.txt");
+		ctx.parser->nextToken();
 
 		int exprCount = 0;
 		while (true)
 		{
-			if (parser->isEof())
+			if (ctx.parser->isEof())
 			{
 				break;
 			}
-			parser_objects::ParserObjectExpressionDecl::parse(parser.get());
-			parser->nextToken();
+			parser_objects::ParserObjectExpressionDecl::parse(&ctx);
+			ctx.parser->nextToken();
 			exprCount++;
 		}
 		ASSERT_EQ(exprCount, 20);
@@ -326,12 +330,12 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionGeneric)
 	{
-		parser->loadSource("t.foo<T>(2)");
-		parser->nextToken();
+		ctx.parser->loadSource("t.foo<T>(2)");
+		ctx.parser->nextToken();
 
-		parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		parser_objects::ParserObjectExpressionDecl::parse(&ctx);
 
-		if (!parser->isEof())
+		if (!ctx.parser->isEof())
 		{
 			throw std::exception();
 		}

@@ -7,49 +7,49 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectScopedIdentifier
 	 */
 
-	ScopedIdentifierDeclPtr	ParserObjectScopedIdentifier::parse(Parser* parser)
+	ScopedIdentifierDeclPtr	ParserObjectScopedIdentifier::parse(CompilationContext_t* ctx)
 	{
 		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Se o escopo vem antes identificador
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
 			// Consome '::'.
-			parser->expectToken(TokenSubType_e::ScopeResolution);
+			ctx->parser->expectToken(TokenSubType_e::ScopeResolution);
 			scopedIdentifierDecl->startFromRoot = true;
 		}
 
 		// Consome o identificador.
-		scopedIdentifierDecl->identifier = parser->expectIdentifier();
+		scopedIdentifierDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Verifica se a mais declaracoes de escopo.
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
-			scopedIdentifierDecl->tailIdentifier = ParserObjectScopedIdentifier::parseChildScopedIdentifiers(parser);
+			scopedIdentifierDecl->tailIdentifier = ParserObjectScopedIdentifier::parseChildScopedIdentifiers(ctx);
 		}
 		return scopedIdentifierDecl;
 	}
 
-	ScopedIdentifierDeclPtr ParserObjectScopedIdentifier::parseChildScopedIdentifiers(Parser* parser)
+	ScopedIdentifierDeclPtr ParserObjectScopedIdentifier::parseChildScopedIdentifiers(CompilationContext_t* ctx)
 	{
 		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome '::'.
-		parser->expectToken(TokenSubType_e::ScopeResolution);
+		ctx->parser->expectToken(TokenSubType_e::ScopeResolution);
 
 		// Consome o identificador.
-		scopedIdentifierDecl->identifier = parser->expectIdentifier();
+		scopedIdentifierDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Verifica se a mais declaracoes de escopo.
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
-			scopedIdentifierDecl->tailIdentifier = ParserObjectScopedIdentifier::parseChildScopedIdentifiers(parser);
+			scopedIdentifierDecl->tailIdentifier = ParserObjectScopedIdentifier::parseChildScopedIdentifiers(ctx);
 		}
 		return scopedIdentifierDecl;
 	}

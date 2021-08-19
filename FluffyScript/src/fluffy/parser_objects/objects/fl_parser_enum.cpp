@@ -7,90 +7,90 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectEnumDecl
 	 */
 
-	EnumDeclPtr ParserObjectEnumDecl::parse(Parser* parser, Bool hasExport)
+	EnumDeclPtr ParserObjectEnumDecl::parse(CompilationContext_t* ctx, Bool hasExport)
 	{
 		auto enumDecl = std::make_unique<ast::EnumDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		enumDecl->isExported = hasExport;
 
 		// Consome 'enum'.
-		parser->expectToken(TokenSubType_e::Enum);
+		ctx->parser->expectToken(TokenSubType_e::Enum);
 
 		// Consome o identificador.
-		enumDecl->identifier = parser->expectIdentifier();
+		enumDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Consome generic se houver.
-		if (parser->isLessThan())
+		if (ctx->parser->isLessThan())
 		{
-			enumDecl->genericDeclList = ParserObjectGenericDecl::parse(parser);
+			enumDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
-			if (parser->isRightBracket())
+			if (ctx->parser->isRightBracket())
 			{
 				break;
 			}
 
 		parseEnumLabel:
 			// Consome enum.
-			enumDecl->enumItemDeclList.push_back(parserEnum(parser));
+			enumDecl->enumItemDeclList.push_back(parserEnum(ctx));
 
-			if (parser->isComma())
+			if (ctx->parser->isComma())
 			{				
 				// Consome ','.
-				parser->expectToken(TokenSubType_e::Comma);
+				ctx->parser->expectToken(TokenSubType_e::Comma);
 				goto parseEnumLabel;
 			}
 
-			if (parser->isRightBracket())
+			if (ctx->parser->isRightBracket())
 			{
 				break;
 			}
 
 			throw exceptions::unexpected_token_exception(
-				parser->getTokenValue(),
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenValue(),
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 
 		return enumDecl;
 	}
 
-	EnumItemDeclPtr ParserObjectEnumDecl::parserEnum(Parser* parser)
+	EnumItemDeclPtr ParserObjectEnumDecl::parserEnum(CompilationContext_t* ctx)
 	{
 		auto enumItemDecl = std::make_unique<ast::EnumItemDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome o identificador.
-		enumItemDecl->identifier = parser->expectIdentifier();
+		enumItemDecl->identifier = ctx->parser->expectIdentifier();
 
-		switch (parser->getTokenSubType())
+		switch (ctx->parser->getTokenSubType())
 		{
 		case TokenSubType_e::Assign:
 			{
 				// Consome '='.
-				parser->expectToken(TokenSubType_e::Assign);
+				ctx->parser->expectToken(TokenSubType_e::Assign);
 				enumItemDecl->hasValue = true;
-				enumItemDecl->valueExpression = ParserObjectExpressionDecl::skipEnumExpr(parser);
+				enumItemDecl->valueExpression = ParserObjectExpressionDecl::skipEnumExpr(ctx);
 			}
 			break;
 		case TokenSubType_e::LParBracket:
 			{
 				// Consome '('.
-				parser->expectToken(TokenSubType_e::LParBracket);
+				ctx->parser->expectToken(TokenSubType_e::LParBracket);
 
 				// Indica presenca de dados.
 				enumItemDecl->hasData = true;
@@ -99,40 +99,40 @@ namespace fluffy { namespace parser_objects {
 				while (true)
 				{
 					// Consome Tipo
-					enumItemDecl->dataTypeDeclList.push_back(ParserObjectTypeDecl::parse(parser));
+					enumItemDecl->dataTypeDeclList.push_back(ParserObjectTypeDecl::parse(ctx));
 
-					if (parser->isComma())
+					if (ctx->parser->isComma())
 					{
 						// Consome ','.
-						parser->expectToken(TokenSubType_e::Comma);
+						ctx->parser->expectToken(TokenSubType_e::Comma);
 						continue;
 					}
 
-					if (parser->isRightParBracket())
+					if (ctx->parser->isRightParBracket())
 					{
 						break;
 					}
 
 					throw exceptions::unexpected_with_possibilities_token_exception(
-						parser->getTokenValue(),
+						ctx->parser->getTokenValue(),
 						{ TokenSubType_e::Comma, TokenSubType_e::RParBracket },
-						parser->getTokenLine(),
-						parser->getTokenColumn()
+						ctx->parser->getTokenLine(),
+						ctx->parser->getTokenColumn()
 					);
 				}				
 
 				// Consome ')'.
-				parser->expectToken(TokenSubType_e::RParBracket);
+				ctx->parser->expectToken(TokenSubType_e::RParBracket);
 			}
 			break;
 		case TokenSubType_e::Comma:
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				parser->getTokenValue(),
+				ctx->parser->getTokenValue(),
 				{ TokenSubType_e::Assign, TokenSubType_e::LParBracket, TokenSubType_e::Comma },
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 

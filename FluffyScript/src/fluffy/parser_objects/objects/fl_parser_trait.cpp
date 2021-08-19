@@ -4,28 +4,40 @@
 
 namespace fluffy { namespace parser_objects {
 	/**
-	 * ParserObjectInterfaceDecl
+	 * ParserObjectTraitDecl
 	 */
 
-	InterfaceDeclPtr ParserObjectInterfaceDecl::parse(CompilationContext_t* ctx, Bool hasExport)
+	TraitDeclPtr ParserObjectTraitDecl::parse(CompilationContext_t* ctx, Bool hasExport)
 	{
-		auto interfaceDecl = std::make_unique<ast::InterfaceDecl>(
+		auto traitDecl = std::make_unique<ast::TraitDecl>(
 			ctx->parser->getTokenLine(),
 			ctx->parser->getTokenColumn()
 		);
 
-		interfaceDecl->isExported = hasExport;
+		traitDecl->isExported = hasExport;
 
 		// Consome 'interface'.
 		ctx->parser->expectToken(TokenSubType_e::Interface);
 
 		// Consome o identificador.
-		interfaceDecl->identifier = ctx->parser->expectIdentifier();
+		traitDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Consome generic se houver.
 		if (ctx->parser->isLessThan())
 		{
-			interfaceDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			traitDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+		}
+
+		// Verifica se e um definicao de trait.
+		if (ctx->parser->isFor())
+		{
+			traitDecl->isDefinition = true;
+
+			// Consome 'for'.
+			ctx->parser->expectToken(TokenSubType_e::For);
+
+			// Consome o tipo para qual o trait esta sendo implementado.
+			traitDecl->typeDefinitionDecl = ParserObjectTypeDecl::parseWithSelf(ctx);
 		}
 
 		// Consome '{'.
@@ -40,9 +52,9 @@ namespace fluffy { namespace parser_objects {
 
 		parseFunctionLabel:
 			if (ctx->parser->isFn())
-			{				
+			{
 				// Consome a funcao.
-				interfaceDecl->functionDeclList.push_back(parserFunction(ctx));
+				traitDecl->functionDeclList.push_back(parserFunction(ctx));
 				goto parseFunctionLabel;
 			}
 
@@ -62,12 +74,12 @@ namespace fluffy { namespace parser_objects {
 		// Consome '}'.
 		ctx->parser->expectToken(TokenSubType_e::RBracket);
 
-		return interfaceDecl;
-	}
+		return traitDecl;
+	} 
 
-	InterfaceFunctionDeclPtr ParserObjectInterfaceDecl::parserFunction(CompilationContext_t* ctx)
+	TraitFunctionDeclPtr ParserObjectTraitDecl::parserFunction(CompilationContext_t* ctx)
 	{
-		auto interfaceFunctionDecl = std::make_unique<ast::InterfaceFunctionDecl>(
+		auto traitFunctionDecl = std::make_unique<ast::TraitFunctionDecl>(
 			ctx->parser->getTokenLine(),
 			ctx->parser->getTokenColumn()
 		);
@@ -76,16 +88,16 @@ namespace fluffy { namespace parser_objects {
 		ctx->parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome o identificador.
-		interfaceFunctionDecl->identifier = ctx->parser->expectIdentifier();
+		traitFunctionDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Consome o Generic.
 		if (ctx->parser->isLessThan())
 		{
-			interfaceFunctionDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			traitFunctionDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
 		}
 
 		// Consome os parametros.
-		interfaceFunctionDecl->parameterList = ParserObjectFunctionParameter::parse(ctx);
+		traitFunctionDecl->parameterList = ParserObjectFunctionParameter::parseWithSelf(ctx);
 
 		// Consome o retorno se houver.
 		if (ctx->parser->isArrow())
@@ -94,12 +106,12 @@ namespace fluffy { namespace parser_objects {
 			ctx->parser->expectToken(TokenSubType_e::Arrow);
 
 			// Consome o tipo retorno.
-			interfaceFunctionDecl->returnType = ParserObjectTypeDecl::parse(ctx);
+			traitFunctionDecl->returnType = ParserObjectTypeDecl::parseWithSelf(ctx);
 		}
 		else
 		{
 			// Consome o tipo retorno.
-			interfaceFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
+			traitFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
 				ctx->parser->getTokenLine(),
 				ctx->parser->getTokenColumn()
 			);
@@ -108,6 +120,6 @@ namespace fluffy { namespace parser_objects {
 		// Consome ';'
 		ctx->parser->expectToken(TokenSubType_e::SemiColon);
 
-		return interfaceFunctionDecl;
+		return traitFunctionDecl;
 	}
 } }

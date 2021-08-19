@@ -24,10 +24,6 @@ namespace fluffy { namespace testing {
 
 		// Antes de cada test
 		virtual void SetUp() override {
-			if (std::filesystem::exists(".\\s_cache"))
-			{
-				std::filesystem::remove(".\\s_cache");
-			}
 			buffer = std::make_unique<DirectBuffer>();
 		}
 	};
@@ -100,28 +96,6 @@ namespace fluffy { namespace testing {
 	/**
 	 * Testing
 	 */
-
-	TEST_F(LazyBufferTest, TestLoadAndReadData)
-	{
-		String src = "test";
-
-		buffer->load(src.c_str(), static_cast<U32>(src.length()));
-
-		String str;
-		while (true)
-		{
-			const I8 ch = buffer->readByte();
-
-			if (ch == '\0') {
-				break;
-			}
-			str.push_back(ch);
-
-			buffer->nextByte();
-		}
-
-		EXPECT_EQ(src, str);
-	}
 
 	TEST_F(LazyBufferTest, TestLoadAndReadDataFromFile)
 	{

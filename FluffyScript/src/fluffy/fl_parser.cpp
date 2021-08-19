@@ -18,7 +18,8 @@ namespace fluffy { namespace parser {
 
 	ProgramPtr Parser::parse()
 	{
-		return parser_objects::ParserObjectProgram::parse(this);
+		CompilationContext_t ctx { this };
+		return parser_objects::ParserObjectProgram::parse(&ctx);
 	}
 
 	void Parser::loadSource(String source)

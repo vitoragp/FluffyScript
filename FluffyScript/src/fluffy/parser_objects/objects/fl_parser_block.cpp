@@ -8,99 +8,99 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectBlockDecl
 	 */
 	
-	BlockDeclPtr ParserObjectBlockDecl::parse(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::parse(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 
-	BlockDeclPtr ParserObjectBlockDecl::skip(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::skip(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 
-	BlockDeclPtr ParserObjectBlockDecl::parseExprBlock(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::parseExprBlock(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block expression");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 
-	BlockDeclPtr ParserObjectBlockDecl::skipExprBlock(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::skipExprBlock(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block expression");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 
-	BlockDeclPtr ParserObjectBlockDecl::parseBlockOrExprBlock(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::parseBlockOrExprBlock(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block or Block expression");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 
-	BlockDeclPtr ParserObjectBlockDecl::skipBlockOrExprBlock(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::skipBlockOrExprBlock(CompilationContext_t* ctx)
 	{
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!parser->isRightBracket())
+		if (!ctx->parser->isRightBracket())
 		{
 			throw exceptions::not_implemented_feature_exception("Block or Block expression");
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 		return nullptr;
 	}
 } }

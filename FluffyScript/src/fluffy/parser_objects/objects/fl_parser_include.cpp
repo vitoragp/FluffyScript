@@ -7,57 +7,57 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectIncludeDecl
 	 */
 
-	IncludeDeclPtr ParserObjectIncludeDecl::parse(Parser* parser)
+	IncludeDeclPtr ParserObjectIncludeDecl::parse(CompilationContext_t* ctx)
 	{
 		auto includeDecl = std::make_unique<ast::IncludeDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome 'include'.
-		parser->expectToken(TokenSubType_e::Include);
+		ctx->parser->expectToken(TokenSubType_e::Include);
 
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		ctx->parser->expectToken(TokenSubType_e::LBracket);
 
 		// Consome Identificadores.
 		while (true)
 		{
-			if (parser->isMultiplication()) {
+			if (ctx->parser->isMultiplication()) {
 				// Se existe identificaores declarados, o caractere coringa
 				// nao pode ser usado.
 				if (includeDecl->includedItemList.size()) {
-					throw exceptions::unexpected_token_exception(parser->getTokenValue(), parser->getTokenLine(), parser->getTokenColumn());
+					throw exceptions::unexpected_token_exception(ctx->parser->getTokenValue(), ctx->parser->getTokenLine(), ctx->parser->getTokenColumn());
 				}
 
 				// Consome '*'
-				parser->expectToken(TokenSubType_e::Multiplication);
+				ctx->parser->expectToken(TokenSubType_e::Multiplication);
 				break;
 			}
 
 			// Consome identificador.
-			includeDecl->includedItemList.push_back(parser->expectIdentifier());
+			includeDecl->includedItemList.push_back(ctx->parser->expectIdentifier());
 
 			// Verifica se ha mais declaracoes.
-			if (!parser->isComma()) {
+			if (!ctx->parser->isComma()) {
 				break;
 			}
 
 			// Consome ','
-			parser->expectToken(TokenSubType_e::Comma);
+			ctx->parser->expectToken(TokenSubType_e::Comma);
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		ctx->parser->expectToken(TokenSubType_e::RBracket);
 
 		// Consome 'from'
-		parser->expectToken(TokenSubType_e::From);
+		ctx->parser->expectToken(TokenSubType_e::From);
 
 		// Consome o identificador do namespace.
-		includeDecl->fromNamespace = ParserObjectScopedIdentifier::parse(parser);
+		includeDecl->fromNamespace = ParserObjectScopedIdentifier::parse(ctx);
 
 		// Consome ';'
-		parser->expectToken(TokenSubType_e::SemiColon);
+		ctx->parser->expectToken(TokenSubType_e::SemiColon);
 
 		return includeDecl;
 	}

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+namespace fluffy { namespace parser { class Parser; } }
+
 namespace fluffy {
 
 	/**
@@ -336,6 +338,8 @@ namespace fluffy {
 
 		Tuple,
 
+		Self,			// Apenas em traits.
+
 		Named			// Classes, interfaces, trait, enum...
 	};
 
@@ -390,6 +394,15 @@ namespace fluffy {
 		U32 position;
 
 		String filename;
+	};
+
+	/**
+	 * CompilationContext_t
+	 */
+
+	struct CompilationContext_t
+	{
+		parser::Parser* parser;
 	};
 
 	/**

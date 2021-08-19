@@ -7,37 +7,37 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectGenericTemplate
 	 */
 
-	GenericDeclPtrList ParserObjectGenericDecl::parse(Parser* parser)
+	GenericDeclPtrList ParserObjectGenericDecl::parse(CompilationContext_t* ctx)
 	{
 		GenericDeclPtrList templateDeclList;
 
 		// Consome '<'
-		parser->expectToken(TokenSubType_e::LessThan);
+		ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 		while (true)
 		{
 			auto genericDecl = std::make_unique<ast::GenericDecl>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 
 			// Consome o identificador.
-			genericDecl->identifier = parser->expectIdentifier();
+			genericDecl->identifier = ctx->parser->expectIdentifier();
 
 			// Processa a clausula where.
-			if (parser->isColon())
+			if (ctx->parser->isColon())
 			{
 				// Consome ':'
-				parser->expectToken(TokenSubType_e::Colon);
+				ctx->parser->expectToken(TokenSubType_e::Colon);
 
 				// Consome 'where'
-				parser->expectToken(TokenSubType_e::Where);
+				ctx->parser->expectToken(TokenSubType_e::Where);
 
-				const U32 line = parser->getTokenLine();
-				const U32 column = parser->getTokenColumn();
+				const U32 line = ctx->parser->getTokenLine();
+				const U32 column = ctx->parser->getTokenColumn();
 
 				// Consome o identificador
-				auto identifier = parser->expectIdentifier();
+				auto identifier = ctx->parser->expectIdentifier();
 
 				// Verifica se a declaracao esta correta, o identificador
 				// apos o where deve ser igual o identificador declarado no generic.
@@ -52,11 +52,11 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome 'is'
-				parser->expectToken(TokenSubType_e::Is);
+				ctx->parser->expectToken(TokenSubType_e::Is);
 
 				while (true)
 				{
-					auto whereTypeDecl = ParserObjectTypeDecl::parse(parser);
+					auto whereTypeDecl = ParserObjectTypeDecl::parse(ctx);
 
 					if (whereTypeDecl->nullable)
 					{
@@ -70,10 +70,10 @@ namespace fluffy { namespace parser_objects {
 					genericDecl->whereTypeList.push_back(std::move(whereTypeDecl));
 
 					// Verifica se a outras declaracoes.
-					if (parser->isBitWiseOr())
+					if (ctx->parser->isBitWiseOr())
 					{
 						// Consome '|'
-						parser->expectToken(TokenSubType_e::BitWiseOr);
+						ctx->parser->expectToken(TokenSubType_e::BitWiseOr);
 						continue;
 					}
 					break;
@@ -86,22 +86,22 @@ namespace fluffy { namespace parser_objects {
 			);
 
 			// Consome ',' e processa proxima declaracao.
-			if (parser->isComma())
+			if (ctx->parser->isComma())
 			{
-				parser->expectToken(TokenSubType_e::Comma);
+				ctx->parser->expectToken(TokenSubType_e::Comma);
 				continue;
 			}
 
 			// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 			// serao quebrados em tokens menores.
-			if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+			if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 			{
-				switch (parser->getTokenSubType())
+				switch (ctx->parser->getTokenSubType())
 				{
 				case TokenSubType_e::BitWiseRShift:		// >>
 				case TokenSubType_e::GreaterThanOrEqual:	// >=
 				case TokenSubType_e::BitWiseRShiftAssign:	// >>=
-					parser->reinterpretToken(
+					ctx->parser->reinterpretToken(
 						TokenType_e::Keyword,
 						TokenSubType_e::GreaterThan,
 						1
@@ -113,7 +113,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '>'
-			parser->expectToken(TokenSubType_e::GreaterThan);
+			ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 			break;
 		}
 		return templateDeclList;

@@ -7,138 +7,166 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectTypeDecl
 	 */
 
-	TypeDeclPtr ParserObjectTypeDecl::parse(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parse(CompilationContext_t* ctx)
+	{
+		return parseType(ctx, false);
+	}
+	
+	TypeDeclPtr ParserObjectTypeDecl::parseWithSelf(CompilationContext_t* ctx)
+	{
+		return parseType(ctx, true);
+	}
+
+	TypeDeclPtr ParserObjectTypeDecl::parseType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		TypeDeclPtr typeDecl;
 
-		const U32 line = parser->getTokenLine();
-		const U32 column = parser->getTokenColumn();
+		const U32 line = ctx->parser->getTokenLine();
+		const U32 column = ctx->parser->getTokenColumn();
 
-		switch (parser->getTokenSubType())
+		switch (ctx->parser->getTokenSubType())
 		{
 		case TokenSubType_e::Void:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclVoid>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::I8:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI8>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::U8:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU8>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::I16:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI16>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::U16:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU16>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::I32:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI32>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::U32:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU32>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::I64:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI64>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::U64:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU64>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::Fp32:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp32>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::Fp64:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp64>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::String:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclString>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::Object:
-			parser->nextToken();
+			ctx->parser->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclObject>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 			break;
 		case TokenSubType_e::Vector:
-			typeDecl = ParserObjectTypeDecl::parseVectorType(parser);
+			typeDecl = ParserObjectTypeDecl::parseVectorType(ctx, traitMode);
 			break;
 		case TokenSubType_e::Set:
-			typeDecl = ParserObjectTypeDecl::parseSetType(parser);
+			typeDecl = ParserObjectTypeDecl::parseSetType(ctx, traitMode);
 			break;
 		case TokenSubType_e::Map:
-			typeDecl = ParserObjectTypeDecl::parseMapType(parser);
+			typeDecl = ParserObjectTypeDecl::parseMapType(ctx, traitMode);
 			break;
 		case TokenSubType_e::Fn:
-			typeDecl = ParserObjectTypeDecl::parseFunctionType(parser);
+			typeDecl = ParserObjectTypeDecl::parseFunctionType(ctx, traitMode);
 			break;
 		case TokenSubType_e::LParBracket:
-			typeDecl = ParserObjectTypeDecl::parseTupleType(parser);
+			typeDecl = ParserObjectTypeDecl::parseTupleType(ctx, traitMode);
+			break;
+		case TokenSubType_e::Self:
+			if (traitMode)
+			{
+				ctx->parser->nextToken();
+				typeDecl = std::make_unique<ast::TraitSelfTypeDecl>(
+					ctx->parser->getTokenLine(),
+					ctx->parser->getTokenColumn()
+					);
+			}
+			else
+			{
+				throw exceptions::custom_exception(
+					"Self type only can be declared in traits",
+					ctx->parser->getTokenLine(),
+					ctx->parser->getTokenColumn()
+				);
+			}
 			break;
 		default:
 			// NamedType
-			if (parser->isIdentifier() || parser->isScopeResolution())
+			if (ctx->parser->isIdentifier() || ctx->parser->isScopeResolution())
 			{
-				typeDecl = ParserObjectTypeDecl::parseNamedType(parser);
+				typeDecl = ParserObjectTypeDecl::parseNamedType(ctx, traitMode);
 				break;
 			}
 
 			throw exceptions::unexpected_token_exception(
-				parser->getTokenValue(),
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenValue(),
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
 		// Verifica se o tipo e anulavel.
-		if (parser->isInterrogation())
+		if (ctx->parser->isInterrogation())
 		{
 			if (typeDecl->typeID == TypeDeclID_e::Void)
 			{
@@ -149,17 +177,17 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '?'
-			parser->expectToken(TokenSubType_e::Interrogation);
+			ctx->parser->expectToken(TokenSubType_e::Interrogation);
 
 			typeDecl->nullable = true;
 		}
 
 		// Verifica se e um array
-		if (parser->isLeftSquBracket())
+		if (ctx->parser->isLeftSquBracket())
 		{
 			auto arrayType = std::make_unique<ast::TypeDeclArray>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 
 			// Adiciona o tipo base ao tipo array
@@ -167,18 +195,18 @@ namespace fluffy { namespace parser_objects {
 
 			while (true)
 			{
-				if (!parser->isLeftSquBracket())
+				if (!ctx->parser->isLeftSquBracket())
 				{
 					break;
 				}
-				arrayType->arrayDeclList.push_back(ParserObjectTypeDecl::parseArrayDecl(parser));
+				arrayType->arrayDeclList.push_back(ParserObjectTypeDecl::parseArrayDecl(ctx, traitMode));
 			}
 
 			// Verifica se o array e anulavel.
-			if (parser->isInterrogation())
+			if (ctx->parser->isInterrogation())
 			{
 				// Consome '?'
-				parser->expectToken(TokenSubType_e::Interrogation);
+				ctx->parser->expectToken(TokenSubType_e::Interrogation);
 
 				arrayType->nullable = true;
 			}
@@ -187,158 +215,148 @@ namespace fluffy { namespace parser_objects {
 		return typeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseOnlyNamedType(Parser* parser)
-	{
-		auto typeDecl = ParserObjectTypeDecl::parseNamedType(parser);
 
-		if (typeDecl->typeID == TypeDeclID_e::Void)
-		{
-			throw exceptions::unexpected_type_exception("void", parser->getTokenLine(), parser->getTokenColumn());
-		}
-		return typeDecl;
-	}
-
-	TypeDeclPtr ParserObjectTypeDecl::parseVectorType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseVectorType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto vectorTypeDecl = std::make_unique<ast::TypeDeclVector>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome 'vector'
-		parser->expectToken(TokenSubType_e::Vector);
+		ctx->parser->expectToken(TokenSubType_e::Vector);
 
 		// Consome '<'
-		parser->expectToken(TokenSubType_e::LessThan);
+		ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo do valor
-		vectorTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
+		vectorTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(ctx, traitMode);
 
 		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 		// serao quebrados em tokens menores.
-		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 		{
-			ParserObjectTypeDecl::reinterpretToken(parser);
+			ParserObjectTypeDecl::reinterpretToken(ctx);
 		}
 
 		// Consome '>'
-		parser->expectToken(TokenSubType_e::GreaterThan);
+		ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return vectorTypeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseSetType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseSetType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto setTypeDecl = std::make_unique<ast::TypeDeclSet>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome 'set'
-		parser->expectToken(TokenSubType_e::Set);
+		ctx->parser->expectToken(TokenSubType_e::Set);
 
 		// Consome '<'
-		parser->expectToken(TokenSubType_e::LessThan);
+		ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo do valor
-		setTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
+		setTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(ctx, traitMode);
 
 		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 		// serao quebrados em tokens menores.
-		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 		{
-			ParserObjectTypeDecl::reinterpretToken(parser);
+			ParserObjectTypeDecl::reinterpretToken(ctx);
 		}
 
 		// Consome '>'
-		parser->expectToken(TokenSubType_e::GreaterThan);
+		ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return setTypeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseMapType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseMapType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto mapTypeDecl = std::make_unique<ast::TypeDeclMap>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome 'map'
-		parser->expectToken(TokenSubType_e::Map);
+		ctx->parser->expectToken(TokenSubType_e::Map);
 
 		// Consome '<'
-		parser->expectToken(TokenSubType_e::LessThan);
+		ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 		// Consome o tipo da chave.
-		mapTypeDecl->keyType = ParserObjectTypeDecl::parseVariableType(parser);
+		mapTypeDecl->keyType = ParserObjectTypeDecl::parseVariableType(ctx, traitMode);
 
 		// Consome ','
-		parser->expectToken(TokenSubType_e::Comma);
+		ctx->parser->expectToken(TokenSubType_e::Comma);
 
 		// Consome o tipo do valor
-		mapTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(parser);
+		mapTypeDecl->valueType = ParserObjectTypeDecl::parseVariableType(ctx, traitMode);
 
 		// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 		// serao quebrados em tokens menores.
-		if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+		if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 		{
-			ParserObjectTypeDecl::reinterpretToken(parser);
+			ParserObjectTypeDecl::reinterpretToken(ctx);
 		}
 
 		// Consome '>'
-		parser->expectToken(TokenSubType_e::GreaterThan);
+		ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 
 		return mapTypeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseFunctionType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseFunctionType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto functionTypeDecl = std::make_unique<ast::TypeDeclFunction>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		ctx->parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome '('
-		parser->expectToken(TokenSubType_e::LParBracket);
+		ctx->parser->expectToken(TokenSubType_e::LParBracket);
 
 		Bool hasReturnExplicit = false;
 		while (true)
 		{
-			if (parser->isRightParBracket())
+			if (ctx->parser->isRightParBracket())
 			{
 				break;
 			}
 
 			// Consome o tipo do parametro.
-			if (auto paramType = ParserObjectTypeDecl::parseVariableType(parser))
+			if (auto paramType = ParserObjectTypeDecl::parseVariableType(ctx, traitMode))
 			{
 				functionTypeDecl->parameterTypeList.push_back(std::move(paramType));
 
 				// Verifica se ha mais parametros e consome ','
-				if (parser->isComma()) {
-					parser->expectToken(TokenSubType_e::Comma);
+				if (ctx->parser->isComma()) {
+					ctx->parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
 
 			// Processa o retorno
-			if (parser->isArrow())
+			if (ctx->parser->isArrow())
 			{
 				// Consome '->'
-				parser->expectToken(TokenSubType_e::Arrow);
+				ctx->parser->expectToken(TokenSubType_e::Arrow);
 
-				functionTypeDecl->returnType = parse(parser);
+				functionTypeDecl->returnType = parseType(ctx, traitMode);
 
 				hasReturnExplicit = true;
 				break;
 			}
 
 			throw exceptions::custom_exception("Expected ')', '->' or ',' declaration",
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
@@ -346,49 +364,49 @@ namespace fluffy { namespace parser_objects {
 		if (!hasReturnExplicit)
 		{
 			functionTypeDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
 		// Consome ')'
-		parser->expectToken(TokenSubType_e::RParBracket);
+		ctx->parser->expectToken(TokenSubType_e::RParBracket);
 
 		return functionTypeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseVariableType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseVariableType(CompilationContext_t* ctx, Bool traitMode)
 	{
-		auto typeDecl = parse(parser);
+		auto typeDecl = parseType(ctx, traitMode);
 
 		if (typeDecl->typeID == TypeDeclID_e::Void)
 		{
 			throw exceptions::unexpected_type_exception("void",
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 		return typeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseTupleType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseTupleType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto tupleTypeDecl = std::make_unique<ast::TypeDeclTuple>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome '('.
-		parser->expectToken(TokenSubType_e::LParBracket);
+		ctx->parser->expectToken(TokenSubType_e::LParBracket);
 
 		// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
-		if (auto tupleItemDecl = ParserObjectTypeDecl::parse(parser))
+		if (auto tupleItemDecl = ParserObjectTypeDecl::parseType(ctx, traitMode))
 		{
 			if (tupleItemDecl->typeID == TypeDeclID_e::Void)
 			{
 				throw exceptions::unexpected_type_exception("void",
-					parser->getTokenLine(),
-					parser->getTokenColumn()
+					ctx->parser->getTokenLine(),
+					ctx->parser->getTokenColumn()
 				);
 			}
 			tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
@@ -396,24 +414,24 @@ namespace fluffy { namespace parser_objects {
 
 		while (true)
 		{
-			if (parser->isRightBracket())
+			if (ctx->parser->isRightBracket())
 			{
 				break;
 			}
 
-			if (parser->isComma())
+			if (ctx->parser->isComma())
 			{
 				// Consome ','.
-				parser->expectToken(TokenSubType_e::Comma);
+				ctx->parser->expectToken(TokenSubType_e::Comma);
 
 				// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
-				if (auto tupleItemDecl = ParserObjectTypeDecl::parse(parser))
+				if (auto tupleItemDecl = ParserObjectTypeDecl::parseType(ctx, traitMode))
 				{
 					if (tupleItemDecl->typeID == TypeDeclID_e::Void)
 					{
 						throw exceptions::unexpected_type_exception("void",
-							parser->getTokenLine(),
-							parser->getTokenColumn()
+							ctx->parser->getTokenLine(),
+							ctx->parser->getTokenColumn()
 						);
 					}
 					tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
@@ -422,176 +440,176 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			throw exceptions::unexpected_token_exception(
-				parser->getTokenValue(),
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenValue(),
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
 		// Consome ')'.
-		parser->expectToken(TokenSubType_e::RParBracket);
+		ctx->parser->expectToken(TokenSubType_e::RParBracket);
 		return tupleTypeDecl;
 	}
 
-	TypeDeclPtr ParserObjectTypeDecl::parseNamedType(Parser* parser)
+	TypeDeclPtr ParserObjectTypeDecl::parseNamedType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Verifica se inicia pelo escopo global.
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
 			// Consome '::'.
-			parser->expectToken(TokenSubType_e::ScopeResolution);
+			ctx->parser->expectToken(TokenSubType_e::ScopeResolution);
 			namedTypeDecl->startFromRoot = true;
 		}
 
 		// Consome o identificador.
-		namedTypeDecl->identifier = parser->expectIdentifier();
+		namedTypeDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Verefica se a definicao de generic.
-		if (parser->isLessThan())
+		if (ctx->parser->isLessThan())
 		{
 			// Consome '<'.
-			parser->expectToken(TokenSubType_e::LessThan);
+			ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 			while (true)
 			{
 				// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 				// serao quebrados em tokens menores.
-				if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 				{
-					ParserObjectTypeDecl::reinterpretToken(parser);
+					ParserObjectTypeDecl::reinterpretToken(ctx);
 				}
 
 				// Verifica se terminou a definicao dos generics
-				if (parser->isGreaterThan())
+				if (ctx->parser->isGreaterThan())
 				{
 					break;
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parse(parser));
+				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parseType(ctx, traitMode));
 
 				// Verifica se ha mais definicoes de generic
-				if (parser->isComma())
+				if (ctx->parser->isComma())
 				{
 					// Consome ','.
-					parser->expectToken(TokenSubType_e::Comma);
+					ctx->parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
 
 			// Consome '>'.
-			parser->expectToken(TokenSubType_e::GreaterThan);
+			ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 		}
 
 		// Verifica se ha identificadores internos.
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
-			namedTypeDecl->internalIdentifier = ParserObjectTypeDecl::parseInternalNamedType(parser);
+			namedTypeDecl->internalIdentifier = ParserObjectTypeDecl::parseInternalNamedType(ctx, traitMode);
 		}
 		return namedTypeDecl;
 	}
 
-	ArrayDeclPtr ParserObjectTypeDecl::parseArrayDecl(Parser* parser)
+	ArrayDeclPtr ParserObjectTypeDecl::parseArrayDecl(CompilationContext_t* ctx, Bool traitMode)
 	{
 		// Consome '['
-		parser->expectToken(TokenSubType_e::LSquBracket);
+		ctx->parser->expectToken(TokenSubType_e::LSquBracket);
 
 		// Unsized array
-		if (parser->isRightSquBracket()) {
+		if (ctx->parser->isRightSquBracket()) {
 			// Consome ']'
-			parser->expectToken(TokenSubType_e::RSquBracket);
+			ctx->parser->expectToken(TokenSubType_e::RSquBracket);
 			return std::make_unique<ast::UnsizedArrayDecl>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
+				ctx->parser->getTokenLine(),
+				ctx->parser->getTokenColumn()
 			);
 		}
 
 		auto sizedArrayDecl = std::make_unique<ast::SizedArrayDecl>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 		
 		// TODO: Futuramente vai fazer o parse de uma expressao em tempode compilacao.
 		// mas por hora vai fazer o parse de um I32.
-		sizedArrayDecl->size = parser->expectConstantI32();
+		sizedArrayDecl->size = ctx->parser->expectConstantI32();
 
 		// Consome ']'
-		parser->expectToken(TokenSubType_e::RSquBracket);
+		ctx->parser->expectToken(TokenSubType_e::RSquBracket);
 
 		return sizedArrayDecl;
 	}
 
-	TypeDeclNamedPtr ParserObjectTypeDecl::parseInternalNamedType(Parser* parser)
+	TypeDeclNamedPtr ParserObjectTypeDecl::parseInternalNamedType(CompilationContext_t* ctx, Bool traitMode)
 	{
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
-			parser->getTokenLine(),
-			parser->getTokenColumn()
+			ctx->parser->getTokenLine(),
+			ctx->parser->getTokenColumn()
 		);
 
 		// Consome '::'.
-		parser->expectToken(TokenSubType_e::ScopeResolution);
+		ctx->parser->expectToken(TokenSubType_e::ScopeResolution);
 
 		// Consome o identificador.
-		namedTypeDecl->identifier = parser->expectIdentifier();
+		namedTypeDecl->identifier = ctx->parser->expectIdentifier();
 
 		// Verefica se a definicao de generic.
-		if (parser->isLessThan())
+		if (ctx->parser->isLessThan())
 		{
 			// Consome '<'.
-			parser->expectToken(TokenSubType_e::LessThan);
+			ctx->parser->expectToken(TokenSubType_e::LessThan);
 
 			while (true)
 			{
 				// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
 				// serao quebrados em tokens menores.
-				if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
+				if (ctx->parser->isBitWiseRightShift() || ctx->parser->isBitWiseRightShiftAssign())
 				{
-					ParserObjectTypeDecl::reinterpretToken(parser);
+					ParserObjectTypeDecl::reinterpretToken(ctx);
 				}
 
 				// Verifica se terminou a definicao dos generics
-				if (parser->isGreaterThan())
+				if (ctx->parser->isGreaterThan())
 				{
 					break;
 				}
 
 				// Processa a definicao de generic
-				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parse(parser));
+				namedTypeDecl->genericDefinitionList.push_back(ParserObjectTypeDecl::parseType(ctx, traitMode));
 
 				// Verifica se ha mais definicoes de generic
-				if (parser->isComma())
+				if (ctx->parser->isComma())
 				{
 					// Consome ','.
-					parser->expectToken(TokenSubType_e::Comma);
+					ctx->parser->expectToken(TokenSubType_e::Comma);
 					continue;
 				}
 			}
 
 			// Consome '>'.
-			parser->expectToken(TokenSubType_e::GreaterThan);
+			ctx->parser->expectToken(TokenSubType_e::GreaterThan);
 		}
 
 		// Verifica se ha identificadores internos.
-		if (parser->isScopeResolution())
+		if (ctx->parser->isScopeResolution())
 		{
-			namedTypeDecl->internalIdentifier = ParserObjectTypeDecl::parseInternalNamedType(parser);
+			namedTypeDecl->internalIdentifier = ParserObjectTypeDecl::parseInternalNamedType(ctx, traitMode);
 		}
 		return namedTypeDecl;
 	}
 
-	void ParserObjectTypeDecl::reinterpretToken(Parser* parser)
+	void ParserObjectTypeDecl::reinterpretToken(CompilationContext_t* ctx)
 	{
-		switch (parser->getTokenSubType())
+		switch (ctx->parser->getTokenSubType())
 		{
 		case TokenSubType_e::BitWiseRShift:		// >>
 		case TokenSubType_e::GreaterThanOrEqual:	// >=
 		case TokenSubType_e::BitWiseRShiftAssign:	// >>=
-			parser->reinterpretToken(
+			ctx->parser->reinterpretToken(
 				TokenType_e::Keyword,
 				TokenSubType_e::GreaterThan,
 				1

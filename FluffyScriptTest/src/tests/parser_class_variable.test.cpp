@@ -19,6 +19,8 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
 
+		CompilationContext_t ctx;
+
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
@@ -26,7 +28,9 @@ namespace fluffy { namespace testing {
 				new Lexer(
 					new DirectBuffer()
 				)
-			);
+				);
+
+			ctx.parser = parser.get();
 		}
 	};
 
@@ -36,10 +40,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestVariableI32)
 	{
-		parser->loadSource("class Foo { let Foo: i32; }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { let Foo: i32; }");
+		ctx.parser->nextToken();
 
-		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -53,10 +57,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestVariableRefI32)
 	{
-		parser->loadSource("class Foo { let ref Foo: i32; }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { let ref Foo: i32; }");
+		ctx.parser->nextToken();
 
-		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -70,10 +74,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestConstI32)
 	{
-		parser->loadSource("class Foo { const Foo: i32 = a.getValue(); }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { const Foo: i32 = a.getValue(); }");
+		ctx.parser->nextToken();
 
-		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -87,10 +91,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestConstRefI32)
 	{
-		parser->loadSource("class Foo { const ref Foo: i32 = 5 * 9 + super.getValue() * this.value; }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { const ref Foo: i32 = 5 * 9 + super.getValue() * this.value; }");
+		ctx.parser->nextToken();
 
-		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -104,10 +108,10 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestConstFunctionTypeWithFunctionExpr)
 	{
-		parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = fn (a) { }; }");
-		parser->nextToken();
+		ctx.parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = fn (a) { }; }");
+		ctx.parser->nextToken();
 
-		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classDecl = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);

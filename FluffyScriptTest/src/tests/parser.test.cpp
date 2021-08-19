@@ -17,6 +17,8 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
 
+		CompilationContext_t ctx;
+
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
@@ -25,6 +27,8 @@ namespace fluffy { namespace testing {
 					new DirectBuffer()
 				)
 			);
+
+			ctx.parser = parser.get();
 		}
 	};
 
@@ -34,48 +38,48 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseEmpty)
 	{
-		parser->loadSource("");
-		auto treeAst = parser->parse();
+		ctx.parser->loadSource("");
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseConstants)
 	{
-		parser->loadSource("10i8 10u8 10i16 10u16 10i32 10u32 10i64 10u64 10.0f 10.0 10 \"10\" '1' true false");
+		ctx.parser->loadSource("10i8 10u8 10i16 10u16 10i32 10u32 10i64 10u64 10.0f 10.0 10 \"10\" '1' true false");
 
 		// Le o primeiro token.
-		parser->nextToken();
+		ctx.parser->nextToken();
 
-		EXPECT_EQ(parser->expectConstantI8(), 10);
-		EXPECT_EQ(parser->expectConstantU8(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantI8(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantU8(), 10);
 
-		EXPECT_EQ(parser->expectConstantI16(), 10);
-		EXPECT_EQ(parser->expectConstantU16(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantI16(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantU16(), 10);
 
-		EXPECT_EQ(parser->expectConstantI32(), 10);
-		EXPECT_EQ(parser->expectConstantU32(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantI32(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantU32(), 10);
 
-		EXPECT_EQ(parser->expectConstantI64(), 10);
-		EXPECT_EQ(parser->expectConstantU64(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantI64(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantU64(), 10);
 
-		EXPECT_EQ(parser->expectConstantFp32(), 10.0f);
-		EXPECT_EQ(parser->expectConstantFp64(), 10.0);
+		EXPECT_EQ(ctx.parser->expectConstantFp32(), 10.0f);
+		EXPECT_EQ(ctx.parser->expectConstantFp64(), 10.0);
 
-		EXPECT_EQ(parser->expectConstantI32(), 10);
+		EXPECT_EQ(ctx.parser->expectConstantI32(), 10);
 
-		EXPECT_EQ(parser->expectConstantString(), "10");
+		EXPECT_EQ(ctx.parser->expectConstantString(), "10");
 
-		EXPECT_EQ(parser->expectConstantChar(), '1');
+		EXPECT_EQ(ctx.parser->expectConstantChar(), '1');
 
-		EXPECT_EQ(parser->expectConstantBool(), true);
-		EXPECT_EQ(parser->expectConstantBool(), false);
+		EXPECT_EQ(ctx.parser->expectConstantBool(), true);
+		EXPECT_EQ(ctx.parser->expectConstantBool(), false);
 	}
 
 	TEST_F(ParserTest, TestParseIncludeOnlyOneIdentifier)
 	{
-		parser->loadSource("include { print } from std;");
+		ctx.parser->loadSource("include { print } from std;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
@@ -91,9 +95,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseIncludeTwoIdentifier)
 	{
-		parser->loadSource("include { print, scan } from std;");
+		ctx.parser->loadSource("include { print, scan } from std;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
@@ -111,9 +115,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseIncludeAll)
 	{
-		parser->loadSource("include { * } from std::math;");
+		ctx.parser->loadSource("include { * } from std::math;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
@@ -131,9 +135,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeTwoIdentifierWithGeneric)
 	{
-		parser->loadSource("include { print, scan } from std;\ninclude { Window } from std::UI;");
+		ctx.parser->loadSource("include { print, scan } from std;\ninclude { Window } from std::UI;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
@@ -161,9 +165,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeAll)
 	{
-		parser->loadSource("include { * } from std;\ninclude { * } from UI;");
+		ctx.parser->loadSource("include { * } from std;\ninclude { * } from UI;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
@@ -184,9 +188,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMultiplesInclude)
 	{
-		parser->loadSource("include { print2, scan } from std;\ninclude { * } from UI;");
+		ctx.parser->loadSource("include { print2, scan } from std;\ninclude { * } from UI;");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
@@ -210,9 +214,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseOnlyOneNamespaceEmpty)
 	{
-		parser->loadSource("namespace application { }");
+		ctx.parser->loadSource("namespace application { }");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
@@ -224,9 +228,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMultiplesNamespaceEmpty)
 	{
-		parser->loadSource("namespace application { }\nnamespace testing {}");
+		ctx.parser->loadSource("namespace application { }\nnamespace testing {}");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
@@ -241,9 +245,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseOnlyOneNamespaceOnlyOneChildNamespace)
 	{
-		parser->loadSource("namespace application { namespace detail { } }");
+		ctx.parser->loadSource("namespace application { namespace detail { } }");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
@@ -258,9 +262,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMultiplesNamespaceOnlyOneChildNamespace)
 	{
-		parser->loadSource("namespace application { namespace detail { } }\nnamespace testing {}");
+		ctx.parser->loadSource("namespace application { namespace detail { } }\nnamespace testing {}");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 0);
@@ -279,9 +283,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMixedIncludeAndNamespace)
 	{
-		parser->loadSource("include { print } from std;\nnamespace application { namespace detail { } }\nnamespace testing {}");
+		ctx.parser->loadSource("include { print } from std;\nnamespace application { namespace detail { } }\nnamespace testing {}");
 
-		auto treeAst = parser->parse();
+		auto treeAst = ctx.parser->parse();
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 1);
