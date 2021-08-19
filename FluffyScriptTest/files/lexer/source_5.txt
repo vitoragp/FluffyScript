@@ -6,7 +6,7 @@ namespace application
 	export struct User
 	{
 		let id: u64;
-		let name: string;
+		let identifier: string;
 		let age: u8;
 		let weight: fp32;
 		

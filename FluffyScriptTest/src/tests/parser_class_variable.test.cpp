@@ -1,9 +1,11 @@
 #include <memory>
 #include "gtest/gtest.h"
 
-#include "fl_parser.h"
+#include "parser\fl_parser.h"
+#include "parser\parser_objects/fl_parser_objects.h"
+#include "lexer\fl_lexer.h"
+#include "fl_buffer.h"
 #include "fl_exceptions.h"
-#include "parser_objects/fl_parser_objects.h"
 
 
 namespace fluffy { namespace testing {

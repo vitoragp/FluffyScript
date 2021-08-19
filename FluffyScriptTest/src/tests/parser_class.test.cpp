@@ -1,9 +1,11 @@
 #include <memory>
 #include "gtest/gtest.h"
 
-#include "fl_parser.h"
+#include "parser/fl_parser.h"
+#include "parser/parser_objects/fl_parser_objects.h"
+#include "lexer\fl_lexer.h"
+#include "fl_buffer.h"
 #include "fl_exceptions.h"
-#include "parser_objects/fl_parser_objects.h"
 
 
 namespace fluffy { namespace testing {
@@ -45,7 +47,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 	}
 
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportWithOnlyOneGenericNoExtendsNoImplements)
@@ -55,7 +57,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->genericDeclList.size(), 1);
 		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
@@ -72,7 +74,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->genericDeclList.size(), 2);
 		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
@@ -97,7 +99,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
 
@@ -116,7 +118,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->genericDeclList.size(), 2);
 		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
@@ -177,7 +179,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->genericDeclList.size(), 0);
 
@@ -220,7 +222,7 @@ namespace fluffy { namespace testing {
 
 		auto classObject = parser_objects::ParserObjectClassDecl::parse(&ctx, false, false);
 
-		EXPECT_EQ(classObject->name, "Foo");
+		EXPECT_EQ(classObject->identifier, "Foo");
 
 		EXPECT_EQ(classObject->genericDeclList.size(), 2);
 		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");

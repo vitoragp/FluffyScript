@@ -7,8 +7,8 @@
 
 #include <memory>
 #include <set>
-#include "gtest/gtest.h"
-#include "fl_lex.h"
+#include "gtest\gtest.h"
+#include "lexer\fl_lexer.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
@@ -242,9 +242,9 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.filename, filename);
 		}
 
-		lex->parse(tok); // name
+		lex->parse(tok); // identifier
 		{
-			EXPECT_EQ(tok.value, "name");
+			EXPECT_EQ(tok.value, "identifier");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::Unknown);
 			EXPECT_EQ(tok.line, 2);
@@ -731,9 +731,9 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(tok.filename, filename);
 		}
 
-		lex->parse(tok); // name
+		lex->parse(tok); // identifier
 		{
-			EXPECT_EQ(tok.value, "name");
+			EXPECT_EQ(tok.value, "identifier");
 			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(tok.subType, fluffy::TokenSubType_e::Unknown);
 			EXPECT_EQ(tok.line, 2);

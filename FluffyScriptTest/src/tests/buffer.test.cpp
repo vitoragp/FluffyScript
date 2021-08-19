@@ -56,7 +56,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(DirectBufferTest, TestLoadAndReadDataFromFile)
 	{
-		String src = "u64 id\r\nstring name";
+		String src = "u64 id\r\nstring identifier";
 
 		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
 
@@ -99,7 +99,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LazyBufferTest, TestLoadAndReadDataFromFile)
 	{
-		String src = "u64 id\r\nstring name";
+		String src = "u64 id\r\nstring identifier";
 
 		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
 

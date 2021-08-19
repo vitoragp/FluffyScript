@@ -1,2 +1,2 @@
 u64 id
-string name
+string identifier
