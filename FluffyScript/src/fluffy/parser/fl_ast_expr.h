@@ -10,7 +10,13 @@ namespace fluffy { namespace ast {
 	class BlockDecl;
 } }
 
+namespace fluffy { namespace ast { namespace pattern {
+	class PatternDecl;
+} } }
+
 namespace fluffy { namespace ast { namespace expr {
+	using ast::pattern::PatternDecl;
+
 	using TypeDeclPtr								= std::unique_ptr<TypeDecl>;
 	using TypeDeclFunctionPtr						= std::unique_ptr<TypeDeclFunction>;
 
@@ -24,7 +30,7 @@ namespace fluffy { namespace ast { namespace expr {
 	using ExpressionMatchWhenDeclPtr				= std::unique_ptr<class ExpressionMatchWhenDecl>;
 	using ExpressionMatchWhenDeclPtrList			= std::vector<ExpressionMatchWhenDeclPtr>;
 
-	using PatternDeclPtr							= std::unique_ptr<class PatternDecl>;
+	using PatternDeclPtr							= std::unique_ptr<PatternDecl>;
 
 	/**
 	 * ExpressionDecl
@@ -409,25 +415,6 @@ namespace fluffy { namespace ast { namespace expr {
 
 		PatternDeclPtr							patternDecl;
 		BlockDeclPtr							blockDecl;
-	};
-
-	/**
-	 * PatternDecl
-	 */
-
-	class PatternDecl : public AstNode
-	{
-	protected:
-		PatternDecl(PatterType_e type, U32 line, U32 column)
-			: AstNode(line, column)
-			, type(type)
-		{}
-
-	public:
-		virtual ~PatternDecl()
-		{}
-
-		const PatterType_e						type;
 	};
 
 	/**

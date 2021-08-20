@@ -7,59 +7,59 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectVariableDecl
 	 */
 
-	VariableDeclPtr ParserObjectVariableDecl::parse(CompilationContext_t* ctx, Bool hasExport)
+	VariableDeclPtr ParserObjectVariableDecl::parse(Parser* parser, Bool hasExport)
 	{
 		auto variableDecl = std::make_unique<ast::VariableDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		variableDecl->isExported = hasExport;
 
 		// Consome 'let' ou 'const'
-		switch (ctx->parser->getTokenSubType())
+		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Let:
-			ctx->parser->expectToken(TokenSubType_e::Let);
+			parser->expectToken(TokenSubType_e::Let);
 			variableDecl->isConst = false;
 			break;
 		case TokenSubType_e::Const:
-			ctx->parser->expectToken(TokenSubType_e::Const);
+			parser->expectToken(TokenSubType_e::Const);
 			variableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				ctx->parser->getTokenValue(),
+				parser->getTokenValue(),
 				{ TokenSubType_e::Let, TokenSubType_e::Const },
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Verifica se o modificador 'ref' foi declarado.
-		if (ctx->parser->isRef())
+		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			ctx->parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenSubType_e::Ref);
 			variableDecl->isReference = true;
 		}
 
 		// Consome identificador.
-		variableDecl->identifier = ctx->parser->expectIdentifier();
+		variableDecl->identifier = parser->expectIdentifier();
 
 		Bool mustHaveInitExpression = variableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
-		if (ctx->parser->isColon())
+		if (parser->isColon())
 		{
 			// Consome ':'.
-			ctx->parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenSubType_e::Colon);
 
-			const U32 line = ctx->parser->getTokenLine();
-			const U32 column = ctx->parser->getTokenColumn();
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
 
 			// Consome o tipo.
-			variableDecl->typeDecl = ParserObjectTypeDecl::parse(ctx);
+			variableDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 
 			// Verifica se o tipo e valido.
 			if (variableDecl->typeDecl->typeID == TypeDeclID_e::Void)
@@ -79,15 +79,15 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			ctx->parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = ParserObjectExpressionDecl::skip(ctx);
+			variableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		ctx->parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenSubType_e::SemiColon);
 
 		return variableDecl;
 	}

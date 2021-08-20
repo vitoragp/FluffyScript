@@ -4,7 +4,14 @@
 	
 namespace fluffy { namespace ast { namespace expr {
 	class ExpressionDecl;
+} } }
+
+namespace fluffy { namespace ast { namespace pattern {
 	class PatternDecl;
+} } }
+
+namespace fluffy { namespace ast { namespace stmt {
+	class StmtDecl;
 } } }
 
 namespace fluffy { namespace parser_objects { 
@@ -50,9 +57,11 @@ namespace fluffy { namespace parser_objects {
 
 	using ExpressionDeclPtr					= unique_ptr<ast::expr::ExpressionDecl>;
 
-	using PatternDeclPtr					= unique_ptr<ast::expr::PatternDecl>;
+	using PatternDeclPtr					= unique_ptr<ast::pattern::PatternDecl>;
 
 	using BlockDeclPtr						= unique_ptr<ast::BlockDecl>;
+
+	using StmtDeclPtr						= unique_ptr<ast::stmt::StmtDecl>;
 
 	using ScopedIdentifierDeclPtr			= unique_ptr<ast::ScopedIdentifierDecl>;
 	using ScopedIdentifierDeclPtrList		= vector<ast::ScopedIdentifierDeclPtr>;
@@ -65,7 +74,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ProgramPtr							parse(CompilationContext_t* ctx);
+		ProgramPtr							parse(Parser* parser);
 	};
 
 	/**
@@ -76,7 +85,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		IncludeDeclPtr						parse(CompilationContext_t* ctx);
+		IncludeDeclPtr						parse(Parser* parser);
 	};
 
 	/**
@@ -87,7 +96,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		NamespaceDeclPtr					parse(CompilationContext_t* ctx);
+		NamespaceDeclPtr					parse(Parser* parser);
 	};
 
 	/**
@@ -98,7 +107,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		GeneralStmtPtr						parse(CompilationContext_t* ctx);
+		GeneralStmtPtr						parse(Parser* parser);
 	};
 
 	/**
@@ -109,29 +118,29 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ClassDeclPtr						parse(CompilationContext_t* ctx, Bool hasExport, Bool hasAbstract);
+		ClassDeclPtr						parse(Parser* parser, Bool hasExport, Bool hasAbstract);
 
 	private:
 		static
-		TypeDeclPtr							parseExtends(CompilationContext_t* ctx);
+		TypeDeclPtr							parseExtends(Parser* parser);
 
 		static
-		TypeDeclPtrList						parseImplements(CompilationContext_t* ctx);
+		TypeDeclPtrList						parseImplements(Parser* parser);
 
 		static
-		ClassFunctionDeclPtr				parseStaticFunction(CompilationContext_t* ctx, TokenSubType_e accessModifier);
+		ClassFunctionDeclPtr				parseStaticFunction(Parser* parser, TokenSubType_e accessModifier);
 
 		static
-		ClassFunctionDeclPtr				parseFunction(CompilationContext_t* ctx, TokenSubType_e accessModifier);
+		ClassFunctionDeclPtr				parseFunction(Parser* parser, TokenSubType_e accessModifier);
 
 		static
-		ClassVariableDeclPtr				parseVariable(CompilationContext_t* ctx, TokenSubType_e accessModifier, Bool isStatic);
+		ClassVariableDeclPtr				parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic);
 
 		static
-		ClassConstructorDeclPtr				parseConstructor(CompilationContext_t* ctx, TokenSubType_e accessModifier);
+		ClassConstructorDeclPtr				parseConstructor(Parser* parser, TokenSubType_e accessModifier);
 
 		static
-		ClassDestructorDeclPtr				parseDestructor(CompilationContext_t* ctx);
+		ClassDestructorDeclPtr				parseDestructor(Parser* parser);
 	};
 
 	/**
@@ -142,11 +151,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		InterfaceDeclPtr					parse(CompilationContext_t* ctx, Bool hasExport);
+		InterfaceDeclPtr					parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		InterfaceFunctionDeclPtr			parserFunction(CompilationContext_t* ctx);
+		InterfaceFunctionDeclPtr			parserFunction(Parser* parser);
 	};
 
 	/**
@@ -157,11 +166,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		StructDeclPtr						parse(CompilationContext_t* ctx, Bool hasExport);
+		StructDeclPtr						parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		StructVariableDeclPtr				parserVariable(CompilationContext_t* ctx);
+		StructVariableDeclPtr				parserVariable(Parser* parser);
 	};
 
 	/**
@@ -172,11 +181,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		EnumDeclPtr						parse(CompilationContext_t* ctx, Bool hasExport);
+		EnumDeclPtr						parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		EnumItemDeclPtr					parserEnum(CompilationContext_t* ctx);
+		EnumItemDeclPtr					parserEnum(Parser* parser);
 	};
 
 	/**
@@ -187,11 +196,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		TraitDeclPtr					parse(CompilationContext_t* ctx, Bool hasExport);
+		TraitDeclPtr					parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		TraitFunctionDeclPtr			parserFunction(CompilationContext_t* ctx);
+		TraitFunctionDeclPtr			parserFunction(Parser* parser);
 	};
 
 	/**
@@ -202,7 +211,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		FunctionDeclPtr					parse(CompilationContext_t* ctx, Bool hasExport);
+		FunctionDeclPtr					parse(Parser* parser, Bool hasExport);
 	};
 
 	/**
@@ -213,7 +222,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		VariableDeclPtr					parse(CompilationContext_t* ctx, Bool hasExport);
+		VariableDeclPtr					parse(Parser* parser, Bool hasExport);
 	};
 
 	/**
@@ -224,14 +233,14 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		FunctionParameterDeclPtrList		parse(CompilationContext_t* ctx);
+		FunctionParameterDeclPtrList		parse(Parser* parser);
 
 		static
-		FunctionParameterDeclPtrList		parseWithSelf(CompilationContext_t* ctx);
+		FunctionParameterDeclPtrList		parseWithSelf(Parser* parser);
 
 	public:
 		static
-		FunctionParameterDeclPtrList		parseParameters(CompilationContext_t* ctx, Bool traitMode);
+		FunctionParameterDeclPtrList		parseParameters(Parser* parser, Bool traitMode);
 	};
 
 	/**
@@ -242,7 +251,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		GenericDeclPtrList					parse(CompilationContext_t* ctx);
+		GenericDeclPtrList					parse(Parser* parser);
 	};
 
 	/**
@@ -253,44 +262,47 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		TypeDeclPtr							parse(CompilationContext_t* ctx);
+		TypeDeclPtr							parse(Parser* parser);
 
 		static
-		TypeDeclPtr							parseWithSelf(CompilationContext_t* ctx);
+		TypeDeclPtr							skip(Parser* parser);
+
+		static
+		TypeDeclPtr							parseWithSelf(Parser* parser);
 
 	private:
 		static
-		TypeDeclPtr							parseType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static 
-		TypeDeclPtr							parseVectorType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseVectorType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseSetType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseSetType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseMapType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseMapType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseFunctionType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseFunctionType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseVariableType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseVariableType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseTupleType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseTupleType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclPtr							parseNamedType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclPtr							parseNamedType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		ArrayDeclPtr						parseArrayDecl(CompilationContext_t* ctx, Bool traitMode);
+		ArrayDeclPtr						parseArrayDecl(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		TypeDeclNamedPtr					parseInternalNamedType(CompilationContext_t* ctx, Bool traitMode);
+		TypeDeclNamedPtr					parseInternalNamedType(Parser* parser, Bool traitMode, Bool skipMode);
 
 		static
-		void								reinterpretToken(CompilationContext_t* ctx);
+		void								reinterpretToken(Parser* parser);
 
 	};
 
@@ -302,23 +314,23 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ExpressionDeclPtr					parse(CompilationContext_t* ctx);
+		ExpressionDeclPtr					parse(Parser* parser);
 
 		static
-		ExpressionDeclPtr					skip(CompilationContext_t* ctx);
+		ExpressionDeclPtr					skip(Parser* parser);
 
 		static
-		ExpressionDeclPtr					parseEnumExpr(CompilationContext_t* ctx);
+		ExpressionDeclPtr					parseEnumExpr(Parser* parser);
 
 		static
-		ExpressionDeclPtr					skipEnumExpr(CompilationContext_t* ctx);
+		ExpressionDeclPtr					skipEnumExpr(Parser* parser);
 
 	private:
 		static
-		ExpressionDeclPtr					parseExpression(CompilationContext_t* ctx, U32 prec, Bool skipOnly);
+		ExpressionDeclPtr					parseExpression(Parser* parser, U32 prec, Bool skipOnly);
 
 		static
-		ExpressionDeclPtr					parseAtom(CompilationContext_t* ctx, Bool skipOnly);
+		ExpressionDeclPtr					parseAtom(Parser* parser, Bool skipOnly);
 	};
 
 	/**
@@ -329,7 +341,10 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		PatternDeclPtr						parse(CompilationContext_t* ctx);
+		PatternDeclPtr						parse(Parser* parser);
+
+		static
+		PatternDeclPtr						skip(Parser* parser);
 	};
 
 	/**
@@ -340,22 +355,73 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		BlockDeclPtr						parse(CompilationContext_t* ctx);
+		BlockDeclPtr						parse(Parser* parser);
 
 		static
-		BlockDeclPtr						skip(CompilationContext_t* ctx);
+		BlockDeclPtr						skip(Parser* parser);
+	};
+
+	/**
+	 * ParserObjectStmtDecl
+	 */
+
+	class ParserObjectStmtDecl
+	{
+	public:
+		static
+		StmtDeclPtr							parse(Parser* parser);
 
 		static
-		BlockDeclPtr						parseExprBlock(CompilationContext_t* ctx);
+		StmtDeclPtr							skip(Parser* parser);
+
+	private:
+		static
+		StmtDeclPtr							parseStmt(Parser* parser, Bool skipOnly);
 
 		static
-		BlockDeclPtr						skipExprBlock(CompilationContext_t* ctx);
+		StmtDeclPtr							parseIf(Parser* parser, Bool skipOnly);
 
 		static
-		BlockDeclPtr						parseBlockOrExprBlock(CompilationContext_t* ctx);
+		StmtDeclPtr							parseIfLet(Parser* parser, Bool skipOnly);
 
 		static
-		BlockDeclPtr						skipBlockOrExprBlock(CompilationContext_t* ctx);
+		StmtDeclPtr							parseFor(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseWhile(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseDoWhile(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseMatch(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseReturn(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseContinue(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseBreak(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseGoto(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseLabel(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseTry(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parsePanic(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseVariable(Parser* parser, Bool skipOnly);
+
+		static
+		StmtDeclPtr							parseExpr(Parser* parser, Bool skipOnly);
 	};
 
 	/**
@@ -366,10 +432,10 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ScopedIdentifierDeclPtr				parse(CompilationContext_t* ctx);
+		ScopedIdentifierDeclPtr				parse(Parser* parser);
 
 	private:
 		static
-		ScopedIdentifierDeclPtr				parseChildScopedIdentifiers(CompilationContext_t* ctx);
+		ScopedIdentifierDeclPtr				parseChildScopedIdentifiers(Parser* parser);
 	};
 } }

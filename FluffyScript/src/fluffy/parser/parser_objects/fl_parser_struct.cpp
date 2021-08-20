@@ -7,114 +7,114 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectStructDecl
 	 */
 
-	StructDeclPtr ParserObjectStructDecl::parse(CompilationContext_t* ctx, Bool hasExport)
+	StructDeclPtr ParserObjectStructDecl::parse(Parser* parser, Bool hasExport)
 	{
 		auto structDecl = std::make_unique<ast::StructDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		structDecl->isExported = hasExport;
 
 		// Consome 'struct'.
-		ctx->parser->expectToken(TokenSubType_e::Struct);
+		parser->expectToken(TokenSubType_e::Struct);
 
 		// Consome o identificador.
-		structDecl->identifier = ctx->parser->expectIdentifier();
+		structDecl->identifier = parser->expectIdentifier();
 
 		// Consome generic se houver.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			structDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			structDecl->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Consome '{'.
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 		parseVariableLabel:
-			if (ctx->parser->isLet() || ctx->parser->isConst())
+			if (parser->isLet() || parser->isConst())
 			{
 				// Consome a funcao.
-				structDecl->variableList.push_back(parserVariable(ctx));				
+				structDecl->variableList.push_back(parserVariable(parser));				
 				goto parseVariableLabel;
 			}
 
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				ctx->parser->getTokenValue(),
+				parser->getTokenValue(),
 				{ TokenSubType_e::Let, TokenSubType_e::Const, TokenSubType_e::RBracket },
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return structDecl;
 	}
 
-	StructVariableDeclPtr ParserObjectStructDecl::parserVariable(CompilationContext_t* ctx)
+	StructVariableDeclPtr ParserObjectStructDecl::parserVariable(Parser* parser)
 	{
 		auto structVariableDecl = std::make_unique<ast::StructVariableDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
-		switch (ctx->parser->getTokenSubType())
+		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Let:
-			ctx->parser->expectToken(TokenSubType_e::Let);
+			parser->expectToken(TokenSubType_e::Let);
 			structVariableDecl->isConst = false;
 			break;
 		case TokenSubType_e::Const:
-			ctx->parser->expectToken(TokenSubType_e::Const);
+			parser->expectToken(TokenSubType_e::Const);
 			structVariableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				ctx->parser->getTokenValue(),
+				parser->getTokenValue(),
 				{ TokenSubType_e::Let, TokenSubType_e::Const },
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Verifica se possui o identificador 'ref'.
-		if (ctx->parser->isRef())
+		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			ctx->parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenSubType_e::Ref);
 			structVariableDecl->isReference = true;
 		}
 
 		// Consome identificador.
-		structVariableDecl->identifier = ctx->parser->expectIdentifier();
+		structVariableDecl->identifier = parser->expectIdentifier();
 
 		Bool mustHaveInitExpression = structVariableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
-		if (ctx->parser->isColon())
+		if (parser->isColon())
 		{
 			// Consome ':'.
-			ctx->parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenSubType_e::Colon);
 
-			const U32 line = ctx->parser->getTokenLine();
-			const U32 column = ctx->parser->getTokenColumn();
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
 
 			// Consome o tipo.
-			structVariableDecl->typeDecl = ParserObjectTypeDecl::parse(ctx);
+			structVariableDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 
 			// Verifica se o tipo e valido.
 			if (structVariableDecl->typeDecl->typeID == TypeDeclID_e::Void)
@@ -134,15 +134,15 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			ctx->parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			structVariableDecl->initExpression = ParserObjectExpressionDecl::skip(ctx);
+			structVariableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		ctx->parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenSubType_e::SemiColon);
 
 		return structVariableDecl;
 	}

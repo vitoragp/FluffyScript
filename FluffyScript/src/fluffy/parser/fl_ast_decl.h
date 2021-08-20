@@ -4,6 +4,7 @@
 #include "fl_ast.h"
 #include "fl_ast_expr.h"
 #include "fl_ast_type.h"
+#include "fl_ast_stmt.h"
 #include "..\\fl_defs.h"
 
 namespace fluffy { namespace ast {
@@ -11,6 +12,7 @@ namespace fluffy { namespace ast {
 	using std::unique_ptr;
 
 	using namespace expr;
+	using namespace stmt;
 
 	using StringList						= vector<String>;
 
@@ -67,6 +69,9 @@ namespace fluffy { namespace ast {
 	using ExpressionDeclPtr					= unique_ptr<ExpressionDecl>;
 
 	using BlockDeclPtr						= unique_ptr<class BlockDecl>;
+
+	using StmtDeclPtr						= unique_ptr<class StmtDecl>;
+	using StmtDeclPtrList					= vector<StmtDeclPtr>;
 
 	using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
 	using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
@@ -235,8 +240,6 @@ namespace fluffy { namespace ast {
 		virtual ~ClassFunctionDecl()
 		{}
 
-		String								identifier;
-
 		Bool								isStatic;
 		Bool								isVirtual;
 		Bool								isAbstract;
@@ -268,7 +271,6 @@ namespace fluffy { namespace ast {
 		virtual ~ClassVariableDecl()
 		{}
 
-		String								identifier;
 		Bool								isConst;
 		Bool								isReference;
 		Bool								isStatic;
@@ -346,7 +348,6 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		String								identifier;
 		GenericDeclPtrList					genericDeclList;
 		InterfaceFunctionDeclPtrList		functionDeclList;
 	};
@@ -386,7 +387,6 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		String								identifier;
 		GenericDeclPtrList					genericDeclList;
 		StructVariableDeclPtrList			variableList;
 	};
@@ -609,24 +609,5 @@ namespace fluffy { namespace ast {
 
 		ScopedIdentifierDeclPtr				tailIdentifier;
 		Bool								startFromRoot;
-	};
-
-	/**
-	 * BlockDecl
-	 */
-
-	class BlockDecl : public AstNode
-	{
-	protected:
-		BlockDecl(BlockType_e type, U32 line, U32 column)
-			: AstNode(line, column)
-			, type(type)
-		{}
-
-	public:
-		virtual ~BlockDecl()
-		{}
-
-		const BlockType_e					type;
 	};
 } }

@@ -7,118 +7,118 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectTraitDecl
 	 */
 
-	TraitDeclPtr ParserObjectTraitDecl::parse(CompilationContext_t* ctx, Bool hasExport)
+	TraitDeclPtr ParserObjectTraitDecl::parse(Parser* parser, Bool hasExport)
 	{
 		auto traitDecl = std::make_unique<ast::TraitDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		traitDecl->isExported = hasExport;
 
 		// Consome 'interface'.
-		ctx->parser->expectToken(TokenSubType_e::Interface);
+		parser->expectToken(TokenSubType_e::Interface);
 
 		// Consome o identificador.
-		traitDecl->identifier = ctx->parser->expectIdentifier();
+		traitDecl->identifier = parser->expectIdentifier();
 
 		// Consome generic se houver.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			traitDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			traitDecl->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Verifica se e um definicao de trait.
-		if (ctx->parser->isFor())
+		if (parser->isFor())
 		{
 			traitDecl->isDefinition = true;
 
 			// Consome 'for'.
-			ctx->parser->expectToken(TokenSubType_e::For);
+			parser->expectToken(TokenSubType_e::For);
 
 			// Consome o tipo para qual o trait esta sendo implementado.
-			traitDecl->typeDefinitionDecl = ParserObjectTypeDecl::parseWithSelf(ctx);
+			traitDecl->typeDefinitionDecl = ParserObjectTypeDecl::parseWithSelf(parser);
 		}
 
 		// Consome '{'.
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 		parseFunctionLabel:
-			if (ctx->parser->isFn())
+			if (parser->isFn())
 			{
 				// Consome a funcao.
-				traitDecl->functionDeclList.push_back(parserFunction(ctx));
+				traitDecl->functionDeclList.push_back(parserFunction(parser));
 				goto parseFunctionLabel;
 			}
 
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				ctx->parser->getTokenValue(),
+				parser->getTokenValue(),
 				{ TokenSubType_e::Fn, TokenSubType_e::RBracket },
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return traitDecl;
 	} 
 
-	TraitFunctionDeclPtr ParserObjectTraitDecl::parserFunction(CompilationContext_t* ctx)
+	TraitFunctionDeclPtr ParserObjectTraitDecl::parserFunction(Parser* parser)
 	{
 		auto traitFunctionDecl = std::make_unique<ast::TraitFunctionDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Consome 'fn'
-		ctx->parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome o identificador.
-		traitFunctionDecl->identifier = ctx->parser->expectIdentifier();
+		traitFunctionDecl->identifier = parser->expectIdentifier();
 
 		// Consome o Generic.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			traitFunctionDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			traitFunctionDecl->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Consome os parametros.
-		traitFunctionDecl->parameterList = ParserObjectFunctionParameter::parseWithSelf(ctx);
+		traitFunctionDecl->parameterList = ParserObjectFunctionParameter::parseWithSelf(parser);
 
 		// Consome o retorno se houver.
-		if (ctx->parser->isArrow())
+		if (parser->isArrow())
 		{
 			// Consome '->'
-			ctx->parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenSubType_e::Arrow);
 
 			// Consome o tipo retorno.
-			traitFunctionDecl->returnType = ParserObjectTypeDecl::parseWithSelf(ctx);
+			traitFunctionDecl->returnType = ParserObjectTypeDecl::parseWithSelf(parser);
 		}
 		else
 		{
 			// Consome o tipo retorno.
 			traitFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome ';'
-		ctx->parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenSubType_e::SemiColon);
 
 		return traitFunctionDecl;
 	}

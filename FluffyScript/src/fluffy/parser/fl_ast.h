@@ -1,4 +1,5 @@
 #pragma once
+#include "..\fl_string.h"
 #include "..\fl_defs.h"
 namespace fluffy { namespace ast {
 	/**
@@ -34,6 +35,6 @@ namespace fluffy { namespace ast {
 		virtual ~AstNodeIdentified()
 		{}
 
-		String					identifier;
+		TString					identifier;
 	};
 } }

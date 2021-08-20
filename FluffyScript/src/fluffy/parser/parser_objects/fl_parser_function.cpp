@@ -7,59 +7,59 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectFunctionDecl
 	 */
 
-	FunctionDeclPtr ParserObjectFunctionDecl::parse(CompilationContext_t* ctx, Bool hasExport)
+	FunctionDeclPtr ParserObjectFunctionDecl::parse(Parser* parser, Bool hasExport)
 	{
 		auto functionPtr = std::make_unique<ast::FunctionDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		functionPtr->isExported = hasExport;
 
 		// Consome 'fn'
-		ctx->parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome o identificador.
-		functionPtr->identifier = ctx->parser->expectIdentifier();
+		functionPtr->identifier = parser->expectIdentifier();
 
 		// Consome o Generic.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			functionPtr->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			functionPtr->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Consome os parametros.
-		functionPtr->parameterList = ParserObjectFunctionParameter::parse(ctx);
+		functionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
 
 		// Consome o retorno se houver.
-		if (ctx->parser->isArrow())
+		if (parser->isArrow())
 		{
 			// Consome '->'
-			ctx->parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenSubType_e::Arrow);
 
 			// Consome o tipo retorno.
-			functionPtr->returnType = ParserObjectTypeDecl::parse(ctx);
+			functionPtr->returnType = ParserObjectTypeDecl::parse(parser);
 		}
 		else
 		{
 			// Consome o tipo retorno.
 			functionPtr->returnType = std::make_unique<ast::TypeDeclVoid>(
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '{'
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		// Consome bloco se houver.
-		if (!ctx->parser->isRightBracket())
+		if (!parser->isRightBracket())
 		{
-			functionPtr->blockDecl = ParserObjectBlockDecl::parse(ctx);
+			functionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
 		}
 
 		// Consome '}'
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return functionPtr;
 	}

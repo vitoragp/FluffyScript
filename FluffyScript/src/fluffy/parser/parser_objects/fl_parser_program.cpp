@@ -1,47 +1,51 @@
 #include "..\fl_ast_decl.h"
+#include "..\..\fl_buffer.h"
 #include "fl_parser_objects.h"
 
 namespace fluffy { namespace parser_objects {
-	/**
-		* ParserObjectProgram
-		*/
 
-	ProgramPtr ParserObjectProgram::parse(CompilationContext_t* ctx)
+	using lexer::Lexer;
+
+	/**
+	 * ParserObjectProgram
+	 */
+
+	ProgramPtr ParserObjectProgram::parse(Parser* parser)
 	{
 		auto program = std::make_unique<ast::Program>();
 
 		// Faz a analise do primeiro token.
-		ctx->parser->nextToken();
+		parser->nextToken();
 
-		if (ctx->parser->isEof()) {
+		if (parser->isEof()) {
 			return program;
 		}
 
 		// Processa declaracoes de include.
 		while (true)
 		{
-			if (ctx->parser->isEof()) {
+			if (parser->isEof()) {
 				return program;
 			}
-			if (ctx->parser->isInclude()) {
-				program->includeDeclList.push_back(ParserObjectIncludeDecl::parse(ctx));
+			if (parser->isInclude()) {
+				program->includeDeclList.push_back(ParserObjectIncludeDecl::parse(parser));
 				continue;
 			}
 			break;
 		}
 
-		if (auto codeUnit = std::make_unique<ast::CodeUnit>(ctx->parser->getFilename()))
+		if (auto codeUnit = std::make_unique<ast::CodeUnit>(parser->getFilename()))
 		{
 			while (true)
 			{
-				if (ctx->parser->isEof()) {
+				if (parser->isEof()) {
 					program->codeUnitList.push_back(std::move(codeUnit));
 					break;
 				}
 
 				// Processa namespaces.
-				if (ctx->parser->isNamespace()) {
-					codeUnit->namespaceDeclList.push_back(ParserObjectNamespace::parse(ctx));
+				if (parser->isNamespace()) {
+					codeUnit->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
 				}
 			}
 		}

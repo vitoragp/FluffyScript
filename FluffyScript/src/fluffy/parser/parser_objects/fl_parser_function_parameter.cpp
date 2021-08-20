@@ -8,54 +8,54 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectFunctionParameter
 	 */
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parse(CompilationContext_t* ctx)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parse(Parser* parser)
 	{
-		return parseParameters(ctx, false);
+		return parseParameters(parser, false);
 	}
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseWithSelf(CompilationContext_t* ctx)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseWithSelf(Parser* parser)
 	{
-		return parseParameters(ctx, true);
+		return parseParameters(parser, true);
 	}
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseParameters(CompilationContext_t* ctx, Bool traitMode)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseParameters(Parser* parser, Bool traitMode)
 	{
 		FunctionParameterDeclPtrList parameterDeclList;
 
 		// Consome '('
-		ctx->parser->expectToken(TokenSubType_e::LParBracket);
+		parser->expectToken(TokenSubType_e::LParBracket);
 
 		// Finaliza declaracao da lista de parametros.
-		if (ctx->parser->isRightParBracket())
+		if (parser->isRightParBracket())
 		{
 			// Consome ')'
-			ctx->parser->expectToken(TokenSubType_e::RParBracket);
+			parser->expectToken(TokenSubType_e::RParBracket);
 			return parameterDeclList;
 		}
 
 		while (true)
 		{
 			auto parameterDecl = std::make_unique<ast::FunctionParameterDecl>(
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 
-			const U32 line = ctx->parser->getTokenLine();
-			const U32 column = ctx->parser->getTokenColumn();
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
 
-			parameterDecl->identifier = ctx->parser->expectIdentifier();
+			parameterDecl->identifier = parser->expectIdentifier();
 
 			// Consome ':'
-			ctx->parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenSubType_e::Colon);
 
 			// Consome tipo
 			if (traitMode)
 			{
-				parameterDecl->typeDecl = ParserObjectTypeDecl::parseWithSelf(ctx);
+				parameterDecl->typeDecl = ParserObjectTypeDecl::parseWithSelf(parser);
 			}
 			else
 			{
-				parameterDecl->typeDecl = ParserObjectTypeDecl::parse(ctx);
+				parameterDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 			}
 
 			// Parametros nao podem ser do tipo void.
@@ -65,7 +65,7 @@ namespace fluffy { namespace parser_objects {
 					"Parameter '%s' can't have void type",
 					line,
 					column,
-					parameterDecl->identifier.c_str()
+					parameterDecl->identifier.str()
 				);
 			}
 
@@ -73,26 +73,26 @@ namespace fluffy { namespace parser_objects {
 			parameterDeclList.push_back(std::move(parameterDecl));
 
 			// Consome ','
-			if (ctx->parser->isComma())
+			if (parser->isComma())
 			{
-				ctx->parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenSubType_e::Comma);
 				continue;
 			}
 
 			// Finaliza declaracao da lista de parametros.
-			if (ctx->parser->isRightParBracket())
+			if (parser->isRightParBracket())
 			{
 				break;
 			}
 
 			throw exceptions::custom_exception("Expected ',' or ')' token",
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome ')'
-		ctx->parser->expectToken(TokenSubType_e::RParBracket);
+		parser->expectToken(TokenSubType_e::RParBracket);
 
 		return parameterDeclList;
 	}

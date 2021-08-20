@@ -7,43 +7,43 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectNamespace
 	 */
 
-	NamespaceDeclPtr ParserObjectNamespace::parse(CompilationContext_t* ctx)
+	NamespaceDeclPtr ParserObjectNamespace::parse(Parser* parser)
 	{
 		auto namespaceDecl = std::make_unique<ast::NamespaceDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Consome 'namespace'.
-		ctx->parser->expectToken(TokenSubType_e::Namespace);
+		parser->expectToken(TokenSubType_e::Namespace);
 
 		// Consome o identficador com o nome do namespace.
-		namespaceDecl->identifier = ctx->parser->expectIdentifier();
+		namespaceDecl->identifier = parser->expectIdentifier();
 
 		// Consome '{'.
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
 			// Verifica se chegou ao fim do namespace.
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 			// Processa namespace.
-			if (ctx->parser->isNamespace())
+			if (parser->isNamespace())
 			{
-				namespaceDecl->namespaceDeclList.push_back(ParserObjectNamespace::parse(ctx));
+				namespaceDecl->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
 				continue;
 			}
 
 			// Processa declaracao geral.
-			namespaceDecl->generalDeclList.push_back(ParserObjectGeneralDecl::parse(ctx));
+			namespaceDecl->generalDeclList.push_back(ParserObjectGeneralDecl::parse(parser));
 		}
 
 		// Consome '}'.
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return namespaceDecl;
 	}

@@ -8,7 +8,13 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectPatternDecl
 	 */
 	
-	PatternDeclPtr ParserObjectPatternDecl::parse(CompilationContext_t* ctx)
+	PatternDeclPtr ParserObjectPatternDecl::parse(Parser* parser)
+	{
+		throw exceptions::not_implemented_feature_exception("Parser pattern");
+		return nullptr;
+	}
+
+	PatternDeclPtr ParserObjectPatternDecl::skip(Parser* parser)
 	{
 		throw exceptions::not_implemented_feature_exception("Parser pattern");
 		return nullptr;

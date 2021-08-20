@@ -7,42 +7,42 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectClassDecl
 	 */
 
-	ClassDeclPtr ParserObjectClassDecl::parse(CompilationContext_t* ctx, Bool hasExport, Bool hasAbstract)
+	ClassDeclPtr ParserObjectClassDecl::parse(Parser* parser, Bool hasExport, Bool hasAbstract)
 	{
 		auto classDecl = std::make_unique<ast::ClassDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		classDecl->isExported = hasExport;
 		classDecl->isAbstract = hasAbstract;
 
 		// Consome 'class'.
-		ctx->parser->expectToken(TokenSubType_e::Class);
+		parser->expectToken(TokenSubType_e::Class);
 
 		// Consome o nome da classe.
-		classDecl->identifier = ctx->parser->expectIdentifier();
+		classDecl->identifier = parser->expectIdentifier();
 
 		// Verifica se a declaracao de generic.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			classDecl->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			classDecl->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Verifica se a declaracao de extends.
-		if (ctx->parser->isExtends())
+		if (parser->isExtends())
 		{
-			classDecl->baseClass = ParserObjectClassDecl::parseExtends(ctx);
+			classDecl->baseClass = ParserObjectClassDecl::parseExtends(parser);
 		}
 
 		// Verifica se a declaracao de interfaces.
-		if (ctx->parser->isImplements())
+		if (parser->isImplements())
 		{
-			classDecl->interfaceList = ParserObjectClassDecl::parseImplements(ctx);
+			classDecl->interfaceList = ParserObjectClassDecl::parseImplements(parser);
 		}
 
 		// Consome '{'.
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		while (true)
 		{
@@ -51,35 +51,35 @@ namespace fluffy { namespace parser_objects {
 			Bool staticModifier = false;
 
 			// Finaliza a declaracao do bloco.
-			if (ctx->parser->isRightBracket())
+			if (parser->isRightBracket())
 			{
 				break;
 			}
 
 			// Processa declaracao de modificador de acesso.
-			if (ctx->parser->isPublic() || ctx->parser->isProtected() || ctx->parser->isPrivate())
+			if (parser->isPublic() || parser->isProtected() || parser->isPrivate())
 			{
 				hasAccessModifier = true;
-				accessModifier = ctx->parser->getTokenSubType();
-				ctx->parser->nextToken();
+				accessModifier = parser->getTokenSubType();
+				parser->nextToken();
 			}
 
 			// Processa modificador static
-			if (ctx->parser->isStatic())
+			if (parser->isStatic())
 			{
 				staticModifier = true;
-				ctx->parser->nextToken();
+				parser->nextToken();
 			}
 
-			switch (ctx->parser->getTokenSubType())
+			switch (parser->getTokenSubType())
 			{
 			case TokenSubType_e::Abstract:
 				if (staticModifier)
 				{
 					throw exceptions::custom_exception(
 						"Static function can't be abstract",
-						ctx->parser->getTokenLine(),
-						ctx->parser->getTokenColumn()
+						parser->getTokenLine(),
+						parser->getTokenColumn()
 					);
 				}
 				goto processFunction;
@@ -89,8 +89,8 @@ namespace fluffy { namespace parser_objects {
 				{
 					throw exceptions::custom_exception(
 						"Static function can't be virtual",
-						ctx->parser->getTokenLine(),
-						ctx->parser->getTokenColumn()
+						parser->getTokenLine(),
+						parser->getTokenColumn()
 					);
 				}
 				goto processFunction;
@@ -98,18 +98,18 @@ namespace fluffy { namespace parser_objects {
 			case TokenSubType_e::Fn:
 			processFunction:
 				if (staticModifier) {
-					classDecl->staticFunctionList.push_back(parseStaticFunction(ctx, accessModifier));
+					classDecl->staticFunctionList.push_back(parseStaticFunction(parser, accessModifier));
 				} else {
-					classDecl->functionList.push_back(parseFunction(ctx, accessModifier));
+					classDecl->functionList.push_back(parseFunction(parser, accessModifier));
 				}
 				break;
 
 			case TokenSubType_e::Const:
 			case TokenSubType_e::Let:
 				if (staticModifier) {
-					classDecl->staticVariableList.push_back(parseVariable(ctx, accessModifier, staticModifier));
+					classDecl->staticVariableList.push_back(parseVariable(parser, accessModifier, staticModifier));
 				} else {
-					classDecl->variableList.push_back(parseVariable(ctx, accessModifier, staticModifier));
+					classDecl->variableList.push_back(parseVariable(parser, accessModifier, staticModifier));
 				}
 				break;
 
@@ -119,11 +119,11 @@ namespace fluffy { namespace parser_objects {
 					{
 						throw exceptions::custom_exception(
 							"Constructors can't be static",
-							ctx->parser->getTokenLine(),
-							ctx->parser->getTokenColumn()
+							parser->getTokenLine(),
+							parser->getTokenColumn()
 						);
 					}
-					classDecl->constructorList.push_back(parseConstructor(ctx, accessModifier));
+					classDecl->constructorList.push_back(parseConstructor(parser, accessModifier));
 				}
 				break;
 
@@ -133,8 +133,8 @@ namespace fluffy { namespace parser_objects {
 					{
 						throw exceptions::custom_exception(
 							"Destructor can't be static",
-							ctx->parser->getTokenLine(),
-							ctx->parser->getTokenColumn()
+							parser->getTokenLine(),
+							parser->getTokenColumn()
 						);
 					}
 
@@ -142,58 +142,58 @@ namespace fluffy { namespace parser_objects {
 					{
 						throw exceptions::custom_exception(
 							"Destructors are public, can't have any access modifier",
-							ctx->parser->getTokenLine(),
-							ctx->parser->getTokenColumn()
+							parser->getTokenLine(),
+							parser->getTokenColumn()
 						);
 					}
-					classDecl->destructorDecl = parseDestructor(ctx);
+					classDecl->destructorDecl = parseDestructor(parser);
 				}
 				break;
 
 			default:
 				throw exceptions::unexpected_with_possibilities_token_exception(
-					ctx->parser->getTokenValue(),
+					parser->getTokenValue(),
 					{
 						TokenSubType_e::Public, TokenSubType_e::Protected, TokenSubType_e::Private,
 						TokenSubType_e::Let, TokenSubType_e::Const,
 						TokenSubType_e::Virtual, TokenSubType_e::Abstract, TokenSubType_e::Fn,
 						TokenSubType_e::LBracket
 					},
-					ctx->parser->getTokenLine(),
-					ctx->parser->getTokenColumn()
+					parser->getTokenLine(),
+					parser->getTokenColumn()
 				);
 			}
 		}
 
 		// Consome '}'.
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return classDecl;
 	}
 
-	TypeDeclPtr ParserObjectClassDecl::parseExtends(CompilationContext_t* ctx)
+	TypeDeclPtr ParserObjectClassDecl::parseExtends(Parser* parser)
 	{
 		// Consome 'extends'
-		ctx->parser->expectToken(TokenSubType_e::Extends);
-		return ParserObjectTypeDecl::parse(ctx);
+		parser->expectToken(TokenSubType_e::Extends);
+		return ParserObjectTypeDecl::parse(parser);
 	}
 
-	TypeDeclPtrList ParserObjectClassDecl::parseImplements(CompilationContext_t* ctx)
+	TypeDeclPtrList ParserObjectClassDecl::parseImplements(Parser* parser)
 	{
 		TypeDeclPtrList interfaceList;
 
 		// Consome 'implements'
-		ctx->parser->expectToken(TokenSubType_e::Implements);
+		parser->expectToken(TokenSubType_e::Implements);
 
 		while (true)
 		{
 			// Consome o identificador com escopo.
-			interfaceList.push_back(ParserObjectTypeDecl::parse(ctx));
+			interfaceList.push_back(ParserObjectTypeDecl::parse(parser));
 
-			if (ctx->parser->isComma())
+			if (parser->isComma())
 			{
 				// Consome ','
-				ctx->parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenSubType_e::Comma);
 				continue;
 			}
 			break;
@@ -201,11 +201,11 @@ namespace fluffy { namespace parser_objects {
 		return interfaceList;
 	}
 
-	ClassFunctionDeclPtr ParserObjectClassDecl::parseStaticFunction(CompilationContext_t* ctx, TokenSubType_e accessModifier)
+	ClassFunctionDeclPtr ParserObjectClassDecl::parseStaticFunction(Parser* parser, TokenSubType_e accessModifier)
 	{
 		auto classFunctionPtr = std::make_unique<ast::ClassFunctionDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Atribui modificador static.
@@ -228,69 +228,69 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		ctx->parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome o identificador.
-		classFunctionPtr->identifier = ctx->parser->expectIdentifier();
+		classFunctionPtr->identifier = parser->expectIdentifier();
 
 		// Consome o Generic.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			classFunctionPtr->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			classFunctionPtr->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Consome os parametros.
-		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(ctx);
+		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
 
 		// Consome o retorno se houver.
-		if (ctx->parser->isArrow())
+		if (parser->isArrow())
 		{
 			// Consome '->'
-			ctx->parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenSubType_e::Arrow);
 
 			// Consome o tipo retorno.
-			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(ctx);
+			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
 		}
 		else
 		{
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = std::make_unique<ast::TypeDeclVoid>(
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '{'
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!ctx->parser->isRightBracket())
+		if (!parser->isRightBracket())
 		{
-			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(ctx);
+			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
 		}
 
 		// Consome '}'
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return classFunctionPtr;
 	}
 
-	ClassFunctionDeclPtr ParserObjectClassDecl::parseFunction(CompilationContext_t* ctx, TokenSubType_e accessModifier)
+	ClassFunctionDeclPtr ParserObjectClassDecl::parseFunction(Parser* parser, TokenSubType_e accessModifier)
 	{
 		auto classFunctionPtr = std::make_unique<ast::ClassFunctionDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Processa modificador 'abtract' ou 'virtual'.
-		switch (ctx->parser->getTokenSubType())
+		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Abstract:
-			ctx->parser->expectToken(TokenSubType_e::Abstract);
+			parser->expectToken(TokenSubType_e::Abstract);
 			classFunctionPtr->isAbstract = true;
 			break;
 		case TokenSubType_e::Virtual:
-			ctx->parser->expectToken(TokenSubType_e::Virtual);
+			parser->expectToken(TokenSubType_e::Virtual);
 			classFunctionPtr->isVirtual = true;
 			break;
 		default:
@@ -314,39 +314,39 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		ctx->parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenSubType_e::Fn);
 
 		// Consome o identificador.
-		classFunctionPtr->identifier = ctx->parser->expectIdentifier();
+		classFunctionPtr->identifier = parser->expectIdentifier();
 
 		// Consome o Generic.
-		if (ctx->parser->isLessThan())
+		if (parser->isLessThan())
 		{
-			classFunctionPtr->genericDeclList = ParserObjectGenericDecl::parse(ctx);
+			classFunctionPtr->genericDeclList = ParserObjectGenericDecl::parse(parser);
 		}
 
 		// Consome os parametros.
-		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(ctx);
+		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
 
 		// Consome o retorno se houver.
-		if (ctx->parser->isArrow())
+		if (parser->isArrow())
 		{
 			// Consome '->'
-			ctx->parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenSubType_e::Arrow);
 
 			// Consome o tipo retorno.
-			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(ctx);
+			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
 		}
 		else
 		{
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = std::make_unique<ast::TypeDeclVoid>(
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
-		switch (ctx->parser->getTokenSubType())
+		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Override:
 			// Funcoes abstratas nao podem ser override ou final
@@ -354,12 +354,12 @@ namespace fluffy { namespace parser_objects {
 			{
 				throw exceptions::custom_exception(
 					"Abstract function '%s' can't have override or final modifiers",
-					ctx->parser->getTokenLine(),
-					ctx->parser->getTokenColumn(),
-					classFunctionPtr->identifier.c_str()
+					parser->getTokenLine(),
+					parser->getTokenColumn(),
+					classFunctionPtr->identifier.str()
 				);
 			}
-			ctx->parser->expectToken(TokenSubType_e::Override);
+			parser->expectToken(TokenSubType_e::Override);
 			classFunctionPtr->isOverride = true;
 			break;
 		case TokenSubType_e::Final:
@@ -368,12 +368,12 @@ namespace fluffy { namespace parser_objects {
 			{
 				throw exceptions::custom_exception(
 					"Abstract function '%s' can't have override or final modifiers",
-					ctx->parser->getTokenLine(),
-					ctx->parser->getTokenColumn(),
-					classFunctionPtr->identifier.c_str()
+					parser->getTokenLine(),
+					parser->getTokenColumn(),
+					classFunctionPtr->identifier.str()
 				);
 			}
-			ctx->parser->expectToken(TokenSubType_e::Final);
+			parser->expectToken(TokenSubType_e::Final);
 			classFunctionPtr->isFinal = true;
 			break;
 		default:
@@ -383,30 +383,30 @@ namespace fluffy { namespace parser_objects {
 		if (classFunctionPtr->isAbstract)
 		{
 			// Consome ';'
-			ctx->parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenSubType_e::SemiColon);
 			return classFunctionPtr;
 		}
 
 		// Consome '{'
-		ctx->parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenSubType_e::LBracket);
 
 		// Console bloco se houver.
-		if (!ctx->parser->isRightBracket())
+		if (!parser->isRightBracket())
 		{
-			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(ctx);
+			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
 		}
 
 		// Consome '}'
-		ctx->parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenSubType_e::RBracket);
 
 		return classFunctionPtr;
 	}
 
-	ClassVariableDeclPtr ParserObjectClassDecl::parseVariable(CompilationContext_t* ctx, TokenSubType_e accessModifier, Bool isStatic)
+	ClassVariableDeclPtr ParserObjectClassDecl::parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic)
 	{
 		auto classVariableDecl = std::make_unique<ast::ClassVariableDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Define a variavel como estatica.
@@ -429,49 +429,49 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'let' ou 'const'
-		switch (ctx->parser->getTokenSubType())
+		switch (parser->getTokenSubType())
 		{
 		case TokenSubType_e::Let:
-			ctx->parser->expectToken(TokenSubType_e::Let);
+			parser->expectToken(TokenSubType_e::Let);
 			classVariableDecl->isConst = false;
 			break;
 		case TokenSubType_e::Const:
-			ctx->parser->expectToken(TokenSubType_e::Const);
+			parser->expectToken(TokenSubType_e::Const);
 			classVariableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
-				ctx->parser->getTokenValue(),
+				parser->getTokenValue(),
 				{ TokenSubType_e::Let, TokenSubType_e::Const },
-				ctx->parser->getTokenLine(),
-				ctx->parser->getTokenColumn()
+				parser->getTokenLine(),
+				parser->getTokenColumn()
 			);
 		}
 
 		// Verifica se o modificador 'ref' foi declarado.
-		if (ctx->parser->isRef())
+		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			ctx->parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenSubType_e::Ref);
 			classVariableDecl->isReference = true;
 		}
 
 		// Consome identificador.
-		classVariableDecl->identifier = ctx->parser->expectIdentifier();
+		classVariableDecl->identifier = parser->expectIdentifier();
 
 		Bool mustHaveInitExpression = classVariableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
-		if (ctx->parser->isColon())
+		if (parser->isColon())
 		{
 			// Consome ':'.
-			ctx->parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenSubType_e::Colon);
 
-			const U32 line = ctx->parser->getTokenLine();
-			const U32 column = ctx->parser->getTokenColumn();
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
 
 			// Consome o tipo.
-			classVariableDecl->typeDecl = ParserObjectTypeDecl::parse(ctx);
+			classVariableDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 
 			// Verifica se o tipo e valido.
 			if (classVariableDecl->typeDecl->typeID == TypeDeclID_e::Void)
@@ -491,67 +491,67 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			ctx->parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			classVariableDecl->initExpression = ParserObjectExpressionDecl::skip(ctx);
+			classVariableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		ctx->parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenSubType_e::SemiColon);
 
 		return classVariableDecl;
 	}
 
-	ClassConstructorDeclPtr ParserObjectClassDecl::parseConstructor(CompilationContext_t* ctx, TokenSubType_e accessModifier)
+	ClassConstructorDeclPtr ParserObjectClassDecl::parseConstructor(Parser* parser, TokenSubType_e accessModifier)
 	{
 		auto classConstructorDecl = std::make_unique<ast::ClassConstructorDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 		
 		// Consome 'constructor'.
-		ctx->parser->expectToken(TokenSubType_e::Constructor);
+		parser->expectToken(TokenSubType_e::Constructor);
 
 		// Consome os parametros.
-		classConstructorDecl->parameterList = ParserObjectFunctionParameter::parse(ctx);
+		classConstructorDecl->parameterList = ParserObjectFunctionParameter::parse(parser);
 
 		// Verifica se a declaracao do construtor base.
-		if (ctx->parser->isColon())
+		if (parser->isColon())
 		{
 			// Consome ':'.
-			ctx->parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenSubType_e::Colon);
 
-			if (ctx->parser->isSuper())
+			if (parser->isSuper())
 			{
 				// Consome 'super'.
-				ctx->parser->expectToken(TokenSubType_e::Super);
+				parser->expectToken(TokenSubType_e::Super);
 
 				// Consome '('.
-				ctx->parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenSubType_e::LParBracket);
 
 				// Consome os parametros.
-				classConstructorDecl->superParameters = ParserObjectExpressionDecl::skip(ctx);
+				classConstructorDecl->superParameters = ParserObjectExpressionDecl::skip(parser);
 
 				// Consome ')'.
-				ctx->parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenSubType_e::RParBracket);
 			} else {
 				auto variableInitDecl = std::make_unique<ast::ClassVariableInitDecl>(
-					ctx->parser->getTokenLine(),
-					ctx->parser->getTokenColumn()
+					parser->getTokenLine(),
+					parser->getTokenColumn()
 					);
 
 				// Consome o identificador
-				variableInitDecl->identifier = ctx->parser->expectIdentifier();
+				variableInitDecl->identifier = parser->expectIdentifier();
 
 				// Consome '('.
-				ctx->parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenSubType_e::LParBracket);
 
-				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(ctx);
+				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
 
 				// Consome ')'.
-				ctx->parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenSubType_e::RParBracket);
 
 				// Adiciona inicializacao de variavel a lista.
 				classConstructorDecl->variableInitDeclList.push_back(std::move(variableInitDecl));
@@ -560,59 +560,59 @@ namespace fluffy { namespace parser_objects {
 			// Consome inicializacao e variaveis.
 			while (true)
 			{
-				if (!ctx->parser->isComma())
+				if (!parser->isComma())
 				{
 					break;
 				}
 
 				// Consome ','.
-				ctx->parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenSubType_e::Comma);
 
 				auto variableInitDecl = std::make_unique<ast::ClassVariableInitDecl>(
-					ctx->parser->getTokenLine(),
-					ctx->parser->getTokenColumn()
+					parser->getTokenLine(),
+					parser->getTokenColumn()
 				);
 
 				// Consome o identificador
-				variableInitDecl->identifier = ctx->parser->expectIdentifier();
+				variableInitDecl->identifier = parser->expectIdentifier();
 
 				// Consome '('.
-				ctx->parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenSubType_e::LParBracket);
 
-				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(ctx);
+				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
 
 				// Consome ')'.
-				ctx->parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenSubType_e::RParBracket);
 
 				// Adiciona inicializacao de variavel a lista.
 				classConstructorDecl->variableInitDeclList.push_back(std::move(variableInitDecl));
 			}
 		}
 
-		// Console bloco..
-		classConstructorDecl->blockDecl = ParserObjectBlockDecl::skip(ctx);
+		// Console bloco.
+		classConstructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
 
 		return classConstructorDecl;
 	}
 
-	ClassDestructorDeclPtr ParserObjectClassDecl::parseDestructor(CompilationContext_t* ctx)
+	ClassDestructorDeclPtr ParserObjectClassDecl::parseDestructor(Parser* parser)
 	{
 		auto classDestructorDecl = std::make_unique<ast::ClassDestructorDecl>(
-			ctx->parser->getTokenLine(),
-			ctx->parser->getTokenColumn()
+			parser->getTokenLine(),
+			parser->getTokenColumn()
 		);
 
 		// Consome 'destructor'.
-		ctx->parser->expectToken(TokenSubType_e::Destructor);
+		parser->expectToken(TokenSubType_e::Destructor);
 
 		// Consome '('.
-		ctx->parser->expectToken(TokenSubType_e::LParBracket);
+		parser->expectToken(TokenSubType_e::LParBracket);
 
 		// Consome ')'.
-		ctx->parser->expectToken(TokenSubType_e::RParBracket);
+		parser->expectToken(TokenSubType_e::RParBracket);
 
 		// Console bloco..
-		classDestructorDecl->blockDecl = ParserObjectBlockDecl::skip(ctx);
+		classDestructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
 
 		return classDestructorDecl;
 	}

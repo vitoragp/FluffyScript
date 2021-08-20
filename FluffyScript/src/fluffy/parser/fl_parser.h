@@ -25,12 +25,15 @@ namespace fluffy { namespace parser {
 
 		ProgramPtr						parse();
 
+		Token_s							parseNextToken();
+
 		void							loadSource(String source);
 		void							loadSourceFromFile(String sourceFile);
 
 		void							reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset);
 
 		void							nextToken();
+
 
 		void							expectToken(TokenSubType_e expectedToken);
 		void							expectToken(TokenSubType_e expectedToken, ErrCallback errcallback);

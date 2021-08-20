@@ -1,10 +1,14 @@
 #pragma once
 #include <string>
+#include <vector>
+#include <unordered_map>
 
-namespace fluffy { namespace parser { class Parser; } }
+namespace fluffy { namespace parser {
+	class Parser;
+	class AstNodeIdentified;
+} }
 
 namespace fluffy {
-
 	/**
 	 * Tipos primitivos
 	 */
@@ -344,16 +348,6 @@ namespace fluffy {
 	};
 
 	/**
-	 * BlockType_e
-	 */
-
-	enum class BlockType_e
-	{
-		Default,
-		Expression
-	};
-
-	/**
 	 * ArrayType_e
 	 */
 
@@ -378,36 +372,50 @@ namespace fluffy {
 	};
 
 	/**
+	 * StmtDeclType_e
+	 */
+
+	enum class StmtDeclType_e
+	{
+		If,
+		IfLet,
+		For,
+		While,
+		DoWhile,
+		Match,
+		Return,
+		Continue,
+		Break,
+		Goto,
+		Label,
+		Try,
+		Panic,
+		Variable,
+		Expr
+	};
+
+	/**
 	 * Token
 	 * Estrutura basica de informacao do compilador.
 	 */
 
 	struct Token_s
 	{
-		String value;
+		String			value;
 
-		TokenType_e type;
-		TokenSubType_e subType;
+		TokenType_e		type;
+		TokenSubType_e	subType;
 
-		U32 line;
-		U32 column;
-		U32 position;
+		U32				line;
+		U32				column;
+		U32				position;
 
-		String filename;
-	};
-
-	/**
-	 * CompilationContext_t
-	 */
-
-	struct CompilationContext_t
-	{
-		parser::Parser* parser;
+		String			filename;
 	};
 
 	/**
 	 * Funcoes auxiliares
 	 */
 
-	const I8* getTokenString(const TokenSubType_e tokenSubType);
+	const I8*			getTokenString(const TokenSubType_e tokenSubType);
 }

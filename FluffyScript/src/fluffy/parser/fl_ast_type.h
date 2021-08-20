@@ -180,6 +180,7 @@ namespace fluffy { namespace ast {
 		TypeDeclNamed(U32 line, U32 column)
 			: TypeDecl(TypeDeclID_e::Named, line, column)
 			, startFromRoot(false)
+			, reference(nullptr)
 		{}
 
 		virtual ~TypeDeclNamed()
@@ -189,6 +190,7 @@ namespace fluffy { namespace ast {
 		TypeDeclNamedPtr					internalIdentifier;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
+		AstNode*							reference;
 	};
 
 	/**

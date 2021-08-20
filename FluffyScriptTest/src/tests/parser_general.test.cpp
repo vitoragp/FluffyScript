@@ -20,8 +20,6 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
 
-		CompilationContext_t ctx;
-
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
@@ -29,9 +27,7 @@ namespace fluffy { namespace testing {
 				new Lexer(
 					new DirectBuffer()
 				)
-				);
-
-			ctx.parser = parser.get();
+			);
 		}
 	};
 
@@ -41,9 +37,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserGeneralTest, TestClassDeclaration)
 	{
-		ctx.parser->loadSource("class Foo {}");
-		ctx.parser->nextToken();
+		parser->loadSource("class Foo {}");
+		parser->nextToken();
 
-		parser_objects::ParserObjectGeneralDecl::parse(&ctx);
+		parser_objects::ParserObjectGeneralDecl::parse(parser.get());
 	}
 } }
