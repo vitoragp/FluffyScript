@@ -49,12 +49,9 @@ namespace application
 				
 			}
 
-			foreach let user in list
+			for let i in iterators
 			{
-				if user.age > 18
-				{
-					break;
-				}
+				break;
 			}
 			return true;
 		}

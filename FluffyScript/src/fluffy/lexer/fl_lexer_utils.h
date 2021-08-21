@@ -119,7 +119,6 @@ namespace fluffy { namespace utils {
 									FLUFFY_IS_TOKEN_DECL(Continue);
 									FLUFFY_IS_TOKEN_DECL(Break);
 									FLUFFY_IS_TOKEN_DECL(For);
-									FLUFFY_IS_TOKEN_DECL(Foreach);
 									FLUFFY_IS_TOKEN_DECL(In);
 									FLUFFY_IS_TOKEN_DECL(While);
 									FLUFFY_IS_TOKEN_DECL(Do);

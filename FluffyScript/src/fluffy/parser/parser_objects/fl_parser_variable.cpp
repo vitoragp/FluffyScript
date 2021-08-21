@@ -82,7 +82,7 @@ namespace fluffy { namespace parser_objects {
 			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
+			variableDecl->initExpression = ParserObjectExpressionDecl::skipVariableInitExpr(parser);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'

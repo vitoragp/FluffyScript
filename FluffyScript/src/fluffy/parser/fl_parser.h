@@ -129,7 +129,6 @@ namespace fluffy { namespace parser {
 		Bool							isContinue();
 		Bool							isBreak();
 		Bool							isFor();
-		Bool							isForeach();
 		Bool							isIn();
 		Bool							isWhile();
 		Bool							isDo();

@@ -106,7 +106,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassVariableTest, TestConstFunctionTypeWithFunctionExpr)
 	{
-		parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = fn (a) { }; }");
+		parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = |a| { }; }");
 		parser->nextToken();
 
 		auto classDecl = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);

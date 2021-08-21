@@ -40,6 +40,18 @@ namespace {
 	{
 		__validateExpr(expr, callback, "ExpressionBinaryDecl");
 	}
+	
+	void validateIdeExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIdentifierDecl*)> callback)
+	{
+		__validateExpr(expr, callback, "ExpressionConstantIdentifierDecl");
+	}
+
+	void validateIntExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIntegerDecl*)> callback)
+	{
+		__validateExpr(expr, callback, "ExpressionConstantIntegerDecl");
+	}
+
+	/*
 
 	void validateUnaExpr(ExpressionDecl* expr, std::function<void(ExpressionUnaryDecl*)> callback)
 	{
@@ -71,9 +83,9 @@ namespace {
 		__validateExpr(expr, callback, "ExpressionFunctionCall");
 	}
 
-	void validateIndExpr(ExpressionDecl* expr, std::function<void(ExpressionIndexAddress*)> callback)
+	void validateIndExpr(ExpressionDecl* expr, std::function<void(ExpressionIndexDecl*)> callback)
 	{
-		__validateExpr(expr, callback, "ExpressionIndexAddress");
+		__validateExpr(expr, callback, "ExpressionIndexDecl");
 	}
 
 	void validateThiExpr(ExpressionDecl* expr, std::function<void(ExpressionThisDecl*)> callback)
@@ -89,11 +101,6 @@ namespace {
 	void validateBooExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantBoolDecl*)> callback)
 	{
 		__validateExpr(expr, callback, "ExpressionConstantBoolDecl");
-	}
-
-	void validateIntExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIntegerDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantIntegerDecl");
 	}
 
 	void validateReaExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantRealDecl*)> callback)
@@ -115,11 +122,7 @@ namespace {
 	{
 		__validateExpr(expr, callback, "ExpressionConstantNullDecl");
 	}
-
-	void validateIdeExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIdentifierDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantIdentifierDecl");
-	}
+	*/
 }
 
 namespace fluffy { namespace testing {

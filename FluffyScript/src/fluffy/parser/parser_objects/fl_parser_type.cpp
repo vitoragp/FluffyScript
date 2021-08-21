@@ -461,7 +461,6 @@ namespace fluffy { namespace parser_objects {
 					parser->getTokenColumn()
 				);
 			}
-
 			parser->expectToken(TokenSubType_e::RParBracket);
 			return nullptr;
 		}

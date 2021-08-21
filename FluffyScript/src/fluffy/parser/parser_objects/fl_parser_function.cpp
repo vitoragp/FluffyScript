@@ -49,18 +49,9 @@ namespace fluffy { namespace parser_objects {
 			);
 		}
 
-		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
-
 		// Consome bloco se houver.
-		if (!parser->isRightBracket())
-		{
-			functionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
-		}
-
-		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
-
+		functionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+		
 		return functionPtr;
 	}
 } }

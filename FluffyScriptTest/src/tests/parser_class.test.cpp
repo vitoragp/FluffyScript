@@ -295,4 +295,13 @@ namespace fluffy { namespace testing {
 			parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
 		}
 	}
+
+	TEST_F(ParserClassTest, TestFullClassDeclaration2)
+	{
+		parser->loadSourceFromFile(".\\files\\parser\\source_5.txt");
+
+		auto program = parser->parse();
+
+		ASSERT_TRUE(program != nullptr);
+	}
 } }

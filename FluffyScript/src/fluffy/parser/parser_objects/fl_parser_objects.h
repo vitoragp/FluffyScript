@@ -320,6 +320,12 @@ namespace fluffy { namespace parser_objects {
 		ExpressionDeclPtr					skip(Parser* parser);
 
 		static
+		ExpressionDeclPtr					parseVariableInitExpr(Parser* parser);
+
+		static
+		ExpressionDeclPtr					skipVariableInitExpr(Parser* parser);
+
+		static
 		ExpressionDeclPtr					parseEnumExpr(Parser* parser);
 
 		static

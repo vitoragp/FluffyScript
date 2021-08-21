@@ -1,5 +1,6 @@
 #include "..\fl_ast_decl.h"
 #include "..\..\fl_buffer.h"
+#include "..\..\fl_exceptions.h"
 #include "fl_parser_objects.h"
 
 namespace fluffy { namespace parser_objects {
@@ -46,7 +47,17 @@ namespace fluffy { namespace parser_objects {
 				// Processa namespaces.
 				if (parser->isNamespace()) {
 					codeUnit->namespaceDeclList.push_back(ParserObjectNamespace::parse(parser));
+					continue;
 				}
+
+				throw exceptions::unexpected_with_possibilities_token_exception(
+					parser->getTokenValue(),
+					{
+						TokenSubType_e::Namespace
+					},
+					parser->getTokenLine(),
+					parser->getTokenColumn()
+				);
 			}
 		}
 		return program;

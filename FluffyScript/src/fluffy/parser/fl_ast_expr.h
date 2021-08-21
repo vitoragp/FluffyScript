@@ -32,6 +32,13 @@ namespace fluffy { namespace ast { namespace expr {
 
 	using PatternDeclPtr							= std::unique_ptr<PatternDecl>;
 
+	using ExpressionNewBlockDeclPtr					= std::unique_ptr<class ExpressionNewBlockDecl>;
+	using ExpressionNewBlockDeclPtrList				= std::vector<ExpressionNewBlockDeclPtr>;
+
+	using ExpressionNewItemDeclPtr					= std::unique_ptr<class ExpressionNewItemDecl>;
+	using ExpressionNewItemDeclPtrList				= std::vector<ExpressionNewItemDeclPtr>;
+	
+
 	/**
 	 * ExpressionDecl
 	 */
@@ -205,21 +212,40 @@ namespace fluffy { namespace ast { namespace expr {
 	};
 
 	/**
-	 * ExpressionIndexAddress
+	 * ExpressionIndexDecl
 	 */
 
-	class ExpressionIndexAddress : public ExpressionDecl
+	class ExpressionIndexDecl : public ExpressionDecl
 	{
 	public:
-		ExpressionIndexAddress(const U32 line, const U32 column)
+		ExpressionIndexDecl(const U32 line, const U32 column)
 			: ExpressionDecl(ExpressionDeclType_e::Index, line, column)
 		{}
 
-		virtual ~ExpressionIndexAddress()
+		virtual ~ExpressionIndexDecl()
 		{}
 
 		ExpressionDeclPtr						leftDecl;
 		ExpressionDeclPtr						rightDecl;
+	};
+
+	/**
+	 * ExpressionNewDecl
+	 */
+
+	class ExpressionNewDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionNewDecl(const U32 line, const U32 column)
+			: ExpressionDecl(ExpressionDeclType_e::New, line, column)
+		{}
+
+		virtual ~ExpressionNewDecl()
+		{}
+
+		TypeDeclPtr								objectTypeDecl;
+		ExpressionDeclPtr						expressionDecl;
+		ExpressionNewBlockDeclPtr				objectInitBlockDecl;
 	};
 
 	/**
@@ -434,4 +460,40 @@ namespace fluffy { namespace ast { namespace expr {
 		String									identifierDecl;
 		TypeDeclPtr								typeDecl;
 	};
+
+	/**
+	 * ExpressionNewBlock
+	 */
+
+	class ExpressionNewBlockDecl : public AstNode
+	{
+	public:
+		ExpressionNewBlockDecl(U32 line, U32 column)
+			: AstNode(line, column)
+		{}
+
+		virtual ~ExpressionNewBlockDecl()
+		{}
+
+		ExpressionNewItemDeclPtrList			itemDeclList;
+	};
+
+	/**
+	 * ExpressionNewItemDecl
+	 */
+
+	class ExpressionNewItemDecl : public AstNode
+	{
+	public:
+		ExpressionNewItemDecl(U32 line, U32 column)
+			: AstNode(line, column)
+		{}
+
+		virtual ~ExpressionNewItemDecl()
+		{}
+
+		TString									identifier;
+		ExpressionDeclPtr						expressionDecl;
+	};
+
 } } }

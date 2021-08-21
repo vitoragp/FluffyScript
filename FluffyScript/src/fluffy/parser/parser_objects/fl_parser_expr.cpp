@@ -52,7 +52,6 @@ namespace fluffy {
 		case TokenSubType_e::LogicalNot:
 		case TokenSubType_e::ScopeResolution:
 		case TokenSubType_e::Interrogation:
-		case TokenSubType_e::Fn:
 		case TokenSubType_e::Match:
 			return true;
 		default:
@@ -161,6 +160,25 @@ namespace fluffy { namespace parser_objects {
 		const U32 beginPosition = parser->getTokenPosition();
 
 		parseExpression(parser, OperatorPrecLevel_e::MinPrec, true);
+
+		const U32 endPosition = parser->getTokenPosition();
+
+		return std::make_unique<ExpressionDeclMark>(line, column, beginPosition, endPosition);
+	}
+
+	ExpressionDeclPtr ParserObjectExpressionDecl::parseVariableInitExpr(Parser* parser)
+	{
+		return parseExpression(parser, OperatorPrecLevel_e::Interrogation, false);
+	}
+
+	ExpressionDeclPtr ParserObjectExpressionDecl::skipVariableInitExpr(Parser* parser)
+	{
+		const U32 line = parser->getTokenLine();
+		const U32 column = parser->getTokenColumn();
+
+		const U32 beginPosition = parser->getTokenPosition();
+
+		parseExpression(parser, OperatorPrecLevel_e::Interrogation, true);
 
 		const U32 endPosition = parser->getTokenPosition();
 
@@ -418,7 +436,7 @@ namespace fluffy { namespace parser_objects {
 						parser->expectToken(TokenSubType_e::RSquBracket);
 					}
 
-					auto indexAddressExpr = std::make_unique<ExpressionIndexAddress>(
+					auto indexAddressExpr = std::make_unique<ExpressionIndexDecl>(
 						line,
 						column
 					);
@@ -525,42 +543,41 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Processa declaracao de funcao anonima.
-		if (parser->isFn())
+		if (parser->isBitWiseOr() || parser->isLogicalOr())
 		{
+			// Quebra token.
+			if (parser->isLogicalOr())
+			{
+				parser->reinterpretToken(TokenType_e::Symbol, TokenSubType_e::BitWiseOr, 1);
+			}
+
 			// Processa superficialmente.
 			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::Fn);
-				parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenSubType_e::BitWiseOr);
 				if (parser->isIdentifier()) {
-					auto identifier = parser->expectIdentifier();
-					if (parser->isColon())
+					if (parser->parseNextToken().subType == TokenSubType_e::Colon)
 					{
+						auto identifier = parser->expectIdentifier();
 						parser->expectToken(TokenSubType_e::Colon);
-
-						U32 paramLine = parser->getTokenLine();
-						U32 paramColumn = parser->getTokenColumn();
 
 						// Parametro nao podem ter tipo nulo.
 						if (ParserObjectTypeDecl::parse(parser)->typeID == TypeDeclID_e::Void)
 						{
 							throw exceptions::custom_exception(
 								"Parameter '%s' can't have void type",
-								paramLine,
-								paramColumn,
+								parser->getTokenLine(),
+								parser->getTokenColumn(),
 								identifier.c_str()
 							);
 						}
 
 						while (true)
 						{
-							if (parser->isRightParBracket())
+							if (parser->isBitWiseOr())
 							{
 								break;
 							}
 							parser->expectToken(TokenSubType_e::Comma);
-
-							U32 paramLine = parser->getTokenLine();
-							U32 paramColumn = parser->getTokenColumn();
 
 							auto identifierDecl = parser->expectIdentifier();
 
@@ -571,16 +588,18 @@ namespace fluffy { namespace parser_objects {
 							{
 								throw exceptions::custom_exception(
 									"Parameter '%s' can't have void type",
-									paramLine,
-									paramColumn,
+									parser->getTokenLine(),
+									parser->getTokenColumn(),
 									identifier.c_str()
 								);
 							}
 						}
 					} else {
+						parser->expectIdentifier();
+
 						while (true)
 						{
-							if (parser->isRightParBracket())
+							if (parser->isBitWiseOr())
 							{
 								break;
 							}
@@ -592,8 +611,8 @@ namespace fluffy { namespace parser_objects {
 					}
 				}
 
-				// Consome ')'
-				parser->expectToken(TokenSubType_e::RParBracket);
+				// Consome '|'
+				parser->expectToken(TokenSubType_e::BitWiseOr);
 
 				// Verifica se o tipo de retorno e explicito.
 				if (parser->isArrow()) {
@@ -613,11 +632,8 @@ namespace fluffy { namespace parser_objects {
 				column
 			);
 
-			// Consome 'fn'
-			parser->expectToken(TokenSubType_e::Fn);
-
-			// Consome '('
-			parser->expectToken(TokenSubType_e::LParBracket);
+			// Consome '|'
+			parser->expectToken(TokenSubType_e::BitWiseOr);
 
 			// Uma funcao anonima pode ter parametros tipados ou nao, depende do contexto.
 			// Por exemplo se a funcao esta sendo passada como parametro, seus tipos podem ser
@@ -627,65 +643,29 @@ namespace fluffy { namespace parser_objects {
 			// ou constate onde o tipo e omitido, logo, nao se poderia fazer a deducao.
 
 			if (parser->isIdentifier()) {
-
-				// Consome o identificador.
-				auto identifier = parser->expectIdentifier();
-
-				// Verifica se o proximo token e ':'
-				if (parser->isColon())
+				if (parser->parseNextToken().subType == TokenSubType_e::Colon)
 				{
-					// Consome ':'
-					parser->expectToken(TokenSubType_e::Colon);
-
-					U32 paramLine = parser->getTokenLine();
-					U32 paramColumn = parser->getTokenColumn();
-
-					auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
-						paramLine,
-						paramColumn
-					);
-
-					paramDecl->identifierDecl = identifier;
-					paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
-
-					// Parametro nao podem ter tipo nulo.
-					if (paramDecl->typeDecl->typeID == TypeDeclID_e::Void)
-					{
-						throw exceptions::custom_exception(
-							"Parameter '%s' can't have void type",
-							paramLine,
-							paramColumn,
-							identifier.c_str()
-						);
-					}
-
-					// Adiciona o parametro a lista
-					functionDecl->parametersDecl.push_back(std::move(paramDecl));
-
 					// Processa o restante do parametros se houver.
 					while (true)
 					{
-						if (parser->isRightParBracket())
+						if (parser->isBitWiseOr())
 						{
 							break;
 						}
 
-						// Consome ','
-						parser->expectToken(TokenSubType_e::Comma);
-
-						U32 paramLine = parser->getTokenLine();
-						U32 paramColumn = parser->getTokenColumn();
-
+					parseParamterDecl:
 						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
-							paramLine,
-							paramColumn
+							parser->getTokenLine(),
+							parser->getTokenColumn()
 						);
 
+						// Consome identificador.
 						paramDecl->identifierDecl = parser->expectIdentifier();
 
 						// Consome ':'
 						parser->expectToken(TokenSubType_e::Colon);
 
+						// Consome o tipo do parametro.
 						paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
 
 						// Parametro nao podem ter tipo nulo.
@@ -693,14 +673,34 @@ namespace fluffy { namespace parser_objects {
 						{
 							throw exceptions::custom_exception(
 								"Parameter '%s' can't have void type",
-								paramLine,
-								paramColumn,
-								identifier.c_str()
+								parser->getTokenLine(),
+								parser->getTokenColumn(),
+								paramDecl->identifierDecl.c_str()
 							);
 						}
 
 						// Adiciona o parametro a lista
 						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+
+						// Consome ','
+						if (parser->isComma())
+						{
+							parser->expectToken(TokenSubType_e::Comma);
+							goto parseParamterDecl;
+						}
+
+						if (parser->isBitWiseOr())
+						{
+							break;
+						}
+
+						throw exceptions::unexpected_with_possibilities_token_exception(
+							parser->getTokenValue(),
+							{
+							},
+							parser->getTokenLine(),
+							parser->getTokenColumn()
+						);
 					}
 				} else {
 					auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
@@ -708,7 +708,7 @@ namespace fluffy { namespace parser_objects {
 						parser->getTokenColumn()
 					);
 
-					paramDecl->identifierDecl = identifier;
+					paramDecl->identifierDecl = parser->expectIdentifier();
 
 					// Adiciona o parametro a lista
 					functionDecl->parametersDecl.push_back(std::move(paramDecl));
@@ -716,7 +716,7 @@ namespace fluffy { namespace parser_objects {
 					// Processa o restante do parametros se houver.
 					while (true)
 					{
-						if (parser->isRightParBracket())
+						if (parser->isBitWiseOr())
 						{
 							break;
 						}
@@ -737,8 +737,8 @@ namespace fluffy { namespace parser_objects {
 				}
 			}
 
-			// Consome ')'
-			parser->expectToken(TokenSubType_e::RParBracket);
+			// Consome '|'
+			parser->expectToken(TokenSubType_e::BitWiseOr);
 
 			// Verifica se o tipo de retorno e explicito.
 			if (parser->isArrow()) {
@@ -757,6 +757,145 @@ namespace fluffy { namespace parser_objects {
 			functionDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
 
 			return functionDecl;
+		}
+
+		// Processa new.
+		if (parser->isNew())
+		{
+			if (skipOnly)
+			{
+				parser->expectToken(TokenSubType_e::New);
+				ParserObjectTypeDecl::skip(parser);
+				parser->expectToken(TokenSubType_e::LParBracket);
+				ParserObjectExpressionDecl::skip(parser);
+				parser->expectToken(TokenSubType_e::RParBracket);
+				if (parser->isLeftBracket())
+				{
+					parser->expectToken(TokenSubType_e::LBracket);
+					while (true)
+					{
+						if (parser->isRightBracket())
+						{
+							break;
+						}
+
+					parserItemLabelSkip:
+						parser->expectIdentifier();
+						parser->expectToken(TokenSubType_e::Colon);
+						ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
+
+						// Verifica se existem mais itens.
+						if (parser->isComma())
+						{
+							// Consome ','
+							parser->expectToken(TokenSubType_e::Comma);
+							goto parserItemLabelSkip;
+						}
+
+						if (parser->isRightBracket())
+						{
+							break;
+						}
+
+						throw exceptions::unexpected_with_possibilities_token_exception(
+							parser->getTokenValue(),
+							{
+								TokenSubType_e::Comma,
+								TokenSubType_e::RBracket
+							},
+							parser->getTokenLine(),
+							parser->getTokenColumn()
+						);
+					}
+					parser->expectToken(TokenSubType_e::RBracket);
+				}
+				return nullptr;
+			}
+
+			auto newDecl = std::make_unique<ast::ExpressionNewDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
+
+			// Consome 'new'
+			parser->expectToken(TokenSubType_e::New);
+
+			// Consome o tipo.
+			newDecl->objectTypeDecl = ParserObjectTypeDecl::parse(parser);
+
+			// Consome '('
+			parser->expectToken(TokenSubType_e::LParBracket);
+
+			// Consome expressao no caso os parametros passados para o construtor.
+			newDecl->expressionDecl = ParserObjectExpressionDecl::parse(parser);
+
+			// Consome ')'
+			parser->expectToken(TokenSubType_e::RParBracket);
+
+			// Processa o bloco de inicio.
+			if (parser->isLeftBracket())
+			{
+				// Consome '{'
+				parser->expectToken(TokenSubType_e::LBracket);
+
+				newDecl->objectInitBlockDecl = std::make_unique<ast::ExpressionNewBlockDecl>(
+					parser->getTokenLine(),
+					parser->getTokenColumn()
+				);
+
+				while (true)
+				{
+					if (parser->isRightBracket())
+					{
+						break;
+					}
+
+				parserItemLabel:
+					auto itemDecl = std::make_unique<ExpressionNewItemDecl>(
+						parser->getTokenLine(),
+						parser->getTokenColumn()
+					);
+
+					// Processa identificador.
+					itemDecl->identifier = parser->expectIdentifier();
+
+					// Consome ':'
+					parser->expectToken(TokenSubType_e::Colon);
+
+					// Consome expressao.
+					itemDecl->expressionDecl = ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
+
+					// Adiciona item ao bloco.
+					newDecl->objectInitBlockDecl->itemDeclList.push_back(std::move(itemDecl));
+
+					// Verifica se existem mais itens.
+					if (parser->isComma())
+					{
+						// Consome ','
+						parser->expectToken(TokenSubType_e::Comma);
+						goto parserItemLabel;
+					}
+
+					if (parser->isRightBracket())
+					{
+						break;
+					}
+
+					throw exceptions::unexpected_with_possibilities_token_exception(
+						parser->getTokenValue(),
+						{
+							TokenSubType_e::Comma,
+							TokenSubType_e::RBracket
+						},
+						parser->getTokenLine(),
+						parser->getTokenColumn()
+					);
+				}
+
+				// Consome '}'
+				parser->expectToken(TokenSubType_e::RBracket);
+			}
+			return newDecl;
 		}
 
 		// Processa this.

@@ -681,7 +681,7 @@ namespace fluffy { namespace parser_objects {
 			if (mustHaveInitExpression)
 			{
 				parser->expectToken(TokenSubType_e::Assign);
-				ParserObjectExpressionDecl::skip(parser);
+				ParserObjectExpressionDecl::skipVariableInitExpr(parser);
 			}
 
 			// Consome ';'.
@@ -764,7 +764,7 @@ namespace fluffy { namespace parser_objects {
 			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = ParserObjectExpressionDecl::parse(parser);
+			variableDecl->initExpression = ParserObjectExpressionDecl::parseVariableInitExpr(parser);
 		}
 
 		// Consome ';'.

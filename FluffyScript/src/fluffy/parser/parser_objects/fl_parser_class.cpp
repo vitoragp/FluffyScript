@@ -387,17 +387,7 @@ namespace fluffy { namespace parser_objects {
 			return classFunctionPtr;
 		}
 
-		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
-
-		// Console bloco se houver.
-		if (!parser->isRightBracket())
-		{
-			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
-		}
-
-		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
 
 		return classFunctionPtr;
 	}
@@ -494,7 +484,7 @@ namespace fluffy { namespace parser_objects {
 			parser->expectToken(TokenSubType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			classVariableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
+			classVariableDecl->initExpression = ParserObjectExpressionDecl::skipVariableInitExpr(parser);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
@@ -579,7 +569,7 @@ namespace fluffy { namespace parser_objects {
 				// Consome '('.
 				parser->expectToken(TokenSubType_e::LParBracket);
 
-				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
+				variableInitDecl->initExpression = ParserObjectExpressionDecl::skipEnumExpr(parser);
 
 				// Consome ')'.
 				parser->expectToken(TokenSubType_e::RParBracket);

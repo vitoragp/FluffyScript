@@ -1,0 +1,28 @@
+include { Button, Widget, Window } from UI;
+
+namespace application
+{
+	class MyWindow extends Window
+	{
+		let p: i32;
+	
+		public constructor()
+			: super("My window", (100, 100), (600, 400))
+			, p(0)
+		{}
+		
+		fn build() -> Widget
+		{
+			return new LinearLayout(LayoutOrientation::Vertical) {
+				build: || {
+					return 0;
+				}
+			};
+		}
+	}
+
+	fn main() -> i32
+	{
+		return 0;
+	}
+}

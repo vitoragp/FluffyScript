@@ -61,7 +61,6 @@ namespace fluffy {
 		std::make_tuple("continue", 	TokenSubType_e::Continue),		// ok
 		std::make_tuple("break", 		TokenSubType_e::Break),			// ok
 		std::make_tuple("for", 			TokenSubType_e::For),			// ok
-		std::make_tuple("foreach", 		TokenSubType_e::Foreach),		// ok
 		std::make_tuple("in",			TokenSubType_e::In),			// ok
 		std::make_tuple("while", 		TokenSubType_e::While),			// ok
 		std::make_tuple("do", 			TokenSubType_e::Do),			// ok

@@ -123,7 +123,6 @@ namespace fluffy {
 		Continue,			// ok
 		Break,				// ok
 		For,				// ok
-		Foreach,			// ok
 		In,					// ok
 		While,				// ok
 		Do,					// ok
@@ -233,6 +232,7 @@ namespace fluffy {
 		FunctionDecl,
 		FunctionCall,
 		Index,
+		New,
 		This,
 		Super,
 		ConstantBool,

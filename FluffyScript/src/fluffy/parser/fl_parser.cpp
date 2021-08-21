@@ -29,6 +29,7 @@ namespace fluffy { namespace parser {
 
 		m_lex->parse(tok);
 		m_lex->setPosition(position);
+		m_lex->parse(m_tok);
 
 		return tok;
 	}
@@ -665,11 +666,6 @@ namespace fluffy { namespace parser {
 	Bool Parser::isFor()
 	{
 		return utils::LexUtils::isFor(m_tok);
-	}
-
-	Bool Parser::isForeach()
-	{
-		return utils::LexUtils::isForeach(m_tok);
 	}
 
 	Bool Parser::isIn()
