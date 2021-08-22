@@ -84,58 +84,6 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
-	 * TypeDeclVector
-	 */
-
-	class TypeDeclVector : public TypeDecl
-	{
-	public:
-		TypeDeclVector(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Vector, line, column)
-		{}
-
-		virtual ~TypeDeclVector()
-		{}
-
-		TypeDeclPtr							valueType;
-	};
-
-	/**
-	 * TypeDeclSet
-	 */
-
-	class TypeDeclSet : public TypeDecl
-	{
-	public:
-		TypeDeclSet(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Set, line, column)
-		{}
-
-		virtual ~TypeDeclSet()
-		{}
-
-		TypeDeclPtr							valueType;
-	};
-
-	/**
-	 * TypeDeclMap
-	 */
-
-	class TypeDeclMap : public TypeDecl
-	{
-	public:
-		TypeDeclMap(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Map, line, column)
-		{}
-
-		virtual ~TypeDeclMap()
-		{}
-
-		TypeDeclPtr							keyType;
-		TypeDeclPtr							valueType;
-	};
-
-	/**
 	 * TypeDeclFunction
 	 */
 
@@ -186,7 +134,7 @@ namespace fluffy { namespace ast {
 		virtual ~TypeDeclNamed()
 		{}
 
-		String								identifier;
+		TString								identifier;
 		TypeDeclNamedPtr					internalIdentifier;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;

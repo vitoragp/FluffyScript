@@ -15,13 +15,13 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'namespace'.
-		parser->expectToken(TokenSubType_e::Namespace);
+		parser->expectToken(TokenType_e::Namespace);
 
 		// Consome o identficador com o nome do namespace.
 		namespaceDecl->identifier = parser->expectIdentifier();
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -43,7 +43,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return namespaceDecl;
 	}

@@ -17,9 +17,9 @@ namespace fluffy { namespace parser {
 	Parser::~Parser()
 	{}
 
-	ProgramPtr Parser::parse()
+	CodeUnitPtr Parser::parse()
 	{
-		return parser_objects::ParserObjectProgram::parse(this);
+		return parser_objects::ParserObjectCodeUnit::parse(this);
 	}
 
 	Token_s Parser::parseNextToken()
@@ -48,11 +48,15 @@ namespace fluffy { namespace parser {
 		m_fileName = sourceFile;
 	}
 
-	void Parser::reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset)
+	void Parser::resetToPosition(U32 position)
+	{
+		m_lex->setPosition(position);
+		m_lex->parse(m_tok);
+	}
+
+	void Parser::reinterpretToken(TokenType_e type, U32 offset)
 	{
 		m_tok.type = type;
-		m_tok.subType = subType;
-
 		m_lex->setPosition(m_tok.position + offset);
 	}
 
@@ -61,9 +65,9 @@ namespace fluffy { namespace parser {
 		m_lex->parse(m_tok);
 	}
 
-	void Parser::expectToken(TokenSubType_e expectedToken)
+	void Parser::expectToken(TokenType_e expectedToken)
 	{
-		if (m_tok.subType != expectedToken) {
+		if (m_tok.type != expectedToken) {
 			throw exceptions::custom_exception(
 				"Expected token '%s', received '%s'",
 				m_tok.line,
@@ -75,9 +79,9 @@ namespace fluffy { namespace parser {
 		nextToken();
 	}
 
-	void Parser::expectToken(TokenSubType_e expectedToken, ErrCallback errcallback)
+	void Parser::expectToken(TokenType_e expectedToken, ErrCallback errcallback)
 	{
-		if (m_tok.subType != expectedToken) {
+		if (m_tok.type != expectedToken) {
 			errcallback();
 		}
 		nextToken();
@@ -113,9 +117,9 @@ namespace fluffy { namespace parser {
 		return value;
 	}
 
-	const I8 Parser::expectConstantI8()
+	const I8 Parser::expectConstantInteger()
 	{
-		if (!utils::LexUtils::isConstantI8(m_tok)) {
+		if (!utils::LexUtils::isConstantInteger(m_tok)) {
 			throw exceptions::custom_exception(
 				"Expected an integer 8-bits constant, received '%s'",
 				m_tok.line,
@@ -124,111 +128,6 @@ namespace fluffy { namespace parser {
 			);
 		}
 		const I8 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const U8 Parser::expectConstantU8()
-	{
-		if (!utils::LexUtils::isConstantU8(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an unsigned integer 8-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const U8 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const I16 Parser::expectConstantI16()
-	{
-		if (!utils::LexUtils::isConstantI16(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an integer 16-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const I16 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const U16 Parser::expectConstantU16()
-	{
-		if (!utils::LexUtils::isConstantU16(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an unsigned integer 16-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const U16 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const I32 Parser::expectConstantI32()
-	{
-		if (!utils::LexUtils::isConstantI32(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an integer 32-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const I32 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const U32 Parser::expectConstantU32()
-	{
-		if (!utils::LexUtils::isConstantU32(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an unsigned integer 32-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const I32 value = std::stoi(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const I64 Parser::expectConstantI64()
-	{
-		if (!utils::LexUtils::isConstantI64(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an integer 64-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const I64 value = std::stol(m_tok.value, nullptr);
-		nextToken();
-		return value;
-	}
-
-	const U64 Parser::expectConstantU64()
-	{
-		if (!utils::LexUtils::isConstantU64(m_tok)) {
-			throw exceptions::custom_exception(
-				"Expected an unsigned integer 64-bits constant, received '%s'",
-				m_tok.line,
-				m_tok.column,
-				m_tok.value.c_str()
-			);
-		}
-		const U64 value = std::stoi(m_tok.value, nullptr);
 		nextToken();
 		return value;
 	}
@@ -303,44 +202,9 @@ namespace fluffy { namespace parser {
 		return utils::LexUtils::isIdentifier(m_tok);
 	}
 
-	Bool Parser::isConstantI8()
+	Bool Parser::isConstantInteger()
 	{
-		return utils::LexUtils::isConstantI8(m_tok);
-	}
-
-	Bool Parser::isConstantU8()
-	{
-		return utils::LexUtils::isConstantU8(m_tok);
-	}
-
-	Bool Parser::isConstantI16()
-	{
-		return utils::LexUtils::isConstantI16(m_tok);
-	}
-
-	Bool Parser::isConstantU16()
-	{
-		return utils::LexUtils::isConstantU16(m_tok);
-	}
-
-	Bool Parser::isConstantI32()
-	{
-		return utils::LexUtils::isConstantI32(m_tok);
-	}
-
-	Bool Parser::isConstantU32()
-	{
-		return utils::LexUtils::isConstantU32(m_tok);
-	}
-
-	Bool Parser::isConstantI64()
-	{
-		return utils::LexUtils::isConstantI64(m_tok);
-	}
-
-	Bool Parser::isConstantU64()
-	{
-		return utils::LexUtils::isConstantU64(m_tok);
+		return utils::LexUtils::isConstantInteger(m_tok);
 	}
 
 	Bool Parser::isConstantFp32()
@@ -576,21 +440,6 @@ namespace fluffy { namespace parser {
 	Bool Parser::isString()
 	{
 		return utils::LexUtils::isString(m_tok);
-	}
-
-	Bool Parser::isVector()
-	{
-		return utils::LexUtils::isVector(m_tok);
-	}
-
-	Bool Parser::isSet()
-	{
-		return utils::LexUtils::isSet(m_tok);
-	}
-
-	Bool Parser::isMap()
-	{
-		return utils::LexUtils::isMap(m_tok);
 	}
 
 	Bool Parser::isObject()
@@ -943,6 +792,11 @@ namespace fluffy { namespace parser {
 		return utils::LexUtils::isDot(m_tok);
 	}
 
+	Bool Parser::isEllipsis()
+	{
+		return utils::LexUtils::isEllipsis(m_tok);
+	}
+
 	const String& Parser::getFilename()
 	{
 		return m_fileName;
@@ -956,11 +810,6 @@ namespace fluffy { namespace parser {
 	const TokenType_e Parser::getTokenType()
 	{
 		return m_tok.type;
-	}
-
-	const TokenSubType_e Parser::getTokenSubType()
-	{
-		return m_tok.subType;
 	}
 
 	const U32 Parser::getTokenPosition()

@@ -17,7 +17,7 @@ namespace fluffy { namespace parser_objects {
 		interfaceDecl->isExported = hasExport;
 
 		// Consome 'interface'.
-		parser->expectToken(TokenSubType_e::Interface);
+		parser->expectToken(TokenType_e::Interface);
 
 		// Consome o identificador.
 		interfaceDecl->identifier = parser->expectIdentifier();
@@ -29,7 +29,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -53,14 +53,14 @@ namespace fluffy { namespace parser_objects {
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Fn, TokenSubType_e::RBracket },
+				{ TokenType_e::Fn, TokenType_e::RBracket },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return interfaceDecl;
 	}
@@ -73,7 +73,7 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenType_e::Fn);
 
 		// Consome o identificador.
 		interfaceFunctionDecl->identifier = parser->expectIdentifier();
@@ -85,13 +85,13 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome os parametros.
-		interfaceFunctionDecl->parameterList = ParserObjectFunctionParameter::parse(parser);
+		interfaceFunctionDecl->parameterList = ParserObjectFunctionParameter::parse(parser, false);
 
 		// Consome o retorno se houver.
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenType_e::Arrow);
 
 			// Consome o tipo retorno.
 			interfaceFunctionDecl->returnType = ParserObjectTypeDecl::parse(parser);
@@ -106,7 +106,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome ';'
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return interfaceFunctionDecl;
 	}

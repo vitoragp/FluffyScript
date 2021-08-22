@@ -17,7 +17,7 @@ namespace fluffy { namespace parser_objects {
 		functionPtr->isExported = hasExport;
 
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenType_e::Fn);
 
 		// Consome o identificador.
 		functionPtr->identifier = parser->expectIdentifier();
@@ -29,13 +29,13 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome os parametros.
-		functionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
+		functionPtr->parameterList = ParserObjectFunctionParameter::parse(parser, false);
 
 		// Consome o retorno se houver.
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenType_e::Arrow);
 
 			// Consome o tipo retorno.
 			functionPtr->returnType = ParserObjectTypeDecl::parse(parser);
@@ -50,7 +50,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome bloco se houver.
-		functionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+		functionPtr->blockDecl = ParserObjectBlockDecl::parse(parser, false);
 		
 		return functionPtr;
 	}

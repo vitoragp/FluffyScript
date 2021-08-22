@@ -9,6 +9,8 @@ namespace fluffy { namespace parser_objects {
 
 	TraitDeclPtr ParserObjectTraitDecl::parse(Parser* parser, Bool hasExport)
 	{
+		Bool isDefinition = false;
+
 		auto traitDecl = std::make_unique<ast::TraitDecl>(
 			parser->getTokenLine(),
 			parser->getTokenColumn()
@@ -16,8 +18,8 @@ namespace fluffy { namespace parser_objects {
 
 		traitDecl->isExported = hasExport;
 
-		// Consome 'interface'.
-		parser->expectToken(TokenSubType_e::Interface);
+		// Consome 'trait'.
+		parser->expectToken(TokenType_e::Trait);
 
 		// Consome o identificador.
 		traitDecl->identifier = parser->expectIdentifier();
@@ -34,14 +36,17 @@ namespace fluffy { namespace parser_objects {
 			traitDecl->isDefinition = true;
 
 			// Consome 'for'.
-			parser->expectToken(TokenSubType_e::For);
+			parser->expectToken(TokenType_e::For);
 
 			// Consome o tipo para qual o trait esta sendo implementado.
 			traitDecl->typeDefinitionDecl = ParserObjectTypeDecl::parseWithSelf(parser);
+
+			// Indica que e uma definicao, permitindo assim que tenho um bloco de codigo.
+			isDefinition = true;
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -51,10 +56,19 @@ namespace fluffy { namespace parser_objects {
 			}
 
 		parseFunctionLabel:
+			Bool isStatic = false;
+
+			// Consome 'static'.
+			if (parser->isStatic())
+			{
+				parser->expectToken(TokenType_e::Static);
+				isStatic = true;
+			}
+
 			if (parser->isFn())
 			{
 				// Consome a funcao.
-				traitDecl->functionDeclList.push_back(parserFunction(parser));
+				traitDecl->functionDeclList.push_back(parserFunction(parser, isDefinition, isStatic));
 				goto parseFunctionLabel;
 			}
 
@@ -65,27 +79,29 @@ namespace fluffy { namespace parser_objects {
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Fn, TokenSubType_e::RBracket },
+				{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return traitDecl;
 	} 
 
-	TraitFunctionDeclPtr ParserObjectTraitDecl::parserFunction(Parser* parser)
+	TraitFunctionDeclPtr ParserObjectTraitDecl::parserFunction(Parser* parser, Bool isDefinition, Bool isStatic)
 	{
 		auto traitFunctionDecl = std::make_unique<ast::TraitFunctionDecl>(
 			parser->getTokenLine(),
 			parser->getTokenColumn()
 		);
 
+		traitFunctionDecl->isStatic = isStatic;
+
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenType_e::Fn);
 
 		// Consome o identificador.
 		traitFunctionDecl->identifier = parser->expectIdentifier();
@@ -97,13 +113,13 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome os parametros.
-		traitFunctionDecl->parameterList = ParserObjectFunctionParameter::parseWithSelf(parser);
+		traitFunctionDecl->parameterList = ParserObjectFunctionParameter::parseWithSelf(parser, false);
 
 		// Consome o retorno se houver.
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenType_e::Arrow);
 
 			// Consome o tipo retorno.
 			traitFunctionDecl->returnType = ParserObjectTypeDecl::parseWithSelf(parser);
@@ -117,9 +133,13 @@ namespace fluffy { namespace parser_objects {
 			);
 		}
 
-		// Consome ';'
-		parser->expectToken(TokenSubType_e::SemiColon);
-
+		// No modo de definicao e necessario implementar o bloco da funcao.
+		if (isDefinition) {
+			traitFunctionDecl->blockDecl = ParserObjectBlockDecl::parse(parser, false);
+		} else {
+			// Consome ';'
+			parser->expectToken(TokenType_e::SemiColon);
+		}
 		return traitFunctionDecl;
 	}
 } }

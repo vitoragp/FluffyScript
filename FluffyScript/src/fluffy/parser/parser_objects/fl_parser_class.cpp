@@ -18,7 +18,7 @@ namespace fluffy { namespace parser_objects {
 		classDecl->isAbstract = hasAbstract;
 
 		// Consome 'class'.
-		parser->expectToken(TokenSubType_e::Class);
+		parser->expectToken(TokenType_e::Class);
 
 		// Consome o nome da classe.
 		classDecl->identifier = parser->expectIdentifier();
@@ -42,12 +42,12 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
 			Bool hasAccessModifier = false;
-			TokenSubType_e accessModifier = TokenSubType_e::Unknown;
+			TokenType_e accessModifier = TokenType_e::Unknown;
 			Bool staticModifier = false;
 
 			// Finaliza a declaracao do bloco.
@@ -60,7 +60,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isPublic() || parser->isProtected() || parser->isPrivate())
 			{
 				hasAccessModifier = true;
-				accessModifier = parser->getTokenSubType();
+				accessModifier = parser->getTokenType();
 				parser->nextToken();
 			}
 
@@ -71,9 +71,9 @@ namespace fluffy { namespace parser_objects {
 				parser->nextToken();
 			}
 
-			switch (parser->getTokenSubType())
+			switch (parser->getTokenType())
 			{
-			case TokenSubType_e::Abstract:
+			case TokenType_e::Abstract:
 				if (staticModifier)
 				{
 					throw exceptions::custom_exception(
@@ -84,7 +84,7 @@ namespace fluffy { namespace parser_objects {
 				}
 				goto processFunction;
 
-			case TokenSubType_e::Virtual:
+			case TokenType_e::Virtual:
 				if (staticModifier)
 				{
 					throw exceptions::custom_exception(
@@ -95,7 +95,7 @@ namespace fluffy { namespace parser_objects {
 				}
 				goto processFunction;
 
-			case TokenSubType_e::Fn:
+			case TokenType_e::Fn:
 			processFunction:
 				if (staticModifier) {
 					classDecl->staticFunctionList.push_back(parseStaticFunction(parser, accessModifier));
@@ -104,8 +104,8 @@ namespace fluffy { namespace parser_objects {
 				}
 				break;
 
-			case TokenSubType_e::Const:
-			case TokenSubType_e::Let:
+			case TokenType_e::Const:
+			case TokenType_e::Let:
 				if (staticModifier) {
 					classDecl->staticVariableList.push_back(parseVariable(parser, accessModifier, staticModifier));
 				} else {
@@ -113,7 +113,7 @@ namespace fluffy { namespace parser_objects {
 				}
 				break;
 
-			case TokenSubType_e::Constructor:
+			case TokenType_e::Constructor:
 				{
 					if (staticModifier)
 					{
@@ -127,7 +127,7 @@ namespace fluffy { namespace parser_objects {
 				}
 				break;
 
-			case TokenSubType_e::Destructor:
+			case TokenType_e::Destructor:
 				{
 					if (staticModifier)
 					{
@@ -154,10 +154,10 @@ namespace fluffy { namespace parser_objects {
 				throw exceptions::unexpected_with_possibilities_token_exception(
 					parser->getTokenValue(),
 					{
-						TokenSubType_e::Public, TokenSubType_e::Protected, TokenSubType_e::Private,
-						TokenSubType_e::Let, TokenSubType_e::Const,
-						TokenSubType_e::Virtual, TokenSubType_e::Abstract, TokenSubType_e::Fn,
-						TokenSubType_e::LBracket
+						TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
+						TokenType_e::Let, TokenType_e::Const,
+						TokenType_e::Virtual, TokenType_e::Abstract, TokenType_e::Fn,
+						TokenType_e::LBracket
 					},
 					parser->getTokenLine(),
 					parser->getTokenColumn()
@@ -166,7 +166,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return classDecl;
 	}
@@ -174,7 +174,7 @@ namespace fluffy { namespace parser_objects {
 	TypeDeclPtr ParserObjectClassDecl::parseExtends(Parser* parser)
 	{
 		// Consome 'extends'
-		parser->expectToken(TokenSubType_e::Extends);
+		parser->expectToken(TokenType_e::Extends);
 		return ParserObjectTypeDecl::parse(parser);
 	}
 
@@ -183,7 +183,7 @@ namespace fluffy { namespace parser_objects {
 		TypeDeclPtrList interfaceList;
 
 		// Consome 'implements'
-		parser->expectToken(TokenSubType_e::Implements);
+		parser->expectToken(TokenType_e::Implements);
 
 		while (true)
 		{
@@ -193,7 +193,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isComma())
 			{
 				// Consome ','
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
 				continue;
 			}
 			break;
@@ -201,7 +201,7 @@ namespace fluffy { namespace parser_objects {
 		return interfaceList;
 	}
 
-	ClassFunctionDeclPtr ParserObjectClassDecl::parseStaticFunction(Parser* parser, TokenSubType_e accessModifier)
+	ClassFunctionDeclPtr ParserObjectClassDecl::parseStaticFunction(Parser* parser, TokenType_e accessModifier)
 	{
 		auto classFunctionPtr = std::make_unique<ast::ClassFunctionDecl>(
 			parser->getTokenLine(),
@@ -213,14 +213,14 @@ namespace fluffy { namespace parser_objects {
 
 		// Atribui modificadores de acesso.
 		switch (accessModifier) {
-		case TokenSubType_e::Protected:
+		case TokenType_e::Protected:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Protected;
 			break;
-		case TokenSubType_e::Unknown:
-		case TokenSubType_e::Private:
+		case TokenType_e::Unknown:
+		case TokenType_e::Private:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Private;
 			break;
-		case TokenSubType_e::Public:
+		case TokenType_e::Public:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Public;
 			break;
 		default:
@@ -228,7 +228,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenType_e::Fn);
 
 		// Consome o identificador.
 		classFunctionPtr->identifier = parser->expectIdentifier();
@@ -240,13 +240,13 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome os parametros.
-		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
+		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser, false);
 
 		// Consome o retorno se houver.
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenType_e::Arrow);
 
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
@@ -261,21 +261,21 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		// Console bloco se houver.
 		if (!parser->isRightBracket())
 		{
-			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+			classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser, false);
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return classFunctionPtr;
 	}
 
-	ClassFunctionDeclPtr ParserObjectClassDecl::parseFunction(Parser* parser, TokenSubType_e accessModifier)
+	ClassFunctionDeclPtr ParserObjectClassDecl::parseFunction(Parser* parser, TokenType_e accessModifier)
 	{
 		auto classFunctionPtr = std::make_unique<ast::ClassFunctionDecl>(
 			parser->getTokenLine(),
@@ -283,14 +283,14 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Processa modificador 'abtract' ou 'virtual'.
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Abstract:
-			parser->expectToken(TokenSubType_e::Abstract);
+		case TokenType_e::Abstract:
+			parser->expectToken(TokenType_e::Abstract);
 			classFunctionPtr->isAbstract = true;
 			break;
-		case TokenSubType_e::Virtual:
-			parser->expectToken(TokenSubType_e::Virtual);
+		case TokenType_e::Virtual:
+			parser->expectToken(TokenType_e::Virtual);
 			classFunctionPtr->isVirtual = true;
 			break;
 		default:
@@ -299,14 +299,14 @@ namespace fluffy { namespace parser_objects {
 
 		// Atribui modificadores de acesso.
 		switch (accessModifier) {
-		case TokenSubType_e::Protected:
+		case TokenType_e::Protected:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Protected;
 			break;
-		case TokenSubType_e::Private:
-		case TokenSubType_e::Unknown:
+		case TokenType_e::Private:
+		case TokenType_e::Unknown:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Private;
 			break;
-		case TokenSubType_e::Public:
+		case TokenType_e::Public:
 			classFunctionPtr->accessModifier = ClassMemberAccessModifier_e::Public;
 			break;
 		default:
@@ -314,7 +314,30 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'fn'
-		parser->expectToken(TokenSubType_e::Fn);
+		parser->expectToken(TokenType_e::Fn);
+
+		// Verifica se ate o token '(' existe algum '.', se existir significa que se trata
+		// de uma especificacao de desambiguicao ou seja indica onde a fonte da declaracao da funcao
+		// e segue a seguint sintaxe: <tipo> '.'
+		Bool	hasSourceTypeDecl = false;
+		U32		position = parser->getTokenPosition();
+
+		while (!parser->isLeftParBracket()) {
+			if (parser->isDot())
+			{
+				hasSourceTypeDecl = true;
+				break;
+			}
+			parser->nextToken();
+		}
+		parser->resetToPosition(position);
+
+		// Consome o <tipo> seguido de '.'
+		if (hasSourceTypeDecl)
+		{
+			classFunctionPtr->sourceTypeDecl = ParserObjectTypeDecl::parse(parser);
+			parser->expectToken(TokenType_e::Dot);
+		}
 
 		// Consome o identificador.
 		classFunctionPtr->identifier = parser->expectIdentifier();
@@ -326,13 +349,13 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome os parametros.
-		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser);
+		classFunctionPtr->parameterList = ParserObjectFunctionParameter::parse(parser, false);
 
 		// Consome o retorno se houver.
 		if (parser->isArrow())
 		{
 			// Consome '->'
-			parser->expectToken(TokenSubType_e::Arrow);
+			parser->expectToken(TokenType_e::Arrow);
 
 			// Consome o tipo retorno.
 			classFunctionPtr->returnType = ParserObjectTypeDecl::parse(parser);
@@ -346,9 +369,9 @@ namespace fluffy { namespace parser_objects {
 			);
 		}
 
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Override:
+		case TokenType_e::Override:
 			// Funcoes abstratas nao podem ser override ou final
 			if (classFunctionPtr->isAbstract)
 			{
@@ -359,10 +382,10 @@ namespace fluffy { namespace parser_objects {
 					classFunctionPtr->identifier.str()
 				);
 			}
-			parser->expectToken(TokenSubType_e::Override);
+			parser->expectToken(TokenType_e::Override);
 			classFunctionPtr->isOverride = true;
 			break;
-		case TokenSubType_e::Final:
+		case TokenType_e::Final:
 			// Funcoes abstratas nao podem ser override ou final
 			if (classFunctionPtr->isAbstract)
 			{
@@ -373,7 +396,7 @@ namespace fluffy { namespace parser_objects {
 					classFunctionPtr->identifier.str()
 				);
 			}
-			parser->expectToken(TokenSubType_e::Final);
+			parser->expectToken(TokenType_e::Final);
 			classFunctionPtr->isFinal = true;
 			break;
 		default:
@@ -383,16 +406,16 @@ namespace fluffy { namespace parser_objects {
 		if (classFunctionPtr->isAbstract)
 		{
 			// Consome ';'
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::SemiColon);
 			return classFunctionPtr;
 		}
 
-		classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser);
+		classFunctionPtr->blockDecl = ParserObjectBlockDecl::parse(parser, false);
 
 		return classFunctionPtr;
 	}
 
-	ClassVariableDeclPtr ParserObjectClassDecl::parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic)
+	ClassVariableDeclPtr ParserObjectClassDecl::parseVariable(Parser* parser, TokenType_e accessModifier, Bool isStatic)
 	{
 		auto classVariableDecl = std::make_unique<ast::ClassVariableDecl>(
 			parser->getTokenLine(),
@@ -404,14 +427,14 @@ namespace fluffy { namespace parser_objects {
 
 		// Atribui modificadores de acesso.
 		switch (accessModifier) {
-		case TokenSubType_e::Protected:
+		case TokenType_e::Protected:
 			classVariableDecl->accessModifier = ClassMemberAccessModifier_e::Protected;
 			break;
-		case TokenSubType_e::Private:
-		case TokenSubType_e::Unknown:
+		case TokenType_e::Private:
+		case TokenType_e::Unknown:
 			classVariableDecl->accessModifier = ClassMemberAccessModifier_e::Private;
 			break;
-		case TokenSubType_e::Public:
+		case TokenType_e::Public:
 			classVariableDecl->accessModifier = ClassMemberAccessModifier_e::Public;
 			break;
 		default:
@@ -419,20 +442,20 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome 'let' ou 'const'
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Let:
-			parser->expectToken(TokenSubType_e::Let);
+		case TokenType_e::Let:
+			parser->expectToken(TokenType_e::Let);
 			classVariableDecl->isConst = false;
 			break;
-		case TokenSubType_e::Const:
-			parser->expectToken(TokenSubType_e::Const);
+		case TokenType_e::Const:
+			parser->expectToken(TokenType_e::Const);
 			classVariableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Let, TokenSubType_e::Const },
+				{ TokenType_e::Let, TokenType_e::Const },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
@@ -442,7 +465,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenType_e::Ref);
 			classVariableDecl->isReference = true;
 		}
 
@@ -455,7 +478,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 
 			const U32 line = parser->getTokenLine();
 			const U32 column = parser->getTokenColumn();
@@ -481,20 +504,20 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			classVariableDecl->initExpression = ParserObjectExpressionDecl::skipVariableInitExpr(parser);
+			classVariableDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::Interrogation, true);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return classVariableDecl;
 	}
 
-	ClassConstructorDeclPtr ParserObjectClassDecl::parseConstructor(Parser* parser, TokenSubType_e accessModifier)
+	ClassConstructorDeclPtr ParserObjectClassDecl::parseConstructor(Parser* parser, TokenType_e accessModifier)
 	{
 		auto classConstructorDecl = std::make_unique<ast::ClassConstructorDecl>(
 			parser->getTokenLine(),
@@ -502,30 +525,30 @@ namespace fluffy { namespace parser_objects {
 		);
 		
 		// Consome 'constructor'.
-		parser->expectToken(TokenSubType_e::Constructor);
+		parser->expectToken(TokenType_e::Constructor);
 
 		// Consome os parametros.
-		classConstructorDecl->parameterList = ParserObjectFunctionParameter::parse(parser);
+		classConstructorDecl->parameterList = ParserObjectFunctionParameter::parse(parser, false);
 
 		// Verifica se a declaracao do construtor base.
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 
 			if (parser->isSuper())
 			{
 				// Consome 'super'.
-				parser->expectToken(TokenSubType_e::Super);
+				parser->expectToken(TokenType_e::Super);
 
 				// Consome '('.
-				parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenType_e::LParBracket);
 
 				// Consome os parametros.
-				classConstructorDecl->superParameters = ParserObjectExpressionDecl::skip(parser);
+				classConstructorDecl->superParameters = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, true);
 
 				// Consome ')'.
-				parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenType_e::RParBracket);
 			} else {
 				auto variableInitDecl = std::make_unique<ast::ClassVariableInitDecl>(
 					parser->getTokenLine(),
@@ -536,12 +559,13 @@ namespace fluffy { namespace parser_objects {
 				variableInitDecl->identifier = parser->expectIdentifier();
 
 				// Consome '('.
-				parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenType_e::LParBracket);
 
-				variableInitDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
+				// Consome expressao.
+				variableInitDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, true);
 
 				// Consome ')'.
-				parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenType_e::RParBracket);
 
 				// Adiciona inicializacao de variavel a lista.
 				classConstructorDecl->variableInitDeclList.push_back(std::move(variableInitDecl));
@@ -556,7 +580,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome ','.
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
 
 				auto variableInitDecl = std::make_unique<ast::ClassVariableInitDecl>(
 					parser->getTokenLine(),
@@ -567,12 +591,13 @@ namespace fluffy { namespace parser_objects {
 				variableInitDecl->identifier = parser->expectIdentifier();
 
 				// Consome '('.
-				parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenType_e::LParBracket);
 
-				variableInitDecl->initExpression = ParserObjectExpressionDecl::skipEnumExpr(parser);
+				// Consome expressao.
+				variableInitDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, true);
 
 				// Consome ')'.
-				parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenType_e::RParBracket);
 
 				// Adiciona inicializacao de variavel a lista.
 				classConstructorDecl->variableInitDeclList.push_back(std::move(variableInitDecl));
@@ -580,7 +605,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Console bloco.
-		classConstructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		classConstructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser, false);
 
 		return classConstructorDecl;
 	}
@@ -593,16 +618,16 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'destructor'.
-		parser->expectToken(TokenSubType_e::Destructor);
+		parser->expectToken(TokenType_e::Destructor);
 
 		// Consome '('.
-		parser->expectToken(TokenSubType_e::LParBracket);
+		parser->expectToken(TokenType_e::LParBracket);
 
 		// Consome ')'.
-		parser->expectToken(TokenSubType_e::RParBracket);
+		parser->expectToken(TokenType_e::RParBracket);
 
-		// Console bloco..
-		classDestructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		// Console bloco.
+		classDestructorDecl->blockDecl = ParserObjectBlockDecl::parse(parser, false);
 
 		return classDestructorDecl;
 	}

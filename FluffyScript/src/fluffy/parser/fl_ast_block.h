@@ -18,11 +18,22 @@ namespace fluffy { namespace ast {
 	public:
 		BlockDecl(U32 line, U32 column)
 			: AstNode(line, column)
+			, beginPosition(0)
+			, endPosition(0)
+		{}
+
+		BlockDecl(U32 beginPosition, U32 endPosition, U32 line, U32 column)
+			: AstNode(line, column)
+			, beginPosition(beginPosition)
+			, endPosition(endPosition)
 		{}
 
 		virtual ~BlockDecl()
 		{}
 
 		StmtDeclPtrList						stmtList;
+
+		const U32							beginPosition;
+		const U32							endPosition;
 	};
 } }

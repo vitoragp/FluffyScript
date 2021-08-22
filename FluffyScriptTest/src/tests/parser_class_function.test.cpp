@@ -87,9 +87,16 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 1);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::Void);
 	}
 
@@ -116,13 +123,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::Void);
 	}
 
@@ -149,13 +168,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -182,13 +213,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -215,13 +258,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -248,13 +303,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -281,13 +348,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->functionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->functionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->functionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -314,13 +393,25 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->staticFunctionList[0]->genericDeclList.size(), 0);
 
 		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList.size(), 2);
+		/*
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->staticFunctionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+			ASSERT_TRUE(param != nullptr);
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
 
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->staticFunctionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}
+		*/
 		EXPECT_EQ(classObject->staticFunctionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}
 
@@ -354,11 +445,23 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList.size(), 2);
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[0]->identifier, "test");
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		/*{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->staticFunctionList[0]->parameterList[0].get());
 
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[1]->identifier, "test2");
-		EXPECT_EQ(classObject->staticFunctionList[0]->parameterList[1]->typeDecl->typeID, TypeDeclID_e::String);
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+		}
+
+		{
+			auto param = dynamic_cast<ast::FunctionParameterIdentifiedDecl*>(classObject->staticFunctionList[0]->parameterList[1].get());
+
+			ASSERT_TRUE(param != nullptr);
+
+			EXPECT_EQ(param->identifier, "test2");
+			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+		}*/
 
 		EXPECT_EQ(classObject->staticFunctionList[0]->returnType->typeID, TypeDeclID_e::I32);
 	}

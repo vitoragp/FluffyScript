@@ -16,7 +16,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isExport())
 		{
 			// Consome 'export'.
-			parser->expectToken(TokenSubType_e::Export);
+			parser->expectToken(TokenType_e::Export);
 			hasExport = true;
 		}
 
@@ -24,7 +24,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isAbstract())
 		{
 			// Consome 'abtract'.
-			parser->expectToken(TokenSubType_e::Abstract);
+			parser->expectToken(TokenType_e::Abstract);
 			hasAbtract = true;
 
 			// Obrigatoriamente 'abstract' deve se referir a uma classe.
@@ -36,35 +36,35 @@ namespace fluffy { namespace parser_objects {
 		// export, abstract, class, interface, struct, enum, trait, let, fn
 
 		// Verifica qual declaracao processar.
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Class:
+		case TokenType_e::Class:
 			return ParserObjectClassDecl::parse(parser, hasExport, hasAbtract);
-		case TokenSubType_e::Interface:
+		case TokenType_e::Interface:
 			return ParserObjectInterfaceDecl::parse(parser, hasExport);
-		case TokenSubType_e::Struct:
+		case TokenType_e::Struct:
 			return ParserObjectStructDecl::parse(parser, hasExport);
-		case TokenSubType_e::Enum:
+		case TokenType_e::Enum:
 			return ParserObjectEnumDecl::parse(parser, hasExport);
-		case TokenSubType_e::Trait:
+		case TokenType_e::Trait:
 			return ParserObjectTraitDecl::parse(parser, hasExport);
-		case TokenSubType_e::Fn:
+		case TokenType_e::Fn:
 			return ParserObjectFunctionDecl::parse(parser, hasExport);
-		case TokenSubType_e::Const:
-		case TokenSubType_e::Let:
+		case TokenType_e::Const:
+		case TokenType_e::Let:
 			return ParserObjectVariableDecl::parse(parser, hasExport);
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
 				{
-					TokenSubType_e::Class,
-					TokenSubType_e::Interface,
-					TokenSubType_e::Struct,
-					TokenSubType_e::Enum,
-					TokenSubType_e::Trait,
-					TokenSubType_e::Let,
-					TokenSubType_e::Const,
-					TokenSubType_e::Fn
+					TokenType_e::Class,
+					TokenType_e::Interface,
+					TokenType_e::Struct,
+					TokenType_e::Enum,
+					TokenType_e::Trait,
+					TokenType_e::Let,
+					TokenType_e::Const,
+					TokenType_e::Fn
 				},
 				parser->getTokenLine(),
 				parser->getTokenColumn()

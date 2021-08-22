@@ -22,7 +22,7 @@ namespace fluffy { namespace parser_objects {
 
 	using StringList						= vector<String>;
 
-	using ProgramPtr						= unique_ptr<ast::Program>;
+	using CodeUnitPtr						= unique_ptr<ast::CodeUnit>;
 	using IncludeDeclPtr					= unique_ptr<ast::IncludeDecl>;
 	using NamespaceDeclPtr					= unique_ptr<ast::NamespaceDecl>;
 	using GeneralStmtPtr					= unique_ptr<ast::GeneralDecl>;
@@ -67,14 +67,14 @@ namespace fluffy { namespace parser_objects {
 	using ScopedIdentifierDeclPtrList		= vector<ast::ScopedIdentifierDeclPtr>;
 	
 	/**
-	 * ParserObjectProgram
+	 * ParserObjectCodeUnit
 	 */
 
-	class ParserObjectProgram
+	class ParserObjectCodeUnit
 	{
 	public:
 		static
-		ProgramPtr							parse(Parser* parser);
+		CodeUnitPtr							parse(Parser* parser);
 	};
 
 	/**
@@ -128,16 +128,16 @@ namespace fluffy { namespace parser_objects {
 		TypeDeclPtrList						parseImplements(Parser* parser);
 
 		static
-		ClassFunctionDeclPtr				parseStaticFunction(Parser* parser, TokenSubType_e accessModifier);
+		ClassFunctionDeclPtr				parseStaticFunction(Parser* parser, TokenType_e accessModifier);
 
 		static
-		ClassFunctionDeclPtr				parseFunction(Parser* parser, TokenSubType_e accessModifier);
+		ClassFunctionDeclPtr				parseFunction(Parser* parser, TokenType_e accessModifier);
 
 		static
-		ClassVariableDeclPtr				parseVariable(Parser* parser, TokenSubType_e accessModifier, Bool isStatic);
+		ClassVariableDeclPtr				parseVariable(Parser* parser, TokenType_e accessModifier, Bool isStatic);
 
 		static
-		ClassConstructorDeclPtr				parseConstructor(Parser* parser, TokenSubType_e accessModifier);
+		ClassConstructorDeclPtr				parseConstructor(Parser* parser, TokenType_e accessModifier);
 
 		static
 		ClassDestructorDeclPtr				parseDestructor(Parser* parser);
@@ -181,11 +181,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		EnumDeclPtr						parse(Parser* parser, Bool hasExport);
+		EnumDeclPtr							parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		EnumItemDeclPtr					parserEnum(Parser* parser);
+		EnumItemDeclPtr						parserEnum(Parser* parser);
 	};
 
 	/**
@@ -196,11 +196,11 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		TraitDeclPtr					parse(Parser* parser, Bool hasExport);
+		TraitDeclPtr						parse(Parser* parser, Bool hasExport);
 
 	private:
 		static
-		TraitFunctionDeclPtr			parserFunction(Parser* parser);
+		TraitFunctionDeclPtr				parserFunction(Parser* parser, Bool isDefinition, Bool isStatic);
 	};
 
 	/**
@@ -211,7 +211,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		FunctionDeclPtr					parse(Parser* parser, Bool hasExport);
+		FunctionDeclPtr						parse(Parser* parser, Bool hasExport);
 	};
 
 	/**
@@ -222,7 +222,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		VariableDeclPtr					parse(Parser* parser, Bool hasExport);
+		VariableDeclPtr						parse(Parser* parser, Bool hasExport);
 	};
 
 	/**
@@ -233,14 +233,15 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		FunctionParameterDeclPtrList		parse(Parser* parser);
+		FunctionParameterDeclPtrList		parse(Parser* parser, Bool skipOnly);
 
 		static
-		FunctionParameterDeclPtrList		parseWithSelf(Parser* parser);
+		FunctionParameterDeclPtrList		parseWithSelf(Parser* parser, Bool skipOnly);
 
 	public:
 		static
-		FunctionParameterDeclPtrList		parseParameters(Parser* parser, Bool traitMode);
+		FunctionParameterDeclPtrList		parseParameters(Parser* parser, Bool traitMode, Bool skipOnly);
+
 	};
 
 	/**
@@ -272,34 +273,25 @@ namespace fluffy { namespace parser_objects {
 
 	private:
 		static
-		TypeDeclPtr							parseType(Parser* parser, Bool traitMode, Bool skipMode);
-
-		static 
-		TypeDeclPtr							parseVectorType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclPtr							parseType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseSetType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclPtr							parseFunctionType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseMapType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclPtr							parseVariableType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseFunctionType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclPtr							parseTupleType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseVariableType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclPtr							parseNamedType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseTupleType(Parser* parser, Bool traitMode, Bool skipMode);
+		ArrayDeclPtr						parseArrayDecl(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
-		TypeDeclPtr							parseNamedType(Parser* parser, Bool traitMode, Bool skipMode);
-
-		static
-		ArrayDeclPtr						parseArrayDecl(Parser* parser, Bool traitMode, Bool skipMode);
-
-		static
-		TypeDeclNamedPtr					parseInternalNamedType(Parser* parser, Bool traitMode, Bool skipMode);
+		TypeDeclNamedPtr					parseInternalNamedType(Parser* parser, Bool traitMode, Bool skipOnly);
 
 		static
 		void								reinterpretToken(Parser* parser);
@@ -314,22 +306,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		ExpressionDeclPtr					parse(Parser* parser);
-
-		static
-		ExpressionDeclPtr					skip(Parser* parser);
-
-		static
-		ExpressionDeclPtr					parseVariableInitExpr(Parser* parser);
-
-		static
-		ExpressionDeclPtr					skipVariableInitExpr(Parser* parser);
-
-		static
-		ExpressionDeclPtr					parseEnumExpr(Parser* parser);
-
-		static
-		ExpressionDeclPtr					skipEnumExpr(Parser* parser);
+		ExpressionDeclPtr					parse(Parser* parser, U32 prec, Bool skipOnly);
 
 	private:
 		static
@@ -347,10 +324,23 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		PatternDeclPtr						parse(Parser* parser);
+		PatternDeclPtr						parse(Parser* parser, Bool skipOnly);
+
+	private:
+		static
+		PatternDeclPtr						parsePattern(Parser* parser, Bool skipOnly);
 
 		static
-		PatternDeclPtr						skip(Parser* parser);
+		PatternDeclPtr						parseLiteralPattern(Parser* parser, Bool skipOnly);
+
+		static
+		PatternDeclPtr						parseEnumPattern(Parser* parser, Bool skipOnly);
+
+		static
+		PatternDeclPtr						parseTuplePattern(Parser* parser, Bool skipOnly);
+
+		static
+		PatternDeclPtr						parseClassOrStructPattern(Parser* parser, Bool skipOnly);
 	};
 
 	/**
@@ -361,10 +351,8 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		BlockDeclPtr						parse(Parser* parser);
+		BlockDeclPtr						parse(Parser* parser, Bool skipOnly);
 
-		static
-		BlockDeclPtr						skip(Parser* parser);
 	};
 
 	/**
@@ -375,10 +363,7 @@ namespace fluffy { namespace parser_objects {
 	{
 	public:
 		static
-		StmtDeclPtr							parse(Parser* parser);
-
-		static
-		StmtDeclPtr							skip(Parser* parser);
+		StmtDeclPtr							parse(Parser* parser, Bool skipOnly);
 
 	private:
 		static

@@ -12,7 +12,7 @@ namespace fluffy { namespace parser_objects {
 		GenericDeclPtrList templateDeclList;
 
 		// Consome '<'
-		parser->expectToken(TokenSubType_e::LessThan);
+		parser->expectToken(TokenType_e::LessThan);
 
 		while (true)
 		{
@@ -28,10 +28,10 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isColon())
 			{
 				// Consome ':'
-				parser->expectToken(TokenSubType_e::Colon);
+				parser->expectToken(TokenType_e::Colon);
 
 				// Consome 'where'
-				parser->expectToken(TokenSubType_e::Where);
+				parser->expectToken(TokenType_e::Where);
 
 				const U32 line = parser->getTokenLine();
 				const U32 column = parser->getTokenColumn();
@@ -52,7 +52,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome 'is'
-				parser->expectToken(TokenSubType_e::Is);
+				parser->expectToken(TokenType_e::Is);
 
 				while (true)
 				{
@@ -73,7 +73,7 @@ namespace fluffy { namespace parser_objects {
 					if (parser->isBitWiseOr())
 					{
 						// Consome '|'
-						parser->expectToken(TokenSubType_e::BitWiseOr);
+						parser->expectToken(TokenType_e::BitWiseOr);
 						continue;
 					}
 					break;
@@ -88,7 +88,7 @@ namespace fluffy { namespace parser_objects {
 			// Consome ',' e processa proxima declaracao.
 			if (parser->isComma())
 			{
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
 				continue;
 			}
 
@@ -96,14 +96,13 @@ namespace fluffy { namespace parser_objects {
 			// serao quebrados em tokens menores.
 			if (parser->isBitWiseRightShift() || parser->isBitWiseRightShiftAssign())
 			{
-				switch (parser->getTokenSubType())
+				switch (parser->getTokenType())
 				{
-				case TokenSubType_e::BitWiseRShift:		// >>
-				case TokenSubType_e::GreaterThanOrEqual:	// >=
-				case TokenSubType_e::BitWiseRShiftAssign:	// >>=
+				case TokenType_e::BitWiseRShift:		// >>
+				case TokenType_e::GreaterThanOrEqual:	// >=
+				case TokenType_e::BitWiseRShiftAssign:	// >>=
 					parser->reinterpretToken(
-						TokenType_e::Keyword,
-						TokenSubType_e::GreaterThan,
+						TokenType_e::GreaterThan,
 						1
 					);
 					break;
@@ -113,7 +112,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome '>'
-			parser->expectToken(TokenSubType_e::GreaterThan);
+			parser->expectToken(TokenType_e::GreaterThan);
 			break;
 		}
 		return templateDeclList;

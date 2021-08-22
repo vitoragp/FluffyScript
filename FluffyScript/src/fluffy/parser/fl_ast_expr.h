@@ -23,6 +23,7 @@ namespace fluffy { namespace ast { namespace expr {
 	using BlockDeclPtr								= std::unique_ptr<BlockDecl>;
 
 	using ExpressionDeclPtr							= std::unique_ptr<class ExpressionDecl>;
+	using ExpressionDeclPtrList						= std::vector<ExpressionDeclPtr>;
 
 	using ExpressionFunctionParameterDeclPtr		= std::unique_ptr<class ExpressionFunctionParameterDecl>;
 	using ExpressionFunctionParameterDeclPtrList	= std::vector<ExpressionFunctionParameterDeclPtr>;
@@ -87,7 +88,7 @@ namespace fluffy { namespace ast { namespace expr {
 	public:
 		ExpressionBinaryDecl(const U32 line, const U32 column)
 			: ExpressionDecl(ExpressionDeclType_e::Binary, line, column)
-			, op(TokenSubType_e::Unknown)
+			, op(TokenType_e::Unknown)
 		{}
 
 		virtual ~ExpressionBinaryDecl()
@@ -95,7 +96,7 @@ namespace fluffy { namespace ast { namespace expr {
 
 		ExpressionDeclPtr						leftDecl;
 		ExpressionDeclPtr						rightDecl;
-		TokenSubType_e							op;
+		TokenType_e							op;
 	};
 
 	/**
@@ -108,7 +109,7 @@ namespace fluffy { namespace ast { namespace expr {
 		ExpressionUnaryDecl(const U32 line, const U32 column)
 			: ExpressionDecl(ExpressionDeclType_e::Unary, line, column)
 			, unaryType(ExpressionUnaryType_e::Unknown)
-			, op(TokenSubType_e::Unknown)
+			, op(TokenType_e::Unknown)
 		{}
 
 		virtual ~ExpressionUnaryDecl()
@@ -116,7 +117,7 @@ namespace fluffy { namespace ast { namespace expr {
 
 		ExpressionDeclPtr						exprDecl;
 		ExpressionUnaryType_e					unaryType;
-		TokenSubType_e							op;
+		TokenType_e							op;
 	};
 
 	/**
@@ -183,6 +184,7 @@ namespace fluffy { namespace ast { namespace expr {
 	public:
 		ExpressionFunctionDecl(const U32 line, const U32 column)
 			: ExpressionDecl(ExpressionDeclType_e::FunctionDecl, line, column)
+			, inferenceType(InferenceType_e::None)
 		{}
 
 		virtual ~ExpressionFunctionDecl()
@@ -191,6 +193,7 @@ namespace fluffy { namespace ast { namespace expr {
 		TypeDeclPtr								returnTypeDecl;
 		ExpressionFunctionParameterDeclPtrList	parametersDecl;
 		BlockDeclPtr							blockDecl;
+		InferenceType_e							inferenceType;
 	};
 
 	/**
@@ -401,7 +404,7 @@ namespace fluffy { namespace ast { namespace expr {
 		virtual ~ExpressionConstantIdentifierDecl()
 		{}
 
-		String									identifierDecl;
+		TString									identifierDecl;
 		Bool									startFromRoot;
 	};
 
@@ -413,7 +416,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionDeclMark(const U32 line, const U32 column, const U32 beginPosition, const U32 endPopsition)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantIdentifier, line, column)
+			: ExpressionDecl(ExpressionDeclType_e::Mark, line, column)
 			, beginPosition(beginPosition)
 			, endPopsition(endPopsition)
 		{}
@@ -423,6 +426,23 @@ namespace fluffy { namespace ast { namespace expr {
 
 		const U32								beginPosition;
 		const U32								endPopsition;
+	};
+
+	/**
+	 * ExpressionArrayInitDecl
+	 */
+
+	class ExpressionArrayInitDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionArrayInitDecl(const U32 line, const U32 column)
+			: ExpressionDecl(ExpressionDeclType_e::ArrayInit, line, column)
+		{}
+
+		~ExpressionArrayInitDecl()
+		{}
+
+		ExpressionDeclPtrList					arrayElementDeclList;
 	};
 
 	/**
@@ -447,18 +467,20 @@ namespace fluffy { namespace ast { namespace expr {
 	 * ExpressionFunctionParameterDecl
 	 */
 
-	class ExpressionFunctionParameterDecl : public AstNode
+	class ExpressionFunctionParameterDecl : public AstNodeIdentified
 	{
 	public:
 		ExpressionFunctionParameterDecl(const U32 line, const U32 column)
-			: AstNode(line, column)
+			: AstNodeIdentified(line, column)
+			, isEllipsis(false)
 		{}
 
 		~ExpressionFunctionParameterDecl()
 		{}
 
-		String									identifierDecl;
+
 		TypeDeclPtr								typeDecl;
+		Bool									isEllipsis;
 	};
 
 	/**

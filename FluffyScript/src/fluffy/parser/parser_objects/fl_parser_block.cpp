@@ -8,15 +8,47 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectBlockDecl
 	 */
 	
-	BlockDeclPtr ParserObjectBlockDecl::parse(Parser* parser)
+	BlockDeclPtr ParserObjectBlockDecl::parse(Parser* parser, Bool skipOnly)
 	{
+		if (skipOnly) {
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
+
+			const U32 beginPosition = parser->getTokenPosition();
+
+			// Consome '{'
+			parser->expectToken(TokenType_e::LBracket);
+
+			while (true)
+			{
+				if (parser->isRightBracket())
+				{
+					break;
+				}
+
+				ParserObjectStmtDecl::parse(parser, skipOnly);
+			}
+
+			// Consome '}'
+			parser->expectToken(TokenType_e::RBracket);
+
+			const U32 endPosition = parser->getTokenPosition();
+
+			return std::make_unique<ast::BlockDecl>(
+				beginPosition,
+				endPosition,
+				line,
+				column
+			);
+		}
+
 		auto blockDecl = std::make_unique<ast::BlockDecl>(
 			parser->getTokenLine(),
 			parser->getTokenColumn()
 		);
 
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -25,32 +57,11 @@ namespace fluffy { namespace parser_objects {
 				break;
 			}
 
-			blockDecl->stmtList.push_back(ParserObjectStmtDecl::parse(parser));
+			blockDecl->stmtList.push_back(ParserObjectStmtDecl::parse(parser, skipOnly));
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 		return blockDecl;
-	}
-
-	BlockDeclPtr ParserObjectBlockDecl::skip(Parser* parser)
-	{				
-		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
-
-		while (true)
-		{
-			if (parser->isRightBracket())
-			{
-				break;
-			}
-
-			ParserObjectStmtDecl::skip(parser);
-		}
-
-		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
-
-		return nullptr;
 	}
 } }

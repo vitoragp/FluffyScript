@@ -1,28 +1,197 @@
-include { Button, Widget, Window } from UI;
+include { * } from UI;
+include { fetch, Method, Body, Jsonable } from Net;
 
 namespace application
 {
-	class MyWindow extends Window
+	struct Address
 	{
-		let p: i32;
+		let street: string;
+		let number: string;
+		let cep: string;
+	}
+
+	struct User
+	{
+		let id: u64?;
+		let name: string;
+		let address: Address;
+	}
 	
-		public constructor()
-			: super("My window", (100, 100), (600, 400))
-			, p(0)
-		{}
-		
-		fn build() -> Widget
+	trait Jsonable for User
+	{
+		fn toJson() -> String
 		{
-			return new LinearLayout(LayoutOrientation::Vertical) {
-				build: || {
-					return 0;
+			return """
+				{
+					"id": ${this.id},
+					"name": ${this.name},
+					"address": {
+						"street": ${this.address.street},
+						"number": ${this.address.number},
+						"cep": ${this.address.cep}
+					}
 				}
-			};
+			""";
+		}
+		
+		static fn fromJson({ id, name, cep: { street, number, cep } }: object) -> User
+		{
+			return new User() { id, name, cep: new Cep() { street, number, cep } };
 		}
 	}
 
-	fn main() -> i32
+	/***
+	 * Printable
+	 */
+
+	trait Printable
 	{
+		fn print_me();
+		fn print(printable: self);
+	}
+
+	trait Printable for User
+	{
+		fn print_me()
+		{
+			print("User { id: ${this.id}, name: ${this.name} }");
+		}
+
+		fn print_me(printable: self)
+		{
+			printable.print_me();
+		}
+	}
+
+	/***
+	 * RepositoryBase<R>
+	 */
+
+	interface RepositoryBase<R>
+	{
+		fn create(user: R) -> Promise<R>;
+		fn get(id: string) -> Promise<R>;
+		fn getAll(user: R) -> Promise<R[]>;
+		fn update(user: R) -> Promise<R>;
+		fn delete(user: R) -> Promise<void>;
+	}
+
+	class UserRepository implements RepositoryBase<User>
+	{
+		public fn RepositoryBase<User>.create(user: User) -> Promise<User>
+		{
+			return fetch(Method::POST, "$host/users", new Body() { data: user.toJson() });
+		}		
+
+		public fn RepositoryBase<User>.get(id: string) -> Promise<User>
+		{
+			return fetch(Method::GET, "$host/users/$id").then(|res| { return User::fromJson(res); });
+		}
+
+		public fn RepositoryBase<User>.getAll(user: User) -> Promise<User[]>
+		{
+			return fetch(Method::GET, "$host/users/$id").then(|res| {
+				return res.map(|json| {
+					return User::fromJson(json);
+				});
+			});
+		}
+
+		public fn RepositoryBase<User>.update(user: User) -> Promise<User>
+		{
+			return fetch(Method::PUT, "$host/users/${user.id}", new Body() {
+				data: user.toJson()
+			}).then(|res| {
+				return User::fromJson(res);
+			});
+		}
+
+		public fn RepositoryBase<User>.delete(user: User) -> Promise<void>
+		{
+			return fetch(Method::DELETE, "$host/users/${user.id}").then(|| {});
+		}
+	}
+
+	/***
+	 * UserForm
+	 */
+
+	class UserForm extends Window
+	{
+		let name: string;
+		let street: string;
+		let number: string;
+		let cep: string;
+		let ref repository: UserRepository;
+
+		constructor(ref repository: UserRepository)
+			: repository(repository)
+		{}
+
+		public virtual fn build() -> Widget
+		{
+			return new LinearLayout(Orientation::Vertical) {
+				padding: new Padding(5),
+				children: [
+					new Label("Nome"),
+					new Input("") { onChange: |val| { this.name = val; }},
+					new Label("Rua"),
+					new Input("") { onChange: |val| { this.street = val; }},
+					new Label("CEP"),
+					new Input("") { onChange: |val| { this.cep = val; }},
+					new LinearLayout(Orientation::Horizontal) {
+						children: [
+							new Button("Cadastrar") {
+								onClick: || {
+									const { id } = this.repository.create(new User() {
+										name: this.name,
+										address: new Address() {
+											street: this.street,
+											number: this.number,
+											cep: this.cep,
+										},
+									});
+
+									if (id == null)
+									{
+										panic("Failed to create user!");
+									}
+								},
+							},
+							new FixedSpaced(5),
+							new Button("Fechar") {
+								onClick: || {
+									this.close();
+								},
+							},
+						],
+					},
+				],
+			};
+		}
+
+		virtual fn onEvent(evt: WindowEvent) override
+		{
+			match evt
+			{
+				when CloseEvent(_) -> {
+					showMessage("Information", "Deseja realmente fechar a janela?", Message::YesNo);
+				},
+				when _ -> {},
+			}
+			super.onEvent(evt);
+		}
+	}
+
+	/***
+	 * main
+	 */
+
+	fn main(args: string[]) -> i32
+	{
+		let userRepository = new UserRepository();
+		let userForm = new UserForm(ref userRepository);
+		userForm.show();
 		return 0;
 	}
 }

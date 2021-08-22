@@ -50,7 +50,7 @@ namespace fluffy {
 		class unexpected_with_possibilities_token_exception : public std::exception
 		{
 		public:
-									unexpected_with_possibilities_token_exception(String token, std::vector<TokenSubType_e> possibilities, U32 line, U32 column);
+									unexpected_with_possibilities_token_exception(String token, std::vector<TokenType_e> possibilities, U32 line, U32 column);
 									~unexpected_with_possibilities_token_exception();
 
 			virtual const char*		what() const noexcept override;

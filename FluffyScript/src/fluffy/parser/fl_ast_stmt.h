@@ -18,6 +18,9 @@ namespace fluffy { namespace ast { namespace stmt {
 	using PatternDeclPtr				= std::unique_ptr<PatternDecl>;
 	using PatternDeclPtrList			= std::vector<PatternDeclPtr>;
 
+	using MatchWhenDeclPtr				= std::unique_ptr<class MatchWhenDecl>;
+	using MatchWhenDeclPtrList			= std::vector<MatchWhenDeclPtr>;
+
 	using ExpressionDeclPtr				= std::unique_ptr<ExpressionDecl>;
 	using BlockDeclPtr					= std::unique_ptr<BlockDecl>;
 	using TypeDeclPtr					= std::unique_ptr<TypeDecl>;
@@ -80,6 +83,7 @@ namespace fluffy { namespace ast { namespace stmt {
 		{}
 
 		PatternDeclPtr						patternDecl;
+		ExpressionDeclPtr					expressionDecl;
 		BlockDeclPtr						ifBlockDecl;
 		BlockDeclPtr						elseBlockDecl;
 	};
@@ -156,7 +160,7 @@ namespace fluffy { namespace ast { namespace stmt {
 		 {}
 
 		 ExpressionDeclPtr					conditionExprDecl;
-		 PatternDeclPtrList					patternList;
+		 MatchWhenDeclPtrList				whenDeclList;
 	 };
 
 	 /**
@@ -284,20 +288,21 @@ namespace fluffy { namespace ast { namespace stmt {
 	 public:
 		 StmtVariableDecl(U32 line, U32 column)
 			 : StmtDecl(StmtDeclType_e::Variable, line, column)
-			 /*
+			 , isShared(false)
 			 , isConst(false)
 			 , isReference(false)
-			 */
 		 {}
 
 		 virtual ~StmtVariableDecl()
 		 {}
 
+		 Bool								isShared;
 		 TString							identifier;
 		 Bool								isConst;
 		 Bool								isReference;
 		 TypeDeclPtr						typeDecl;
 		 ExpressionDeclPtr					initExpression;
+		 PatternDeclPtr						destructuringPatternDecl;
 	 };
 
 	 /**
@@ -337,8 +342,26 @@ namespace fluffy { namespace ast { namespace stmt {
 	 };
 
 	 /**
-	 * StmtTryCatchBlockDecl
-	 */
+	  * MatchWhenDecl
+	  */
+
+	 class MatchWhenDecl : public AstNode
+	 {
+	 public:
+		 MatchWhenDecl(U32 line, U32 column)
+			 : AstNode(line, column)
+		 {}
+
+		 virtual ~MatchWhenDecl()
+		 {}
+
+		 PatternDeclPtr						patternDecl;		 
+		 BlockDeclPtr						blockDecl;
+	 };
+
+	 /**
+	  * StmtTryCatchBlockDecl
+	  */
 
 	 class StmtTryCatchBlockDecl : public AstNode
 	 {

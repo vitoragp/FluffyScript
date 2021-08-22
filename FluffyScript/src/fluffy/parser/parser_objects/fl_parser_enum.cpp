@@ -17,7 +17,7 @@ namespace fluffy { namespace parser_objects {
 		enumDecl->isExported = hasExport;
 
 		// Consome 'enum'.
-		parser->expectToken(TokenSubType_e::Enum);
+		parser->expectToken(TokenType_e::Enum);
 
 		// Consome o identificador.
 		enumDecl->identifier = parser->expectIdentifier();
@@ -29,7 +29,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -45,7 +45,7 @@ namespace fluffy { namespace parser_objects {
 			if (parser->isComma())
 			{				
 				// Consome ','.
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
 				goto parseEnumLabel;
 			}
 
@@ -62,7 +62,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return enumDecl;
 	}
@@ -77,20 +77,20 @@ namespace fluffy { namespace parser_objects {
 		// Consome o identificador.
 		enumItemDecl->identifier = parser->expectIdentifier();
 
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Assign:
+		case TokenType_e::Assign:
 			{
 				// Consome '='.
-				parser->expectToken(TokenSubType_e::Assign);
+				parser->expectToken(TokenType_e::Assign);
 				enumItemDecl->hasValue = true;
-				enumItemDecl->valueExpression = ParserObjectExpressionDecl::skipEnumExpr(parser);
+				enumItemDecl->valueExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::EnumExpr, true);
 			}
 			break;
-		case TokenSubType_e::LParBracket:
+		case TokenType_e::LParBracket:
 			{
 				// Consome '('.
-				parser->expectToken(TokenSubType_e::LParBracket);
+				parser->expectToken(TokenType_e::LParBracket);
 
 				// Indica presenca de dados.
 				enumItemDecl->hasData = true;
@@ -104,7 +104,7 @@ namespace fluffy { namespace parser_objects {
 					if (parser->isComma())
 					{
 						// Consome ','.
-						parser->expectToken(TokenSubType_e::Comma);
+						parser->expectToken(TokenType_e::Comma);
 						continue;
 					}
 
@@ -115,22 +115,22 @@ namespace fluffy { namespace parser_objects {
 
 					throw exceptions::unexpected_with_possibilities_token_exception(
 						parser->getTokenValue(),
-						{ TokenSubType_e::Comma, TokenSubType_e::RParBracket },
+						{ TokenType_e::Comma, TokenType_e::RParBracket },
 						parser->getTokenLine(),
 						parser->getTokenColumn()
 					);
 				}				
 
 				// Consome ')'.
-				parser->expectToken(TokenSubType_e::RParBracket);
+				parser->expectToken(TokenType_e::RParBracket);
 			}
 			break;
-		case TokenSubType_e::Comma:
+		case TokenType_e::Comma:
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Assign, TokenSubType_e::LParBracket, TokenSubType_e::Comma },
+				{ TokenType_e::Assign, TokenType_e::LParBracket, TokenType_e::Comma },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);

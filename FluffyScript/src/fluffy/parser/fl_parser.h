@@ -9,7 +9,7 @@ namespace fluffy { namespace lexer { class Lexer; } }
 namespace fluffy { namespace parser {
 	using fluffy::lexer::Lexer;
 
-	using ProgramPtr					= std::unique_ptr<ast::Program>;
+	using CodeUnitPtr					= std::unique_ptr<ast::CodeUnit>;
 
 	using ErrCallback					= std::function<void()>;
 
@@ -23,31 +23,25 @@ namespace fluffy { namespace parser {
 										Parser(Lexer* const lex);
 										~Parser();
 
-		ProgramPtr						parse();
+		CodeUnitPtr						parse();
 
 		Token_s							parseNextToken();
 
 		void							loadSource(String source);
 		void							loadSourceFromFile(String sourceFile);
 
-		void							reinterpretToken(TokenType_e type, TokenSubType_e subType, U32 offset);
+		void							resetToPosition(U32 position);
+
+		void							reinterpretToken(TokenType_e type, U32 offset);
 
 		void							nextToken();
 
-
-		void							expectToken(TokenSubType_e expectedToken);
-		void							expectToken(TokenSubType_e expectedToken, ErrCallback errcallback);
+		void							expectToken(TokenType_e expectedToken);
+		void							expectToken(TokenType_e expectedToken, ErrCallback errcallback);
 
 		String							expectIdentifier();
 		const Bool						expectConstantBool();
-		const I8						expectConstantI8();
-		const U8						expectConstantU8();
-		const I16						expectConstantI16();
-		const U16						expectConstantU16();
-		const I32						expectConstantI32();
-		const U32						expectConstantU32();
-		const I64						expectConstantI64();
-		const U64						expectConstantU64();
+		const I8						expectConstantInteger();
 		const Fp32						expectConstantFp32();
 		const Fp64						expectConstantFp64();
 		const I8						expectConstantChar();
@@ -55,14 +49,7 @@ namespace fluffy { namespace parser {
 
 		Bool							isEof();
 		Bool							isIdentifier();		
-		Bool							isConstantI8();		
-		Bool							isConstantU8();		
-		Bool							isConstantI16();		
-		Bool							isConstantU16();		
-		Bool							isConstantI32();		
-		Bool							isConstantU32();		
-		Bool							isConstantI64();		
-		Bool							isConstantU64();		
+		Bool							isConstantInteger();				
 		Bool							isConstantFp32();		
 		Bool							isConstantFp64();		
 		Bool							isConstantChar();
@@ -111,9 +98,6 @@ namespace fluffy { namespace parser {
 		Bool							isFp32();
 		Bool							isFp64();
 		Bool							isString();
-		Bool							isVector();
-		Bool							isSet();
-		Bool							isMap();
 		Bool							isObject();
 		Bool							isFn();
 		Bool							isLet();
@@ -185,12 +169,12 @@ namespace fluffy { namespace parser {
 		Bool							isInterrogation();
 		Bool							isComma();
 		Bool							isDot();
+		Bool							isEllipsis();
 
 		const String&					getFilename();
 
 		const String&					getTokenValue();
 		const TokenType_e				getTokenType();
-		const TokenSubType_e			getTokenSubType();
 		const U32						getTokenPosition();
 		const U32						getTokenLine();
 		const U32						getTokenColumn();

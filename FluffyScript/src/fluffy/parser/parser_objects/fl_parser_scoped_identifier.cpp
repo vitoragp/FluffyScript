@@ -18,7 +18,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isScopeResolution())
 		{
 			// Consome '::'.
-			parser->expectToken(TokenSubType_e::ScopeResolution);
+			parser->expectToken(TokenType_e::ScopeResolution);
 			scopedIdentifierDecl->startFromRoot = true;
 		}
 
@@ -41,7 +41,7 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome '::'.
-		parser->expectToken(TokenSubType_e::ScopeResolution);
+		parser->expectToken(TokenType_e::ScopeResolution);
 
 		// Consome o identificador.
 		scopedIdentifierDecl->identifier = parser->expectIdentifier();

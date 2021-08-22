@@ -15,10 +15,10 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'include'.
-		parser->expectToken(TokenSubType_e::Include);
+		parser->expectToken(TokenType_e::Include);
 
 		// Consome '{'
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		// Consome Identificadores.
 		while (true)
@@ -31,7 +31,7 @@ namespace fluffy { namespace parser_objects {
 				}
 
 				// Consome '*'
-				parser->expectToken(TokenSubType_e::Multiplication);
+				parser->expectToken(TokenType_e::Multiplication);
 				break;
 			}
 
@@ -44,20 +44,20 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Consome ','
-			parser->expectToken(TokenSubType_e::Comma);
+			parser->expectToken(TokenType_e::Comma);
 		}
 
 		// Consome '}'
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		// Consome 'from'
-		parser->expectToken(TokenSubType_e::From);
+		parser->expectToken(TokenType_e::From);
 
 		// Consome o identificador do namespace.
 		includeDecl->fromNamespace = ParserObjectScopedIdentifier::parse(parser);
 
 		// Consome ';'
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return includeDecl;
 	}

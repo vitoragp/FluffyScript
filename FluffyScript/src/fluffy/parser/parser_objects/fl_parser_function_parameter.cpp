@@ -8,74 +8,129 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectFunctionParameter
 	 */
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parse(Parser* parser)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parse(Parser* parser, Bool skipOnly)
 	{
-		return parseParameters(parser, false);
+		return parseParameters(parser, false, skipOnly);
 	}
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseWithSelf(Parser* parser)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseWithSelf(Parser* parser, Bool skipOnly)
 	{
-		return parseParameters(parser, true);
+		return parseParameters(parser, true, skipOnly);
 	}
 
-	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseParameters(Parser* parser, Bool traitMode)
+	FunctionParameterDeclPtrList ParserObjectFunctionParameter::parseParameters(Parser* parser, Bool traitMode, Bool skipOnly)
 	{
 		FunctionParameterDeclPtrList parameterDeclList;
 
 		// Consome '('
-		parser->expectToken(TokenSubType_e::LParBracket);
+		parser->expectToken(TokenType_e::LParBracket);
 
 		// Finaliza declaracao da lista de parametros.
 		if (parser->isRightParBracket())
 		{
 			// Consome ')'
-			parser->expectToken(TokenSubType_e::RParBracket);
+			parser->expectToken(TokenType_e::RParBracket);
 			return parameterDeclList;
 		}
 
 		while (true)
 		{
-			auto parameterDecl = std::make_unique<ast::FunctionParameterDecl>(
-				parser->getTokenLine(),
-				parser->getTokenColumn()
-			);
+			Bool isReference = false;
 
-			const U32 line = parser->getTokenLine();
-			const U32 column = parser->getTokenColumn();
-
-			parameterDecl->identifier = parser->expectIdentifier();
-
-			// Consome ':'
-			parser->expectToken(TokenSubType_e::Colon);
-
-			// Consome tipo
-			if (traitMode)
+			if (parser->isRef())
 			{
-				parameterDecl->typeDecl = ParserObjectTypeDecl::parseWithSelf(parser);
-			}
-			else
-			{
-				parameterDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+				parser->expectToken(TokenType_e::Ref);
+				isReference = true;
 			}
 
-			// Parametros nao podem ser do tipo void.
-			if (parameterDecl->typeDecl->typeID == TypeDeclID_e::Void)
+			if (parser->isIdentifier())
 			{
-				throw exceptions::custom_exception(
-					"Parameter '%s' can't have void type",
-					line,
-					column,
-					parameterDecl->identifier.str()
+				auto parameterDecl = std::make_unique<ast::FunctionParameterDecl>(
+					parser->getTokenLine(),
+					parser->getTokenColumn()
 				);
-			}
 
-			// Adiciona o parametro a lista.
-			parameterDeclList.push_back(std::move(parameterDecl));
+				parameterDecl->isReference = isReference;
+				parameterDecl->identifier = parser->expectIdentifier();
+
+				// Verifica se e uma ellipsis
+				if (parser->isEllipsis())
+				{
+					parameterDecl->isEllipsis = true;
+					parser->expectToken(TokenType_e::Ellipsis);
+					break;
+				}
+
+				// Consome ':'
+				parser->expectToken(TokenType_e::Colon);
+
+				// Consome tipo
+				if (traitMode)
+				{
+					parameterDecl->typeDecl = ParserObjectTypeDecl::parseWithSelf(parser);
+				}
+				else
+				{
+					parameterDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+				}
+
+				// Parametros nao podem ser do tipo void.
+				if (parameterDecl->typeDecl->typeID == TypeDeclID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Parameter '%s' can't have void type",
+						parameterDecl->typeDecl->line,
+						parameterDecl->typeDecl->column,
+						parameterDecl->identifier.str()
+					);
+				}
+
+				// Adiciona o parametro a lista.
+				parameterDeclList.push_back(std::move(parameterDecl));
+			}
+			else if (parser->isLeftBracket())
+			{
+				auto parameterDecl = std::make_unique<ast::FunctionParameterDecl>(
+					parser->getTokenLine(),
+					parser->getTokenColumn()
+				);
+
+				parameterDecl->isReference = isReference;
+
+				// Consome destructuring.
+				parameterDecl->destructuringPatternDecl = ParserObjectPatternDecl::parse(parser, skipOnly);
+
+				// Consome ':'
+				parser->expectToken(TokenType_e::Colon);
+
+				// Consome tipo
+				if (traitMode)
+				{
+					parameterDecl->typeDecl = ParserObjectTypeDecl::parseWithSelf(parser);
+				}
+				else
+				{
+					parameterDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+				}
+
+				// Parametros nao podem ser do tipo void.
+				if (parameterDecl->typeDecl->typeID == TypeDeclID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Parameter can't have void type",
+						parameterDecl->typeDecl->line,
+						parameterDecl->typeDecl->column
+					);
+				}
+
+				// Adiciona o parametro a lista.
+				parameterDeclList.push_back(std::move(parameterDecl));
+			}
 
 			// Consome ','
 			if (parser->isComma())
 			{
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
 				continue;
 			}
 
@@ -92,7 +147,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome ')'
-		parser->expectToken(TokenSubType_e::RParBracket);
+		parser->expectToken(TokenType_e::RParBracket);
 
 		return parameterDeclList;
 	}

@@ -14,7 +14,7 @@ namespace fluffy { namespace ast {
 	using namespace expr;
 	using namespace stmt;
 
-	using StringList						= vector<String>;
+	using TStringList						= vector<TString>;
 
 	using IncludeDeclPtr					= unique_ptr<class IncludeDecl>;
 	using IncludeDeclPtrList				= vector<IncludeDeclPtr>;
@@ -56,7 +56,7 @@ namespace fluffy { namespace ast {
 	using TraitFunctionDeclPtrList			= vector<TraitFunctionDeclPtr>;
 
 	using FunctionParameterDeclPtr			= unique_ptr<class FunctionParameterDecl>;
-	using FunctionParameterDeclPtrList		= vector<FunctionParameterDeclPtr>;		
+	using FunctionParameterDeclPtrList		= vector<FunctionParameterDeclPtr>;
 
 	using GenericDeclPtr					= unique_ptr<class GenericDecl>;
 	using GenericDeclPtrList				= vector<GenericDeclPtr>;
@@ -80,43 +80,8 @@ namespace fluffy { namespace ast {
 	using ScopedIdentifierDeclPtrList		= vector<ScopedIdentifierDeclPtr>;
 
 	/**
-		* Program
-		*/
-
-	class Program
-	{
-	public:
-		Program() {}
-		~Program() {}
-
-		IncludeDeclPtrList					includeDeclList;
-		CodeUnitPtrList						codeUnitList;
-	};
-
-	/**
-		* Include
-		*/
-
-	class IncludeDecl
-	{
-	public:
-		IncludeDecl(U32 line, U32 column)
-			: line(line)
-			, column(column)
-		{}
-
-		~IncludeDecl()
-		{}
-
-		StringList							includedItemList;
-		ScopedIdentifierDeclPtr				fromNamespace;
-		U32									line;
-		U32									column;
-	};
-
-	/**
-		* CodeUnit
-		*/
+	 * CodeUnit
+	 */
 
 	class CodeUnit
 	{
@@ -129,12 +94,31 @@ namespace fluffy { namespace ast {
 		{}
 
 		const String						name;
+		IncludeDeclPtrList					includeDeclList;
 		NamespaceDeclPtrList				namespaceDeclList;
 	};
 
 	/**
-		* NamespaceDecl
-		*/
+	 * Include
+	 */
+
+	class IncludeDecl : public AstNode
+	{
+	public:
+		IncludeDecl(U32 line, U32 column)
+			: AstNode(line, column)
+		{}
+
+		~IncludeDecl()
+		{}
+
+		TStringList							includedItemList;
+		ScopedIdentifierDeclPtr				fromNamespace;
+	};
+
+	/**
+	 * NamespaceDecl
+	 */
 
 	class NamespaceDecl : public AstNodeIdentified
 	{
@@ -151,8 +135,8 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
-		* GeneralDecl
-		*/
+	 * GeneralDecl
+	 */
 
 	class GeneralDecl : public AstNodeIdentified
 	{
@@ -251,6 +235,8 @@ namespace fluffy { namespace ast {
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
 
+		TypeDeclPtr							sourceTypeDecl;
+
 		BlockDeclPtr						blockDecl;
 	};
 
@@ -263,6 +249,7 @@ namespace fluffy { namespace ast {
 	public:
 		ClassVariableDecl(U32 line, U32 column)
 			: ClassMemberDecl(ClassMemberType_e::Variable, line, column)
+			, isShared(false)
 			, isConst(false)
 			, isReference(false)
 			, isStatic(false)
@@ -271,6 +258,7 @@ namespace fluffy { namespace ast {
 		virtual ~ClassVariableDecl()
 		{}
 
+		Bool								isShared;
 		Bool								isConst;
 		Bool								isReference;
 		Bool								isStatic;
@@ -400,6 +388,7 @@ namespace fluffy { namespace ast {
 	public:
 		StructVariableDecl(U32 line, U32 column)
 			: AstNodeIdentified(line, column)
+			, isShared(false)
 			, isConst(false)
 			, isReference(false)
 		{}
@@ -407,6 +396,7 @@ namespace fluffy { namespace ast {
 		~StructVariableDecl()
 		{}
 
+		Bool								isShared;
 		Bool								isConst;
 		Bool								isReference;
 		TypeDeclPtr							typeDecl;
@@ -487,6 +477,7 @@ namespace fluffy { namespace ast {
 	public:
 		TraitFunctionDecl(U32 line, U32 column)
 			: AstNodeIdentified(line, column)
+			, isStatic(true)
 		{}
 
 		~TraitFunctionDecl()
@@ -495,6 +486,8 @@ namespace fluffy { namespace ast {
 		GenericDeclPtrList					genericDeclList;
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
+		BlockDeclPtr						blockDecl;
+		Bool								isStatic;
 	};
 
 	/**
@@ -544,6 +537,7 @@ namespace fluffy { namespace ast {
 		VariableDecl(U32 line, U32 column)
 			: GeneralDecl(GeneralDeclType_e::VariableDecl, line, column)
 			, isExported(false)
+			, isShared(false)
 			, isConst(false)
 			, isReference(false)
 		{}
@@ -552,6 +546,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
+		Bool								isShared;
 		Bool								isConst;
 		Bool								isReference;
 		TypeDeclPtr							typeDecl;
@@ -567,12 +562,19 @@ namespace fluffy { namespace ast {
 	public:
 		FunctionParameterDecl(U32 line, U32 column)
 			: AstNodeIdentified(line, column)
+			, isShared(false)
+			, isReference(false)
+			, isEllipsis(false)
 		{}
 
 		~FunctionParameterDecl()
 		{}
 
+		Bool								isShared;
+		Bool								isReference;
+		Bool								isEllipsis;
 		TypeDeclPtr							typeDecl;
+		PatternDeclPtr						destructuringPatternDecl;
 	};
 
 	/**

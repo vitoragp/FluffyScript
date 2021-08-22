@@ -8,51 +8,52 @@ namespace fluffy {
 	 * isExprOperator
 	 */
 
-	bool isExprOperator(TokenSubType_e type)
+	bool isExprOperator(TokenType_e type)
 	{
 		switch (type) {
-		case TokenSubType_e::Comma:
-		case TokenSubType_e::Assign:
-		case TokenSubType_e::LogicalOr:
-		case TokenSubType_e::LogicalAnd:
-		case TokenSubType_e::BitWiseOr:
-		case TokenSubType_e::BitWiseXor:
-		case TokenSubType_e::BitWiseAnd:
-		case TokenSubType_e::BitWiseOrAssign:
-		case TokenSubType_e::BitWiseXorAssign:
-		case TokenSubType_e::BitWiseAndAssign:
-		case TokenSubType_e::BitWiseRShiftAssign:
-		case TokenSubType_e::BitWiseLShiftAssign:
-		case TokenSubType_e::Equal:
-		case TokenSubType_e::NotEqual:
-		case TokenSubType_e::GreaterThan:
-		case TokenSubType_e::LessThan:
-		case TokenSubType_e::GreaterThanOrEqual:
-		case TokenSubType_e::LessThanOrEqual:
-		case TokenSubType_e::BitWiseLShift:
-		case TokenSubType_e::BitWiseRShift:
-		case TokenSubType_e::Plus:
-		case TokenSubType_e::Minus:
-		case TokenSubType_e::Multiplication:
-		case TokenSubType_e::Division:
-		case TokenSubType_e::Modulo:
-		case TokenSubType_e::PlusAssign:
-		case TokenSubType_e::MinusAssign:
-		case TokenSubType_e::MultAssign:
-		case TokenSubType_e::DivAssign:
-		case TokenSubType_e::ModAssign:
-		case TokenSubType_e::Increment:
-		case TokenSubType_e::Decrement:
-		case TokenSubType_e::As:
-		case TokenSubType_e::Is:
-		case TokenSubType_e::LSquBracket:
-		case TokenSubType_e::LParBracket:
-		case TokenSubType_e::Dot:
-		case TokenSubType_e::BitWiseNot:
-		case TokenSubType_e::LogicalNot:
-		case TokenSubType_e::ScopeResolution:
-		case TokenSubType_e::Interrogation:
-		case TokenSubType_e::Match:
+		case TokenType_e::Comma:
+		case TokenType_e::Assign:
+		case TokenType_e::LogicalOr:
+		case TokenType_e::LogicalAnd:
+		case TokenType_e::BitWiseOr:
+		case TokenType_e::BitWiseXor:
+		case TokenType_e::BitWiseAnd:
+		case TokenType_e::BitWiseOrAssign:
+		case TokenType_e::BitWiseXorAssign:
+		case TokenType_e::BitWiseAndAssign:
+		case TokenType_e::BitWiseRShiftAssign:
+		case TokenType_e::BitWiseLShiftAssign:
+		case TokenType_e::Equal:
+		case TokenType_e::NotEqual:
+		case TokenType_e::GreaterThan:
+		case TokenType_e::LessThan:
+		case TokenType_e::GreaterThanOrEqual:
+		case TokenType_e::LessThanOrEqual:
+		case TokenType_e::BitWiseLShift:
+		case TokenType_e::BitWiseRShift:
+		case TokenType_e::Plus:
+		case TokenType_e::Minus:
+		case TokenType_e::Multiplication:
+		case TokenType_e::Division:
+		case TokenType_e::Modulo:
+		case TokenType_e::PlusAssign:
+		case TokenType_e::MinusAssign:
+		case TokenType_e::MultAssign:
+		case TokenType_e::DivAssign:
+		case TokenType_e::ModAssign:
+		case TokenType_e::Increment:
+		case TokenType_e::Decrement:
+		case TokenType_e::As:
+		case TokenType_e::Is:
+		case TokenType_e::LSquBracket:
+		case TokenType_e::LParBracket:
+		case TokenType_e::Dot:
+		case TokenType_e::BitWiseNot:
+		case TokenType_e::LogicalNot:
+		case TokenType_e::ScopeResolution:
+		case TokenType_e::Interrogation:
+		case TokenType_e::Match:
+		case TokenType_e::Ref:
 			return true;
 		default:
 			break;
@@ -66,63 +67,64 @@ namespace fluffy {
 
 	struct TokenInfo_t
 	{
-		TokenSubType_e	op;
+		TokenType_e	op;
 		U32				prec;
 		Bool			left;
 	};
 
 	static const TokenInfo_t op_info[] = {
-			{ TokenSubType_e::Comma,				1, true },
-			{ TokenSubType_e::Interrogation,		2, false },
-			{ TokenSubType_e::Assign,				2, false },
-			{ TokenSubType_e::PlusAssign,			2, false },
-			{ TokenSubType_e::MinusAssign,			2, false },
-			{ TokenSubType_e::MultAssign,			2, false },
-			{ TokenSubType_e::DivAssign,			2, false },
-			{ TokenSubType_e::ModAssign,			2, false },
-			{ TokenSubType_e::BitWiseOrAssign,		2, false },
-			{ TokenSubType_e::BitWiseXorAssign,		2, false },
-			{ TokenSubType_e::BitWiseAndAssign,		2, false },
-			{ TokenSubType_e::BitWiseLShiftAssign,	2, false },
-			{ TokenSubType_e::BitWiseRShiftAssign,	2, false },
-			{ TokenSubType_e::LogicalOr,			3, true },
-			{ TokenSubType_e::LogicalAnd,			4, true },
-			{ TokenSubType_e::BitWiseOr,			5, true },
-			{ TokenSubType_e::BitWiseXor,			6, true },
-			{ TokenSubType_e::BitWiseAnd,			7, true },
-			{ TokenSubType_e::Equal,			    8, true },
-			{ TokenSubType_e::NotEqual,			    8, true },
-			{ TokenSubType_e::GreaterThan,		    9, true },
-			{ TokenSubType_e::LessThan,			    9, true },
-			{ TokenSubType_e::GreaterThanOrEqual,   9, true },
-			{ TokenSubType_e::LessThanOrEqual,	    9, true },
-			{ TokenSubType_e::BitWiseLShift,	   10, true },
-			{ TokenSubType_e::BitWiseRShift,	   10, true },
-			{ TokenSubType_e::Plus,				   11, true },   // Add
-			{ TokenSubType_e::Minus,			   11, true },   // Sub
-			{ TokenSubType_e::Multiplication,	   12, true },
-			{ TokenSubType_e::Division,			   12, true },
-			{ TokenSubType_e::Modulo,			   12, true },
-			{ TokenSubType_e::Increment,		   13, false },  // Prefix
-			{ TokenSubType_e::Decrement,		   13, false },  // Prefix
-			{ TokenSubType_e::Plus,				   13, false },  // Unary positive
-			{ TokenSubType_e::Minus,			   13, false },  // Unary negative
-			{ TokenSubType_e::Match,			   13, false },
-			{ TokenSubType_e::As,				   13, true },
-			{ TokenSubType_e::Is,				   13, true },
-			{ TokenSubType_e::LSquBracket,		   14, true },   // Array
-			{ TokenSubType_e::LParBracket,		   14, true },   // Function Call
-			{ TokenSubType_e::Increment,		   14, true },   // Postfix
-			{ TokenSubType_e::Decrement,		   14, true },   // Postfix
-			{ TokenSubType_e::Dot,				   14, true },
-			{ TokenSubType_e::BitWiseNot,		   14, true },
-			{ TokenSubType_e::LogicalNot,		   14, true },
-			{ TokenSubType_e::ScopeResolution,	   15, true },
-			{ TokenSubType_e::Unknown,			    0, true }
+			{ TokenType_e::Comma,				1, true },
+			{ TokenType_e::Interrogation,		2, false },
+			{ TokenType_e::Assign,				2, false },
+			{ TokenType_e::PlusAssign,			2, false },
+			{ TokenType_e::MinusAssign,			2, false },
+			{ TokenType_e::MultAssign,			2, false },
+			{ TokenType_e::DivAssign,			2, false },
+			{ TokenType_e::ModAssign,			2, false },
+			{ TokenType_e::BitWiseOrAssign,		2, false },
+			{ TokenType_e::BitWiseXorAssign,	2, false },
+			{ TokenType_e::BitWiseAndAssign,	2, false },
+			{ TokenType_e::BitWiseLShiftAssign,	2, false },
+			{ TokenType_e::BitWiseRShiftAssign,	2, false },
+			{ TokenType_e::LogicalOr,			3, true },
+			{ TokenType_e::LogicalAnd,			4, true },
+			{ TokenType_e::BitWiseOr,			5, true },
+			{ TokenType_e::BitWiseXor,			6, true },
+			{ TokenType_e::BitWiseAnd,			7, true },
+			{ TokenType_e::Equal,			    8, true },
+			{ TokenType_e::NotEqual,			8, true },
+			{ TokenType_e::GreaterThan,		    9, true },
+			{ TokenType_e::LessThan,			9, true },
+			{ TokenType_e::GreaterThanOrEqual,  9, true },
+			{ TokenType_e::LessThanOrEqual,		9, true },
+			{ TokenType_e::BitWiseLShift,		10, true },
+			{ TokenType_e::BitWiseRShift,		10, true },
+			{ TokenType_e::Plus,				11, true },   // Add
+			{ TokenType_e::Minus,				11, true },   // Sub
+			{ TokenType_e::Multiplication,		12, true },
+			{ TokenType_e::Division,			12, true },
+			{ TokenType_e::Modulo,				12, true },
+			{ TokenType_e::Increment,			13, false },  // Prefix
+			{ TokenType_e::Decrement,			13, false },  // Prefix
+			{ TokenType_e::Ref,					13, false },  // Prefix
+			{ TokenType_e::Plus,				13, false },  // Unary positive
+			{ TokenType_e::Minus,				13, false },  // Unary negative
+			{ TokenType_e::Match,				13, false },
+			{ TokenType_e::As,					13, true },
+			{ TokenType_e::Is,					13, true },
+			{ TokenType_e::LSquBracket,			14, true },   // Array
+			{ TokenType_e::LParBracket,			14, true },   // Function Call
+			{ TokenType_e::Increment,			14, true },   // Postfix
+			{ TokenType_e::Decrement,			14, true },   // Postfix
+			{ TokenType_e::Dot,					14, true },
+			{ TokenType_e::BitWiseNot,			14, true },
+			{ TokenType_e::LogicalNot,			14, true },
+			{ TokenType_e::ScopeResolution,		15, true },
+			{ TokenType_e::Unknown,				0, true }
 	};
 
 	// Retorna informacoes sobre os operadores.
-	const TokenInfo_t& getOperatorInfo(TokenSubType_e op)
+	const TokenInfo_t& getOperatorInfo(TokenType_e op)
 	{
 		U32 current_op = 0;
 		while (true)
@@ -131,7 +133,7 @@ namespace fluffy {
 			{
 				return op_info[current_op];
 			}
-			if (op_info[current_op].op == TokenSubType_e::Unknown)
+			if (op_info[current_op].op == TokenType_e::Unknown)
 			{
 				return op_info[current_op];
 			}
@@ -147,61 +149,17 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectExpressionDecl
 	 */
 
-	ExpressionDeclPtr ParserObjectExpressionDecl::parse(Parser* parser)
+	ExpressionDeclPtr ParserObjectExpressionDecl::parse(Parser* parser, U32 prec, Bool skipOnly)
 	{
-		return parseExpression(parser, OperatorPrecLevel_e::MinPrec, false);
-	}
-
-	ExpressionDeclPtr ParserObjectExpressionDecl::skip(Parser* parser)
-	{
-		const U32 line = parser->getTokenLine();
-		const U32 column = parser->getTokenColumn();
-
-		const U32 beginPosition = parser->getTokenPosition();
-
-		parseExpression(parser, OperatorPrecLevel_e::MinPrec, true);
-
-		const U32 endPosition = parser->getTokenPosition();
-
-		return std::make_unique<ExpressionDeclMark>(line, column, beginPosition, endPosition);
-	}
-
-	ExpressionDeclPtr ParserObjectExpressionDecl::parseVariableInitExpr(Parser* parser)
-	{
-		return parseExpression(parser, OperatorPrecLevel_e::Interrogation, false);
-	}
-
-	ExpressionDeclPtr ParserObjectExpressionDecl::skipVariableInitExpr(Parser* parser)
-	{
-		const U32 line = parser->getTokenLine();
-		const U32 column = parser->getTokenColumn();
-
-		const U32 beginPosition = parser->getTokenPosition();
-
-		parseExpression(parser, OperatorPrecLevel_e::Interrogation, true);
-
-		const U32 endPosition = parser->getTokenPosition();
-
-		return std::make_unique<ExpressionDeclMark>(line, column, beginPosition, endPosition);
-	}
-
-	ExpressionDeclPtr ParserObjectExpressionDecl::parseEnumExpr(Parser* parser)
-	{
-		return parseExpression(parser, OperatorPrecLevel_e::EnumExpr, false);
-	}
-
-	ExpressionDeclPtr ParserObjectExpressionDecl::skipEnumExpr(Parser* parser)
-	{
-		const U32 line = parser->getTokenLine();
-		const U32 column = parser->getTokenColumn();
-
-		const U32 beginPosition = parser->getTokenPosition();
-
-		parseExpression(parser, OperatorPrecLevel_e::EnumExpr, true);
-
-		const U32 endPosition = parser->getTokenPosition();
-
-		return std::make_unique<ExpressionDeclMark>(line, column, beginPosition, endPosition);
+		if (skipOnly) {
+			const U32 line = parser->getTokenLine();
+			const U32 column = parser->getTokenColumn();
+			const U32 beginPosition = parser->getTokenPosition();
+			parseExpression(parser, prec, skipOnly);
+			const U32 endPosition = parser->getTokenPosition();
+			return std::make_unique<ExpressionDeclMark>(line, column, beginPosition, endPosition);
+		}
+		return parseExpression(parser, prec, skipOnly);
 	}
 
 	ExpressionDeclPtr ParserObjectExpressionDecl::parseExpression(Parser* parser, U32 prec, Bool skipOnly)
@@ -214,95 +172,90 @@ namespace fluffy { namespace parser_objects {
 
 		// Processa operadores unarios Prefixo.
 		if (prec > OperatorPrecLevel_e::Unary) {
-			switch (parser->getTokenSubType())
+			switch (parser->getTokenType())
 			{
-			case TokenSubType_e::BitWiseNot:
-			case TokenSubType_e::LogicalNot:
-			case TokenSubType_e::Minus:
-			case TokenSubType_e::Plus:
-			case TokenSubType_e::Increment:
-			case TokenSubType_e::Decrement:			
+			case TokenType_e::BitWiseNot:
+			case TokenType_e::LogicalNot:
+			case TokenType_e::Minus:
+			case TokenType_e::Plus:
+			case TokenType_e::Increment:
+			case TokenType_e::Decrement:
+			case TokenType_e::Ref:
 				{
 					// Processa superficialmente
-					if (skipOnly)
-					{
-						parser->nextToken();
-						parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
-						return nullptr;
-					}
-
-					auto unaryExprDecl = std::make_unique<ExpressionUnaryDecl>(
+					auto unaryExprDecl = !skipOnly ? std::make_unique<ExpressionUnaryDecl>(
 						parser->getTokenLine(),
 						parser->getTokenColumn()
-					);
+					) : nullptr;
 
-					unaryExprDecl->op = parser->getTokenSubType();
-					unaryExprDecl->unaryType = ExpressionUnaryType_e::Prefix;
+					if (!skipOnly) {
+						unaryExprDecl->op = parser->getTokenType();
+						unaryExprDecl->unaryType = ExpressionUnaryType_e::Prefix;
+					}
 
 					// Consome operator.
 					parser->nextToken();
 
 					// Processa expressao a direita.
-					unaryExprDecl->exprDecl = parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					if (!skipOnly) {
+						unaryExprDecl->exprDecl = parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					} else {
+						parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					}
 					return unaryExprDecl;
 				}
 				break;
-			case TokenSubType_e::Match:
+			case TokenType_e::Match:
 				{
-					// Processa superficialmente
-					if (skipOnly)
-					{
-						parser->nextToken();
-						parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
-						parser->expectToken(TokenSubType_e::LBracket);
-						while (true)
-						{
-							parser->expectToken(TokenSubType_e::When);
-							ParserObjectPatternDecl::parse(parser);
-							parser->expectToken(TokenSubType_e::Arrow);
-							ParserObjectBlockDecl::skip(parser);
-						}
-						parser->expectToken(TokenSubType_e::RBracket);
-						return nullptr;
-					}
-
-					auto matchExprDecl = std::make_unique<ExpressionMatchDecl>(
+					auto matchExprDecl = !skipOnly ? std::make_unique<ExpressionMatchDecl>(
 						parser->getTokenLine(),
 						parser->getTokenColumn()
-					);
+					) : nullptr;
 
 					// Consome operator.
 					parser->nextToken();
 
 					// Processa expressao a direita.
-					matchExprDecl->exprDecl = parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					if (!skipOnly) {
+						matchExprDecl->exprDecl = parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					} else {
+						parseExpression(parser, OperatorPrecLevel_e::Unary, skipOnly);
+					}
 
 					// Consome '{'
-					parser->expectToken(TokenSubType_e::LBracket);
+					parser->expectToken(TokenType_e::LBracket);
 
 					// Processa declaracao 'when'
 					while (true)
 					{
-						auto whenDecl = std::make_unique<ExpressionMatchWhenDecl>(
+						auto whenDecl = !skipOnly ? std::make_unique<ExpressionMatchWhenDecl>(
 							parser->getTokenLine(),
 							parser->getTokenColumn()
-						);
+						) : nullptr;
 
 						// Consome 'when'
-						parser->expectToken(TokenSubType_e::When);
+						parser->expectToken(TokenType_e::When);
 
 						// Consome pattern.
-						whenDecl->patternDecl = ParserObjectPatternDecl::parse(parser);
+						if (!skipOnly) {
+							whenDecl->patternDecl = ParserObjectPatternDecl::parse(parser, skipOnly);
+						} else {
+							ParserObjectPatternDecl::parse(parser, skipOnly);
+						}
 
 						// Consome '->'
-						parser->expectToken(TokenSubType_e::Arrow);
+						parser->expectToken(TokenType_e::Arrow);
 
 						// Console o bloco de codigo de expressao.
-						whenDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+						if (!skipOnly) {
+							whenDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
+						} else {
+							ParserObjectBlockDecl::parse(parser, skipOnly);
+						}
 					}
 
 					// Consome '}'
-					parser->expectToken(TokenSubType_e::RBracket);
+					parser->expectToken(TokenType_e::RBracket);
 
 					return matchExprDecl;
 				}
@@ -319,44 +272,43 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Processa expressao a esquerda.
-		if (skipOnly) {
-			parseExpression(parser, prec + 1, skipOnly);
-		} else {
+		if (!skipOnly) {
 			lhs = parseExpression(parser, prec + 1, skipOnly);
+		} else {
+			parseExpression(parser, prec + 1, skipOnly);
 		}
 
 		while (true)
 		{
-			const TokenSubType_e op = parser->getTokenSubType();
+			const TokenType_e op = parser->getTokenType();
 
 			// Se nao e um operador de expressao sai do loop.
-			if (!isExprOperator(parser->getTokenSubType()))
+			if (!isExprOperator(parser->getTokenType()))
 			{
 				break;
 			}
 
 			// Processa operator unario posfixo.
-			switch (parser->getTokenSubType())
+			switch (parser->getTokenType())
 			{
-			case TokenSubType_e::Increment:
-			case TokenSubType_e::Decrement:
+			case TokenType_e::Increment:
+			case TokenType_e::Decrement:
 				{
-					// Processa superficialmente.
-					if (skipOnly)
-					{
-						continue;
-					}
+					// Consome o token: '++' ou '--'
+					parser->nextToken();
 
-					auto unaryExprDecl = std::make_unique<ExpressionUnaryDecl>(
+					auto unaryExprDecl = !skipOnly ? std::make_unique<ExpressionUnaryDecl>(
 						parser->getTokenLine(),
 						parser->getTokenColumn()
-					);
+					) : nullptr;
 
-					unaryExprDecl->op = parser->getTokenSubType();
-					unaryExprDecl->unaryType = ExpressionUnaryType_e::Posfix;
-					unaryExprDecl->exprDecl = std::move(lhs);
+					if (!skipOnly) {
+						unaryExprDecl->op = parser->getTokenType();
+						unaryExprDecl->unaryType = ExpressionUnaryType_e::Posfix;
+						unaryExprDecl->exprDecl = std::move(lhs);
 
-					lhs = std::move(unaryExprDecl);
+						lhs = std::move(unaryExprDecl);
+					}
 				}
 				continue;
 			default:
@@ -364,7 +316,7 @@ namespace fluffy { namespace parser_objects {
 			}
 
 			// Pega informacoes do operador.
-			const auto& opInfo = getOperatorInfo(parser->getTokenSubType());
+			const auto& opInfo = getOperatorInfo(parser->getTokenType());
 
 			// Retorna se precedencia dele e menor que a atual da funcao.
 			if (opInfo.prec < prec) {
@@ -380,74 +332,68 @@ namespace fluffy { namespace parser_objects {
 			// Processa chamada de funcao ou indexacao de dados.
 			switch (op)
 			{
-			case TokenSubType_e::LParBracket:
+			case TokenType_e::LParBracket:
 				{
-					// Processa superficialmente.
-					if (skipOnly)
-					{
-						if (parser->isRightParBracket())
-						{
-							parser->expectToken(TokenSubType_e::RParBracket);
-							continue;
-						}
-						parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
-						parser->expectToken(TokenSubType_e::RParBracket);
-						continue;
-					}
-
 					// Se nao ha parametros e uma expressao unaria posfixa f().
 					if (parser->isRightParBracket())
 					{
 						// Consome ')'
-						parser->expectToken(TokenSubType_e::RParBracket);
+						parser->expectToken(TokenType_e::RParBracket);
 
-						auto functionCallExpr = std::make_unique<ExpressionFunctionCall>(
+						auto functionCallExpr = !skipOnly ? std::make_unique<ExpressionFunctionCall>(
 							line,
 							column
-						);
+						) : nullptr;
 
-						functionCallExpr->leftDecl = std::move(lhs);
+						if (!skipOnly) {
+							functionCallExpr->leftDecl = std::move(lhs);
 
-						lhs = std::move(functionCallExpr);
+							lhs = std::move(functionCallExpr);
+						}
 						continue;
 					}
 
-					auto functionCallExpr = std::make_unique<ExpressionFunctionCall>(
+					auto functionCallExpr = !skipOnly ? std::make_unique<ExpressionFunctionCall>(
 						line,
 						column
-					);
+					) : nullptr;
 
-					functionCallExpr->leftDecl = std::move(lhs);
-					functionCallExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					if (!skipOnly) {
+						functionCallExpr->leftDecl = std::move(lhs);
+						functionCallExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					} else {
+						parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					}
 
 					// Consome ')'
-					parser->expectToken(TokenSubType_e::RParBracket);
+					parser->expectToken(TokenType_e::RParBracket);
 
-					lhs = std::move(functionCallExpr);
+					if (!skipOnly) {
+						lhs = std::move(functionCallExpr);
+					}
 					continue;
 				}
 				break;
-			case TokenSubType_e::LSquBracket:
+			case TokenType_e::LSquBracket:
 				{
-					// Processa superficialmente.
-					if (skipOnly)
-					{
-						parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
-						parser->expectToken(TokenSubType_e::RSquBracket);
-					}
-
-					auto indexAddressExpr = std::make_unique<ExpressionIndexDecl>(
+					auto indexAddressExpr = !skipOnly ? std::make_unique<ExpressionIndexDecl>(
 						line,
 						column
-					);
+					) : nullptr;
 
-					indexAddressExpr->leftDecl = std::move(lhs);
-					indexAddressExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					if (!skipOnly) {
+						indexAddressExpr->leftDecl = std::move(lhs);
+						indexAddressExpr->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					} else {
+						parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+					}
 
 					// Consome ']'
-					parser->expectToken(TokenSubType_e::RSquBracket);
+					parser->expectToken(TokenType_e::RSquBracket);
 
-					lhs = std::move(indexAddressExpr);
+					if (!skipOnly) {
+						lhs = std::move(indexAddressExpr);
+					}
 					continue;
 				}
 				break;
@@ -455,57 +401,47 @@ namespace fluffy { namespace parser_objects {
 				break;
 			}
 
-			// Processa superficialmente.
-			if (skipOnly) {
-				// Processa expressao a direira.
-				parseExpression(parser, nextMinPrec, skipOnly);
-			} else {
-				// Processa expressao a direira.
+			// Processa expressao a direita.
+			if (!skipOnly) {
 				rhs = parseExpression(parser, nextMinPrec, skipOnly);
+			} else {
+				parseExpression(parser, nextMinPrec, skipOnly);
 			}
 
 			// Verifica se a operacao e ternaria
-			if (op == TokenSubType_e::Interrogation)
+			if (op == TokenType_e::Interrogation)
 			{
-				// Processa superficialmente.
-				if (skipOnly) {
-					parser->expectToken(TokenSubType_e::Colon);
-					parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
-					break;
-				}
+				auto ternaryExprDecl = !skipOnly ? std::make_unique<ExpressionTernaryDecl>(
+					line,
+					column
+				) : nullptr;
 
-				auto ternaryExprDecl = std::make_unique<ExpressionTernaryDecl>(
+				// Consome ':'
+				parser->expectToken(TokenType_e::Colon);
+
+				if (!skipOnly) {
+					ternaryExprDecl->conditionDecl = std::move(lhs);
+					ternaryExprDecl->leftDecl = std::move(rhs);
+					ternaryExprDecl->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+
+					lhs = std::move(ternaryExprDecl);
+				}
+				break;
+			}
+
+			// Processa operador binario.
+			if (!skipOnly) {
+				auto binaryExprDecl = std::make_unique<ExpressionBinaryDecl>(
 					line,
 					column
 				);
 
-				// Consome ':'
-				parser->expectToken(TokenSubType_e::Colon);
+				binaryExprDecl->op = op;
+				binaryExprDecl->leftDecl = std::move(lhs);
+				binaryExprDecl->rightDecl = std::move(rhs);
 
-				ternaryExprDecl->conditionDecl = std::move(lhs);
-				ternaryExprDecl->leftDecl = std::move(rhs);
-				ternaryExprDecl->rightDecl = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
-
-				lhs = std::move(ternaryExprDecl);
-				break;
+				lhs = std::move(binaryExprDecl);				
 			}
-
-			// Processa superficialmente.
-			if (skipOnly) {
-				continue;
-			}
-
-			// Processa operador binario.
-			auto binaryExprDecl = std::make_unique<ExpressionBinaryDecl>(
-				line,
-				column
-			);
-
-			binaryExprDecl->op = op;
-			binaryExprDecl->leftDecl = std::move(lhs);
-			binaryExprDecl->rightDecl = std::move(rhs);
-
-			lhs = std::move(binaryExprDecl);
 		}
 		return lhs;
 	}
@@ -518,28 +454,65 @@ namespace fluffy { namespace parser_objects {
 		// Processa expressao entre parenteses.
 		if (parser->isLeftParBracket())
 		{
-			// Processa superficialmente.
-			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::LParBracket);
-				parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
-				parser->expectToken(TokenSubType_e::RParBracket);
-				return nullptr;
-			}
+			ExpressionDeclPtr expr;
 
 			// Consome '('
-			parser->expectToken(TokenSubType_e::LParBracket);
+			parser->expectToken(TokenType_e::LParBracket);
 
 			// Processa expressao.
-			auto expr = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			if (!skipOnly) {
+				expr = parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
-			// Ajusta a posicao inicial
-			expr->line = line;
-			expr->column = column;
+				// Ajusta a posicao inicial
+				expr->line = line;
+				expr->column = column;
 
-			// Consome ')'
-			parser->expectToken(TokenSubType_e::RParBracket);
+				// Consome ')'
+				parser->expectToken(TokenType_e::RParBracket);
+			} else {
+				parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
+				// Consome ')'
+				parser->expectToken(TokenType_e::RParBracket);
+			}
 			return expr;
+		}
+
+		// Processa declaracao de array.
+		if (parser->isLeftSquBracket())
+		{
+			auto arrayIniDecl = !skipOnly ? std::make_unique<ast::ExpressionArrayInitDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			) : nullptr;
+
+			// Consome '['
+			parser->expectToken(TokenType_e::LSquBracket);
+
+			while (true)
+			{
+				if (parser->isRightSquBracket())
+				{
+					break;
+				}
+
+				// Consome elemento
+				if (!skipOnly) {
+					arrayIniDecl->arrayElementDeclList.push_back(parseExpression(parser, OperatorPrecLevel_e::Interrogation, skipOnly));
+				} else {
+					parseExpression(parser, OperatorPrecLevel_e::Interrogation, skipOnly);
+				}
+
+				if (parser->isComma())
+				{
+					parser->expectToken(TokenType_e::Comma);
+				}
+			}
+
+			// Consome ']'
+			parser->expectToken(TokenType_e::RSquBracket);
+
+			return arrayIniDecl;
 		}
 
 		// Processa declaracao de funcao anonima.
@@ -548,92 +521,16 @@ namespace fluffy { namespace parser_objects {
 			// Quebra token.
 			if (parser->isLogicalOr())
 			{
-				parser->reinterpretToken(TokenType_e::Symbol, TokenSubType_e::BitWiseOr, 1);
+				parser->reinterpretToken(TokenType_e::BitWiseOr, 1);
 			}
 
-			// Processa superficialmente.
-			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::BitWiseOr);
-				if (parser->isIdentifier()) {
-					if (parser->parseNextToken().subType == TokenSubType_e::Colon)
-					{
-						auto identifier = parser->expectIdentifier();
-						parser->expectToken(TokenSubType_e::Colon);
-
-						// Parametro nao podem ter tipo nulo.
-						if (ParserObjectTypeDecl::parse(parser)->typeID == TypeDeclID_e::Void)
-						{
-							throw exceptions::custom_exception(
-								"Parameter '%s' can't have void type",
-								parser->getTokenLine(),
-								parser->getTokenColumn(),
-								identifier.c_str()
-							);
-						}
-
-						while (true)
-						{
-							if (parser->isBitWiseOr())
-							{
-								break;
-							}
-							parser->expectToken(TokenSubType_e::Comma);
-
-							auto identifierDecl = parser->expectIdentifier();
-
-							parser->expectToken(TokenSubType_e::Colon);
-
-							// Parametro nao podem ter tipo nulo.
-							if (ParserObjectTypeDecl::parse(parser)->typeID == TypeDeclID_e::Void)
-							{
-								throw exceptions::custom_exception(
-									"Parameter '%s' can't have void type",
-									parser->getTokenLine(),
-									parser->getTokenColumn(),
-									identifier.c_str()
-								);
-							}
-						}
-					} else {
-						parser->expectIdentifier();
-
-						while (true)
-						{
-							if (parser->isBitWiseOr())
-							{
-								break;
-							}
-
-							// Consome ','
-							parser->expectToken(TokenSubType_e::Comma);
-							parser->expectIdentifier();
-						}
-					}
-				}
-
-				// Consome '|'
-				parser->expectToken(TokenSubType_e::BitWiseOr);
-
-				// Verifica se o tipo de retorno e explicito.
-				if (parser->isArrow()) {
-					// Consome '->'
-					parser->expectToken(TokenSubType_e::Arrow);
-					ParserObjectTypeDecl::parse(parser);
-				}
-
-				// Consome bloco.
-				ParserObjectBlockDecl::skip(parser);
-
-				return nullptr;
-			}
-
-			auto functionDecl = std::make_unique<ExpressionFunctionDecl>(
+			auto functionDecl = !skipOnly ? std::make_unique<ExpressionFunctionDecl>(
 				line,
 				column
-			);
+			) : nullptr;
 
 			// Consome '|'
-			parser->expectToken(TokenSubType_e::BitWiseOr);
+			parser->expectToken(TokenType_e::BitWiseOr);
 
 			// Uma funcao anonima pode ter parametros tipados ou nao, depende do contexto.
 			// Por exemplo se a funcao esta sendo passada como parametro, seus tipos podem ser
@@ -643,7 +540,7 @@ namespace fluffy { namespace parser_objects {
 			// ou constate onde o tipo e omitido, logo, nao se poderia fazer a deducao.
 
 			if (parser->isIdentifier()) {
-				if (parser->parseNextToken().subType == TokenSubType_e::Colon)
+				if (parser->parseNextToken().type == TokenType_e::Colon)
 				{
 					// Processa o restante do parametros se houver.
 					while (true)
@@ -654,38 +551,57 @@ namespace fluffy { namespace parser_objects {
 						}
 
 					parseParamterDecl:
-						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+						auto paramDecl = !skipOnly ? std::make_unique<ExpressionFunctionParameterDecl>(
 							parser->getTokenLine(),
 							parser->getTokenColumn()
-						);
+						) : nullptr;
 
 						// Consome identificador.
-						paramDecl->identifierDecl = parser->expectIdentifier();
-
-						// Consome ':'
-						parser->expectToken(TokenSubType_e::Colon);
-
-						// Consome o tipo do parametro.
-						paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
-
-						// Parametro nao podem ter tipo nulo.
-						if (paramDecl->typeDecl->typeID == TypeDeclID_e::Void)
-						{
-							throw exceptions::custom_exception(
-								"Parameter '%s' can't have void type",
-								parser->getTokenLine(),
-								parser->getTokenColumn(),
-								paramDecl->identifierDecl.c_str()
-							);
+						if (!skipOnly) {
+							paramDecl->identifier = parser->expectIdentifier();
+						} else {
+							parser->expectIdentifier();
 						}
 
-						// Adiciona o parametro a lista
-						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+						// Consome ellipsis
+						if (parser->isEllipsis()) {
+							if (!skipOnly) {
+								paramDecl->isEllipsis = true;
+							}
+							parser->expectToken(TokenType_e::Ellipsis);
+							goto parseFunctionRetOrBody;
+						}
+
+						// Consome ':'
+						parser->expectToken(TokenType_e::Colon);
+
+						// Consome o tipo do parametro.
+						if (!skipOnly) {
+							paramDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
+						} else {
+							ParserObjectTypeDecl::skip(parser);
+						}
+
+						// Parametro nao podem ter tipo nulo.
+						if (!skipOnly) {
+							if (paramDecl->typeDecl->typeID == TypeDeclID_e::Void)
+							{
+								throw exceptions::custom_exception(
+									"Parameter '%s' can't have void type",
+									parser->getTokenLine(),
+									parser->getTokenColumn(),
+									paramDecl->identifier.str()
+								);
+							}
+
+							// Adiciona o parametro a lista
+							functionDecl->parametersDecl.push_back(std::move(paramDecl));
+						}
 
 						// Consome ','
 						if (parser->isComma())
 						{
-							parser->expectToken(TokenSubType_e::Comma);
+							parser->expectToken(TokenType_e::Comma);
 							goto parseParamterDecl;
 						}
 
@@ -697,21 +613,43 @@ namespace fluffy { namespace parser_objects {
 						throw exceptions::unexpected_with_possibilities_token_exception(
 							parser->getTokenValue(),
 							{
+								TokenType_e::Comma,
+								TokenType_e::BitWiseOr
 							},
 							parser->getTokenLine(),
 							parser->getTokenColumn()
 						);
 					}
 				} else {
-					auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+					// Atribui nivel de inferencia.
+					if (!skipOnly) {
+						functionDecl->inferenceType = InferenceType_e::OnlyParams;
+					}
+
+					auto paramDecl = !skipOnly ? std::make_unique<ExpressionFunctionParameterDecl>(
 						parser->getTokenLine(),
 						parser->getTokenColumn()
-					);
+					) : nullptr;
 
-					paramDecl->identifierDecl = parser->expectIdentifier();
+					if (!skipOnly) {
+						paramDecl->identifier = parser->expectIdentifier();
+					} else {
+						parser->expectIdentifier();
+					}
+
+					// Consome ellipsis
+					if (parser->isEllipsis()) {
+						if (!skipOnly) {
+							paramDecl->isEllipsis = true;
+						}
+						parser->expectToken(TokenType_e::Ellipsis);
+						goto parseFunctionRetOrBody;
+					}
 
 					// Adiciona o parametro a lista
-					functionDecl->parametersDecl.push_back(std::move(paramDecl));
+					if (!skipOnly) {
+						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+					}
 
 					// Processa o restante do parametros se houver.
 					while (true)
@@ -722,39 +660,69 @@ namespace fluffy { namespace parser_objects {
 						}
 
 						// Consome ','
-						parser->expectToken(TokenSubType_e::Comma);
+						parser->expectToken(TokenType_e::Comma);
 
-						auto paramDecl = std::make_unique<ExpressionFunctionParameterDecl>(
+						auto paramDecl = !skipOnly ? std::make_unique<ExpressionFunctionParameterDecl>(
 							parser->getTokenLine(),
 							parser->getTokenColumn()
-						);
+						) : nullptr;
 
-						paramDecl->identifierDecl = parser->expectIdentifier();
+						if (!skipOnly) {
+							paramDecl->identifier = parser->expectIdentifier();
+						} else {
+							parser->expectIdentifier();
+						}
 
-						// Adiciona o parametro a lista
-						functionDecl->parametersDecl.push_back(std::move(paramDecl));
+						// Consome ellipsis
+						if (parser->isEllipsis()) {
+							if (!skipOnly) {
+								paramDecl->isEllipsis = true;
+								functionDecl->parametersDecl.push_back(std::move(paramDecl));
+							}
+							parser->expectToken(TokenType_e::Ellipsis);
+							goto parseFunctionRetOrBody;
+						}
 					}
 				}
 			}
 
+		parseFunctionRetOrBody:
+
 			// Consome '|'
-			parser->expectToken(TokenSubType_e::BitWiseOr);
+			parser->expectToken(TokenType_e::BitWiseOr);
 
 			// Verifica se o tipo de retorno e explicito.
 			if (parser->isArrow()) {
 				// Consome '->'
-				parser->expectToken(TokenSubType_e::Arrow);
+				parser->expectToken(TokenType_e::Arrow);
 
-				functionDecl->returnTypeDecl = ParserObjectTypeDecl::parse(parser);
+				if (!skipOnly) {
+					functionDecl->returnTypeDecl = ParserObjectTypeDecl::parse(parser);
+				} else {
+					ParserObjectTypeDecl::skip(parser);
+				}
 			} else {
-				functionDecl->returnTypeDecl = std::make_unique<ast::TypeDeclVoid>(
-					parser->getTokenLine(),
-					parser->getTokenColumn()
-				);
+				// Atribui nivel de inferencia.
+				if (!skipOnly) {
+					if (functionDecl->inferenceType == InferenceType_e::OnlyParams)	{
+						functionDecl->inferenceType = InferenceType_e::Full;
+					} else {
+						functionDecl->inferenceType = InferenceType_e::OnlyReturn;
+					}
+
+					functionDecl->returnTypeDecl = std::make_unique<ast::TypeDeclVoid>(
+						parser->getTokenLine(),
+						parser->getTokenColumn()
+					);
+				}
 			}
 
 			// Consome bloco.
-			functionDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+			if (!skipOnly) {
+				functionDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
+			} else {
+				ParserObjectBlockDecl::parse(parser, skipOnly);
+			}
 
 			return functionDecl;
 		}
@@ -762,86 +730,47 @@ namespace fluffy { namespace parser_objects {
 		// Processa new.
 		if (parser->isNew())
 		{
-			if (skipOnly)
-			{
-				parser->expectToken(TokenSubType_e::New);
-				ParserObjectTypeDecl::skip(parser);
-				parser->expectToken(TokenSubType_e::LParBracket);
-				ParserObjectExpressionDecl::skip(parser);
-				parser->expectToken(TokenSubType_e::RParBracket);
-				if (parser->isLeftBracket())
-				{
-					parser->expectToken(TokenSubType_e::LBracket);
-					while (true)
-					{
-						if (parser->isRightBracket())
-						{
-							break;
-						}
-
-					parserItemLabelSkip:
-						parser->expectIdentifier();
-						parser->expectToken(TokenSubType_e::Colon);
-						ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
-
-						// Verifica se existem mais itens.
-						if (parser->isComma())
-						{
-							// Consome ','
-							parser->expectToken(TokenSubType_e::Comma);
-							goto parserItemLabelSkip;
-						}
-
-						if (parser->isRightBracket())
-						{
-							break;
-						}
-
-						throw exceptions::unexpected_with_possibilities_token_exception(
-							parser->getTokenValue(),
-							{
-								TokenSubType_e::Comma,
-								TokenSubType_e::RBracket
-							},
-							parser->getTokenLine(),
-							parser->getTokenColumn()
-						);
-					}
-					parser->expectToken(TokenSubType_e::RBracket);
-				}
-				return nullptr;
-			}
-
-			auto newDecl = std::make_unique<ast::ExpressionNewDecl>(
+			auto newDecl = !skipOnly ? std::make_unique<ast::ExpressionNewDecl>(
 				parser->getTokenLine(),
 				parser->getTokenColumn()
-			);
+			) : nullptr;
 
 			// Consome 'new'
-			parser->expectToken(TokenSubType_e::New);
+			parser->expectToken(TokenType_e::New);
 
 			// Consome o tipo.
-			newDecl->objectTypeDecl = ParserObjectTypeDecl::parse(parser);
+			if (!skipOnly) {
+				newDecl->objectTypeDecl = ParserObjectTypeDecl::parse(parser);
+			} else {
+				ParserObjectTypeDecl::skip(parser);
+			}
 
 			// Consome '('
-			parser->expectToken(TokenSubType_e::LParBracket);
+			parser->expectToken(TokenType_e::LParBracket);
 
 			// Consome expressao no caso os parametros passados para o construtor.
-			newDecl->expressionDecl = ParserObjectExpressionDecl::parse(parser);
+			if (!parser->isRightParBracket())
+			{
+				if (!skipOnly) {
+					newDecl->expressionDecl = ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+				} else {
+					ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+				}
+			}
 
 			// Consome ')'
-			parser->expectToken(TokenSubType_e::RParBracket);
+			parser->expectToken(TokenType_e::RParBracket);
 
 			// Processa o bloco de inicio.
 			if (parser->isLeftBracket())
 			{
 				// Consome '{'
-				parser->expectToken(TokenSubType_e::LBracket);
+				parser->expectToken(TokenType_e::LBracket);
 
-				newDecl->objectInitBlockDecl = std::make_unique<ast::ExpressionNewBlockDecl>(
+				newDecl->objectInitBlockDecl = !skipOnly ? std::make_unique<ast::ExpressionNewBlockDecl>(
 					parser->getTokenLine(),
 					parser->getTokenColumn()
-				);
+				) : nullptr;
 
 				while (true)
 				{
@@ -850,50 +779,46 @@ namespace fluffy { namespace parser_objects {
 						break;
 					}
 
-				parserItemLabel:
-					auto itemDecl = std::make_unique<ExpressionNewItemDecl>(
+					auto itemDecl = !skipOnly ? std::make_unique<ExpressionNewItemDecl>(
 						parser->getTokenLine(),
 						parser->getTokenColumn()
-					);
+					) : nullptr;
 
 					// Processa identificador.
-					itemDecl->identifier = parser->expectIdentifier();
+					if (!skipOnly) {
+						itemDecl->identifier = parser->expectIdentifier();
+					} else {
+						parser->expectIdentifier();
+					}
 
 					// Consome ':'
-					parser->expectToken(TokenSubType_e::Colon);
+					if (parser->isColon())
+					{
+						parser->expectToken(TokenType_e::Colon);
 
-					// Consome expressao.
-					itemDecl->expressionDecl = ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
+						// Consome expressao.
+						if (!skipOnly) {
+							itemDecl->expressionDecl = ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
+						} else {
+							ParserObjectExpressionDecl::parseExpression(parser, OperatorPrecLevel_e::EnumExpr, skipOnly);
+						}
+					}
 
 					// Adiciona item ao bloco.
-					newDecl->objectInitBlockDecl->itemDeclList.push_back(std::move(itemDecl));
+					if (!skipOnly) {
+						newDecl->objectInitBlockDecl->itemDeclList.push_back(std::move(itemDecl));
+					}
 
 					// Verifica se existem mais itens.
 					if (parser->isComma())
 					{
 						// Consome ','
-						parser->expectToken(TokenSubType_e::Comma);
-						goto parserItemLabel;
+						parser->expectToken(TokenType_e::Comma);
 					}
-
-					if (parser->isRightBracket())
-					{
-						break;
-					}
-
-					throw exceptions::unexpected_with_possibilities_token_exception(
-						parser->getTokenValue(),
-						{
-							TokenSubType_e::Comma,
-							TokenSubType_e::RBracket
-						},
-						parser->getTokenLine(),
-						parser->getTokenColumn()
-					);
 				}
 
 				// Consome '}'
-				parser->expectToken(TokenSubType_e::RBracket);
+				parser->expectToken(TokenType_e::RBracket);
 			}
 			return newDecl;
 		}
@@ -903,12 +828,12 @@ namespace fluffy { namespace parser_objects {
 		{
 			// Processa superficialmente.
 			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::This);
+				parser->expectToken(TokenType_e::This);
 				return nullptr;
 			}
 
 			// Consome 'this'
-			parser->expectToken(TokenSubType_e::This);
+			parser->expectToken(TokenType_e::This);
 
 			return std::make_unique<ExpressionThisDecl>(line,column);
 		}
@@ -918,12 +843,12 @@ namespace fluffy { namespace parser_objects {
 		{
 			// Processa superficialmente.
 			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::Super);
+				parser->expectToken(TokenType_e::Super);
 				return nullptr;
 			}
 
 			// Consome 'super'
-			parser->expectToken(TokenSubType_e::Super);
+			parser->expectToken(TokenType_e::Super);
 
 			return std::make_unique<ExpressionSuperDecl>(line, column);
 		}
@@ -933,12 +858,12 @@ namespace fluffy { namespace parser_objects {
 		{
 			// Processa superficialmente.
 			if (skipOnly) {
-				parser->expectToken(TokenSubType_e::Null);
+				parser->expectToken(TokenType_e::Null);
 				return nullptr;
 			}
 
 			// Consome 'null'
-			parser->expectToken(TokenSubType_e::Null);
+			parser->expectToken(TokenType_e::Null);
 
 			return std::make_unique<ExpressionConstantNullDecl>(line, column);
 		}
@@ -946,82 +871,40 @@ namespace fluffy { namespace parser_objects {
 		// Processa superficialmente.
 		if (skipOnly) {
 			// Processa algumas constantes
-			switch (parser->getTokenSubType())
+			switch (parser->getTokenType())
 			{
-			case TokenSubType_e::False:
-			case TokenSubType_e::True:
+			case TokenType_e::False:
+			case TokenType_e::True:
 				{
 					parser->nextToken();
 					return nullptr;
 				}
 				break;
-			case TokenSubType_e::ConstantI8:
+			case TokenType_e::ConstantInteger:
 				{
-					parser->expectConstantI8();
+					parser->expectConstantInteger();
 					return nullptr;
 				}
 				break;
-			case TokenSubType_e::ConstantU8:
-				{
-					parser->expectConstantU8();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantI16:
-				{
-					parser->expectConstantI16();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantU16:
-				{
-					parser->expectConstantU16();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantI32:
-				{
-					parser->expectConstantI32();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantU32:
-				{
-					parser->expectConstantU32();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantI64:
-				{
-					parser->expectConstantI64();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantU64:
-				{
-					parser->expectConstantU64();
-					return nullptr;
-				}
-				break;
-			case TokenSubType_e::ConstantFp32:
+			case TokenType_e::ConstantFp32:
 				{
 					parser->expectConstantFp32();
 					return nullptr;
 				}
 				break;
-			case TokenSubType_e::ConstantFp64:
+			case TokenType_e::ConstantFp64:
 				{
 					parser->expectConstantFp64();
 					return nullptr;
 				}
 				break;
-			case TokenSubType_e::ConstantString:
+			case TokenType_e::ConstantString:
 				{
 					parser->expectConstantString();
 					return nullptr;
 				}
 				break;
-			case TokenSubType_e::ConstantChar:
+			case TokenType_e::ConstantChar:
 				{
 					parser->expectConstantChar();
 					return nullptr;
@@ -1034,7 +917,7 @@ namespace fluffy { namespace parser_objects {
 			// Resolucao de escopo unaria, indica acesso ao escopo global.
 			if (parser->isScopeResolution())
 			{
-				parser->expectToken(TokenSubType_e::ScopeResolution);
+				parser->expectToken(TokenType_e::ScopeResolution);
 				parser->expectIdentifier();
 				return nullptr;
 			}
@@ -1054,82 +937,26 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Processa algumas constantes
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::False:
-		case TokenSubType_e::True:
+		case TokenType_e::False:
+		case TokenType_e::True:
 			{
 				auto constantBoolDecl = std::make_unique<ExpressionConstantBoolDecl>(line, column);
-				constantBoolDecl->valueDecl = parser->getTokenSubType() == TokenSubType_e::True ? true : false;
+				constantBoolDecl->valueDecl = parser->getTokenType() == TokenType_e::True ? true : false;
 				parser->nextToken();
 				return constantBoolDecl;
 			}
 			break;
-		case TokenSubType_e::ConstantI8:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::I8;
-				constantIntegerDecl->valueDecl = parser->expectConstantI8();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantU8:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::U8;
-				constantIntegerDecl->valueDecl = parser->expectConstantU8();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantI16:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::I16;
-				constantIntegerDecl->valueDecl = parser->expectConstantI16();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantU16:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::U16;
-				constantIntegerDecl->valueDecl = parser->expectConstantU16();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantI32:
+		case TokenType_e::ConstantInteger:
 			{
 				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
 				constantIntegerDecl->valueType = TypeDeclID_e::I32;
-				constantIntegerDecl->valueDecl = parser->expectConstantI32();
+				constantIntegerDecl->valueDecl = parser->expectConstantInteger();
 				return constantIntegerDecl;
 			}
 			break;
-		case TokenSubType_e::ConstantU32:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::U32;
-				constantIntegerDecl->valueDecl = parser->expectConstantU32();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantI64:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::I64;
-				constantIntegerDecl->valueDecl = parser->expectConstantI64();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantU64:
-			{
-				auto constantIntegerDecl = std::make_unique<ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::U64;
-				constantIntegerDecl->valueDecl = parser->expectConstantU64();
-				return constantIntegerDecl;
-			}
-			break;
-		case TokenSubType_e::ConstantFp32:
+		case TokenType_e::ConstantFp32:
 			{
 				auto constantRealDecl = std::make_unique<ExpressionConstantRealDecl>(line, column);
 				constantRealDecl->valueType = TypeDeclID_e::Fp32;
@@ -1137,7 +964,7 @@ namespace fluffy { namespace parser_objects {
 				return constantRealDecl;
 			}
 			break;
-		case TokenSubType_e::ConstantFp64:
+		case TokenType_e::ConstantFp64:
 			{
 				auto constantRealDecl = std::make_unique<ExpressionConstantRealDecl>(line, column);
 				constantRealDecl->valueType = TypeDeclID_e::Fp64;
@@ -1145,14 +972,14 @@ namespace fluffy { namespace parser_objects {
 				return constantRealDecl;
 			}
 			break;
-		case TokenSubType_e::ConstantString:
+		case TokenType_e::ConstantString:
 			{
 				auto constantStringDecl = std::make_unique<ExpressionConstantStringDecl>(line, column);
 				constantStringDecl->valueDecl = parser->expectConstantString();
 				return constantStringDecl;
 			}
 			break;
-		case TokenSubType_e::ConstantChar:
+		case TokenType_e::ConstantChar:
 			{
 				auto constantCharDecl = std::make_unique<ExpressionConstantCharDecl>(line, column);
 				constantCharDecl->valueDecl = parser->expectConstantChar();
@@ -1167,7 +994,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isScopeResolution())
 		{
 			// Consome '::'
-			parser->expectToken(TokenSubType_e::ScopeResolution);
+			parser->expectToken(TokenType_e::ScopeResolution);
 
 			auto namedExpressionDecl = std::make_unique<ExpressionConstantIdentifierDecl>(
 				parser->getTokenLine(),

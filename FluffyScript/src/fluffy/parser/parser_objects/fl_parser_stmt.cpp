@@ -6,59 +6,54 @@ namespace fluffy { namespace parser_objects {
 	 * ParserObjectStmtDecl
 	 */
 
-	StmtDeclPtr ParserObjectStmtDecl::parse(Parser* parser)
+	StmtDeclPtr ParserObjectStmtDecl::parse(Parser* parser, Bool skipOnly)
 	{
-		return parseStmt(parser, false);
-	}
-
-	StmtDeclPtr ParserObjectStmtDecl::skip(Parser* parser)
-	{
-		return parseStmt(parser, true);
+		return parseStmt(parser, skipOnly);
 	}
 
 	StmtDeclPtr ParserObjectStmtDecl::parseStmt(Parser* parser, Bool skipOnly) 
 	{
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::If:
+		case TokenType_e::If:
 			{
 				// Verifica se e um 'if' ou um 'if let'.
-				if (parser->parseNextToken().subType == TokenSubType_e::Let)
+				if (parser->parseNextToken().type == TokenType_e::Let)
 				{
 					return parseIfLet(parser, skipOnly);
 				}
 				return parseIf(parser, skipOnly);
 			}
 			break;
-		case TokenSubType_e::For:
+		case TokenType_e::For:
 			return parseFor(parser, skipOnly);
-		case TokenSubType_e::While:
+		case TokenType_e::While:
 			return parseWhile(parser, skipOnly);
-		case TokenSubType_e::Do:
+		case TokenType_e::Do:
 			return parseDoWhile(parser, skipOnly);
-		case TokenSubType_e::Match:
+		case TokenType_e::Match:
 			return parseMatch(parser, skipOnly);
-		case TokenSubType_e::Return:
+		case TokenType_e::Return:
 			return parseReturn(parser, skipOnly);
-		case TokenSubType_e::Continue:
+		case TokenType_e::Continue:
 			return parseContinue(parser, skipOnly);
-		case TokenSubType_e::Break:
+		case TokenType_e::Break:
 			return parseBreak(parser, skipOnly);
-		case TokenSubType_e::Goto:
+		case TokenType_e::Goto:
 			return parseGoto(parser, skipOnly);
-		case TokenSubType_e::Try:
+		case TokenType_e::Try:
 			return parseTry(parser, skipOnly);
-		case TokenSubType_e::Panic:
+		case TokenType_e::Panic:
 			return parsePanic(parser, skipOnly);
-		case TokenSubType_e::Let:
-		case TokenSubType_e::Const:
+		case TokenType_e::Let:
+		case TokenType_e::Const:
 			return parseVariable(parser, skipOnly);
 		default:	// Label, Expr
 			{
 				// Parse label.
 				if (parser->isIdentifier())
 				{
-					if (parser->parseNextToken().subType == TokenSubType_e::Colon)
+					if (parser->parseNextToken().type == TokenType_e::Colon)
 					{
 						return parseLabel(parser, skipOnly);
 					}
@@ -74,11 +69,11 @@ namespace fluffy { namespace parser_objects {
 	{
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::If);
-			ParserObjectExpressionDecl::skip(parser);
+			parser->expectToken(TokenType_e::If);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 			if (parser->isElse()) {
-				parser->expectToken(TokenSubType_e::Else);
-				ParserObjectBlockDecl::skip(parser);
+				parser->expectToken(TokenType_e::Else);
+				ParserObjectBlockDecl::parse(parser, skipOnly);
 			}
 			return nullptr;
 		}
@@ -89,22 +84,22 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'if'.
-		parser->expectToken(TokenSubType_e::If);
+		parser->expectToken(TokenType_e::If);
 
 		// Consome expressao.
-		ifDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser);
+		ifDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome o block if.
-		ifDecl->ifBlockDecl = ParserObjectBlockDecl::parse(parser);
+		ifDecl->ifBlockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 		// Verifica se existe o bloco else.
 		if (parser->isElse())
 		{
 			// Consome 'else'.
-			parser->expectToken(TokenSubType_e::Else);
+			parser->expectToken(TokenType_e::Else);
 
 			// Consome o block else.
-			ifDecl->elseBlockDecl = ParserObjectBlockDecl::parse(parser);
+			ifDecl->elseBlockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 		}
 
 		return ifDecl;
@@ -114,13 +109,15 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::If);
-			parser->expectToken(TokenSubType_e::Let);
-			ParserObjectPatternDecl::skip(parser);
-			ParserObjectBlockDecl::skip(parser);
+			parser->expectToken(TokenType_e::If);
+			parser->expectToken(TokenType_e::Let);
+			ParserObjectPatternDecl::parse(parser, skipOnly);
+			parser->expectToken(TokenType_e::Assign);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
 			if (parser->isElse()) {
-				parser->expectToken(TokenSubType_e::Else);
-				ParserObjectBlockDecl::skip(parser);
+				parser->expectToken(TokenType_e::Else);
+				ParserObjectBlockDecl::parse(parser, skipOnly);
 			}
 			return nullptr;
 		}
@@ -131,27 +128,32 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'if'.
-		parser->expectToken(TokenSubType_e::If);
+		parser->expectToken(TokenType_e::If);
 
 		// Consome 'let'.
-		parser->expectToken(TokenSubType_e::Let);
+		parser->expectToken(TokenType_e::Let);
+
+		// Consome pattern.
+		ifLefDecl->patternDecl = ParserObjectPatternDecl::parse(parser, skipOnly);
+
+		// Consome '='.
+		parser->expectToken(TokenType_e::Assign);
 
 		// Consome expressao.
-		ifLefDecl->patternDecl = ParserObjectPatternDecl::parse(parser);
+		ifLefDecl->expressionDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome o block if.
-		ifLefDecl->ifBlockDecl = ParserObjectBlockDecl::parse(parser);
+		ifLefDecl->ifBlockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 		// Verifica se existe o bloco else.
 		if (parser->isElse())
 		{
 			// Consome 'else'.
-			parser->expectToken(TokenSubType_e::Else);
+			parser->expectToken(TokenType_e::Else);
 
 			// Consome o block else.
-			ifLefDecl->elseBlockDecl = ParserObjectBlockDecl::parse(parser);
+			ifLefDecl->elseBlockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 		}
-
 		return ifLefDecl;
 	}
 
@@ -159,20 +161,20 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::For);
+			parser->expectToken(TokenType_e::For);
 			if (parser->isLet())
 			{
 				parser->expectIdentifier();
-				parser->expectToken(TokenSubType_e::Assign);
-				ParserObjectExpressionDecl::skip(parser);
+				parser->expectToken(TokenType_e::Assign);
+				ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 			} else {
-				ParserObjectExpressionDecl::skip(parser);
+				ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 			}
-			parser->expectToken(TokenSubType_e::SemiColon);
-			ParserObjectExpressionDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::SemiColon);
-			ParserObjectExpressionDecl::skip(parser);
-			ParserObjectBlockDecl::skip(parser);
+			parser->expectToken(TokenType_e::SemiColon);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			parser->expectToken(TokenType_e::SemiColon);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
 			return nullptr;
 		}
 
@@ -182,7 +184,7 @@ namespace fluffy { namespace parser_objects {
 		);
 		
 		// Consome 'for'.
-		parser->expectToken(TokenSubType_e::For);
+		parser->expectToken(TokenType_e::For);
 
 		// Verifica se e uma expressao e inicilizacao.
 		if (parser->isLet())
@@ -196,29 +198,29 @@ namespace fluffy { namespace parser_objects {
 			forDecl->initStmtDecl->identifier = parser->expectIdentifier();
 
 			// Consome '='.
-			parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenType_e::Assign);
 
 			// Consome expressao.
-			forDecl->initStmtDecl->initExpression = ParserObjectExpressionDecl::parse(parser);
+			forDecl->initStmtDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 		} else {
 			// Consome expressao.
-			forDecl->initExprDecl = ParserObjectExpressionDecl::parse(parser);
+			forDecl->initExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 		}
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		// Consome expressao.
-		forDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser);
+		forDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		// Consome expressao.
-		forDecl->updateExprDecl = ParserObjectExpressionDecl::parse(parser);
+		forDecl->updateExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome bloco.
-		forDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		forDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 		return forDecl;
 	}
@@ -227,9 +229,9 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::While);
-			ParserObjectExpressionDecl::skip(parser);
-			ParserObjectBlockDecl::skip(parser);
+			parser->expectToken(TokenType_e::While);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
 			return nullptr;
 		}
 
@@ -239,13 +241,13 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'while'.
-		parser->expectToken(TokenSubType_e::While);
+		parser->expectToken(TokenType_e::While);
 
 		// Consome expressao
-		whileDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser);
+		whileDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome bloco.
-		whileDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		whileDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 		return whileDecl;
 	}
@@ -254,10 +256,10 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Do);
-			ParserObjectBlockDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::While);
-			ParserObjectExpressionDecl::skip(parser);
+			parser->expectToken(TokenType_e::Do);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
+			parser->expectToken(TokenType_e::While);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 			return nullptr;
 		}
 
@@ -267,19 +269,19 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'do'.
-		parser->expectToken(TokenSubType_e::Do);
+		parser->expectToken(TokenType_e::Do);
 
 		// Consome bloco.
-		doWhileDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		doWhileDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 		// Consome 'while'.
-		parser->expectToken(TokenSubType_e::While);
+		parser->expectToken(TokenType_e::While);
 
 		// Consome expressao
-		doWhileDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser);
+		doWhileDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return doWhileDecl;
 	}
@@ -288,9 +290,9 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Match);
-			ParserObjectExpressionDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::LBracket);
+			parser->expectToken(TokenType_e::Match);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			parser->expectToken(TokenType_e::LBracket);
 			while (true)
 			{
 				if (parser->isRightBracket())
@@ -299,11 +301,16 @@ namespace fluffy { namespace parser_objects {
 				}
 
 			parsePatternlabelSkip:
-				parser->expectToken(TokenSubType_e::When);
-				ParserObjectPatternDecl::skip(parser);
+				parser->expectToken(TokenType_e::When);
+				ParserObjectPatternDecl::parse(parser, skipOnly);
+				parser->expectToken(TokenType_e::Arrow);
+				ParserObjectBlockDecl::parse(parser, skipOnly);
 				if (parser->isComma())
 				{
-					parser->expectToken(TokenSubType_e::Comma);
+					parser->expectToken(TokenType_e::Comma);
+					if (parser->isRightBracket()) {
+						break;
+					}
 					goto parsePatternlabelSkip;
 				}
 				if (parser->isRightBracket())
@@ -313,15 +320,15 @@ namespace fluffy { namespace parser_objects {
 				throw exceptions::unexpected_with_possibilities_token_exception(
 					parser->getTokenValue(),
 					{
-						TokenSubType_e::When,
-						TokenSubType_e::Comma,
-						TokenSubType_e::RBracket
+						TokenType_e::When,
+						TokenType_e::Comma,
+						TokenType_e::RBracket
 					},
 					parser->getTokenLine(),
 					parser->getTokenColumn()
 				);
 			}
-			parser->expectToken(TokenSubType_e::RBracket);
+			parser->expectToken(TokenType_e::RBracket);
 			return nullptr;
 		}
 
@@ -331,13 +338,13 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'match'.
-		parser->expectToken(TokenSubType_e::Match);
+		parser->expectToken(TokenType_e::Match);
 
 		// Consome expressao.
-		matchDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser);
+		matchDecl->conditionExprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -347,17 +354,35 @@ namespace fluffy { namespace parser_objects {
 			}
 
 		parsePatternlabel:
+			auto whenDecl = std::make_unique<ast::MatchWhenDecl>(
+				parser->getTokenLine(),
+				parser->getTokenColumn()
+			);
 
 			// Consome 'when'.
-			parser->expectToken(TokenSubType_e::When);
+			parser->expectToken(TokenType_e::When);
 
 			// Consome pattern.
-			matchDecl->patternList.push_back(ParserObjectPatternDecl::parse(parser));
+			whenDecl->patternDecl = ParserObjectPatternDecl::parse(parser, skipOnly);
+
+			// Consome '->'.
+			parser->expectToken(TokenType_e::Arrow);
+
+			// Consome bloco.
+			whenDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
+
+			// Adiciona a declaracao when a lista.
+			matchDecl->whenDeclList.push_back(std::move(whenDecl));
 
 			if (parser->isComma())
 			{
 				// Consome ','
-				parser->expectToken(TokenSubType_e::Comma);
+				parser->expectToken(TokenType_e::Comma);
+
+				// Se for '}' sai do loop.
+				if (parser->isRightBracket()) {
+					break;
+				}
 				goto parsePatternlabel;
 			}
 
@@ -369,9 +394,8 @@ namespace fluffy { namespace parser_objects {
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
 				{
-					TokenSubType_e::When,
-					TokenSubType_e::Comma,
-					TokenSubType_e::RBracket
+					TokenType_e::Comma,
+					TokenType_e::RBracket
 				},
 				parser->getTokenLine(),
 				parser->getTokenColumn()
@@ -379,7 +403,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return matchDecl;
 	}
@@ -388,9 +412,9 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Return);
-			ParserObjectExpressionDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::Return);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -400,13 +424,13 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'return'.
-		parser->expectToken(TokenSubType_e::Return);
+		parser->expectToken(TokenType_e::Return);
 
 		// Consome bloco.
-		returnDecl->exprDecl = ParserObjectExpressionDecl::parse(parser);
+		returnDecl->exprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return returnDecl;
 	}
@@ -415,8 +439,8 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Continue);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::Continue);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -426,10 +450,10 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'continue'.
-		parser->expectToken(TokenSubType_e::Continue);
+		parser->expectToken(TokenType_e::Continue);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return continueDecl;
 	}
@@ -438,8 +462,8 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Break);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::Break);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -449,10 +473,10 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'break'.
-		parser->expectToken(TokenSubType_e::Break);
+		parser->expectToken(TokenType_e::Break);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return continueDecl;
 	}
@@ -461,8 +485,8 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Goto);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::Goto);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -472,13 +496,13 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'goto'.
-		parser->expectToken(TokenSubType_e::Goto);
+		parser->expectToken(TokenType_e::Goto);
 
 		// Consome identificador.
 		gotoDecl->labelIdentifier = parser->expectIdentifier();
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return gotoDecl;
 	}
@@ -488,7 +512,7 @@ namespace fluffy { namespace parser_objects {
 		if (skipOnly)
 		{
 			parser->expectIdentifier();
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 			return nullptr;
 		}
 
@@ -501,7 +525,7 @@ namespace fluffy { namespace parser_objects {
 		labelDecl->identifier = parser->expectIdentifier();
 
 		// Consome ':'.
-		parser->expectToken(TokenSubType_e::Colon);
+		parser->expectToken(TokenType_e::Colon);
 
 		return labelDecl;
 	}
@@ -510,20 +534,20 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Do);
-			ParserObjectBlockDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::Catch);
-			ParserObjectTypeDecl::skip(parser);
+			parser->expectToken(TokenType_e::Do);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
+			parser->expectToken(TokenType_e::Catch);
+			ParserObjectTypeDecl::parse(parser);
 			parser->expectIdentifier();
-			ParserObjectBlockDecl::skip(parser);
+			ParserObjectBlockDecl::parse(parser, skipOnly);
 			while (true)
 			{
 				if (parser->isCatch())
 				{
-					parser->expectToken(TokenSubType_e::Catch);
-					ParserObjectTypeDecl::skip(parser);
+					parser->expectToken(TokenType_e::Catch);
+					ParserObjectTypeDecl::parse(parser);
 					parser->expectIdentifier();
-					ParserObjectBlockDecl::skip(parser);
+					ParserObjectBlockDecl::parse(parser, skipOnly);
 					continue;
 				}
 				break;
@@ -537,10 +561,10 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'try'.
-		parser->expectToken(TokenSubType_e::Try);
+		parser->expectToken(TokenType_e::Try);
 
 		// Consome bloco.
-		tryDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+		tryDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 		{
 			auto catchDecl = std::make_unique<ast::stmt::StmtTryCatchBlockDecl>(
 				parser->getTokenLine(),
@@ -548,7 +572,7 @@ namespace fluffy { namespace parser_objects {
 			);
 
 			// Consome 'catch'
-			parser->expectToken(TokenSubType_e::Catch);
+			parser->expectToken(TokenType_e::Catch);
 
 			// Consome declaracao catch.
 			catchDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
@@ -557,7 +581,7 @@ namespace fluffy { namespace parser_objects {
 			catchDecl->identifier = parser->expectIdentifier();
 
 			// Consome bloco.
-			catchDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+			catchDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 			// Adiciona catch a lista.
 			tryDecl->catchDeclList.push_back(std::move(catchDecl));
@@ -573,7 +597,7 @@ namespace fluffy { namespace parser_objects {
 					);
 
 				// Consome 'catch'
-				parser->expectToken(TokenSubType_e::Catch);
+				parser->expectToken(TokenType_e::Catch);
 
 				// Consome declaracao catch.
 				catchDecl->typeDecl = ParserObjectTypeDecl::parse(parser);
@@ -582,7 +606,7 @@ namespace fluffy { namespace parser_objects {
 				catchDecl->identifier = parser->expectIdentifier();
 
 				// Consome bloco.
-				catchDecl->blockDecl = ParserObjectBlockDecl::parse(parser);
+				catchDecl->blockDecl = ParserObjectBlockDecl::parse(parser, skipOnly);
 
 				// Adiciona catch a lista.
 				tryDecl->catchDeclList.push_back(std::move(catchDecl));
@@ -597,11 +621,11 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			parser->expectToken(TokenSubType_e::Panic);
-			parser->expectToken(TokenSubType_e::LParBracket);
-			ParserObjectExpressionDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::RParBracket);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::Panic);
+			parser->expectToken(TokenType_e::LParBracket);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			parser->expectToken(TokenType_e::RParBracket);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -611,19 +635,19 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome 'panic'.
-		parser->expectToken(TokenSubType_e::Panic);
+		parser->expectToken(TokenType_e::Panic);
 
 		// Consome '('.
-		parser->expectToken(TokenSubType_e::LParBracket);
+		parser->expectToken(TokenType_e::LParBracket);
 
 		// Consome identificador.
-		panicDecl->exprDecl = ParserObjectExpressionDecl::parse(parser);
+		panicDecl->exprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome ')'.
-		parser->expectToken(TokenSubType_e::RParBracket);
+		parser->expectToken(TokenType_e::RParBracket);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return panicDecl;
 	}
@@ -633,22 +657,22 @@ namespace fluffy { namespace parser_objects {
 		if (skipOnly)
 		{
 			Bool isConst = false;
-			switch (parser->getTokenSubType())
+			switch (parser->getTokenType())
 			{
-			case TokenSubType_e::Let:
+			case TokenType_e::Let:
 				isConst = false;
-				parser->expectToken(TokenSubType_e::Let);
+				parser->expectToken(TokenType_e::Let);
 				break;
-			case TokenSubType_e::Const:
+			case TokenType_e::Const:
 				isConst = true;
-				parser->expectToken(TokenSubType_e::Const);
+				parser->expectToken(TokenType_e::Const);
 				break;
 			default:
 				throw exceptions::unexpected_with_possibilities_token_exception(
 					parser->getTokenValue(),
 					{
-						TokenSubType_e::Let,
-						TokenSubType_e::Const
+						TokenType_e::Let,
+						TokenType_e::Const
 					},
 					parser->getTokenLine(),
 					parser->getTokenColumn()
@@ -656,16 +680,24 @@ namespace fluffy { namespace parser_objects {
 			}
 			if (parser->isRef())
 			{
-				parser->expectToken(TokenSubType_e::Ref);
+				parser->expectToken(TokenType_e::Ref);
 			}
-			parser->expectIdentifier();
+
+			if (parser->isIdentifier())
+			{
+				parser->expectIdentifier();
+			}
+			else if (parser->isLeftBracket() || parser->isLeftParBracket())
+			{
+				ParserObjectPatternDecl::parse(parser, skipOnly);
+			}
 
 			Bool mustHaveInitExpression = isConst ? true : false;
 
 			// Verifica se o tipo foi declarado.
 			if (parser->isColon())
 			{
-				parser->expectToken(TokenSubType_e::Colon);
+				parser->expectToken(TokenType_e::Colon);
 				if (parser->isVoid())
 				{
 					throw exceptions::custom_exception(
@@ -674,18 +706,18 @@ namespace fluffy { namespace parser_objects {
 						parser->getTokenColumn()
 					);
 				}
-				ParserObjectTypeDecl::skip(parser);
+				ParserObjectTypeDecl::parse(parser);
 			} else {
 				mustHaveInitExpression = true;
 			}
 			if (mustHaveInitExpression)
 			{
-				parser->expectToken(TokenSubType_e::Assign);
-				ParserObjectExpressionDecl::skipVariableInitExpr(parser);
+				parser->expectToken(TokenType_e::Assign);
+				ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::Interrogation, true);
 			}
 
 			// Consome ';'.
-			parser->expectToken(TokenSubType_e::SemiColon);
+			parser->expectToken(TokenType_e::SemiColon);
 
 			return nullptr;
 		}
@@ -696,22 +728,22 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome o tipo de variavel.
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Let:
-			parser->expectToken(TokenSubType_e::Let);
+		case TokenType_e::Let:
+			parser->expectToken(TokenType_e::Let);
 			variableDecl->isConst = false;
 			break;
-		case TokenSubType_e::Const:
-			parser->expectToken(TokenSubType_e::Const);
+		case TokenType_e::Const:
+			parser->expectToken(TokenType_e::Const);
 			variableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
 				{
-					TokenSubType_e::Let,
-					TokenSubType_e::Const
+					TokenType_e::Let,
+					TokenType_e::Const
 				},
 				parser->getTokenLine(),
 				parser->getTokenColumn()
@@ -721,12 +753,19 @@ namespace fluffy { namespace parser_objects {
 		// Consome 'ref'.
 		if (parser->isRef())
 		{
-			parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenType_e::Ref);
 			variableDecl->isReference = true;
 		}
 
 		// Consome identificador.
-		variableDecl->identifier = parser->expectIdentifier();
+		if (parser->isIdentifier())
+		{
+			variableDecl->identifier = parser->expectIdentifier();
+		}
+		else if (parser->isLeftBracket() || parser->isLeftParBracket())
+		{
+			variableDecl->destructuringPatternDecl = ParserObjectPatternDecl::parse(parser, skipOnly);
+		}
 
 		Bool mustHaveInitExpression = variableDecl->isConst ? true : false;
 
@@ -734,7 +773,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 
 			const U32 line = parser->getTokenLine();
 			const U32 column = parser->getTokenColumn();
@@ -761,14 +800,14 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = ParserObjectExpressionDecl::parseVariableInitExpr(parser);
+			variableDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::Interrogation, false);;
 		}
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return variableDecl;
 	}
@@ -777,8 +816,8 @@ namespace fluffy { namespace parser_objects {
 	{ 
 		if (skipOnly)
 		{
-			ParserObjectExpressionDecl::skip(parser);
-			parser->expectToken(TokenSubType_e::SemiColon);
+			ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
+			parser->expectToken(TokenType_e::SemiColon);
 			return nullptr;
 		}
 
@@ -788,10 +827,10 @@ namespace fluffy { namespace parser_objects {
 		);
 
 		// Consome identificador.
-		exprDecl->exprDecl = ParserObjectExpressionDecl::parse(parser);
+		exprDecl->exprDecl = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, skipOnly);
 
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return exprDecl;
 	}

@@ -36,8 +36,8 @@ namespace fluffy {
 	typedef std::string				String;
 
 	/**
-	 * TokeyType
-	 * Define o tipo de token.
+	 * Tokentype
+	 * Define a especializacao do tipo.
 	 */
 
 	enum class TokenType_e
@@ -45,20 +45,6 @@ namespace fluffy {
 		Unknown,
 
 		Identifier,
-		Keyword,
-		Symbol,
-		Constant,
-		Eof
-	};
-
-	/**
-	 * TokenSubType
-	 * Define a especializacao do tipo.
-	 */
-
-	enum class TokenSubType_e
-	{
-		Unknown,
 
 		/**
 		 * Keyword
@@ -105,9 +91,6 @@ namespace fluffy {
 		Fp32,				// ok
 		Fp64,				// ok
 		String,				// ok
-		Vector,				// ok
-		Set,				// ok
-		Map,				// ok
 		Object,				// ok
 		Fn,					// ok
 		Let,				// ok
@@ -194,25 +177,22 @@ namespace fluffy {
 		Comma,						// ,
 		Dot,						// .
 
+		Ellipsis,					// ...
+
 		/**
 		 * Constant
 		 */
 
-		ConstantI8,
-		ConstantU8,
-		ConstantI16,
-		ConstantU16,
-		ConstantI32,
-		ConstantU32,
-		ConstantI64,
-		ConstantU64,
+		ConstantInteger,
 		ConstantFp32,
 		ConstantFp64,
 		ConstantBin,
 		ConstantHex,
 
 		ConstantChar,
-		ConstantString
+		ConstantString,
+
+		Eof
 	};
 
 	/**
@@ -241,7 +221,9 @@ namespace fluffy {
 		ConstantString,
 		ConstantChar,
 		ConstantNull,
-		ConstantIdentifier
+		ConstantIdentifier,
+		Mark,
+		ArrayInit
 	};
 
 	/**
@@ -262,7 +244,21 @@ namespace fluffy {
 
 	enum class PatterType_e
 	{
-		Unknown
+		Unknown,
+		Literal,
+		Destructuring
+	};
+
+	/**
+	 * DestructuringType_e
+	 */
+
+	enum class DestructuringType_e
+	{
+		Unknown,
+		ClassOrStruct,
+		Tuple,
+		Enum
 	};
 
 	/**
@@ -334,10 +330,6 @@ namespace fluffy {
 
 		Array,
 
-		Vector,
-		Set,
-		Map,
-
 		Function,
 
 		Tuple,
@@ -366,8 +358,7 @@ namespace fluffy {
 		MinPrec			= 1,
 		Interrogation	= 2,
 		EnumExpr		= 3,
-		Unary			= 12,
-		Increment		= 14,
+		Unary			= 13,
 		Max				= 15
 	};
 
@@ -395,6 +386,32 @@ namespace fluffy {
 	};
 
 	/**
+	 * InferenceType_e
+	 */
+
+	enum class InferenceType_e {
+		None,
+
+		OnlyParams,
+		OnlyReturn,
+
+		Full
+	};
+
+	/**
+	 * DestructuringItemType_e
+	 */
+
+	enum class DestructuringItemType_e
+	{
+		Unknown,
+
+		DirectReference,			// Faz referencia a uma variavel, ex: { t }.
+		IndirectReferenceOrMatch,	// Faz referencia a uma variavel e redireciona para outro identifiador ou e matching, ex: { t: id }.
+		SubDestructuring			// Faz referencia ao destructuring de uma variavel, ex: { t: { } }
+	};
+
+	/**
 	 * Token
 	 * Estrutura basica de informacao do compilador.
 	 */
@@ -403,8 +420,7 @@ namespace fluffy {
 	{
 		String			value;
 
-		TokenType_e		type;
-		TokenSubType_e	subType;
+		TokenType_e	type;
 
 		U32				line;
 		U32				column;
@@ -417,5 +433,5 @@ namespace fluffy {
 	 * Funcoes auxiliares
 	 */
 
-	const I8*			getTokenString(const TokenSubType_e tokenSubType);
+	const I8*			getTokenString(const TokenType_e tokentype);
 }

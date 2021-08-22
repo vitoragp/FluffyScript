@@ -293,69 +293,6 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(sizedArrayDecl->size, 2);
 	}
 
-	TEST_F(ParserTypesTest, TestVectorType)
-	{
-		using namespace parser_objects;
-
-		parser->loadSource("vector<i32>");
-		parser->nextToken();
-
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
-
-		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Vector);
-		EXPECT_EQ(typeDecl->nullable, false);
-
-		auto vectorTypeDecl = reinterpret_cast<ast::TypeDeclVector*>(typeDecl.get());
-
-		ASSERT_TRUE(vectorTypeDecl != nullptr);
-
-		EXPECT_EQ(vectorTypeDecl->valueType->typeID, TypeDeclID_e::I32);
-		EXPECT_EQ(vectorTypeDecl->valueType->nullable, false);
-	}
-
-	TEST_F(ParserTypesTest, TestSetType)
-	{
-		using namespace parser_objects;
-
-		parser->loadSource("set<i32>");
-		parser->nextToken();
-
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
-
-		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Set);
-		EXPECT_EQ(typeDecl->nullable, false);
-
-		auto setTypeDecl = reinterpret_cast<ast::TypeDeclSet*>(typeDecl.get());
-
-		ASSERT_TRUE(setTypeDecl != nullptr);
-
-		EXPECT_EQ(setTypeDecl->valueType->typeID, TypeDeclID_e::I32);
-		EXPECT_EQ(setTypeDecl->valueType->nullable, false);
-	}
-
-	TEST_F(ParserTypesTest, TestMapType)
-	{
-		using namespace parser_objects;
-
-		parser->loadSource("map<i32, string>");
-		parser->nextToken();
-
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
-
-		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Map);
-		EXPECT_EQ(typeDecl->nullable, false);
-
-		auto mapTypeDecl = reinterpret_cast<ast::TypeDeclMap*>(typeDecl.get());
-
-		ASSERT_TRUE(mapTypeDecl != nullptr);
-
-		EXPECT_EQ(mapTypeDecl->keyType->typeID, TypeDeclID_e::I32);
-		EXPECT_EQ(mapTypeDecl->keyType->nullable, false);
-
-		EXPECT_EQ(mapTypeDecl->valueType->typeID, TypeDeclID_e::String);
-		EXPECT_EQ(mapTypeDecl->valueType->nullable, false);
-	}
-
 	TEST_F(ParserTypesTest, TestFunctionType)
 	{
 		using namespace parser_objects;
@@ -382,14 +319,12 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[1]->typeID, TypeDeclID_e::String);
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[1]->nullable, false);
 
-		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->typeID, TypeDeclID_e::Vector);
+		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->typeID, TypeDeclID_e::Named);
 		EXPECT_EQ(functionTypeDecl->parameterTypeList[2]->nullable, true);
 
-		auto vectorTypeDecl = reinterpret_cast<ast::TypeDeclVector*>(functionTypeDecl->parameterTypeList[2].get());
+		auto vectorTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(functionTypeDecl->parameterTypeList[2].get());
 
 		ASSERT_TRUE(vectorTypeDecl != nullptr);
-
-		EXPECT_EQ(vectorTypeDecl->valueType->typeID, TypeDeclID_e::I8);
 	}
 
 	TEST_F(ParserTypesTest, TestNamedType)

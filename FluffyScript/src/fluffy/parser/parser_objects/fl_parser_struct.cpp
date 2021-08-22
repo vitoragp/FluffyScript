@@ -17,7 +17,7 @@ namespace fluffy { namespace parser_objects {
 		structDecl->isExported = hasExport;
 
 		// Consome 'struct'.
-		parser->expectToken(TokenSubType_e::Struct);
+		parser->expectToken(TokenType_e::Struct);
 
 		// Consome o identificador.
 		structDecl->identifier = parser->expectIdentifier();
@@ -29,7 +29,7 @@ namespace fluffy { namespace parser_objects {
 		}
 
 		// Consome '{'.
-		parser->expectToken(TokenSubType_e::LBracket);
+		parser->expectToken(TokenType_e::LBracket);
 
 		while (true)
 		{
@@ -53,14 +53,14 @@ namespace fluffy { namespace parser_objects {
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Let, TokenSubType_e::Const, TokenSubType_e::RBracket },
+				{ TokenType_e::Let, TokenType_e::Const, TokenType_e::RBracket },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
 		}
 
 		// Consome '}'.
-		parser->expectToken(TokenSubType_e::RBracket);
+		parser->expectToken(TokenType_e::RBracket);
 
 		return structDecl;
 	}
@@ -72,20 +72,20 @@ namespace fluffy { namespace parser_objects {
 			parser->getTokenColumn()
 		);
 
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Let:
-			parser->expectToken(TokenSubType_e::Let);
+		case TokenType_e::Let:
+			parser->expectToken(TokenType_e::Let);
 			structVariableDecl->isConst = false;
 			break;
-		case TokenSubType_e::Const:
-			parser->expectToken(TokenSubType_e::Const);
+		case TokenType_e::Const:
+			parser->expectToken(TokenType_e::Const);
 			structVariableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Let, TokenSubType_e::Const },
+				{ TokenType_e::Let, TokenType_e::Const },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
@@ -95,7 +95,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenType_e::Ref);
 			structVariableDecl->isReference = true;
 		}
 
@@ -108,7 +108,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 
 			const U32 line = parser->getTokenLine();
 			const U32 column = parser->getTokenColumn();
@@ -134,15 +134,15 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			structVariableDecl->initExpression = ParserObjectExpressionDecl::skip(parser);
+			structVariableDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::MinPrec, true);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return structVariableDecl;
 	}

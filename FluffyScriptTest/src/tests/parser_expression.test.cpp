@@ -159,11 +159,11 @@ namespace fluffy { namespace testing {
 		parser->loadSource("2 + 2 * 3");
 		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
 
 		// [2 + 2 * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-			EXPECT_EQ(binExpr->op, TokenSubType_e::Plus);
+			EXPECT_EQ(binExpr->op, TokenType_e::Plus);
 			EXPECT_EQ(binExpr->line, 1);
 			EXPECT_EQ(binExpr->column, 1);
 
@@ -176,7 +176,7 @@ namespace fluffy { namespace testing {
 
 			// 2 + [2 * 3]
 			validateBinExpr(binExpr->rightDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-				EXPECT_EQ(binExpr->op, TokenSubType_e::Multiplication);
+				EXPECT_EQ(binExpr->op, TokenType_e::Multiplication);
 				EXPECT_EQ(binExpr->line, 1);
 				EXPECT_EQ(binExpr->column, 5);
 
@@ -202,17 +202,17 @@ namespace fluffy { namespace testing {
 		parser->loadSource("(2 + 5) * 3");
 		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
 
 		// [(2 + 5) * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-			EXPECT_EQ(binExpr->op, TokenSubType_e::Multiplication);
+			EXPECT_EQ(binExpr->op, TokenType_e::Multiplication);
 			EXPECT_EQ(binExpr->line, 1);
 			EXPECT_EQ(binExpr->column, 1);
 
 			// [(2 + 5)] * 3
 			validateBinExpr(binExpr->leftDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-				EXPECT_EQ(binExpr->op, TokenSubType_e::Plus);
+				EXPECT_EQ(binExpr->op, TokenType_e::Plus);
 				EXPECT_EQ(binExpr->line, 1);
 				EXPECT_EQ(binExpr->column, 1);
 
@@ -246,7 +246,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("a > 5 ? 5 : 3 * 4");
 		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
 
 		// [a > 5 ? 5 : 3 * 4]
 		validateTerExpr(exprDecl.get(), [](ExpressionTernaryDecl* terExpr) {
@@ -255,7 +255,7 @@ namespace fluffy { namespace testing {
 
 			// [a > 5] ? 5 : 3 * 4
 			validateBinExpr(terExpr->conditionDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-				EXPECT_EQ(binExpr->op, TokenSubType_e::GreaterThan);
+				EXPECT_EQ(binExpr->op, TokenType_e::GreaterThan);
 				EXPECT_EQ(binExpr->line, 1);
 				EXPECT_EQ(binExpr->column, 1);
 
@@ -286,7 +286,7 @@ namespace fluffy { namespace testing {
 
 			// a > 5 ? 5 : [3 * 4]
 			validateBinExpr(terExpr->rightDecl.get(), [](ExpressionBinaryDecl* binExpr) {
-				EXPECT_EQ(binExpr->op, TokenSubType_e::Multiplication);
+				EXPECT_EQ(binExpr->op, TokenType_e::Multiplication);
 				EXPECT_EQ(binExpr->line, 1);
 				EXPECT_EQ(binExpr->column, 13);
 
@@ -322,7 +322,7 @@ namespace fluffy { namespace testing {
 			{
 				break;
 			}
-			parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+			parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
 			parser->nextToken();
 			exprCount++;
 		}
@@ -334,7 +334,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("t.foo<T>(2)");
 		parser->nextToken();
 
-		parser_objects::ParserObjectExpressionDecl::parse(parser.get());
+		parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
 
 		if (!parser->isEof())
 		{

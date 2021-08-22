@@ -17,20 +17,20 @@ namespace fluffy { namespace parser_objects {
 		variableDecl->isExported = hasExport;
 
 		// Consome 'let' ou 'const'
-		switch (parser->getTokenSubType())
+		switch (parser->getTokenType())
 		{
-		case TokenSubType_e::Let:
-			parser->expectToken(TokenSubType_e::Let);
+		case TokenType_e::Let:
+			parser->expectToken(TokenType_e::Let);
 			variableDecl->isConst = false;
 			break;
-		case TokenSubType_e::Const:
-			parser->expectToken(TokenSubType_e::Const);
+		case TokenType_e::Const:
+			parser->expectToken(TokenType_e::Const);
 			variableDecl->isConst = true;
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				parser->getTokenValue(),
-				{ TokenSubType_e::Let, TokenSubType_e::Const },
+				{ TokenType_e::Let, TokenType_e::Const },
 				parser->getTokenLine(),
 				parser->getTokenColumn()
 			);
@@ -40,7 +40,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isRef())
 		{
 			// Consome 'ref'.
-			parser->expectToken(TokenSubType_e::Ref);
+			parser->expectToken(TokenType_e::Ref);
 			variableDecl->isReference = true;
 		}
 
@@ -53,7 +53,7 @@ namespace fluffy { namespace parser_objects {
 		if (parser->isColon())
 		{
 			// Consome ':'.
-			parser->expectToken(TokenSubType_e::Colon);
+			parser->expectToken(TokenType_e::Colon);
 
 			const U32 line = parser->getTokenLine();
 			const U32 column = parser->getTokenColumn();
@@ -79,15 +79,15 @@ namespace fluffy { namespace parser_objects {
 		if (mustHaveInitExpression)
 		{
 			// Consome '='.
-			parser->expectToken(TokenSubType_e::Assign);
+			parser->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = ParserObjectExpressionDecl::skipVariableInitExpr(parser);
+			variableDecl->initExpression = ParserObjectExpressionDecl::parse(parser, OperatorPrecLevel_e::Interrogation, true);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
 		// Consome ';'.
-		parser->expectToken(TokenSubType_e::SemiColon);
+		parser->expectToken(TokenType_e::SemiColon);
 
 		return variableDecl;
 	}

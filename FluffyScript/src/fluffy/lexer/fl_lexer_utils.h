@@ -4,13 +4,13 @@
 #define FLUFFY_IS_TOKEN_DECL(tokId) \
 	static \
 	Bool is##tokId(const Token_s& tok) { \
-		return tok.subType == TokenSubType_e::tokId; \
+		return tok.type == TokenType_e::tokId; \
 	}
 
 #define FLUFFY_IS_TOKEN_DECL_2(name, tokId) \
 	static \
 	Bool is##name(const Token_s& tok) { \
-		return tok.subType == TokenSubType_e::tokId; \
+		return tok.type == TokenType_e::tokId; \
 	}
 
 namespace fluffy { namespace utils {
@@ -24,28 +24,7 @@ namespace fluffy { namespace utils {
 		Bool						isIdentifier(const Token_s& tok);
 
 		static
-		Bool						isConstantI8(const Token_s& tok);
-
-		static
-		Bool						isConstantU8(const Token_s& tok);
-
-		static
-		Bool						isConstantI16(const Token_s& tok);
-
-		static
-		Bool						isConstantU16(const Token_s& tok);
-
-		static
-		Bool						isConstantI32(const Token_s& tok);
-
-		static
-		Bool						isConstantU32(const Token_s& tok);
-
-		static
-		Bool						isConstantI64(const Token_s& tok);
-
-		static
-		Bool						isConstantU64(const Token_s& tok);
+		Bool						isConstantInteger(const Token_s& tok);
 
 		static
 		Bool						isConstantFp32(const Token_s& tok);
@@ -101,9 +80,6 @@ namespace fluffy { namespace utils {
 									FLUFFY_IS_TOKEN_DECL(Fp32);
 									FLUFFY_IS_TOKEN_DECL(Fp64);
 									FLUFFY_IS_TOKEN_DECL(String);
-									FLUFFY_IS_TOKEN_DECL(Vector);
-									FLUFFY_IS_TOKEN_DECL(Set);
-									FLUFFY_IS_TOKEN_DECL(Map);
 									FLUFFY_IS_TOKEN_DECL(Object);
 									FLUFFY_IS_TOKEN_DECL(Fn);
 									FLUFFY_IS_TOKEN_DECL(Let);
@@ -185,6 +161,7 @@ namespace fluffy { namespace utils {
 																											
 									FLUFFY_IS_TOKEN_DECL(Comma);											// ,
 									FLUFFY_IS_TOKEN_DECL(Dot);												// .
+									FLUFFY_IS_TOKEN_DECL(Ellipsis);											// ...
 	};
 } }
 

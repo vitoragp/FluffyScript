@@ -57,7 +57,7 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_with_possibilities_token_exception
 	 */
 
-	unexpected_with_possibilities_token_exception::unexpected_with_possibilities_token_exception(String token, std::vector<TokenSubType_e> possibilities, U32 line, U32 column)
+	unexpected_with_possibilities_token_exception::unexpected_with_possibilities_token_exception(String token, std::vector<TokenType_e> possibilities, U32 line, U32 column)
 		: m_line(line)
 		, m_column(column)
 	{
