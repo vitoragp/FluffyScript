@@ -1,6 +1,6 @@
 #pragma once
-#include "..\fl_string.h"
-#include "..\fl_defs.h"
+#include "fl_string.h"
+#include "fl_defs.h"
 namespace fluffy { namespace ast {
 	/**
 	 * AstNode

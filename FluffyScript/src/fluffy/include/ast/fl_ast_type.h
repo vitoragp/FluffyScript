@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include "fl_ast.h"
-#include "..\fl_defs.h"
+#include "fl_defs.h"
 #define FLUFFY_PRIMITIVE_TYPE_DECL(type) \
 	class TypeDecl##type : public TypeDecl \
 	{ \

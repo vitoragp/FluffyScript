@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 namespace fluffy { namespace parser {
 	class Parser;
@@ -95,6 +94,7 @@ namespace fluffy {
 		Fn,					// ok
 		Let,				// ok
 		This,				// ok
+		Shared,				// ok
 		Ref,				// ok
 		Self,				// ok
 		New,				// ok
@@ -208,6 +208,7 @@ namespace fluffy {
 		Unary,
 		As,
 		Is,
+		GenericDecl,
 		Match,
 		FunctionDecl,
 		FunctionCall,
@@ -215,6 +216,7 @@ namespace fluffy {
 		New,
 		This,
 		Super,
+		PrimitiveType,
 		ConstantBool,
 		ConstantInteger,
 		ConstantReal,

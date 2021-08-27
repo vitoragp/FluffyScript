@@ -87,6 +87,6 @@ namespace fluffy { namespace ast { namespace pattern {
 		DestructuringItemType_e				destructuringItemType;
 		ExpressionDeclPtr					indirectRefOrMatchingDecl;
 		PatternDeclPtr						subDestructuringPattern;
-
+		ExpressionDeclPtr					exprDecl;
 	};
 } } }

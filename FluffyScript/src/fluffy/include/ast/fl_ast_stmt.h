@@ -5,7 +5,7 @@
 #include "fl_ast_pattern.h"
 #include "fl_ast_block.h"
 #include "fl_ast_expr.h"
-#include "..\\fl_defs.h"
+#include "fl_defs.h"
 
 namespace fluffy { namespace ast { namespace expr { 
 	class ExpressionDecl;

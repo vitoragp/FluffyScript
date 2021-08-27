@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include "fl_ast.h"
-#include "..\\fl_defs.h"
+#include "fl_defs.h"
 
 namespace fluffy { namespace ast {
 	class TypeDecl;
@@ -375,6 +375,23 @@ namespace fluffy { namespace ast { namespace expr {
 	};
 
 	/**
+	 * ExpressionPrimitiveTypeDecl
+	 */
+
+	class ExpressionPrimitiveTypeDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionPrimitiveTypeDecl(const U32 line, const U32 column)
+			: ExpressionDecl(ExpressionDeclType_e::PrimitiveType, line, column)
+		{}
+
+		virtual ~ExpressionPrimitiveTypeDecl()
+		{}
+
+		TypeDeclPtr							typeDecl;
+	};
+
+	/**
 	 * ExpressionConstantNullDecl
 	 */
 
@@ -460,7 +477,7 @@ namespace fluffy { namespace ast { namespace expr {
 		{}
 
 		PatternDeclPtr							patternDecl;
-		BlockDeclPtr							blockDecl;
+		ExpressionDeclPtr						exprDecl;
 	};
 
 	/**

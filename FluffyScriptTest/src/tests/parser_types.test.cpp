@@ -2,14 +2,11 @@
 #include "gtest/gtest.h"
 
 #include "parser\fl_parser.h"
-#include "parser\parser_objects/fl_parser_objects.h"
-#include "lexer\fl_lexer.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace testing {
 	using parser::Parser;
-	using lexer::Lexer;
 
 	/**
 	 * ParserTypesTest
@@ -17,16 +14,14 @@ namespace fluffy { namespace testing {
 
 	struct ParserTypesTest : public ::testing::Test
 	{
-		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
+		fluffy::parser::ParserContext_s ctx{ true, false, false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
 			parser = std::make_unique<Parser>(
-				new Lexer(
-					new DirectBuffer()
-				)
+				new DirectBuffer()
 			);
 		}
 	};
@@ -37,27 +32,24 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveTypes)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("void i8 u8 i16 u16 i32 u32 i64 u64 fp32 fp64 string object");
-		parser->nextToken();
 
-		auto typeVoidDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeVoidDecl = parser->parseType(ctx);
 
-		auto typeI8Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeU8Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeI16Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeU16Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeI32Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeU32Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeI64Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeU64Decl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI8Decl = parser->parseType(ctx);
+		auto typeU8Decl = parser->parseType(ctx);
+		auto typeI16Decl = parser->parseType(ctx);
+		auto typeU16Decl = parser->parseType(ctx);
+		auto typeI32Decl = parser->parseType(ctx);
+		auto typeU32Decl = parser->parseType(ctx);
+		auto typeI64Decl = parser->parseType(ctx);
+		auto typeU64Decl = parser->parseType(ctx);
 
-		auto typeFp32Decl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeFp64Decl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeFp32Decl = parser->parseType(ctx);
+		auto typeFp64Decl = parser->parseType(ctx);
 
-		auto typeStringDecl = ParserObjectTypeDecl::parse(parser.get());
-		auto typeObjectDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeStringDecl = parser->parseType(ctx);
+		auto typeObjectDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeVoidDecl->nullable, false);
 		EXPECT_EQ(typeVoidDecl->typeID, TypeDeclID_e::Void);
@@ -96,14 +88,11 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNullableVoidType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("void?");
-		parser->nextToken();
 
 		try
 		{
-			auto typeVoidDecl = ParserObjectTypeDecl::parse(parser.get());			
+			auto typeVoidDecl = parser->parseType(ctx);			
 			throw std::exception();
 		}
 		catch (exceptions::custom_exception& e)
@@ -114,12 +103,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNullablePrimitiveType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32?");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::I32);
@@ -127,12 +113,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveUnsizedArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32[]");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -149,12 +132,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNullablePrimitiveUnsizedArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32?[]");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -171,12 +151,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveUnsizedNullableArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32[]?");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -193,12 +170,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNullablePrimitiveUnsizedNullableArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32?[]?");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, true);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -215,12 +189,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveMultiplesUnsizedLevelsArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32[][]");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -238,12 +209,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveSizedArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32[2]");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -266,12 +234,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestPrimitiveMultiplesMixedLevelsArrayType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("i32[][2]");
-		parser->nextToken();
 
-		auto typeI32NullableDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeI32NullableDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeI32NullableDecl->nullable, false);
 		EXPECT_EQ(typeI32NullableDecl->typeID, TypeDeclID_e::Array);
@@ -295,12 +260,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestFunctionType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("fn(i32, string, vector<i8>? -> fp32)");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Function);
 		EXPECT_EQ(typeDecl->nullable, false);
@@ -329,12 +291,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNamedType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("Foo");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
@@ -352,12 +311,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNamedFromRootType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("::Foo");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
@@ -375,12 +331,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestArrayNamedType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("Foo[]");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Array);
 		EXPECT_EQ(typeDecl->nullable, false);
@@ -405,12 +358,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNullableArrayNamedType)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("Foo[]?");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Array);
 		EXPECT_EQ(typeDecl->nullable, true);
@@ -435,12 +385,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestNamedTypeWithGeneric)
 	{
-		using namespace parser_objects;
-
 		parser->loadSource("Foo<T, i32?>");
-		parser->nextToken();
 
-		auto typeDecl = ParserObjectTypeDecl::parse(parser.get());
+		auto typeDecl = parser->parseType(ctx);
 
 		EXPECT_EQ(typeDecl->typeID, TypeDeclID_e::Named);
 		EXPECT_EQ(typeDecl->nullable, false);
@@ -474,20 +421,17 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestManyProdutionsPass)
 	{
-		using namespace parser_objects;
-
 		parser->loadSourceFromFile("./files/parser/source_1.txt");
-		parser->nextToken();
 
 		std::vector<std::unique_ptr<ast::TypeDecl>> typeList;
 		int typeCount = 0;
 		while (true)
 		{
-			if (parser->isEof())
+			if (parser->finished())
 			{
 				break;
 			}
-			typeList.push_back(ParserObjectTypeDecl::parse(parser.get()));
+			typeList.push_back(parser->parseType(ctx));
 			typeCount++;
 		}
 		ASSERT_EQ(typeCount, 14);

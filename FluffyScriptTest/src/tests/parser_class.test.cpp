@@ -2,15 +2,12 @@
 #include "gtest/gtest.h"
 
 #include "parser/fl_parser.h"
-#include "parser/parser_objects/fl_parser_objects.h"
-#include "lexer\fl_lexer.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
 
 namespace fluffy { namespace testing {
 	using parser::Parser;
-	using lexer::Lexer;
 
 	/**
 	 * ParserClassTest
@@ -18,16 +15,14 @@ namespace fluffy { namespace testing {
 
 	struct ParserClassTest : public ::testing::Test
 	{
-		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
+		fluffy::parser::ParserContext_s ctx{ true, false, false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
 			parser = std::make_unique<Parser>(
-				new Lexer(
-					new DirectBuffer()
-				)
+				new DirectBuffer()
 			);
 		}
 	};
@@ -39,9 +34,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportNoGenericNoExtendsNoImplements)
 	{
 		parser->loadSource("class Foo {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 	}
@@ -49,15 +43,14 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportWithOnlyOneGenericNoExtendsNoImplements)
 	{
 		parser->loadSource("class Foo<T> {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->genericDeclList.size(), 1);
-		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList.size(), 1);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->whereTypeList.size(), 0);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 		EXPECT_EQ(classObject->interfaceList.size(), 0);
@@ -66,17 +59,16 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportWithTwoGenericsWithExtendsNoImplements)
 	{
 		parser->loadSource("class Foo<T, R> extends ::Window {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->genericDeclList.size(), 2);
-		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList.size(), 2);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->whereTypeList.size(), 0);
 		
 		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
 
@@ -91,9 +83,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportNoGenericsWithExtendsNoImplements)
 	{
 		parser->loadSource("class Foo extends ::Window {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -110,17 +101,16 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportWithTwoGenericsNoExtendsTwoInterfaces)
 	{
 		parser->loadSource("class Foo<T, R> implements ::Clickable<T>, UI::Viewable<R> {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->genericDeclList.size(), 2);
-		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList.size(), 2);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->whereTypeList.size(), 0);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 
@@ -171,13 +161,12 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportNoGenericsNoExtendsTwoInterfaces)
 	{
 		parser->loadSource("class Foo implements ::Clickable, UI::Viewable {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->genericDeclList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl, nullptr);
 
 		EXPECT_EQ(classObject->baseClass, nullptr);
 
@@ -214,17 +203,16 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestParseClassEmptyNoExportWithTwoGenericsWithExtendsTwoInterfaces)
 	{
 		parser->loadSource("class Foo<T, R> extends ::Window implements ::Clickable, UI::Viewable {}");
-		parser->nextToken();
 
-		auto classObject = parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
+		auto classObject = parser->parseClass(ctx, false, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->genericDeclList.size(), 2);
-		EXPECT_EQ(classObject->genericDeclList[0]->identifier, "T");
-		EXPECT_EQ(classObject->genericDeclList[0]->whereTypeList.size(), 0);
-		EXPECT_EQ(classObject->genericDeclList[1]->identifier, "R");
-		EXPECT_EQ(classObject->genericDeclList[1]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList.size(), 2);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->identifier, "T");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[0]->whereTypeList.size(), 0);
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->identifier, "R");
+		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->whereTypeList.size(), 0);
 				
 		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
 
@@ -264,44 +252,46 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassTest, TestGenericTemplateWithOnlyOneDeclaration)
 	{
 		parser->loadSource("<T>");
-		parser->nextToken();
 
-		auto genericDeclList = parser_objects::ParserObjectGenericDecl::parse(parser.get());
+		auto genericDecl = parser->parseGenericDecl(ctx);
 
-		EXPECT_EQ(genericDeclList.size(), 1);
-		EXPECT_EQ(genericDeclList[0]->identifier, "T");
+		EXPECT_EQ(genericDecl->genericDeclItemList.size(), 1);
+		EXPECT_EQ(genericDecl->genericDeclItemList[0]->identifier, "T");
 	}
 
 	TEST_F(ParserClassTest, TestGenericTemplateWithTwoDeclaration)
 	{
 		parser->loadSource("<T, R>");
-		parser->nextToken();
 
-		auto genericDeclList = parser_objects::ParserObjectGenericDecl::parse(parser.get());
+		auto genericDecl = parser->parseGenericDecl(ctx);
 
-		EXPECT_EQ(genericDeclList.size(), 2);
+		EXPECT_EQ(genericDecl->genericDeclItemList.size(), 2);
 
-		EXPECT_EQ(genericDeclList[0]->identifier, "T");
-		EXPECT_EQ(genericDeclList[1]->identifier, "R");
+		EXPECT_EQ(genericDecl->genericDeclItemList[0]->identifier, "T");
+		EXPECT_EQ(genericDecl->genericDeclItemList[1]->identifier, "R");
 	}
 
 	TEST_F(ParserClassTest, TestFullClassDeclaration)
 	{
 		parser->loadSourceFromFile(".\\files\\parser\\source_4.txt");
-		parser->nextToken();
-
-		while (!parser->isEof())
-		{
-			parser_objects::ParserObjectClassDecl::parse(parser.get(), false, false);
-		}
+		parser->parseClass(ctx, false, false);
 	}
 
 	TEST_F(ParserClassTest, TestFullClassDeclaration2)
 	{
 		parser->loadSourceFromFile(".\\files\\parser\\source_5.txt");
 
-		auto program = parser->parse();
+		auto codeUnit = parser->parseCodeUnit(ctx);
 
-		ASSERT_TRUE(program != nullptr);
+		ASSERT_TRUE(codeUnit != nullptr);
+	}
+
+	TEST_F(ParserClassTest, TestStatement)
+	{
+		parser->loadSource("a<i32>()");
+
+		auto expr = parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+
+		ASSERT_TRUE(expr != nullptr);
 	}
 } }

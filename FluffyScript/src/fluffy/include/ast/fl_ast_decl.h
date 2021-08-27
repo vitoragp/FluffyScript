@@ -5,7 +5,7 @@
 #include "fl_ast_expr.h"
 #include "fl_ast_type.h"
 #include "fl_ast_stmt.h"
-#include "..\\fl_defs.h"
+#include "fl_defs.h"
 
 namespace fluffy { namespace ast {
 	using std::vector;
@@ -25,8 +25,8 @@ namespace fluffy { namespace ast {
 	using NamespaceDeclPtr					= unique_ptr<class NamespaceDecl>;
 	using NamespaceDeclPtrList				= vector<NamespaceDeclPtr>;
 
-	using GeneralStmtPtr					= unique_ptr<class GeneralDecl>;
-	using GeneralStmtPtrList				= vector<GeneralStmtPtr>;
+	using GeneralStmtDeclPtr				= unique_ptr<class GeneralStmtDecl>;
+	using GeneralStmtDeclPtrList			= vector<GeneralStmtDeclPtr>;
 
 	using ClassFunctionDeclPtr				= unique_ptr<class ClassFunctionDecl>;
 	using ClassFunctionDeclPtrList			= vector<ClassFunctionDeclPtr>;
@@ -60,6 +60,9 @@ namespace fluffy { namespace ast {
 
 	using GenericDeclPtr					= unique_ptr<class GenericDecl>;
 	using GenericDeclPtrList				= vector<GenericDeclPtr>;
+
+	using GenericItemDeclPtr				= unique_ptr<class GenericItemDecl>;
+	using GenericItemDeclPtrList			= vector<GenericItemDeclPtr>;
 
 	using TypeDeclPtr						= unique_ptr<TypeDecl>;
 	using TypeDeclPtrList					= vector<TypeDeclPtr>;
@@ -131,23 +134,23 @@ namespace fluffy { namespace ast {
 		{}
 
 		NamespaceDeclPtrList				namespaceDeclList;
-		GeneralStmtPtrList					generalDeclList;
+		GeneralStmtDeclPtrList				generalDeclList;
 	};
 
 	/**
-	 * GeneralDecl
+	 * GeneralStmtDecl
 	 */
 
-	class GeneralDecl : public AstNodeIdentified
+	class GeneralStmtDecl : public AstNodeIdentified
 	{
 	protected:
-		GeneralDecl(GeneralDeclType_e type, U32 line, U32 column)
+		GeneralStmtDecl(GeneralDeclType_e type, U32 line, U32 column)
 			: AstNodeIdentified(line, column)
 			, type(type)
 		{}
 
 	public:
-		virtual	~GeneralDecl()
+		virtual	~GeneralStmtDecl()
 		{}
 
 		const GeneralDeclType_e				type;
@@ -158,11 +161,11 @@ namespace fluffy { namespace ast {
 	 * ClassDecl
 	 */
 
-	class ClassDecl : public GeneralDecl
+	class ClassDecl : public GeneralStmtDecl
 	{
 	public:
 		ClassDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::ClassDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::ClassDecl, line, column)
 			, isExported(false)
 			, isAbstract(false)
 		{}
@@ -172,12 +175,10 @@ namespace fluffy { namespace ast {
 
 		Bool								isExported;
 		Bool								isAbstract;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		TypeDeclPtr							baseClass;
 		TypeDeclPtrList						interfaceList;
-		ClassFunctionDeclPtrList			staticFunctionList;
 		ClassFunctionDeclPtrList			functionList;
-		ClassVariableDeclPtrList			staticVariableList;
 		ClassVariableDeclPtrList			variableList;
 		ClassConstructorDeclPtrList			constructorList;
 		ClassDestructorDeclPtr				destructorDecl;
@@ -230,7 +231,7 @@ namespace fluffy { namespace ast {
 		Bool								isOverride;
 		Bool								isFinal;
 
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
@@ -324,11 +325,11 @@ namespace fluffy { namespace ast {
 	 * InterfaceDecl
 	 */
 
-	class InterfaceDecl : public GeneralDecl
+	class InterfaceDecl : public GeneralStmtDecl
 	{
 	public:
 		InterfaceDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::InterfaceDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::InterfaceDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -336,7 +337,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		InterfaceFunctionDeclPtrList		functionDeclList;
 	};
 
@@ -354,7 +355,7 @@ namespace fluffy { namespace ast {
 		~InterfaceFunctionDecl()
 		{}
 
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
 	};
@@ -363,11 +364,11 @@ namespace fluffy { namespace ast {
 	 * StructDecl
 	 */
 
-	class StructDecl : public GeneralDecl
+	class StructDecl : public GeneralStmtDecl
 	{
 	public:
 		StructDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::StructDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::StructDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -375,7 +376,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		StructVariableDeclPtrList			variableList;
 	};
 
@@ -407,11 +408,11 @@ namespace fluffy { namespace ast {
 	 * EnumDecl
 	 */
 
-	class EnumDecl : public GeneralDecl
+	class EnumDecl : public GeneralStmtDecl
 	{
 	public:
 		EnumDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::EnumDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::EnumDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -419,7 +420,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		EnumItemDeclPtrList					enumItemDeclList;
 	};
 
@@ -449,11 +450,11 @@ namespace fluffy { namespace ast {
 	 * TraitDecl
 	 */
 
-	class TraitDecl : public GeneralDecl
+	class TraitDecl : public GeneralStmtDecl
 	{
 	public:
 		TraitDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::TraitDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::TraitDecl, line, column)
 			, isExported(false)
 			, isDefinition(false)
 		{}
@@ -464,7 +465,7 @@ namespace fluffy { namespace ast {
 		Bool								isExported;
 		Bool								isDefinition;
 		TypeDeclPtr							typeDefinitionDecl;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		TraitFunctionDeclPtrList			functionDeclList;
 	};
 
@@ -483,7 +484,7 @@ namespace fluffy { namespace ast {
 		~TraitFunctionDecl()
 		{}
 
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
 		BlockDeclPtr						blockDecl;
@@ -509,11 +510,11 @@ namespace fluffy { namespace ast {
 	 * FunctionDecl
 	 */
 
-	class FunctionDecl : public GeneralDecl
+	class FunctionDecl : public GeneralStmtDecl
 	{
 	public:
 		FunctionDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::FunctionDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::FunctionDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -521,7 +522,7 @@ namespace fluffy { namespace ast {
 		{}
 
 		Bool								isExported;
-		GenericDeclPtrList					genericDeclList;
+		GenericDeclPtr						genericDecl;
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
 		BlockDeclPtr						blockDecl;
@@ -531,11 +532,11 @@ namespace fluffy { namespace ast {
 	 * VariableDecl
 	 */
 
-	class VariableDecl : public GeneralDecl
+	class VariableDecl : public GeneralStmtDecl
 	{
 	public:
 		VariableDecl(U32 line, U32 column)
-			: GeneralDecl(GeneralDeclType_e::VariableDecl, line, column)
+			: GeneralStmtDecl(GeneralDeclType_e::VariableDecl, line, column)
 			, isExported(false)
 			, isShared(false)
 			, isConst(false)
@@ -581,14 +582,31 @@ namespace fluffy { namespace ast {
 	 * GenericDecl
 	 */
 
-	class GenericDecl : public AstNodeIdentified
+	class GenericDecl : public AstNode
 	{
 	public:
 		GenericDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNode(line, column)
 		{}
 
 		~GenericDecl()
+		{}
+
+		GenericItemDeclPtrList				genericDeclItemList;
+	};
+
+	/**
+	 * GenericItemDecl
+	 */
+
+	class GenericItemDecl : public AstNodeIdentified
+	{
+	public:
+		GenericItemDecl(U32 line, U32 column)
+			: AstNodeIdentified(line, column)
+		{}
+
+		~GenericItemDecl()
 		{}
 
 		TypeDeclPtrList						whereTypeList;

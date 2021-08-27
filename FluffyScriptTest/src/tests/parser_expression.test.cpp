@@ -1,11 +1,10 @@
 #include <memory>
+#include <functional>
 #include "gtest/gtest.h"
 
-#include "parser\fl_ast_expr.h"
-#include "parser\fl_ast_type.h"
+#include "ast\fl_ast_expr.h"
+#include "ast\fl_ast_type.h"
 #include "parser\fl_parser.h"
-#include "parser\parser_objects/fl_parser_objects.h"
-#include "lexer\fl_lexer.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
@@ -50,84 +49,10 @@ namespace {
 	{
 		__validateExpr(expr, callback, "ExpressionConstantIntegerDecl");
 	}
-
-	/*
-
-	void validateUnaExpr(ExpressionDecl* expr, std::function<void(ExpressionUnaryDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionUnaryDecl");
-	}
-
-	void validateIsExpr(ExpressionDecl* expr, std::function<void(ExpressionIsDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionIsDecl");
-	}
-
-	void validateAsExpr(ExpressionDecl* expr, std::function<void(ExpressionAsDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionAsDecl");
-	}
-
-	void validateMatExpr(ExpressionDecl* expr, std::function<void(ExpressionMatchDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionMatchDecl");
-	}
-
-	void validateFDeExpr(ExpressionDecl* expr, std::function<void(ExpressionFunctionDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionFunctionDecl");
-	}
-
-	void validateFCaExpr(ExpressionDecl* expr, std::function<void(ExpressionFunctionCall*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionFunctionCall");
-	}
-
-	void validateIndExpr(ExpressionDecl* expr, std::function<void(ExpressionIndexDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionIndexDecl");
-	}
-
-	void validateThiExpr(ExpressionDecl* expr, std::function<void(ExpressionThisDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionThisDecl");
-	}
-
-	void validateSupExpr(ExpressionDecl* expr, std::function<void(ExpressionSuperDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionSuperDecl");
-	}
-
-	void validateBooExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantBoolDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantBoolDecl");
-	}
-
-	void validateReaExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantRealDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantRealDecl");
-	}
-
-	void validateStrExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantStringDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantStringDecl");
-	}
-
-	void validateChaExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantCharDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantCharDecl");
-	}
-
-	void validateNulExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantNullDecl*)> callback)
-	{
-		__validateExpr(expr, callback, "ExpressionConstantNullDecl");
-	}
-	*/
 }
 
 namespace fluffy { namespace testing {
 	using parser::Parser;
-	using lexer::Lexer;
 	using namespace ast::expr;
 
 	/**
@@ -136,16 +61,14 @@ namespace fluffy { namespace testing {
 
 	struct ParserExpressionTest : public ::testing::Test
 	{
-		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
+		fluffy::parser::ParserContext_s ctx{ false, false, false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
 			parser = std::make_unique<Parser>(
-				new Lexer(
-					new DirectBuffer()
-				)
+				new DirectBuffer()
 			);
 		}
 	};
@@ -157,9 +80,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserExpressionTest, TestExpression)
 	{
 		parser->loadSource("2 + 2 * 3");
-		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
+		auto exprDecl = parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 
 		// [2 + 2 * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
@@ -195,14 +117,15 @@ namespace fluffy { namespace testing {
 				});
 			});
 		});
+
+		ASSERT_TRUE(parser->finished());
 	}
 
 	TEST_F(ParserExpressionTest, TestExpressionWithParent)
 	{
 		parser->loadSource("(2 + 5) * 3");
-		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
+		auto exprDecl = parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 
 		// [(2 + 5) * 3]
 		validateBinExpr(exprDecl.get(), [](ExpressionBinaryDecl* binExpr) {
@@ -239,14 +162,15 @@ namespace fluffy { namespace testing {
 				EXPECT_EQ(val->column, 11);
 			});
 		});
+
+		ASSERT_TRUE(parser->finished());
 	}
 
 	TEST_F(ParserExpressionTest, TestExpressionTernary)
 	{
 		parser->loadSource("a > 5 ? 5 : 3 * 4");
-		parser->nextToken();
 
-		auto exprDecl = parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
+		auto exprDecl = parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 
 		// [a > 5 ? 5 : 3 * 4]
 		validateTerExpr(exprDecl.get(), [](ExpressionTernaryDecl* terExpr) {
@@ -308,37 +232,29 @@ namespace fluffy { namespace testing {
 			});
 		});
 
+		ASSERT_TRUE(parser->finished());
 	}
 
 	TEST_F(ParserExpressionTest, TestExpressionPass)
 	{
 		parser->loadSourceFromFile(".\\files\\parser\\source_3.txt");
-		parser->nextToken();
 
 		int exprCount = 0;
-		while (true)
+		while (!parser->finished())
 		{
-			if (parser->isEof())
-			{
-				break;
-			}
-			parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
-			parser->nextToken();
+			parser->parseStmtDecl(ctx);
 			exprCount++;
 		}
 		ASSERT_EQ(exprCount, 20);
+		ASSERT_TRUE(parser->finished());
 	}
 
 	TEST_F(ParserExpressionTest, TestExpressionGeneric)
 	{
 		parser->loadSource("t.foo<T>(2)");
-		parser->nextToken();
 
-		parser_objects::ParserObjectExpressionDecl::parse(parser.get(), OperatorPrecLevel_e::MinPrec, false);
+		parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 
-		if (!parser->isEof())
-		{
-			throw std::exception();
-		}
+		ASSERT_TRUE(parser->finished());
 	}
 } }

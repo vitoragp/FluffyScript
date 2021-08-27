@@ -122,9 +122,9 @@ namespace application
 		let street: string;
 		let number: string;
 		let cep: string;
-		let ref repository: UserRepository;
+		let shared repository: UserRepository;
 
-		constructor(ref repository: UserRepository)
+		constructor(shared repository: UserRepository)
 			: repository(repository)
 		{}
 
@@ -172,13 +172,16 @@ namespace application
 
 		virtual fn onEvent(evt: WindowEvent) override
 		{
-			match evt
-			{
-				when CloseEvent(_) -> {
-					showMessage("Information", "Deseja realmente fechar a janela?", Message::YesNo);
-				},
-				when _ -> {},
-			}
+			const (lparam, wparam) = evt.params;
+			const {event} = evt;
+
+			const message = match event {
+				when CloseEvent(_) -> "Closing...",
+				when _ -> "Running...",
+			};
+
+			this.setMessage(message, lparam, wparam);
+
 			super.onEvent(evt);
 		}
 	}
@@ -189,8 +192,8 @@ namespace application
 
 	fn main(args: string[]) -> i32
 	{
-		let userRepository = new UserRepository();
-		let userForm = new UserForm(ref userRepository);
+		let shared userRepository = new UserRepository();
+		let userForm = new UserForm(shared userRepository);
 		userForm.show();
 		return 0;
 	}

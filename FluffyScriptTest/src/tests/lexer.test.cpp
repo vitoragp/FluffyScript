@@ -40,60 +40,56 @@ namespace fluffy { namespace testing {
 	TEST_F(LexerWithDirectBufferTest, TestParseKeywordInclude)
 	{
 		lex->loadSource("include");
-		lex->parse(tok);
 		{
-			EXPECT_EQ(tok.value, "include");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Include);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "include");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Include);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseKeywordNamespace)
 	{
 		lex->loadSource("namespace");
-		lex->parse(tok);
 		{
-			EXPECT_EQ(tok.value, "namespace");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Namespace);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "namespace");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Namespace);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseIdentifier)
 	{
 		lex->loadSource("test");
-		lex->parse(tok);
 		{
-			EXPECT_EQ(tok.value, "test");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "test");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseMultiplesTokens)
 	{
 		lex->loadSource("void test");
-		lex->parse(tok);
 		{
-			EXPECT_EQ(tok.value, "void");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Void);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "void");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Void);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
-		lex->parse(tok);
+		lex->nextToken();
 		{
-			EXPECT_EQ(tok.value, "test");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 6);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "test");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 6);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -101,78 +97,73 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("void test\nu32 love");
 
-		lex->parse(tok); // void
-		lex->parse(tok); // test
-
-		lex->parse(tok); // u32
+		lex->nextToken(); // test
+		lex->nextToken(); // u32
 		{
-			EXPECT_EQ(tok.value, "u32");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::U32);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "u32");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U32);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // love
+		lex->nextToken(); // love
 		{
-			EXPECT_EQ(tok.value, "love");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "love");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseFile)
 	{
-		const std::string filename = ".\\files\\lexer\\source_1.txt";
-
-		lex->loadFromSource(filename);
-
-		lex->parse(tok); // u64
+		const I8* filename = ".\\files\\lexer\\source_1.txt";
+		lex->loadSourceFromFile(filename);
 		{
-			EXPECT_EQ(tok.value, "u64");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::U64);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "u64");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U64);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // id
+		lex->nextToken(); // id
 		{
-			EXPECT_EQ(tok.value, "id");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "id");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // string
+		lex->nextToken(); // string
 		{
-			EXPECT_EQ(tok.value, "string");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::String);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "string");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::String);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // identifier
+		lex->nextToken(); // identifier
 		{
-			EXPECT_EQ(tok.value, "identifier");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 8);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "identifier");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 8);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestParseInvalidFile)
 	{
-		const std::string filename = ".\\files\\lexer\\source_not_exist.txt";
+		const I8* filename = ".\\files\\lexer\\source_not_exist.txt";
 
 		try
 		{
-			lex->loadFromSource(filename);
+			lex->loadSourceFromFile(filename);
 		}
 		catch (exceptions::file_not_found_exception& e)
 		{
@@ -185,8 +176,6 @@ namespace fluffy { namespace testing {
 		try
 		{
 			lex->loadSource("#");
-			lex->parse(tok);
-
 			throw std::exception();
 		}
 		catch (exceptions::unexpected_token_exception& e)
@@ -199,54 +188,54 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("> >= == +=");
 
-		lex->parse(tok); // >
+		// >
 		{
-			EXPECT_EQ(tok.value, ">");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::GreaterThan);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, ">");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::GreaterThan);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // >=
+		lex->nextToken(); // >=
 		{
-			EXPECT_EQ(tok.value, ">=");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::GreaterThanOrEqual);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 3);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, ">=");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::GreaterThanOrEqual);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 3);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // ==
+		lex->nextToken(); // ==
 		{
-			EXPECT_EQ(tok.value, "==");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Equal);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 6);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "==");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Equal);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 6);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // +=
+		lex->nextToken(); // +=
 		{
-			EXPECT_EQ(tok.value, "+=");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::PlusAssign);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 9);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "+=");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::PlusAssign);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 9);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestSkipComments)
 	{
-		lex->loadFromSource(".\\files\\lexer\\source_2.txt");
+		lex->loadSourceFromFile(".\\files\\lexer\\source_2.txt");
 
-		lex->parse(tok); // void
+		// void
 		{
-			EXPECT_EQ(tok.value, "void");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Void);
-			EXPECT_EQ(tok.line, 7);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, ".\\files\\lexer\\source_2.txt");
+			EXPECT_EQ(lex->getToken().value, "void");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Void);
+			EXPECT_EQ(lex->getToken().line, 7);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, ".\\files\\lexer\\source_2.txt");
 		}
 	}
 
@@ -254,8 +243,7 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadFromSource(".\\files\\lexer\\source_3.txt");
-			lex->parse(tok);
+			lex->loadSourceFromFile(".\\files\\lexer\\source_3.txt");
 
 			throw std::exception();
 		}
@@ -269,22 +257,22 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("0x0 0x10a");
 
-		lex->parse(tok); // 0x0
+		// 0x0
 		{
-			EXPECT_EQ(tok.value, "0");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantHex);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantHex);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 0x10a
+		lex->nextToken(); // 0x10a
 		{
-			EXPECT_EQ(tok.value, "10a");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantHex);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "10a");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantHex);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -292,22 +280,22 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("0b0 0b101");
 
-		lex->parse(tok); // 0x0
+		// 0x0
 		{
-			EXPECT_EQ(tok.value, "0");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantBin);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantBin);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 0x10a
+		lex->nextToken(); // 0x10a
 		{
-			EXPECT_EQ(tok.value, "101");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantBin);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "101");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantBin);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -315,31 +303,31 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("0.0 0.5f 0.95F");
 
-		lex->parse(tok); // 0.0
+		// 0.0
 		{
-			EXPECT_EQ(tok.value, "0.0");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantFp64);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0.0");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantFp64);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 0.5f
+		lex->nextToken(); // 0.5f
 		{
-			EXPECT_EQ(tok.value, "0.5");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantFp32);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0.5");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantFp32);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 0.95F
+		lex->nextToken(); // 0.95F
 		{
-			EXPECT_EQ(tok.value, "0.95");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantFp32);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 10);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0.95");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantFp32);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 10);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -347,13 +335,13 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("0");
 
-		lex->parse(tok); // 0
+		// 0
 		{
-			EXPECT_EQ(tok.value, "0");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantInteger);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantInteger);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -361,31 +349,31 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("'a' 'b' '0'");
 
-		lex->parse(tok); // 'a'
+		// 'a'
 		{
-			EXPECT_EQ(tok.value, "a");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantChar);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "a");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantChar);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 'b'
+		lex->nextToken(); // 'b'
 		{
-			EXPECT_EQ(tok.value, "b");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantChar);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "b");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantChar);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // '0'
+		lex->nextToken(); // '0'
 		{
-			EXPECT_EQ(tok.value, "0");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantChar);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 9);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "0");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantChar);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 9);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
@@ -393,57 +381,57 @@ namespace fluffy { namespace testing {
 	{
 		lex->loadSource("\"test\" \"bola\" \"\\n\\r\" \"'tonhudo'\"");
 
-		lex->parse(tok); // test
+		// test
 		{
-			EXPECT_EQ(tok.value, "test");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantString);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "test");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantString);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // bola
+		lex->nextToken(); // bola
 		{
-			EXPECT_EQ(tok.value, "bola");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantString);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 8);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "bola");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantString);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 8);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // \n\r
+		lex->nextToken(); // \n\r
 		{
-			EXPECT_EQ(tok.value, "\\n\\r");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantString);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 15);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "\\n\\r");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantString);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 15);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 
-		lex->parse(tok); // 'tonhudo'
+		lex->nextToken(); // 'tonhudo'
 		{
-			EXPECT_EQ(tok.value, "'tonhudo'");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::ConstantString);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 22);
-			EXPECT_EQ(tok.filename, "anom_block");
+			EXPECT_EQ(lex->getToken().value, "'tonhudo'");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::ConstantString);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 22);
+			EXPECT_EQ(lex->getToken().filename, "anom_block");
 		}
 	}
 
 	TEST_F(LexerWithDirectBufferTest, TestComplexScript)
 	{
-		lex->loadFromSource(".\\files\\lexer\\source_4.txt");
+		lex->loadSourceFromFile(".\\files\\lexer\\source_4.txt");
 
 		int tokenCount = 0;
 		while (true)
 		{
-			lex->parse(tok);
 			{
-				if (tok.type == TokenType_e::Eof) {
+				if (lex->getToken().type == TokenType_e::Eof) {
 					break;
 				}
 			}
 			tokenCount++;
+			lex->nextToken();
 		}
 		EXPECT_EQ(tokenCount, 134);
 	}
@@ -476,54 +464,54 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestParseFile)
 	{
-		const std::string filename = ".\\files\\lexer\\source_1.txt";
+		const I8* filename = ".\\files\\lexer\\source_1.txt";
 
-		lex->loadFromSource(filename);
+		lex->loadSourceFromFile(filename);
 
-		lex->parse(tok); // u64
+		// u64
 		{
-			EXPECT_EQ(tok.value, "u64");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::U64);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "u64");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U64);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // id
+		lex->nextToken(); // id
 		{
-			EXPECT_EQ(tok.value, "id");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 1);
-			EXPECT_EQ(tok.column, 5);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "id");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // string
+		lex->nextToken(); // string
 		{
-			EXPECT_EQ(tok.value, "string");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::String);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "string");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::String);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 
-		lex->parse(tok); // identifier
+		lex->nextToken(); // identifier
 		{
-			EXPECT_EQ(tok.value, "identifier");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Identifier);
-			EXPECT_EQ(tok.line, 2);
-			EXPECT_EQ(tok.column, 8);
-			EXPECT_EQ(tok.filename, filename);
+			EXPECT_EQ(lex->getToken().value, "identifier");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 8);
+			EXPECT_EQ(lex->getToken().filename, filename);
 		}
 	}
 
 	TEST_F(LexerWithLazyBufferTest, TestParseInvalidFile)
 	{
-		const std::string filename = ".\\files\\lexer\\source_not_exist.txt";
+		const I8* filename = ".\\files\\lexer\\source_not_exist.txt";
 
 		try
 		{
-			lex->loadFromSource(filename);
+			lex->loadSourceFromFile(filename);
 		}
 		catch (exceptions::file_not_found_exception& e)
 		{
@@ -533,15 +521,15 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestSkipComments)
 	{
-		lex->loadFromSource(".\\files\\lexer\\source_2.txt");
+		lex->loadSourceFromFile(".\\files\\lexer\\source_2.txt");
 
-		lex->parse(tok); // void
+		// void
 		{
-			EXPECT_EQ(tok.value, "void");
-			EXPECT_EQ(tok.type, fluffy::TokenType_e::Void);
-			EXPECT_EQ(tok.line, 7);
-			EXPECT_EQ(tok.column, 1);
-			EXPECT_EQ(tok.filename, ".\\files\\lexer\\source_2.txt");
+			EXPECT_EQ(lex->getToken().value, "void");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Void);
+			EXPECT_EQ(lex->getToken().line, 7);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, ".\\files\\lexer\\source_2.txt");
 		}
 	}
 
@@ -549,8 +537,8 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadFromSource(".\\files\\lexer\\source_3.txt");
-			lex->parse(tok);
+			lex->loadSourceFromFile(".\\files\\lexer\\source_3.txt");
+			lex->nextToken();
 
 			throw std::exception();
 		}
@@ -562,18 +550,18 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestComplexScript)
 	{
-		lex->loadFromSource(".\\files\\lexer\\source_4.txt");
+		lex->loadSourceFromFile(".\\files\\lexer\\source_4.txt");
 
 		int tokenCount = 0;
 		while (true)
 		{
-			lex->parse(tok);
 			{
-				if (tok.type == TokenType_e::Eof) {
+				if (lex->getToken().type == TokenType_e::Eof) {
 					break;
 				}
 			}
 			tokenCount++;
+			lex->nextToken();
 		}
 		EXPECT_EQ(tokenCount, 134);
 	}

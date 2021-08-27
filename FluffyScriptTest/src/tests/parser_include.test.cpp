@@ -2,14 +2,11 @@
 #include "gtest\gtest.h"
 
 #include "parser\fl_parser.h"
-#include "lexer\fl_lexer.h"
-#include "parser\fl_ast_decl.h"
-#include "parser\parser_objects\fl_parser_objects.h"
+#include "ast\fl_ast_decl.h"
 #include "fl_buffer.h"
 
 namespace fluffy { namespace testing {
 	using parser::Parser;
-	using lexer::Lexer;
 
 	/**
 	 * ParserIncludeTest
@@ -17,16 +14,14 @@ namespace fluffy { namespace testing {
 
 	struct ParserIncludeTest : public ::testing::Test
 	{
-		std::unique_ptr<Lexer> lexer;
 		std::unique_ptr<Parser> parser;
+		fluffy::parser::ParserContext_s ctx{ true, false, false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
 		{
 			parser = std::make_unique<Parser>(
-				new Lexer(
-					new DirectBuffer()
-				)
+				new DirectBuffer()
 			);
 		}
 	};
@@ -38,9 +33,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserIncludeTest, TestIncludeDecl_All)
 	{
 		parser->loadSource("include { * } from std;");
-		parser->nextToken();
 
-		auto inc = parser_objects::ParserObjectIncludeDecl::parse(parser.get());
+		auto inc = parser->parseInclude(ctx);
 
 		ASSERT_TRUE(inc != nullptr);
 
@@ -55,9 +49,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserIncludeTest, TestIncludeDecl_OneInc)
 	{
 		parser->loadSource("include { print } from std;");
-		parser->nextToken();
 
-		auto inc = parser_objects::ParserObjectIncludeDecl::parse(parser.get());
+		auto inc = parser->parseInclude(ctx);
 
 		ASSERT_TRUE(inc != nullptr);
 
@@ -73,9 +66,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc)
 	{
 		parser->loadSource("include { print, scan } from std;");
-		parser->nextToken();
 
-		auto inc = parser_objects::ParserObjectIncludeDecl::parse(parser.get());
+		auto inc = parser->parseInclude(ctx);
 
 		ASSERT_TRUE(inc != nullptr);
 
@@ -92,9 +84,8 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc_ScopedRoot)
 	{
 		parser->loadSource("include { print, scan } from ::std::next;");
-		parser->nextToken();
 
-		auto inc = parser_objects::ParserObjectIncludeDecl::parse(parser.get());
+		auto inc = parser->parseInclude(ctx);
 
 		ASSERT_TRUE(inc != nullptr);
 
