@@ -565,4 +565,51 @@ namespace fluffy { namespace testing {
 		}
 		EXPECT_EQ(tokenCount, 134);
 	}
+
+	/**
+	 * Testing
+	 */
+
+	TEST_F(LexerWithLazyBufferTest, TestParseSourceCode)
+	{
+		const I8* filename = "anom_block";
+
+		lex->loadSource("u64 id\nstring identifier");
+
+		// u64
+		{
+			EXPECT_EQ(lex->getToken().value, "u64");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U64);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
+		}
+
+		lex->nextToken(); // id
+		{
+			EXPECT_EQ(lex->getToken().value, "id");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 1);
+			EXPECT_EQ(lex->getToken().column, 5);
+			EXPECT_EQ(lex->getToken().filename, filename);
+		}
+
+		lex->nextToken(); // string
+		{
+			EXPECT_EQ(lex->getToken().value, "string");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::String);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 1);
+			EXPECT_EQ(lex->getToken().filename, filename);
+		}
+
+		lex->nextToken(); // identifier
+		{
+			EXPECT_EQ(lex->getToken().value, "identifier");
+			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
+			EXPECT_EQ(lex->getToken().line, 2);
+			EXPECT_EQ(lex->getToken().column, 8);
+			EXPECT_EQ(lex->getToken().filename, filename);
+		}
+	}
 } }

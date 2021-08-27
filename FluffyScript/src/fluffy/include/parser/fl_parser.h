@@ -44,6 +44,9 @@ namespace fluffy { namespace parser {
 		finished();
 
 		std::unique_ptr<ast::CodeUnit>
+		parse(ParserContext_s& ctx);
+
+		std::unique_ptr<ast::CodeUnit>
 		parseCodeUnit(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::IncludeDecl>

@@ -18,6 +18,8 @@ namespace fluffy { namespace ast { namespace expr {
 	using ast::pattern::PatternDecl;
 
 	using TypeDeclPtr								= std::unique_ptr<TypeDecl>;
+	using TypeDeclPtrList							= std::vector<TypeDeclPtr>;
+
 	using TypeDeclFunctionPtr						= std::unique_ptr<TypeDeclFunction>;
 
 	using BlockDeclPtr								= std::unique_ptr<BlockDecl>;
@@ -249,6 +251,25 @@ namespace fluffy { namespace ast { namespace expr {
 		TypeDeclPtr								objectTypeDecl;
 		ExpressionDeclPtr						expressionDecl;
 		ExpressionNewBlockDeclPtr				objectInitBlockDecl;
+	};
+
+	/**
+	 * ExpressionGenericDecl
+	 */
+
+	class ExpressionGenericDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionGenericDecl(const U32 line, const U32 column)
+			: ExpressionDecl(ExpressionDeclType_e::GenericDecl, line, column)
+		{}
+
+		virtual ~ExpressionGenericDecl()
+		{}
+
+		TypeDeclPtrList							genericTypeList;
+		ExpressionDeclPtr						lhs;
+		ExpressionDeclPtr						rhs;
 	};
 
 	/**

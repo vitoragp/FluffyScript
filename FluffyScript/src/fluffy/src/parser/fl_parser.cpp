@@ -3191,8 +3191,8 @@ namespace fluffy { namespace parser {
 		std::unique_ptr<ast::expr::ExpressionDecl> lhs;
 		std::unique_ptr<ast::expr::ExpressionDecl> rhs;
 
-		const unsigned int line		= m_lexer->getToken().line;
-		const unsigned int column	= m_lexer->getToken().column;
+		const U32 line		= m_lexer->getToken().line;
+		const U32 column	= m_lexer->getToken().column;
 
 		// Processa operadores unarios Prefixo.
 		if (prec > OperatorPrecLevel_e::Unary) {
@@ -3277,14 +3277,6 @@ namespace fluffy { namespace parser {
 						} else {
 							parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation);
 						}
-
-						/*
-						if (!skipOnly) {
-							whenDecl->blockDecl = ParserObjectBlockDecl::parse(m_lexer);
-						} else {
-							ParserObjectBlockDecl::parse(m_lexer);
-						}
-						*/
 
 						if (m_lexer->isComma())
 						{
@@ -3438,6 +3430,115 @@ namespace fluffy { namespace parser {
 						lhs = std::move(indexAddressExpr);
 					}
 					continue;
+				}
+				break;
+			case TokenType_e::LessThan:
+				{
+					auto exprGenericDef = !skipOnly ? std::make_unique<ast::expr::ExpressionGenericDecl>(
+						m_lexer->getToken().line,
+						m_lexer->getToken().column
+					) : nullptr;
+
+					Bool		parseGeneric = false;
+					Bool		finishParse = false;
+					Bool		expectType = false;
+					const U32	position = m_lexer->getToken().position;
+
+					while (true)
+					{
+						switch (m_lexer->getToken().type)
+						{
+						case TokenType_e::Void:
+							{
+								throw exceptions::custom_exception(
+									"Generic item can't be 'void'",
+									m_lexer->getToken().line,
+									m_lexer->getToken().column
+								);
+							}
+							break;
+						case TokenType_e::Bool:
+						case TokenType_e::I8:
+						case TokenType_e::U8:
+						case TokenType_e::I16:
+						case TokenType_e::U16:
+						case TokenType_e::I32:
+						case TokenType_e::U32:
+						case TokenType_e::I64:
+						case TokenType_e::U64:
+						case TokenType_e::Fp32:
+						case TokenType_e::Fp64:
+						case TokenType_e::String:
+						case TokenType_e::Object:
+						case TokenType_e::Identifier:
+						case TokenType_e::ScopeResolution:
+							{
+								// Consome o tipo.
+								expectType = false;
+								auto typeDecl = parseType(ctx);
+
+								// TODO: Verificar se e um tipo ou uma instancia de dados.
+
+								// Adiciona o template a lista.
+								exprGenericDef->genericTypeList.push_back(std::move(typeDecl));
+								continue;
+							}
+							break;
+						case TokenType_e::Comma:
+							{
+								expectType = true;
+								m_lexer->nextToken();	// Consome ','
+								continue;
+							}
+							break;
+						case TokenType_e::GreaterThan:
+							if (m_lexer->predictNextToken().type == TokenType_e::LParBracket) {
+								m_lexer->nextToken();	// Consome '>'
+								m_lexer->nextToken();	// Consome '('
+
+								parseGeneric = true;
+								finishParse = true;
+
+								// Verfica se e esperado uma declaracao de tipo.
+								if (expectType)
+								{
+									throw exceptions::custom_exception(
+										"Expect type decl",
+										m_lexer->getToken().line,
+										m_lexer->getToken().column
+									);
+								}
+
+								exprGenericDef->lhs = std::move(lhs);
+								exprGenericDef->rhs = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
+
+								// Consome ')'
+								m_lexer->expectToken(TokenType_e::RParBracket);
+
+								lhs = std::move(exprGenericDef);
+							} else {
+								finishParse = true;
+								m_lexer->resetToPosition(position);
+							}
+							break;
+						default:
+							finishParse = true;
+							m_lexer->resetToPosition(position);
+							break;
+						}
+
+						// Quebra o loop.
+						if (finishParse)
+						{
+							break;
+						}
+					}
+
+					// Verifica se houve o processamento do generic.
+					if (parseGeneric)
+					{
+						continue;
+					}
 				}
 				break;
 			default:

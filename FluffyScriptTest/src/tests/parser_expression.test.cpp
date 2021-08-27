@@ -251,10 +251,11 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionGeneric)
 	{
-		parser->loadSource("t.foo<T>(2)");
+		parser->loadSource("t.foo<T, U>(2, 2)");
 
-		parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+		auto expr = parser->parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 
+		ASSERT_TRUE(expr != nullptr);
 		ASSERT_TRUE(parser->finished());
 	}
 } }

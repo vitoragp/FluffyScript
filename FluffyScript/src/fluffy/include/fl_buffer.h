@@ -1,5 +1,4 @@
 #pragma once
-#include <fstream>
 #include "fl_defs.h"
 
 namespace fluffy
@@ -64,7 +63,7 @@ namespace fluffy
 		virtual void			reset(U32 position) override;
 
 	private:
-		std::ifstream			m_stream;
+		std::istream*			m_stream;
 		I8*						m_memory;
 		U32						m_cursor;
 		U32						m_length;

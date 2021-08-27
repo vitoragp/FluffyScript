@@ -1,3 +1,5 @@
+#include <fstream>
+#include <sstream>
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
@@ -89,7 +91,8 @@ namespace fluffy {
 	 */
 
 	LazyBuffer::LazyBuffer(const U32 bufferSize)
-		: m_memory(nullptr)
+		: m_stream(nullptr)
+		, m_memory(nullptr)
 		, m_cursor(0)
 		, m_length(bufferSize)
 		, m_fileSize(0)
@@ -99,8 +102,13 @@ namespace fluffy {
 
 	LazyBuffer::~LazyBuffer()
 	{
-		if (m_stream.is_open()) {
-			m_stream.close();
+		if (m_stream) {
+			if (std::ifstream* file_stream = dynamic_cast<std::ifstream*>(m_stream))
+			{
+				file_stream->close();
+			}
+			delete m_stream;
+			m_stream = nullptr;
 		}
 		if (m_memory != nullptr) {
 			free(m_memory);
@@ -112,22 +120,15 @@ namespace fluffy {
 
 	void LazyBuffer::load(const I8* sourcePtr, const U32 len)
 	{
-		throw exceptions::not_implemented_feature_exception("LazyBuffer works with files only");
-	}
+		m_stream = new std::stringstream(sourcePtr);
 
-	void LazyBuffer::loadFromFile(const I8* fileName)
-	{
-		m_stream.open(fileName, std::ifstream::binary);
-		if (!m_stream.is_open()) {
-			throw exceptions::file_not_found_exception(fileName);
-		}
-
-		m_stream.seekg(0, std::fstream::end);
-		m_fileSize = static_cast<U32>(m_stream.tellg());
-		m_stream.seekg(0, std::fstream::beg);
+		// Calcula o tamanho total do codigo.
+		m_stream->seekg(0, std::fstream::end);
+		m_fileSize = static_cast<U32>(m_stream->tellg());
+		m_stream->seekg(0, std::fstream::beg);
 
 		// Preenche o buffer inicial
-		m_stream.read(m_memory, m_length);
+		m_stream->read(m_memory, m_length);
 
 		// Se o conteudo do arquivo e menor que o buffer
 		// implanta no buffer o caractere nulo no final do conteudo.
@@ -137,9 +138,33 @@ namespace fluffy {
 		}
 	}
 
+	void LazyBuffer::loadFromFile(const I8* fileName)
+	{
+		std::ifstream* file_stream = new std::ifstream();
+		file_stream->open(fileName, std::ifstream::binary);
+		if (!file_stream->is_open()) {
+			throw exceptions::file_not_found_exception(fileName);
+		}
+
+		file_stream->seekg(0, std::fstream::end);
+		m_fileSize = static_cast<U32>(file_stream->tellg());
+		file_stream->seekg(0, std::fstream::beg);
+
+		// Preenche o buffer inicial
+		file_stream->read(m_memory, m_length);
+
+		// Se o conteudo do arquivo e menor que o buffer
+		// implanta no buffer o caractere nulo no final do conteudo.
+		if (m_length > m_fileSize)
+		{
+			m_memory[m_fileSize] = 0;
+		}
+		m_stream = file_stream;
+	}
+
 	U32 LazyBuffer::getPosition()
 	{
-		return static_cast<U32>(m_stream.tellg()) + m_cursor;
+		return static_cast<U32>(m_stream->tellg()) + m_cursor;
 	}
 
 	const I8 LazyBuffer::readByte(U8 offset)
@@ -155,7 +180,7 @@ namespace fluffy {
 			}
 
 			// Salva a posicao atual.
-			size_t cursor = m_stream.tellg();
+			size_t cursor = m_stream->tellg();
 			size_t requestedPosition = cursor + offset - 1;
 
 			// Verifica se o offset solicitado esta dentro do range.
@@ -172,25 +197,25 @@ namespace fluffy {
 
 			// Avanca ate o offset solicitado, le o byte e volta para a
 			// posicao inicial.
-			m_stream.seekg(requestedPosition, std::fstream::beg);
-			m_stream.read(&ch, 1);
-			m_stream.seekg(cursor, std::fstream::beg);
+			m_stream->seekg(requestedPosition, std::fstream::beg);
+			m_stream->read(&ch, 1);
+			m_stream->seekg(cursor, std::fstream::beg);
 
 			return ch;
 		}
 
 		if (m_cursor == m_length)
 		{
-			if (m_stream.good())
+			if (m_stream->good())
 			{
-				const U32 totalReadedBytes = static_cast<U32>(m_stream.tellg());
-				m_stream.read(
+				const U32 totalReadedBytes = static_cast<U32>(m_stream->tellg());
+				m_stream->read(
 					m_memory,
 					totalReadedBytes + m_length > m_fileSize
 					? m_fileSize - totalReadedBytes
 					: m_length
 				);
-				size_t readedBytes = m_stream.gcount();
+				size_t readedBytes = m_stream->gcount();
 				if (readedBytes < m_length) {
 					m_memory[readedBytes] = 0;
 				}
@@ -212,19 +237,19 @@ namespace fluffy {
 	void LazyBuffer::reset(U32 position)
 	{
 		// Vai para a posicao indicada.
-		m_stream.seekg(position, std::fstream::beg);
+		m_stream->seekg(position, std::fstream::beg);
 
 		// Recarrega o buffer.
-		if (m_stream.good())
+		if (m_stream->good())
 		{
-			const U32 totalReadedBytes = static_cast<U32>(m_stream.tellg());
-			m_stream.read(
+			const U32 totalReadedBytes = static_cast<U32>(m_stream->tellg());
+			m_stream->read(
 				m_memory,
 				totalReadedBytes + m_length > m_fileSize
 				? m_fileSize - totalReadedBytes
 				: m_length
 			);
-			size_t readedBytes = m_stream.gcount();
+			size_t readedBytes = m_stream->gcount();
 			if (readedBytes < m_length) {
 				m_memory[readedBytes] = 0;
 			}
