@@ -184,12 +184,14 @@ namespace fluffy {
 		{
 		public:
 									custom_exception(String message, U32 line, U32 column, ...);
+									custom_exception(String message, ...);
 									~custom_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
 			String					m_message;
+			const Bool				m_hasPositionalInfo;
 			const U32 				m_line;
 			const U32 				m_column;
 		};

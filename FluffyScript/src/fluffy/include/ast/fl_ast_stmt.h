@@ -18,8 +18,8 @@ namespace fluffy { namespace ast { namespace stmt {
 	using PatternDeclPtr				= std::unique_ptr<PatternDecl>;
 	using PatternDeclPtrList			= std::vector<PatternDeclPtr>;
 
-	using MatchWhenDeclPtr				= std::unique_ptr<class MatchWhenDecl>;
-	using MatchWhenDeclPtrList			= std::vector<MatchWhenDeclPtr>;
+	using MatchWhenStmtDeclPtr			= std::unique_ptr<class MatchWhenStmtDecl>;
+	using MatchWhenStmtDeclPtrList		= std::vector<MatchWhenStmtDeclPtr>;
 
 	using ExpressionDeclPtr				= std::unique_ptr<ExpressionDecl>;
 	using BlockDeclPtr					= std::unique_ptr<BlockDecl>;
@@ -27,8 +27,8 @@ namespace fluffy { namespace ast { namespace stmt {
 			
 	using StmtForInitDeclPtr			= std::unique_ptr<class StmtForInitDecl>;
 
-	using StmtTryCatchBlockDeclPtr		= std::unique_ptr<class StmtTryCatchBlockDecl>;
-	using StmtTryCatchBlockDeclPtrList	= std::vector<StmtTryCatchBlockDeclPtr>;	
+	using StmtCatchBlockDeclPtr			= std::unique_ptr<class StmtCatchBlockDecl>;
+	using StmtCatchBlockDeclPtrList		= std::vector<StmtCatchBlockDeclPtr>;	
 
 	/**
 	 * StmtDecl
@@ -37,8 +37,8 @@ namespace fluffy { namespace ast { namespace stmt {
 	class StmtDecl : public AstNode
 	{
 	protected:
-		StmtDecl(StmtDeclType_e type, U32 line, U32 column)
-			: AstNode(line, column)
+		StmtDecl(AstNodeType_e nodeType, StmtDeclType_e type, U32 line, U32 column)
+			: AstNode(nodeType, line, column)
 			, type(type)
 		{}
 
@@ -57,7 +57,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	{
 	public:
 		StmtIfDecl(U32 line, U32 column)
-			: StmtDecl(StmtDeclType_e::If, line, column)
+			: StmtDecl(AstNodeType_e::IfStmt, StmtDeclType_e::If, line, column)
 		{}
 
 		virtual ~StmtIfDecl()
@@ -76,7 +76,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	{
 	public:
 		StmtIfLetDecl(U32 line, U32 column)
-			: StmtDecl(StmtDeclType_e::IfLet, line, column)
+			: StmtDecl(AstNodeType_e::IfLetStmt, StmtDeclType_e::IfLet, line, column)
 		{}
 
 		virtual ~StmtIfLetDecl()
@@ -96,7 +96,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtForDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::For, line, column)
+			 : StmtDecl(AstNodeType_e::ForStmt, StmtDeclType_e::For, line, column)
 		 {}
 
 		 virtual ~StmtForDecl()
@@ -117,7 +117,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtWhileDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::While, line, column)
+			 : StmtDecl(AstNodeType_e::WhileStmt, StmtDeclType_e::While, line, column)
 		 {}
 
 		 virtual ~StmtWhileDecl()
@@ -135,7 +135,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtDoWhileDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::DoWhile, line, column)
+			 : StmtDecl(AstNodeType_e::DoWhileStmt, StmtDeclType_e::DoWhile, line, column)
 		 {}
 
 		 virtual ~StmtDoWhileDecl()
@@ -153,14 +153,14 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtMatchDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Match, line, column)
+			 : StmtDecl(AstNodeType_e::MatchStmt, StmtDeclType_e::Match, line, column)
 		 {}
 
 		 virtual ~StmtMatchDecl()
 		 {}
 
 		 ExpressionDeclPtr					conditionExprDecl;
-		 MatchWhenDeclPtrList				whenDeclList;
+		 MatchWhenStmtDeclPtrList			whenDeclList;
 	 };
 
 	 /**
@@ -171,7 +171,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtReturnDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Return, line, column)
+			 : StmtDecl(AstNodeType_e::ReturnStmt, StmtDeclType_e::Return, line, column)
 		 {}
 
 		 virtual ~StmtReturnDecl()
@@ -188,7 +188,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtContinueDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Continue, line, column)
+			 : StmtDecl(AstNodeType_e::ContinueStmt, StmtDeclType_e::Continue, line, column)
 		 {}
 
 		 virtual ~StmtContinueDecl()
@@ -203,7 +203,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtBreakDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Break, line, column)
+			 : StmtDecl(AstNodeType_e::BreakStmt, StmtDeclType_e::Break, line, column)
 		 {}
 
 		 virtual ~StmtBreakDecl()
@@ -218,7 +218,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtGotoDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Goto, line, column)
+			 : StmtDecl(AstNodeType_e::GotoStmt, StmtDeclType_e::Goto, line, column)
 		 {}
 
 		 virtual ~StmtGotoDecl()
@@ -235,7 +235,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtLabelDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Label, line, column)
+			 : StmtDecl(AstNodeType_e::LabelStmt, StmtDeclType_e::Label, line, column)
 		 {}
 
 		 virtual ~StmtLabelDecl()
@@ -252,14 +252,14 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtTryDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Try, line, column)
+			 : StmtDecl(AstNodeType_e::TryStmt, StmtDeclType_e::Try, line, column)
 		 {}
 
 		 virtual ~StmtTryDecl()
 		 {}
 
 		 BlockDeclPtr						blockDecl;
-		 StmtTryCatchBlockDeclPtrList		catchDeclList;
+		 StmtCatchBlockDeclPtrList		catchDeclList;
 	 };
 
 	 /**
@@ -270,7 +270,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtPanicDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Panic, line, column)
+			 : StmtDecl(AstNodeType_e::PanicStmt, StmtDeclType_e::Panic, line, column)
 		 {}
 
 		 virtual ~StmtPanicDecl()
@@ -287,7 +287,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtVariableDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Variable, line, column)
+			 : StmtDecl(AstNodeType_e::VariableStmt, StmtDeclType_e::Variable, line, column)
 			 , isShared(false)
 			 , isConst(false)
 			 , isReference(false)
@@ -313,7 +313,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtExprDecl(U32 line, U32 column)
-			 : StmtDecl(StmtDeclType_e::Expr, line, column)
+			 : StmtDecl(AstNodeType_e::ExprStmt, StmtDeclType_e::Expr, line, column)
 		 {}
 
 		 virtual ~StmtExprDecl()
@@ -330,7 +330,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 {
 	 public:
 		 StmtForInitDecl(U32 line, U32 column)
-			 : AstNode(line, column)
+			 : AstNode(AstNodeType_e::ForInitDecl, line, column)
 		 {}
 
 		 virtual ~StmtForInitDecl()
@@ -342,17 +342,17 @@ namespace fluffy { namespace ast { namespace stmt {
 	 };
 
 	 /**
-	  * MatchWhenDecl
+	  * MatchWhenStmtDecl
 	  */
 
-	 class MatchWhenDecl : public AstNode
+	 class MatchWhenStmtDecl : public AstNode
 	 {
 	 public:
-		 MatchWhenDecl(U32 line, U32 column)
-			 : AstNode(line, column)
+		 MatchWhenStmtDecl(U32 line, U32 column)
+			 : AstNode(AstNodeType_e::MatchWhenStmtDecl, line, column)
 		 {}
 
-		 virtual ~MatchWhenDecl()
+		 virtual ~MatchWhenStmtDecl()
 		 {}
 
 		 PatternDeclPtr						patternDecl;		 
@@ -360,17 +360,17 @@ namespace fluffy { namespace ast { namespace stmt {
 	 };
 
 	 /**
-	  * StmtTryCatchBlockDecl
+	  * StmtCatchBlockDecl
 	  */
 
-	 class StmtTryCatchBlockDecl : public AstNode
+	 class StmtCatchBlockDecl : public AstNode
 	 {
 	 public:
-		 StmtTryCatchBlockDecl(U32 line, U32 column)
-			 : AstNode(line, column)
+		 StmtCatchBlockDecl(U32 line, U32 column)
+			 : AstNode(AstNodeType_e::CatchBlockStmtDecl, line, column)
 		 {}
 
-		 virtual ~StmtTryCatchBlockDecl()
+		 virtual ~StmtCatchBlockDecl()
 		 {}
 
 		 TypeDeclPtr						typeDecl;

@@ -8,7 +8,7 @@
 	{ \
 	public: \
 		TypeDecl##type(U32 line, U32 column) \
-			: TypeDecl(TypeDeclID_e::type, line, column) \
+			: TypeDecl(AstNodeType_e::type##Type, TypeDeclID_e::type, line, column) \
 		{} \
 		virtual ~TypeDecl##type() \
 		{} \
@@ -33,8 +33,8 @@ namespace fluffy { namespace ast {
 	class TypeDecl : public AstNode
 	{
 	protected:
-		TypeDecl(TypeDeclID_e typeID, U32 line, U32 column)
-			: AstNode(line, column)
+		TypeDecl(AstNodeType_e nodeType, TypeDeclID_e typeID, U32 line, U32 column)
+			: AstNode(nodeType, line, column)
 			, typeID(typeID)
 			, nullable(false)
 		{}
@@ -73,7 +73,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TypeDeclArray(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Array, line, column)
+			: TypeDecl(AstNodeType_e::ArrayType, TypeDeclID_e::Array, line, column)
 		{}
 
 		virtual ~TypeDeclArray()
@@ -91,7 +91,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TypeDeclFunction(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Function, line, column)
+			: TypeDecl(AstNodeType_e::FunctionType, TypeDeclID_e::Function, line, column)
 		{}
 
 		virtual ~TypeDeclFunction()
@@ -109,7 +109,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TypeDeclTuple(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Tuple, line, column)
+			: TypeDecl(AstNodeType_e::TupleType, TypeDeclID_e::Tuple, line, column)
 		{}
 
 		virtual ~TypeDeclTuple()
@@ -126,7 +126,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TypeDeclNamed(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Named, line, column)
+			: TypeDecl(AstNodeType_e::NamedType, TypeDeclID_e::Named, line, column)
 			, startFromRoot(false)
 			, reference(nullptr)
 		{}
@@ -142,17 +142,33 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
+	 * SelfTypeDecl
+	 */
+
+	class SelfTypeDecl : public TypeDecl
+	{
+	public:
+		SelfTypeDecl(U32 line, U32 column)
+			: TypeDecl(AstNodeType_e::SelfType, TypeDeclID_e::Self, line, column)
+		{}
+
+		virtual ~SelfTypeDecl()
+		{}
+	};
+
+	/**
 	 * ArrayDecl
 	 */
 
 	class ArrayDecl : public AstNode
 	{
-	public:
-		ArrayDecl(ArrayType_e arrayType, U32 line, U32 column)
-			: AstNode(line, column)
+	protected:
+		ArrayDecl(AstNodeType_e nodeType, ArrayType_e arrayType, U32 line, U32 column)
+			: AstNode(nodeType, line, column)
 			, arrayType(arrayType)
 		{}
 
+	public:
 		virtual ~ArrayDecl()
 		{}
 
@@ -167,7 +183,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		SizedArrayDecl(U32 line, U32 column)
-			: ArrayDecl(ArrayType_e::Sized, line, column)
+			: ArrayDecl(AstNodeType_e::SizedArray, ArrayType_e::Sized, line, column)
 			, size(0)
 		{}
 
@@ -185,7 +201,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		UnsizedArrayDecl(U32 line, U32 column)
-			: ArrayDecl(ArrayType_e::Unsized, line, column)
+			: ArrayDecl(AstNodeType_e::UnsizedArray, ArrayType_e::Unsized, line, column)
 		{}
 
 		virtual ~UnsizedArrayDecl()

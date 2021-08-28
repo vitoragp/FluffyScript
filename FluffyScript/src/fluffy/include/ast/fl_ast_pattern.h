@@ -20,8 +20,8 @@ namespace fluffy { namespace ast { namespace pattern {
 	class PatternDecl : public AstNode
 	{
 	protected:
-		PatternDecl(PatterType_e type, U32 line, U32 column)
-			: AstNode(line, column)
+		PatternDecl(AstNodeType_e nodeType, PatterType_e type, U32 line, U32 column)
+			: AstNode(nodeType, line, column)
 			, type(type)
 		{}
 
@@ -40,7 +40,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	{
 	public:
 		LiteralPatternDecl(U32 line, U32 column)
-			: PatternDecl(PatterType_e::Literal, line, column)
+			: PatternDecl(AstNodeType_e::LiteralPattern, PatterType_e::Literal, line, column)
 		{}
 
 		virtual ~LiteralPatternDecl()
@@ -57,7 +57,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	{	
 	public:
 		DestructuringPatternDecl(U32 line, U32 column)
-			: PatternDecl(PatterType_e::Destructuring, line, column)
+			: PatternDecl(AstNodeType_e::DestructuringPattern, PatterType_e::Destructuring, line, column)
 			, destructuringType(DestructuringType_e::Unknown)
 		{}
 
@@ -77,7 +77,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	{
 	public:
 		DestructuringItemDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::DestructuringItemDecl, line, column)
 			, destructuringItemType(DestructuringItemType_e::Unknown)
 		{}
 

@@ -49,8 +49,8 @@ namespace fluffy { namespace ast { namespace expr {
 	class ExpressionDecl : public AstNode
 	{
 	protected:
-		ExpressionDecl(ExpressionDeclType_e type, const U32 line, const U32 column)
-			: AstNode(line, column)
+		ExpressionDecl(AstNodeType_e nodeType, ExpressionDeclType_e type, const U32 line, const U32 column)
+			: AstNode(nodeType, line, column)
 			, type(type)
 		{}
 
@@ -70,7 +70,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionTernaryDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Ternary, line, column)
+			: ExpressionDecl(AstNodeType_e::TernaryExpr, ExpressionDeclType_e::Ternary, line, column)
 		{}
 
 		virtual ~ExpressionTernaryDecl()
@@ -89,7 +89,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionBinaryDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Binary, line, column)
+			: ExpressionDecl(AstNodeType_e::BinaryExpr, ExpressionDeclType_e::Binary, line, column)
 			, op(TokenType_e::Unknown)
 		{}
 
@@ -109,7 +109,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionUnaryDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Unary, line, column)
+			: ExpressionDecl(AstNodeType_e::UnaryExpr, ExpressionDeclType_e::Unary, line, column)
 			, unaryType(ExpressionUnaryType_e::Unknown)
 			, op(TokenType_e::Unknown)
 		{}
@@ -130,7 +130,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionAsDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::As, line, column)
+			: ExpressionDecl(AstNodeType_e::AsExpr, ExpressionDeclType_e::As, line, column)
 		{}
 
 		virtual ~ExpressionAsDecl()
@@ -149,7 +149,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionIsDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Is, line, column)
+			: ExpressionDecl(AstNodeType_e::IsExpr, ExpressionDeclType_e::Is, line, column)
 		{}
 
 		virtual ~ExpressionIsDecl()
@@ -167,7 +167,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionMatchDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Match, line, column)
+			: ExpressionDecl(AstNodeType_e::MatchExpr, ExpressionDeclType_e::Match, line, column)
 		{}
 
 		virtual ~ExpressionMatchDecl()
@@ -185,7 +185,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionFunctionDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::FunctionDecl, line, column)
+			: ExpressionDecl(AstNodeType_e::FunctionDeclExpr, ExpressionDeclType_e::FunctionDecl, line, column)
 			, inferenceType(InferenceType_e::None)
 		{}
 
@@ -206,7 +206,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionFunctionCall(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::FunctionCall, line, column)
+			: ExpressionDecl(AstNodeType_e::FunctionCallExpr, ExpressionDeclType_e::FunctionCall, line, column)
 		{}
 
 		virtual ~ExpressionFunctionCall()
@@ -217,6 +217,25 @@ namespace fluffy { namespace ast { namespace expr {
 	};
 
 	/**
+	 * ExpressionGenericDecl
+	 */
+
+	class ExpressionGenericDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionGenericDecl(const U32 line, const U32 column)
+			: ExpressionDecl(AstNodeType_e::GenericFunctionCallExpr, ExpressionDeclType_e::GenericDecl, line, column)
+		{}
+
+		virtual ~ExpressionGenericDecl()
+		{}
+
+		TypeDeclPtrList							genericTypeList;
+		ExpressionDeclPtr						lhs;
+		ExpressionDeclPtr						rhs;
+	};
+
+	/**
 	 * ExpressionIndexDecl
 	 */
 
@@ -224,7 +243,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionIndexDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Index, line, column)
+			: ExpressionDecl(AstNodeType_e::IndexExpr, ExpressionDeclType_e::Index, line, column)
 		{}
 
 		virtual ~ExpressionIndexDecl()
@@ -242,7 +261,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionNewDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::New, line, column)
+			: ExpressionDecl(AstNodeType_e::NewExpr, ExpressionDeclType_e::New, line, column)
 		{}
 
 		virtual ~ExpressionNewDecl()
@@ -254,25 +273,6 @@ namespace fluffy { namespace ast { namespace expr {
 	};
 
 	/**
-	 * ExpressionGenericDecl
-	 */
-
-	class ExpressionGenericDecl : public ExpressionDecl
-	{
-	public:
-		ExpressionGenericDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::GenericDecl, line, column)
-		{}
-
-		virtual ~ExpressionGenericDecl()
-		{}
-
-		TypeDeclPtrList							genericTypeList;
-		ExpressionDeclPtr						lhs;
-		ExpressionDeclPtr						rhs;
-	};
-
-	/**
 	 * ExpressionConstantBoolDecl
 	 */
 
@@ -280,7 +280,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantBoolDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantBool, line, column)
+			: ExpressionDecl(AstNodeType_e::ConstantBoolExpr, ExpressionDeclType_e::ConstantBool, line, column)
 			, valueDecl(false)
 		{}
 
@@ -298,7 +298,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantIntegerDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantInteger, line, column)
+			: ExpressionDecl(AstNodeType_e::ConstantIntegerExpr, ExpressionDeclType_e::ConstantInteger, line, column)
 			, valueDecl(0)
 			, valueType(TypeDeclID_e::Unknown)
 		{}
@@ -318,7 +318,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantRealDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantReal, line, column)
+			: ExpressionDecl(AstNodeType_e::ConstantRealExpr, ExpressionDeclType_e::ConstantReal, line, column)
 			, valueDecl(0.0)
 			, valueType(TypeDeclID_e::Unknown)
 		{}
@@ -338,7 +338,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantStringDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantString, line, column)
+			: ExpressionDecl(AstNodeType_e::ConstantStringExpr, ExpressionDeclType_e::ConstantString, line, column)
 		{}
 
 		virtual ~ExpressionConstantStringDecl()
@@ -355,7 +355,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantCharDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantChar, line, column)
+			: ExpressionDecl(AstNodeType_e::ConstantCharExpr, ExpressionDeclType_e::ConstantChar, line, column)
 			, valueDecl(0)
 		{}
 
@@ -363,6 +363,21 @@ namespace fluffy { namespace ast { namespace expr {
 		{}
 
 		I8										valueDecl;
+	};
+
+	/**
+	 * ExpressionConstantNullDecl
+	 */
+
+	class ExpressionConstantNullDecl : public ExpressionDecl
+	{
+	public:
+		ExpressionConstantNullDecl(const U32 line, const U32 column)
+			: ExpressionDecl(AstNodeType_e::ConstantNullExpr, ExpressionDeclType_e::ConstantNull, line, column)
+		{}
+
+		virtual ~ExpressionConstantNullDecl()
+		{}
 	};
 	
 	/**
@@ -373,7 +388,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionThisDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::This, line, column)
+			: ExpressionDecl(AstNodeType_e::ThisExpr, ExpressionDeclType_e::This, line, column)
 		{}
 
 		virtual ~ExpressionThisDecl()
@@ -388,7 +403,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionSuperDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::Super, line, column)
+			: ExpressionDecl(AstNodeType_e::SuperExpr, ExpressionDeclType_e::Super, line, column)
 		{}
 
 		virtual ~ExpressionSuperDecl()
@@ -403,28 +418,13 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionPrimitiveTypeDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::PrimitiveType, line, column)
+			: ExpressionDecl(AstNodeType_e::PrimitiveTypeExpr, ExpressionDeclType_e::PrimitiveType, line, column)
 		{}
 
 		virtual ~ExpressionPrimitiveTypeDecl()
 		{}
 
 		TypeDeclPtr							typeDecl;
-	};
-
-	/**
-	 * ExpressionConstantNullDecl
-	 */
-
-	class ExpressionConstantNullDecl : public ExpressionDecl
-	{
-	public:
-		ExpressionConstantNullDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantNull, line, column)
-		{}
-
-		virtual ~ExpressionConstantNullDecl()
-		{}
 	};
 
 	/**
@@ -435,7 +435,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionConstantIdentifierDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ConstantIdentifier, line, column)
+			: ExpressionDecl(AstNodeType_e::IdentifierExpr, ExpressionDeclType_e::ConstantIdentifier, line, column)
 			, startFromRoot(false)
 		{}
 
@@ -454,7 +454,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionDeclMark(const U32 line, const U32 column, const U32 beginPosition, const U32 endPopsition)
-			: ExpressionDecl(ExpressionDeclType_e::Mark, line, column)
+			: ExpressionDecl(AstNodeType_e::MarkExpr, ExpressionDeclType_e::Mark, line, column)
 			, beginPosition(beginPosition)
 			, endPopsition(endPopsition)
 		{}
@@ -474,7 +474,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionArrayInitDecl(const U32 line, const U32 column)
-			: ExpressionDecl(ExpressionDeclType_e::ArrayInit, line, column)
+			: ExpressionDecl(AstNodeType_e::ArrayInitExpr, ExpressionDeclType_e::ArrayInit, line, column)
 		{}
 
 		~ExpressionArrayInitDecl()
@@ -491,7 +491,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionMatchWhenDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::MatchWhenExprDecl, line, column)
 		{}
 
 		~ExpressionMatchWhenDecl()
@@ -509,7 +509,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionFunctionParameterDecl(const U32 line, const U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::FunctionParameterDecl, line, column)
 			, isEllipsis(false)
 		{}
 
@@ -529,7 +529,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionNewBlockDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::NewBlockDecl, line, column)
 		{}
 
 		virtual ~ExpressionNewBlockDecl()
@@ -546,7 +546,7 @@ namespace fluffy { namespace ast { namespace expr {
 	{
 	public:
 		ExpressionNewItemDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::NewItemDecl, line, column)
 		{}
 
 		virtual ~ExpressionNewItemDecl()

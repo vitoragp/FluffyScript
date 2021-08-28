@@ -17,13 +17,13 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		BlockDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::Block, line, column)
 			, beginPosition(0)
 			, endPosition(0)
 		{}
 
 		BlockDecl(U32 beginPosition, U32 endPosition, U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::Block, line, column)
 			, beginPosition(beginPosition)
 			, endPosition(endPosition)
 		{}

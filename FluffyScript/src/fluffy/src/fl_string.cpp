@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <mutex>
 #include "fl_string.h"
 
 namespace fluffy {
@@ -9,7 +10,7 @@ namespace fluffy {
 	class TStringBuffer
 	{
 	private:
-		TStringBuffer(const U32 bufferSize = 8192)
+		TStringBuffer(const U32 bufferSize = 2097152) // 2MB
 			: m_buffer(nullptr)
 			, m_cursor(0)
 			, m_bufferSize(bufferSize)
@@ -89,37 +90,39 @@ namespace fluffy {
 				return strFinded;
 			}
 
-			// Verifica se e necesseario aumentar o tamanho do buffer.
-			if (m_bufferSize - m_cursor < 256)
+			std::lock_guard<std::mutex> guard(m_mutex);
 			{
-				m_bufferSize += 8192; // 8K
-				m_buffer = static_cast<I8*>(realloc(m_buffer, m_bufferSize));
-			}
-
-			I8* bufferStrBeg = m_buffer + m_cursor;
-
-			// Adiciona string ao buffer.
-			if (I8* bufferCur = bufferStrBeg)
-			{
-				while (*strCur != 0)
-				{
-					*bufferCur++ = *strCur++;
-				}
-				*bufferCur++ = '\0';
-
-				// Atualiza posicao do pcursor para a proxima
-				m_cursor += static_cast<U32>(bufferCur - bufferStrBeg);
-
 				// Verifica se e necesseario aumentar o tamanho do buffer.
-				if (m_cursor >= m_bufferSize)
+				if (m_bufferSize - m_cursor < 256)
 				{
-					m_bufferSize += 8192; // 16K
+					m_bufferSize += 8192; // 8K
 					m_buffer = static_cast<I8*>(realloc(m_buffer, m_bufferSize));
 				}
 
-				return bufferStrBeg;
-			}
+				I8* bufferStrBeg = m_buffer + m_cursor;
 
+				// Adiciona string ao buffer.
+				if (I8* bufferCur = bufferStrBeg)
+				{
+					while (*strCur != 0)
+					{
+						*bufferCur++ = *strCur++;
+					}
+					*bufferCur++ = '\0';
+
+					// Atualiza posicao do pcursor para a proxima
+					m_cursor += static_cast<U32>(bufferCur - bufferStrBeg);
+
+					// Verifica se e necesseario aumentar o tamanho do buffer.
+					if (m_cursor >= m_bufferSize)
+					{
+						m_bufferSize += 8192; // 16K
+						m_buffer = static_cast<I8*>(realloc(m_buffer, m_bufferSize));
+					}
+
+					return bufferStrBeg;
+				}
+			}
 			return nullptr;
 		}
 
@@ -163,9 +166,10 @@ namespace fluffy {
 		}
 
 	private:
-		I8* m_buffer;
-		U32 m_cursor;
-		U32 m_bufferSize;
+		std::mutex	m_mutex;
+		I8*			m_buffer;
+		U32			m_cursor;
+		U32			m_bufferSize;
 	};
 }
 

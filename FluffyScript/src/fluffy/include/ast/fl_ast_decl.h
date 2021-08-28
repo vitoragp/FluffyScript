@@ -86,11 +86,12 @@ namespace fluffy { namespace ast {
 	 * CodeUnit
 	 */
 
-	class CodeUnit
+	class CodeUnit : public AstNode
 	{
 	public:
 		CodeUnit(const String& name)
-			: name(name)
+			: AstNode(AstNodeType_e::CodeUnit, 0, 0)
+			, name(name)
 		{}
 
 		~CodeUnit()
@@ -109,7 +110,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		IncludeDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::Include, line, column)
 		{}
 
 		~IncludeDecl()
@@ -127,7 +128,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		NamespaceDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::Namespace, line, column)
 		{}
 
 		~NamespaceDecl()
@@ -144,8 +145,8 @@ namespace fluffy { namespace ast {
 	class GeneralStmtDecl : public AstNodeIdentified
 	{
 	protected:
-		GeneralStmtDecl(GeneralDeclType_e type, U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+		GeneralStmtDecl(AstNodeType_e nodeType, GeneralDeclType_e type, U32 line, U32 column)
+			: AstNodeIdentified(nodeType, line, column)
 			, type(type)
 		{}
 
@@ -165,7 +166,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::ClassDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Class, GeneralDeclType_e::ClassDecl, line, column)
 			, isExported(false)
 			, isAbstract(false)
 		{}
@@ -191,8 +192,8 @@ namespace fluffy { namespace ast {
 	class ClassMemberDecl : public AstNodeIdentified
 	{
 	protected:
-		ClassMemberDecl(ClassMemberType_e type, U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+		ClassMemberDecl(AstNodeType_e nodeType, ClassMemberType_e type, U32 line, U32 column)
+			: AstNodeIdentified(nodeType, line, column)
 			, type(type)
 			, accessModifier(ClassMemberAccessModifier_e::Unknown)
 
@@ -214,7 +215,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassFunctionDecl(U32 line, U32 column)
-			: ClassMemberDecl(ClassMemberType_e::Function, line, column)
+			: ClassMemberDecl(AstNodeType_e::ClassFunction, ClassMemberType_e::Function, line, column)
 			, isStatic(false)
 			, isVirtual(false)
 			, isAbstract(false)
@@ -249,7 +250,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassVariableDecl(U32 line, U32 column)
-			: ClassMemberDecl(ClassMemberType_e::Variable, line, column)
+			: ClassMemberDecl(AstNodeType_e::ClassVariable, ClassMemberType_e::Variable, line, column)
 			, isShared(false)
 			, isConst(false)
 			, isReference(false)
@@ -275,7 +276,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassConstructorDecl(U32 line, U32 column)
-			: ClassMemberDecl(ClassMemberType_e::Constructor, line, column)
+			: ClassMemberDecl(AstNodeType_e::ClassConstructor, ClassMemberType_e::Constructor, line, column)
 		{}
 
 		virtual ~ClassConstructorDecl()
@@ -295,7 +296,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassDestructorDecl(U32 line, U32 column)
-			: ClassMemberDecl(ClassMemberType_e::Destructor, line, column)
+			: ClassMemberDecl(AstNodeType_e::ClassDestructor, ClassMemberType_e::Destructor, line, column)
 		{}
 
 		virtual ~ClassDestructorDecl()
@@ -312,7 +313,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ClassVariableInitDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::ClassVariableInitDecl, line, column)
 		{}
 
 		~ClassVariableInitDecl()
@@ -329,7 +330,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		InterfaceDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::InterfaceDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Interface, GeneralDeclType_e::InterfaceDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -349,7 +350,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		InterfaceFunctionDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::InterfaceFunction, line, column)
 		{}
 
 		~InterfaceFunctionDecl()
@@ -368,7 +369,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		StructDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::StructDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Struct, GeneralDeclType_e::StructDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -388,7 +389,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		StructVariableDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::StructVariable, line, column)
 			, isShared(false)
 			, isConst(false)
 			, isReference(false)
@@ -412,7 +413,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		EnumDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::EnumDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Enum, GeneralDeclType_e::EnumDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -432,7 +433,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		EnumItemDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::EnumItem, line, column)
 			, hasData(false)
 			, hasValue(false)
 		{}
@@ -454,7 +455,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TraitDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::TraitDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Trait, GeneralDeclType_e::TraitDecl, line, column)
 			, isExported(false)
 			, isDefinition(false)
 		{}
@@ -477,7 +478,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		TraitFunctionDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::TraitFunction, line, column)
 			, isStatic(true)
 		{}
 
@@ -492,21 +493,6 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
-	 * TraitSelfTypeDecl
-	 */
-
-	class TraitSelfTypeDecl : public TypeDecl
-	{
-	public:
-		TraitSelfTypeDecl(U32 line, U32 column)
-			: TypeDecl(TypeDeclID_e::Self, line, column)
-		{}
-
-		virtual ~TraitSelfTypeDecl()
-		{}
-	};
-
-	/**
 	 * FunctionDecl
 	 */
 
@@ -514,7 +500,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		FunctionDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::FunctionDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Function, GeneralDeclType_e::FunctionDecl, line, column)
 			, isExported(false)
 		{}
 
@@ -536,7 +522,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		VariableDecl(U32 line, U32 column)
-			: GeneralStmtDecl(GeneralDeclType_e::VariableDecl, line, column)
+			: GeneralStmtDecl(AstNodeType_e::Variable, GeneralDeclType_e::VariableDecl, line, column)
 			, isExported(false)
 			, isShared(false)
 			, isConst(false)
@@ -562,7 +548,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		FunctionParameterDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::FunctionParamters, line, column)
 			, isShared(false)
 			, isReference(false)
 			, isEllipsis(false)
@@ -586,7 +572,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		GenericDecl(U32 line, U32 column)
-			: AstNode(line, column)
+			: AstNode(AstNodeType_e::Generic, line, column)
 		{}
 
 		~GenericDecl()
@@ -603,7 +589,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		GenericItemDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::GenericItem, line, column)
 		{}
 
 		~GenericItemDecl()
@@ -620,7 +606,7 @@ namespace fluffy { namespace ast {
 	{
 	public:
 		ScopedIdentifierDecl(U32 line, U32 column)
-			: AstNodeIdentified(line, column)
+			: AstNodeIdentified(AstNodeType_e::ScopedIdentifier, line, column)
 			, startFromRoot(false)
 		{}
 

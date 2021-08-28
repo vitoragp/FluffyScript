@@ -8,15 +8,18 @@ namespace fluffy { namespace ast {
 
 	class AstNode
 	{
-	public:
-		AstNode(U32 line, U32 column)
-			: line(line)
+	protected:
+		AstNode(const AstNodeType_e	nodeType, U32 line, U32 column)
+			: nodeType(nodeType)
+			, line(line)
 			, column(column)
 		{}
 
+	public:
 		virtual ~AstNode()
 		{}
 
+		const AstNodeType_e		nodeType;
 		U32						line;
 		U32						column;
 	};
@@ -28,8 +31,8 @@ namespace fluffy { namespace ast {
 	class AstNodeIdentified : public AstNode
 	{
 	public:
-		AstNodeIdentified(U32 line, U32 column)
-			: AstNode(line, column)
+		AstNodeIdentified(const AstNodeType_e nodeType, U32 line, U32 column)
+			: AstNode(nodeType, line, column)
 		{}
 
 		virtual ~AstNodeIdentified()

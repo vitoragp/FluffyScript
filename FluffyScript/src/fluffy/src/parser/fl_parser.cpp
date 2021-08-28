@@ -1182,7 +1182,7 @@ namespace fluffy { namespace parser {
 			{
 				m_lexer->nextToken();
 				if (skipOnly) { break; }
-				typeDecl = std::make_unique<ast::TraitSelfTypeDecl>(
+				typeDecl = std::make_unique<ast::SelfTypeDecl>(
 					m_lexer->getToken().line,
 					m_lexer->getToken().column
 				);
@@ -2666,7 +2666,7 @@ namespace fluffy { namespace parser {
 			}
 
 		parsePatternlabel:
-			auto whenDecl = std::make_unique<ast::MatchWhenDecl>(
+			auto whenDecl = std::make_unique<ast::MatchWhenStmtDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
@@ -2870,7 +2870,7 @@ namespace fluffy { namespace parser {
 		// Consome bloco.
 		tryDecl->blockDecl = parseBlock(ctx);
 		{
-			auto catchDecl = std::make_unique<ast::stmt::StmtTryCatchBlockDecl>(
+			auto catchDecl = std::make_unique<ast::stmt::StmtCatchBlockDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
@@ -2895,7 +2895,7 @@ namespace fluffy { namespace parser {
 		{
 			if (m_lexer->isCatch())
 			{
-				auto catchDecl = std::make_unique<ast::StmtTryCatchBlockDecl>(
+				auto catchDecl = std::make_unique<ast::StmtCatchBlockDecl>(
 					m_lexer->getToken().line,
 					m_lexer->getToken().column
 					);

@@ -414,6 +414,120 @@ namespace fluffy {
 	};
 
 	/**
+	 * AstNodeType_e
+	 */
+
+	enum class AstNodeType_e
+	{
+		Unknown,
+
+		CodeUnit,
+
+		Include,
+		Namespace,
+		Class,
+		ClassFunction,
+		ClassVariable,
+		ClassConstructor,
+		ClassDestructor,
+		ClassVariableInitDecl,
+		Interface,
+		InterfaceFunction,
+		Struct,
+		StructVariable,
+		Trait,
+		TraitFunction,
+		Enum,
+		EnumItem,
+		Function,
+		Variable,
+		FunctionParamters,
+		Generic,
+		GenericItem,
+		ScopedIdentifier,
+
+		Block,
+
+		TernaryExpr,
+		BinaryExpr,
+		UnaryExpr,
+		AsExpr,
+		IsExpr,
+		MatchExpr,
+		FunctionDeclExpr,
+		FunctionCallExpr,
+		GenericFunctionCallExpr,
+		IndexExpr,
+		NewExpr,
+		ConstantBoolExpr,
+		ConstantIntegerExpr,
+		ConstantRealExpr,
+		ConstantStringExpr,
+		ConstantCharExpr,
+		ConstantNullExpr,
+		ThisExpr,
+		SuperExpr,
+		PrimitiveTypeExpr,
+		IdentifierExpr,
+		MarkExpr,
+		ArrayInitExpr,
+
+		MatchWhenExprDecl,
+		FunctionParameterDecl,
+		NewBlockDecl,
+		NewItemDecl,
+
+		LiteralPattern,
+		DestructuringPattern,
+
+		DestructuringItemDecl,
+
+		IfStmt,
+		IfLetStmt,
+		ForStmt,
+		WhileStmt,
+		DoWhileStmt,
+		MatchStmt,
+		ReturnStmt,
+		ContinueStmt,
+		BreakStmt,
+		GotoStmt,
+		LabelStmt,
+		TryStmt,
+		PanicStmt,
+		VariableStmt,
+		ExprStmt,
+
+		ForInitDecl,
+		MatchWhenStmtDecl,
+		CatchBlockStmtDecl,
+
+		VoidType,
+		BoolType,
+		I8Type,
+		U8Type,
+		I16Type,
+		U16Type,
+		I32Type,
+		U32Type,
+		I64Type,
+		U64Type,
+		Fp32Type,
+		Fp64Type,
+		StringType,
+		ObjectType,
+		ArrayType,
+		FunctionType,
+		NamedType,
+		SelfType,
+		TupleType,
+
+		SizedArray,
+		UnsizedArray
+	};
+
+
+	/**
 	 * Token
 	 * Estrutura basica de informacao do compilador.
 	 */

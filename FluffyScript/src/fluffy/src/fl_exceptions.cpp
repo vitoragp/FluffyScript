@@ -225,6 +225,7 @@ namespace fluffy { namespace exceptions {
 
 	custom_exception::custom_exception(String message, U32 line, U32 column, ...)
 		: m_message()
+		, m_hasPositionalInfo(true)
 		, m_line(line)
 		, m_column(column)
 	{
@@ -238,13 +239,33 @@ namespace fluffy { namespace exceptions {
 		m_message = buffer;
 	}
 
+	custom_exception::custom_exception(String message, ...)
+		: m_message()
+		, m_hasPositionalInfo(false)
+		, m_line(0)
+		, m_column(0)
+	{
+		static char buffer[512];
+		va_list list;
+
+		va_start(list, message);
+		vsprintf_s(buffer, 512, message.c_str(), list);
+		va_end(list);
+
+		m_message = buffer;
+	}
+
 	custom_exception::~custom_exception()
 	{}
 
 	const char* custom_exception::what() const noexcept
 	{
 		static char buffer[600];
-		sprintf_s(buffer, "%s at: line %d, column %d", m_message.c_str(), m_line, m_column);
+		if (m_hasPositionalInfo) {
+			sprintf_s(buffer, "%s at: line %d, column %d", m_message.c_str(), m_line, m_column);
+		} else {
+			sprintf_s(buffer, "%s", m_message.c_str());
+		}
 		return buffer;
 	}
 } }
