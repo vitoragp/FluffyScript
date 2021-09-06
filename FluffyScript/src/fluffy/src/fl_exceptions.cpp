@@ -3,9 +3,11 @@
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace exceptions {
+	constexpr const U32 bufferSize = 2048;
+
 	/**
-		* file_not_found_exception
-		*/
+	 * file_not_found_exception
+	 */
 
 	file_not_found_exception::file_not_found_exception(const String filename)
 		: m_filename(filename.c_str())
@@ -16,14 +18,14 @@ namespace fluffy { namespace exceptions {
 
 	const char* file_not_found_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "File not found: '%s'", m_filename.c_str());
 		return buffer;
 	}
 
 	/**
-		* unexpected_token_exception
-		*/
+	 * unexpected_token_exception
+	 */
 
 	unexpected_token_exception::unexpected_token_exception(I8 token, U32 line, U32 column)
 		: m_isChar(true)
@@ -44,7 +46,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* unexpected_token_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		if (m_isChar) {
 			sprintf_s(buffer, "Unexpected token '%c' at: line %d, column %d", m_tokenChar, m_line, m_column);
 		} else {
@@ -100,7 +102,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* unexpected_end_of_file_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Unexpected end of file");
 		return buffer;
 	}
@@ -119,7 +121,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* malformed_number_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Malphormed number at: line %d, column %d", m_line, m_column);
 		return buffer;
 	}
@@ -138,7 +140,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* malformed_character_constant_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Malphormed character constant at: line %d, column %d", m_line, m_column);
 		return buffer;
 	}
@@ -157,7 +159,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* malformed_string_constant_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Malphormed string constant at: line %d, column %d", m_line, m_column);
 		return buffer;
 	}
@@ -175,7 +177,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* not_implemented_feature_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "this feature '%s' is not implemented", m_feature.c_str());
 		return buffer;
 	}
@@ -195,7 +197,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* unexpected_type_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Unexpected type '%s' at: line %d, column %d", m_type.c_str(), m_line, m_column);
 		return buffer;
 	}
@@ -214,7 +216,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* expected_type_exception::what() const noexcept
 	{
-		static char buffer[256];
+		static char buffer[bufferSize];
 		sprintf_s(buffer, "Expected type declaration at: line %d, column %d", m_line, m_column);
 		return buffer;
 	}
@@ -223,33 +225,33 @@ namespace fluffy { namespace exceptions {
 	 * custom_exception
 	 */
 
-	custom_exception::custom_exception(String message, U32 line, U32 column, ...)
+	custom_exception::custom_exception(const I8* message, U32 line, U32 column, ...)
 		: m_message()
 		, m_hasPositionalInfo(true)
 		, m_line(line)
 		, m_column(column)
 	{
-		static char buffer[512];
+		static char buffer[bufferSize];
 		va_list list;
 
 		va_start(list, column);
-		vsprintf_s(buffer, 512, message.c_str(), list);
+		vsprintf_s(buffer, bufferSize, message, list);
 		va_end(list);
 
 		m_message = buffer;
 	}
 
-	custom_exception::custom_exception(String message, ...)
+	custom_exception::custom_exception(const I8* message, ...)
 		: m_message()
 		, m_hasPositionalInfo(false)
 		, m_line(0)
 		, m_column(0)
 	{
-		static char buffer[512];
+		static char buffer[bufferSize];
 		va_list list;
 
 		va_start(list, message);
-		vsprintf_s(buffer, 512, message.c_str(), list);
+		vsprintf_s(buffer, bufferSize, message, list);
 		va_end(list);
 
 		m_message = buffer;
@@ -260,7 +262,7 @@ namespace fluffy { namespace exceptions {
 
 	const char* custom_exception::what() const noexcept
 	{
-		static char buffer[600];
+		static char buffer[bufferSize];
 		if (m_hasPositionalInfo) {
 			sprintf_s(buffer, "%s at: line %d, column %d", m_message.c_str(), m_line, m_column);
 		} else {

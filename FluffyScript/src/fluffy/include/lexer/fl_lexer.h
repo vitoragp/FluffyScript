@@ -36,7 +36,7 @@ namespace fluffy { namespace lexer {
 		getToken();
 
 		void
-		resetToPosition(U32 newPosition);
+		resetToPosition(U32 newPosition, U32 newLine, U32 newColumn);
 
 		void
 		reinterpretToken(TokenType_e type, U32 offset);
@@ -100,9 +100,6 @@ namespace fluffy { namespace lexer {
 
 		Bool
 		isInclude();
-
-		Bool
-		isFrom();
 
 		Bool
 		isExport();
@@ -235,6 +232,9 @@ namespace fluffy { namespace lexer {
 
 		Bool
 		isShared();
+
+		Bool
+		isUnique();
 
 		Bool
 		isRef();
@@ -433,6 +433,9 @@ namespace fluffy { namespace lexer {
 
 		Bool
 		isDot();
+
+		Bool
+		isSafeDot();
 
 		Bool
 		isEllipsis();

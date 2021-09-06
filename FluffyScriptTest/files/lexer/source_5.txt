@@ -28,7 +28,7 @@ namespace application
 		let relationship: map<string, object>;
 	}
 	
-	trait ValidateAgeOfMajority<U: where U is User>
+	trait ValidateAgeOfMajority<U where U is User>
 	{		
 		fn setUser(user: U);
 		fn validate(): bool;

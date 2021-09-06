@@ -16,7 +16,7 @@ namespace fluffy { namespace testing {
 	struct ParserClassVariableTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -35,7 +35,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { let Foo: i32; }");
 
-		auto classDecl = parser->parseClass(ctx, false, false);
+		auto classDecl = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -51,7 +51,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { let ref Foo: i32; }");
 
-		auto classDecl = parser->parseClass(ctx, false, false);
+		auto classDecl = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -67,7 +67,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { const Foo: i32 = a.getValue(); }");
 
-		auto classDecl = parser->parseClass(ctx, false, false);
+		auto classDecl = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -83,7 +83,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { const ref Foo: i32 = 5 * 9 + super.getValue() * this.value; }");
 
-		auto classDecl = parser->parseClass(ctx, false, false);
+		auto classDecl = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);
@@ -99,7 +99,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { const ref Foo: fn(i32 -> i32) = |a| { }; }");
 
-		auto classDecl = parser->parseClass(ctx, false, false);
+		auto classDecl = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classDecl->variableList.size(), 1);
 		EXPECT_EQ(classDecl->variableList[0]->type, ClassMemberType_e::Variable);

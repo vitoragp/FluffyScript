@@ -183,8 +183,8 @@ namespace fluffy {
 		class custom_exception : public std::exception
 		{
 		public:
-									custom_exception(String message, U32 line, U32 column, ...);
-									custom_exception(String message, ...);
+									custom_exception(const I8* message, U32 line, U32 column, ...);
+									custom_exception(const I8* message, ...);
 									~custom_exception();
 
 			virtual const char*		what() const noexcept override;

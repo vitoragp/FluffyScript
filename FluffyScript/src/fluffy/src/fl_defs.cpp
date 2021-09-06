@@ -3,7 +3,6 @@
 namespace fluffy {
 	static const std::tuple<const I8*, TokenType_e> keywords[] = {
 		std::make_tuple("include", 		TokenType_e::Include),		// ok
-		std::make_tuple("from", 		TokenType_e::From),			// ok
 		std::make_tuple("export", 		TokenType_e::Export),		// ok
 		std::make_tuple("namespace",	TokenType_e::Namespace),	// ok
 		std::make_tuple("class", 		TokenType_e::Class),		// ok
@@ -133,6 +132,7 @@ namespace fluffy {
 		case TokenType_e::Interrogation:			return "?";
 		case TokenType_e::Comma:					return ":";
 		case TokenType_e::Dot:						return ".";
+		case TokenType_e::SafeDot:					return "?.";
 		case TokenType_e::ConstantInteger:			return "i8 constant";
 		case TokenType_e::ConstantFp32:				return "fp32 constant";
 		case TokenType_e::ConstantFp64:				return "fp64 constant";

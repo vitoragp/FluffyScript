@@ -1,4 +1,5 @@
 #include <memory>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "parser\fl_parser.h"
@@ -15,7 +16,7 @@ namespace fluffy { namespace testing {
 	struct ParserTypesTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -421,7 +422,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTypesTest, TestManyProdutionsPass)
 	{
-		parser->loadSourceFromFile("./files/parser/source_1.txt");
+		String file = getProjectFilePath("files\\parser\\source_1.txt");
+		parser->loadSourceFromFile(file.c_str());
 
 		std::vector<std::unique_ptr<ast::TypeDecl>> typeList;
 		int typeCount = 0;

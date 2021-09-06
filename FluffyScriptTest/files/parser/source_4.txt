@@ -1,4 +1,4 @@
-class Foo<T: where T is ::Dimple>
+class Foo<T where T is ::Dimple>
 	extends ::Simple<T>
 	implements ::Clickable, ::Viewable<T>
 {

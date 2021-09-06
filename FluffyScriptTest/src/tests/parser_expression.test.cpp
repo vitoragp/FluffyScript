@@ -1,5 +1,6 @@
 #include <memory>
 #include <functional>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "ast\fl_ast_expr.h"
@@ -62,7 +63,7 @@ namespace fluffy { namespace testing {
 	struct ParserExpressionTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ false, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -185,7 +186,7 @@ namespace fluffy { namespace testing {
 
 				// [a] > 5 ? 5 : 3 * 4
 				validateIdeExpr(binExpr->leftDecl.get(), [](ExpressionConstantIdentifierDecl* ident) {
-					EXPECT_EQ(ident->identifierDecl, "a");
+					EXPECT_EQ(ident->identifier, "a");
 					EXPECT_EQ(ident->startFromRoot, false);
 					EXPECT_EQ(ident->line, 1);
 					EXPECT_EQ(ident->column, 1);
@@ -237,7 +238,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserExpressionTest, TestExpressionPass)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_3.txt");
+		String file = getProjectFilePath("files\\parser\\source_3.txt");
+		parser->loadSourceFromFile(file.c_str());
 
 		int exprCount = 0;
 		while (!parser->finished())

@@ -8,6 +8,7 @@
 namespace fluffy { namespace ast {
 	class AstNode;
 	class NamespaceDecl;
+	class CodeUnit;
 } }
 
 namespace fluffy { namespace parser {
@@ -33,23 +34,19 @@ namespace fluffy {
 		initialize();
 
 		void
-		build(std::vector<String> sourceFileList);
+		buildMultiThread(std::vector<String> sourceFileList);
+
+		void
+		buildSingleThread(std::vector<String> sourceFileList);
 
 		void
 		setNumberOfJobs(U32 jobCount);
 
 	private:
-		void
-		mergeOrInsertNamespaceToRoot(const I8* sourceFilename, std::unique_ptr<ast::NamespaceDecl> nsDecl);
-		
-		void
-		mergeOrInsertChildNamespace(const I8* sourceFilename, ast::NamespaceDecl* destinationNS, std::unique_ptr<ast::NamespaceDecl> sourceNs);
-
-	private:
 		std::unique_ptr<parser::Parser>
 		m_parser;
 
-		std::unordered_map<const I8*, std::unique_ptr<ast::NamespaceDecl>>
+		std::unordered_map<const I8*, std::unique_ptr<ast::CodeUnit>>
 		m_rootScope;
 
 		std::vector<ast::AstNode*>

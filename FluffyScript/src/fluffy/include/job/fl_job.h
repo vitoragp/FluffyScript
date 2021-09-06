@@ -78,6 +78,9 @@ namespace fluffy { namespace jobs {
 		std::unique_ptr<ast::CodeUnit>
 		getCodeUnit();
 
+		ast::CodeUnit*
+		getCodeUnitPointer();
+
 	private:
 		const I8*
 		m_sourceFilename;

@@ -1,17 +1,24 @@
 #pragma once
 #include "fl_ast_expr.h"
 #include "fl_ast_block.h"
+#include "fl_ast_type.h"
 #include "fl_ast.h"
+
+namespace fluffy { namespace ast {
+	class TypeDecl;
+} }
+
 namespace fluffy { namespace ast { namespace pattern {
 	using BlockDeclPtr						= std::unique_ptr<ast::BlockDecl>;
 	using ExpressionDeclPtr					= std::unique_ptr<ast::expr::ExpressionDecl>;
 
+	using TypeDeclPtr						= std::unique_ptr<ast::TypeDecl>;
+
 	using PatternDeclPtr					= std::unique_ptr<class PatternDecl>;
+	using PatternDeclPtrList				= std::vector<PatternDeclPtr>;
 
-	using DestructuringPatternDeclPtr		= std::unique_ptr<class DestructuringPatternDecl>;
-
-	using DestructuringItemDeclPtr			= std::unique_ptr<class DestructuringItemDecl>;
-	using DestructuringItemDeclPtrList		= std::vector<DestructuringItemDeclPtr>;
+	using StructureItemPatternDeclPtr		= std::unique_ptr<class StructureItemPatternDecl>;
+	using StructureItemPatternDeclPtrList	= std::vector<StructureItemPatternDeclPtr>;
 
 	/**
 	 * PatternDecl
@@ -20,16 +27,10 @@ namespace fluffy { namespace ast { namespace pattern {
 	class PatternDecl : public AstNode
 	{
 	protected:
-		PatternDecl(AstNodeType_e nodeType, PatterType_e type, U32 line, U32 column)
-			: AstNode(nodeType, line, column)
-			, type(type)
-		{}
+		PatternDecl(AstNodeType_e nodeType, U32 line, U32 column);
 
 	public:
-		virtual ~PatternDecl()
-		{}
-
-		const PatterType_e						type;
+		virtual ~PatternDecl();
 	};
 
 	/**
@@ -39,54 +40,87 @@ namespace fluffy { namespace ast { namespace pattern {
 	class LiteralPatternDecl : public PatternDecl
 	{
 	public:
-		LiteralPatternDecl(U32 line, U32 column)
-			: PatternDecl(AstNodeType_e::LiteralPattern, PatterType_e::Literal, line, column)
-		{}
+		LiteralPatternDecl(U32 line, U32 column);
+		virtual ~LiteralPatternDecl();
 
-		virtual ~LiteralPatternDecl()
-		{}
+		virtual Bool
+		hasChildren();
 
-		ExpressionDeclPtr					patternExpr;
+		virtual std::vector<AstNode*>
+		getChildren();
+
+		ExpressionDeclPtr					literalExpr;
 	};
 
 	/**
-	 * DestructuringPatternDecl
+	 * TuplePatternDecl
 	 */
 
-	class DestructuringPatternDecl : public PatternDecl
+	class TuplePatternDecl : public PatternDecl
 	{	
 	public:
-		DestructuringPatternDecl(U32 line, U32 column)
-			: PatternDecl(AstNodeType_e::DestructuringPattern, PatterType_e::Destructuring, line, column)
-			, destructuringType(DestructuringType_e::Unknown)
-		{}
+		TuplePatternDecl(U32 line, U32 column);
+		virtual ~TuplePatternDecl();
 
-		virtual ~DestructuringPatternDecl()
-		{}
+		virtual Bool
+		hasChildren();
 
-		DestructuringType_e					destructuringType;
-		DestructuringItemDeclPtrList		destructuringItemDeclList;
-		ExpressionDeclPtr					enumExpr;
+		virtual std::vector<AstNode*>
+		getChildren();
+
+		PatternDeclPtrList					patternItemDeclList;
 	};
 
 	/**
-	 * DestructuringItemDecl
+	 * StructurePatternDecl
 	 */
 
-	class DestructuringItemDecl : public AstNodeIdentified
+	class StructurePatternDecl : public PatternDecl
 	{
 	public:
-		DestructuringItemDecl(U32 line, U32 column)
-			: AstNodeIdentified(AstNodeType_e::DestructuringItemDecl, line, column)
-			, destructuringItemType(DestructuringItemType_e::Unknown)
-		{}
+		StructurePatternDecl(U32 line, U32 column);
+		virtual ~StructurePatternDecl();
 
-		virtual ~DestructuringItemDecl()
-		{}
+		virtual Bool
+		hasChildren();
 
-		DestructuringItemType_e				destructuringItemType;
-		ExpressionDeclPtr					indirectRefOrMatchingDecl;
-		PatternDeclPtr						subDestructuringPattern;
-		ExpressionDeclPtr					exprDecl;
+		virtual std::vector<AstNode*>
+		getChildren();
+
+		StructureItemPatternDeclPtrList		structureItemDeclList;
 	};
+
+	/**
+	 * EnumerablePatternDecl
+	 */
+
+	class EnumerablePatternDecl : public PatternDecl
+	{
+	public:
+		EnumerablePatternDecl(U32 line, U32 column);
+		virtual ~EnumerablePatternDecl();
+
+		virtual Bool
+		hasChildren();
+
+		virtual std::vector<AstNode*>
+		getChildren();
+
+		TypeDeclPtr							enumReferenced;
+		PatternDeclPtrList					patternDeclItemList;
+	};
+
+	/**
+	 * StructureItemPatternDecl
+	 */
+
+	class StructureItemPatternDecl : public AstNodeIdentified
+	{
+	public:
+		StructureItemPatternDecl(U32 line, U32 column);
+		virtual ~StructureItemPatternDecl();
+
+		PatternDeclPtr						referencedPattern;
+	};
+
 } } }

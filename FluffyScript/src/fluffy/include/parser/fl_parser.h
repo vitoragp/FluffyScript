@@ -18,10 +18,8 @@ namespace fluffy { namespace lexer {
 namespace fluffy { namespace parser {
 	struct ParserContext_s
 	{
-		Bool isFirstPass;
-
-		Bool insideExpr;
 		Bool insideTrait;
+		Bool insideExpr;
 	};
 
 	///
@@ -43,6 +41,9 @@ namespace fluffy { namespace parser {
 		Bool
 		finished();
 
+		void
+		skipToken();
+
 		std::unique_ptr<ast::CodeUnit>
 		parseCodeUnit(ParserContext_s& ctx);
 
@@ -53,7 +54,7 @@ namespace fluffy { namespace parser {
 		parseNamespace(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::ClassDecl>
-		parseClass(ParserContext_s& ctx, Bool hasExport, Bool hasAbstract);
+		parseClass(ParserContext_s& ctx, Bool hasExport);
 
 		std::unique_ptr<ast::InterfaceDecl>
 		parseInterface(ParserContext_s& ctx, Bool hasExport);
@@ -195,22 +196,22 @@ namespace fluffy { namespace parser {
 		parseExprStmt(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::expr::ExpressionDecl>
-		parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec);
+		parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec, Bool* requiredGenericValidation);
 
 		std::unique_ptr<ast::expr::ExpressionDecl>
-		parseAtom(ParserContext_s& ctx);
+		parseAtom(ParserContext_s& ctx, Bool* requiredGenericValidation);
 
 		std::unique_ptr<ast::pattern::PatternDecl>
 		parseLiteralPattern(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::pattern::PatternDecl>
-		parseEnumPattern(ParserContext_s& ctx);
-
-		std::unique_ptr<ast::pattern::PatternDecl>
 		parseTuplePattern(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::pattern::PatternDecl>
-		parseClassOrStructPattern(ParserContext_s& ctx);
+		parseStructurePattern(ParserContext_s& ctx);
+
+		std::unique_ptr<ast::pattern::PatternDecl>
+		parseEnumerablePattern(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::TypeDecl>
 		parseFunctionType(ParserContext_s& ctx);

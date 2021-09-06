@@ -7,11 +7,8 @@
 	class TypeDecl##type : public TypeDecl \
 	{ \
 	public: \
-		TypeDecl##type(U32 line, U32 column) \
-			: TypeDecl(AstNodeType_e::type##Type, TypeDeclID_e::type, line, column) \
-		{} \
-		virtual ~TypeDecl##type() \
-		{} \
+		TypeDecl##type(U32 line, U32 column); \
+		virtual ~TypeDecl##type(); \
 	}
 
 namespace fluffy { namespace ast {
@@ -33,15 +30,10 @@ namespace fluffy { namespace ast {
 	class TypeDecl : public AstNode
 	{
 	protected:
-		TypeDecl(AstNodeType_e nodeType, TypeDeclID_e typeID, U32 line, U32 column)
-			: AstNode(nodeType, line, column)
-			, typeID(typeID)
-			, nullable(false)
-		{}
+		TypeDecl(AstNodeType_e nodeType, TypeDeclID_e typeID, U32 line, U32 column);
 
 	public:
-		virtual ~TypeDecl()
-		{}
+		virtual ~TypeDecl();
 
 		const TypeDeclID_e					typeID;
 		Bool								nullable;
@@ -72,12 +64,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclArray : public TypeDecl
 	{
 	public:
-		TypeDeclArray(U32 line, U32 column)
-			: TypeDecl(AstNodeType_e::ArrayType, TypeDeclID_e::Array, line, column)
-		{}
-
-		virtual ~TypeDeclArray()
-		{}
+		TypeDeclArray(U32 line, U32 column);
+		virtual ~TypeDeclArray();
 
 		ArrayDeclPtrList					arrayDeclList;
 		TypeDeclPtr							valueType;
@@ -90,15 +78,11 @@ namespace fluffy { namespace ast {
 	class TypeDeclFunction : public TypeDecl
 	{
 	public:
-		TypeDeclFunction(U32 line, U32 column)
-			: TypeDecl(AstNodeType_e::FunctionType, TypeDeclID_e::Function, line, column)
-		{}
+		TypeDeclFunction(U32 line, U32 column);
+		virtual ~TypeDeclFunction();
 
-		virtual ~TypeDeclFunction()
-		{}
-
-		TypeDeclPtr							returnType;
 		TypeDeclPtrList						parameterTypeList;
+		TypeDeclPtr							returnType;
 	};
 
 	/**
@@ -108,12 +92,8 @@ namespace fluffy { namespace ast {
 	class TypeDeclTuple : public TypeDecl
 	{
 	public:
-		TypeDeclTuple(U32 line, U32 column)
-			: TypeDecl(AstNodeType_e::TupleType, TypeDeclID_e::Tuple, line, column)
-		{}
-
-		virtual ~TypeDeclTuple()
-		{}
+		TypeDeclTuple(U32 line, U32 column);
+		virtual ~TypeDeclTuple();
 
 		TypeDeclPtrList						tupleItemList;
 	};
@@ -125,20 +105,13 @@ namespace fluffy { namespace ast {
 	class TypeDeclNamed : public TypeDecl
 	{
 	public:
-		TypeDeclNamed(U32 line, U32 column)
-			: TypeDecl(AstNodeType_e::NamedType, TypeDeclID_e::Named, line, column)
-			, startFromRoot(false)
-			, reference(nullptr)
-		{}
-
-		virtual ~TypeDeclNamed()
-		{}
+		TypeDeclNamed(U32 line, U32 column);
+		virtual ~TypeDeclNamed();
 
 		TString								identifier;
 		TypeDeclNamedPtr					internalIdentifier;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
-		AstNode*							reference;
 	};
 
 	/**
@@ -148,12 +121,9 @@ namespace fluffy { namespace ast {
 	class SelfTypeDecl : public TypeDecl
 	{
 	public:
-		SelfTypeDecl(U32 line, U32 column)
-			: TypeDecl(AstNodeType_e::SelfType, TypeDeclID_e::Self, line, column)
-		{}
+		SelfTypeDecl(U32 line, U32 column);
+		virtual ~SelfTypeDecl();
 
-		virtual ~SelfTypeDecl()
-		{}
 	};
 
 	/**
@@ -163,14 +133,10 @@ namespace fluffy { namespace ast {
 	class ArrayDecl : public AstNode
 	{
 	protected:
-		ArrayDecl(AstNodeType_e nodeType, ArrayType_e arrayType, U32 line, U32 column)
-			: AstNode(nodeType, line, column)
-			, arrayType(arrayType)
-		{}
+		ArrayDecl(AstNodeType_e nodeType, ArrayType_e arrayType, U32 line, U32 column);
 
 	public:
-		virtual ~ArrayDecl()
-		{}
+		virtual ~ArrayDecl();
 
 		const ArrayType_e					arrayType;
 	};
@@ -182,13 +148,8 @@ namespace fluffy { namespace ast {
 	class SizedArrayDecl : public ArrayDecl
 	{
 	public:
-		SizedArrayDecl(U32 line, U32 column)
-			: ArrayDecl(AstNodeType_e::SizedArray, ArrayType_e::Sized, line, column)
-			, size(0)
-		{}
-
-		virtual ~SizedArrayDecl()
-		{}
+		SizedArrayDecl(U32 line, U32 column);
+		virtual ~SizedArrayDecl();
 
 		U32									size;
 	};
@@ -200,11 +161,7 @@ namespace fluffy { namespace ast {
 	class UnsizedArrayDecl : public ArrayDecl
 	{
 	public:
-		UnsizedArrayDecl(U32 line, U32 column)
-			: ArrayDecl(AstNodeType_e::UnsizedArray, ArrayType_e::Unsized, line, column)
-		{}
-
-		virtual ~UnsizedArrayDecl()
-		{}
+		UnsizedArrayDecl(U32 line, U32 column);
+		virtual ~UnsizedArrayDecl();
 	};
 } }

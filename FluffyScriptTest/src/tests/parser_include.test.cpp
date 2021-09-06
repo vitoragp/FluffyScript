@@ -15,7 +15,7 @@ namespace fluffy { namespace testing {
 	struct ParserIncludeTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -32,7 +32,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_All)
 	{
-		parser->loadSource("include { * } from std;");
+		parser->loadSource("include { * } in std;");
 
 		auto inc = parser->parseInclude(ctx);
 
@@ -43,12 +43,12 @@ namespace fluffy { namespace testing {
 		EXPECT_NE(inc->fromNamespace, nullptr);
 		EXPECT_EQ(inc->fromNamespace->identifier, "std");
 		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->tailIdentifier, nullptr);
+		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_OneInc)
 	{
-		parser->loadSource("include { print } from std;");
+		parser->loadSource("include { print } in std;");
 
 		auto inc = parser->parseInclude(ctx);
 
@@ -60,12 +60,12 @@ namespace fluffy { namespace testing {
 		EXPECT_NE(inc->fromNamespace, nullptr);
 		EXPECT_EQ(inc->fromNamespace->identifier, "std");
 		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->tailIdentifier, nullptr);
+		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc)
 	{
-		parser->loadSource("include { print, scan } from std;");
+		parser->loadSource("include { print, scan } in std;");
 
 		auto inc = parser->parseInclude(ctx);
 
@@ -78,12 +78,12 @@ namespace fluffy { namespace testing {
 		EXPECT_NE(inc->fromNamespace, nullptr);
 		EXPECT_EQ(inc->fromNamespace->identifier, "std");
 		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->tailIdentifier, nullptr);
+		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc_ScopedRoot)
 	{
-		parser->loadSource("include { print, scan } from ::std::next;");
+		parser->loadSource("include { print, scan } in ::std::next;");
 
 		auto inc = parser->parseInclude(ctx);
 
@@ -96,6 +96,6 @@ namespace fluffy { namespace testing {
 		EXPECT_NE(inc->fromNamespace, nullptr);
 		EXPECT_EQ(inc->fromNamespace->identifier, "std");
 		EXPECT_EQ(inc->fromNamespace->startFromRoot, true);
-		EXPECT_EQ(inc->fromNamespace->tailIdentifier->identifier, "next");
+		EXPECT_EQ(inc->fromNamespace->referencedIdentifier->identifier, "next");
 	}
 } }

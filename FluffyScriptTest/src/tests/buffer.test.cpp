@@ -6,6 +6,7 @@
  */
 
 #include <memory>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "fl_buffer.h"
@@ -56,8 +57,9 @@ namespace fluffy { namespace testing {
 	TEST_F(DirectBufferTest, TestLoadAndReadDataFromFile)
 	{
 		String src = "u64 id\r\nstring identifier";
+		String file = getProjectFilePath(".\\files\\lexer\\source_1.txt");
 
-		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
+		buffer->loadFromFile(file.c_str());
 
 		String str;
 		while (true)
@@ -100,7 +102,8 @@ namespace fluffy { namespace testing {
 	{
 		String src = "u64 id\r\nstring identifier";
 
-		buffer->loadFromFile(".\\files\\lexer\\source_1.txt");
+		String file = getProjectFilePath(".\\files\\lexer\\source_1.txt");
+		buffer->loadFromFile(file.c_str());
 
 		String str;
 		while (true)

@@ -261,6 +261,6 @@ namespace fluffy {
 
 	const Bool operator!=(const TString& str1, const TString& str2)
 	{
-		return str1.hash() == str2.hash();
+		return str1.hash() != str2.hash();
 	}
 }

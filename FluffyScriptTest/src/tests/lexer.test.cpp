@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <set>
+#include "test.h"
 #include "gtest\gtest.h"
 #include "lexer\fl_lexer.h"
 #include "fl_buffer.h"
@@ -119,14 +120,14 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestParseFile)
 	{
-		const I8* filename = ".\\files\\lexer\\source_1.txt";
-		lex->loadSourceFromFile(filename);
+		String file = getProjectFilePath("files\\lexer\\source_1.txt");
+		lex->loadSourceFromFile(file.c_str());
 		{
 			EXPECT_EQ(lex->getToken().value, "u64");
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U64);
 			EXPECT_EQ(lex->getToken().line, 1);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // id
@@ -135,7 +136,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(lex->getToken().line, 1);
 			EXPECT_EQ(lex->getToken().column, 5);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // string
@@ -144,7 +145,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::String);
 			EXPECT_EQ(lex->getToken().line, 2);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // identifier
@@ -153,7 +154,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(lex->getToken().line, 2);
 			EXPECT_EQ(lex->getToken().column, 8);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 	}
 
@@ -227,7 +228,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestSkipComments)
 	{
-		lex->loadSourceFromFile(".\\files\\lexer\\source_2.txt");
+		String file = getProjectFilePath("files\\lexer\\source_2.txt");
+		lex->loadSourceFromFile(file.c_str());
 
 		// void
 		{
@@ -235,7 +237,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Void);
 			EXPECT_EQ(lex->getToken().line, 7);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, ".\\files\\lexer\\source_2.txt");
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 	}
 
@@ -243,7 +245,8 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadSourceFromFile(".\\files\\lexer\\source_3.txt");
+			String file = getProjectFilePath("files\\lexer\\source_3.txt");
+			lex->loadSourceFromFile(file.c_str());
 
 			throw std::exception();
 		}
@@ -420,7 +423,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithDirectBufferTest, TestComplexScript)
 	{
-		lex->loadSourceFromFile(".\\files\\lexer\\source_4.txt");
+		String file = getProjectFilePath("files\\lexer\\source_4.txt");
+		lex->loadSourceFromFile(file.c_str());
 
 		int tokenCount = 0;
 		while (true)
@@ -464,9 +468,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestParseFile)
 	{
-		const I8* filename = ".\\files\\lexer\\source_1.txt";
-
-		lex->loadSourceFromFile(filename);
+		String file = getProjectFilePath("files\\lexer\\source_1.txt");
+		lex->loadSourceFromFile(file.c_str());
 
 		// u64
 		{
@@ -474,7 +477,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::U64);
 			EXPECT_EQ(lex->getToken().line, 1);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // id
@@ -483,7 +486,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(lex->getToken().line, 1);
 			EXPECT_EQ(lex->getToken().column, 5);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // string
@@ -492,7 +495,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::String);
 			EXPECT_EQ(lex->getToken().line, 2);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 
 		lex->nextToken(); // identifier
@@ -501,7 +504,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Identifier);
 			EXPECT_EQ(lex->getToken().line, 2);
 			EXPECT_EQ(lex->getToken().column, 8);
-			EXPECT_EQ(lex->getToken().filename, filename);
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 	}
 
@@ -521,7 +524,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestSkipComments)
 	{
-		lex->loadSourceFromFile(".\\files\\lexer\\source_2.txt");
+		String file = getProjectFilePath("files\\lexer\\source_2.txt");
+		lex->loadSourceFromFile(file.c_str());
 
 		// void
 		{
@@ -529,7 +533,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(lex->getToken().type, fluffy::TokenType_e::Void);
 			EXPECT_EQ(lex->getToken().line, 7);
 			EXPECT_EQ(lex->getToken().column, 1);
-			EXPECT_EQ(lex->getToken().filename, ".\\files\\lexer\\source_2.txt");
+			EXPECT_EQ(lex->getToken().filename, file.c_str());
 		}
 	}
 
@@ -537,7 +541,8 @@ namespace fluffy { namespace testing {
 	{
 		try
 		{
-			lex->loadSourceFromFile(".\\files\\lexer\\source_3.txt");
+			String file = getProjectFilePath("files\\lexer\\source_3.txt");
+			lex->loadSourceFromFile(file.c_str());
 			lex->nextToken();
 
 			throw std::exception();
@@ -550,7 +555,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(LexerWithLazyBufferTest, TestComplexScript)
 	{
-		lex->loadSourceFromFile(".\\files\\lexer\\source_4.txt");
+		String file = getProjectFilePath("files\\lexer\\source_4.txt");
+		lex->loadSourceFromFile(file.c_str());
 
 		int tokenCount = 0;
 		while (true)

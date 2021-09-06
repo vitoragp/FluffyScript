@@ -15,7 +15,7 @@ namespace fluffy { namespace testing {
 	struct ParserNamespaceTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()

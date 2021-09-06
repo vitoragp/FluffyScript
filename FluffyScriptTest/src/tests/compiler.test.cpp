@@ -1,4 +1,5 @@
 #include <memory>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "fl_compiler.h"
@@ -28,9 +29,9 @@ namespace fluffy { namespace testing {
 	TEST_F(CompilerTest, TestOne)
 	{
 		compiler->initialize();
-		compiler->build({
-			".\\files\\compiler\\main.txt",
-			".\\files\\compiler\\subfile.txt"
+		compiler->buildSingleThread({
+			getProjectFilePath("files\\compiler\\main.txt"),
+			getProjectFilePath("files\\compiler\\subfile.txt"),
 		});
 	}
 

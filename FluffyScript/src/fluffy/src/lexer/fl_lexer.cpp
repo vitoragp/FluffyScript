@@ -6,7 +6,6 @@
 namespace fluffy {
 	static constexpr const std::tuple<const I8*, TokenType_e> keywords[] = {
 		std::make_tuple("include", 		TokenType_e::Include),		// ok
-		std::make_tuple("from", 		TokenType_e::From),			// ok
 		std::make_tuple("export", 		TokenType_e::Export),		// ok
 		std::make_tuple("namespace",	TokenType_e::Namespace),	// ok
 		std::make_tuple("class", 		TokenType_e::Class),		// ok
@@ -51,6 +50,7 @@ namespace fluffy {
 		std::make_tuple("let", 			TokenType_e::Let),			// ok
 		std::make_tuple("this", 		TokenType_e::This),			// ok
 		std::make_tuple("shared", 		TokenType_e::Shared),		// ok
+		std::make_tuple("unique", 		TokenType_e::Unique),		// ok
 		std::make_tuple("ref", 			TokenType_e::Ref),			// ok
 		std::make_tuple("self", 		TokenType_e::Self),			// ok
 		std::make_tuple("new", 			TokenType_e::New),			// ok
@@ -180,9 +180,11 @@ namespace fluffy { namespace lexer {
 	}
 
 	void
-	Lexer::resetToPosition(U32 newPosition)
+	Lexer::resetToPosition(U32 newPosition, U32 newLine, U32 newColumn)
 	{
 		m_eof = false;
+		m_line = newLine;
+		m_column = newColumn;
 		m_buffer->reset(newPosition);
 		parse();
 	}
@@ -199,9 +201,12 @@ namespace fluffy { namespace lexer {
 	Lexer::predictNextToken()
 	{
 		const U32 position = m_token.position;
+		const U32 line = m_token.line;
+		const U32 column = m_token.column;
+
 		parse();
 		const Token_s token = m_token;
-		resetToPosition(position);
+		resetToPosition(position, line, column);
 		return token;
 	}
 
@@ -397,12 +402,6 @@ namespace fluffy { namespace lexer {
 	Lexer::isInclude()
 	{
 		return is(TokenType_e::Include);
-	}
-
-	Bool
-	Lexer::isFrom()
-	{
-		return is(TokenType_e::From);
 	}
 
 	Bool
@@ -667,6 +666,12 @@ namespace fluffy { namespace lexer {
 	Lexer::isShared()
 	{
 		return is(TokenType_e::Shared);
+	}
+
+	Bool
+	Lexer::isUnique()
+	{
+		return is(TokenType_e::Unique);
 	}
 
 	Bool
@@ -1060,6 +1065,12 @@ namespace fluffy { namespace lexer {
 	Lexer::isDot()
 	{
 		return is(TokenType_e::Dot);
+	}
+
+	Bool
+	Lexer::isSafeDot()
+	{
+		return is(TokenType_e::SafeDot);
 	}
 
 	Bool
@@ -1507,6 +1518,11 @@ namespace fluffy { namespace lexer {
 			{
 				m_token.type = TokenType_e::Interrogation;
 				m_token.value.push_back(readCharAndAdv());
+				if (readChar() == '.') {
+					m_token.type = TokenType_e::SafeDot;
+					m_token.value.push_back(readCharAndAdv());
+					return;
+				}
 			}
 			break;
 		default:

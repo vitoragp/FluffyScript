@@ -7,28 +7,28 @@
 #include "fl_ast_expr.h"
 #include "fl_defs.h"
 
-namespace fluffy { namespace ast { namespace expr { 
-	class ExpressionDecl;
+namespace fluffy { namespace ast { namespace expr {
+			class ExpressionDecl;
 } } }
 
 namespace fluffy { namespace ast { namespace stmt {
 	using expr::ExpressionDecl;
 	using pattern::PatternDecl;
 
-	using PatternDeclPtr				= std::unique_ptr<PatternDecl>;
-	using PatternDeclPtrList			= std::vector<PatternDeclPtr>;
+	using PatternDeclPtr			= std::unique_ptr<PatternDecl>;
+	using PatternDeclPtrList		= std::vector<PatternDeclPtr>;
 
-	using MatchWhenStmtDeclPtr			= std::unique_ptr<class MatchWhenStmtDecl>;
-	using MatchWhenStmtDeclPtrList		= std::vector<MatchWhenStmtDeclPtr>;
+	using MatchWhenStmtDeclPtr		= std::unique_ptr<class MatchWhenStmtDecl>;
+	using MatchWhenStmtDeclPtrList	= std::vector<MatchWhenStmtDeclPtr>;
 
-	using ExpressionDeclPtr				= std::unique_ptr<ExpressionDecl>;
-	using BlockDeclPtr					= std::unique_ptr<BlockDecl>;
-	using TypeDeclPtr					= std::unique_ptr<TypeDecl>;
-			
-	using StmtForInitDeclPtr			= std::unique_ptr<class StmtForInitDecl>;
+	using ExpressionDeclPtr			= std::unique_ptr<ExpressionDecl>;
+	using BlockDeclPtr				= std::unique_ptr<BlockDecl>;
+	using TypeDeclPtr				= std::unique_ptr<TypeDecl>;
 
-	using StmtCatchBlockDeclPtr			= std::unique_ptr<class StmtCatchBlockDecl>;
-	using StmtCatchBlockDeclPtrList		= std::vector<StmtCatchBlockDeclPtr>;	
+	using StmtForInitDeclPtr		= std::unique_ptr<class StmtForInitDecl>;
+
+	using StmtCatchBlockDeclPtr		= std::unique_ptr<class StmtCatchBlockDecl>;
+	using StmtCatchBlockDeclPtrList = std::vector<StmtCatchBlockDeclPtr>;
 
 	/**
 	 * StmtDecl
@@ -37,14 +37,10 @@ namespace fluffy { namespace ast { namespace stmt {
 	class StmtDecl : public AstNode
 	{
 	protected:
-		StmtDecl(AstNodeType_e nodeType, StmtDeclType_e type, U32 line, U32 column)
-			: AstNode(nodeType, line, column)
-			, type(type)
-		{}
+		StmtDecl(AstNodeType_e nodeType, StmtDeclType_e type, U32 line, U32 column);
 
 	public:
-		virtual ~StmtDecl()
-		{}
+		virtual ~StmtDecl();
 
 		const StmtDeclType_e					type;
 	};
@@ -56,12 +52,8 @@ namespace fluffy { namespace ast { namespace stmt {
 	class StmtIfDecl : public StmtDecl
 	{
 	public:
-		StmtIfDecl(U32 line, U32 column)
-			: StmtDecl(AstNodeType_e::IfStmt, StmtDeclType_e::If, line, column)
-		{}
-
-		virtual ~StmtIfDecl()
-		{}
+		StmtIfDecl(U32 line, U32 column);
+		virtual ~StmtIfDecl();
 
 		ExpressionDeclPtr					conditionExprDecl;
 		BlockDeclPtr						ifBlockDecl;
@@ -75,12 +67,14 @@ namespace fluffy { namespace ast { namespace stmt {
 	class StmtIfLetDecl : public StmtDecl
 	{
 	public:
-		StmtIfLetDecl(U32 line, U32 column)
-			: StmtDecl(AstNodeType_e::IfLetStmt, StmtDeclType_e::IfLet, line, column)
-		{}
+		StmtIfLetDecl(U32 line, U32 column);
+		virtual ~StmtIfLetDecl();
 
-		virtual ~StmtIfLetDecl()
-		{}
+		virtual Bool
+		hasChildren();
+
+		virtual std::vector<AstNode*>
+		getChildren();
 
 		PatternDeclPtr						patternDecl;
 		ExpressionDeclPtr					expressionDecl;
@@ -92,289 +86,235 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtForDecl
 	 */
 
-	 class StmtForDecl : public StmtDecl
-	 {
-	 public:
-		 StmtForDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::ForStmt, StmtDeclType_e::For, line, column)
-		 {}
+	class StmtForDecl : public StmtDecl
+	{
+	public:
+		StmtForDecl(U32 line, U32 column);
+		virtual ~StmtForDecl();
 
-		 virtual ~StmtForDecl()
-		 {}
+		virtual Bool
+		hasChildren();
 
-		 StmtForInitDeclPtr					initStmtDecl;
-		 ExpressionDeclPtr					initExprDecl;
-		 ExpressionDeclPtr					conditionExprDecl;
-		 ExpressionDeclPtr					updateExprDecl;
-		 BlockDeclPtr						blockDecl;
-	 };
+		virtual std::vector<AstNode*>
+		getChildren();
 
-	 /**
+		StmtForInitDeclPtr					initStmtDecl;
+		ExpressionDeclPtr					initExprDecl;
+		ExpressionDeclPtr					conditionExprDecl;
+		ExpressionDeclPtr					updateExprDecl;
+		BlockDeclPtr						blockDecl;
+	};
+
+	/**
 	 * StmtWhileDecl
 	 */
 
-	 class StmtWhileDecl : public StmtDecl
-	 {
-	 public:
-		 StmtWhileDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::WhileStmt, StmtDeclType_e::While, line, column)
-		 {}
+	class StmtWhileDecl : public StmtDecl
+	{
+	public:
+		StmtWhileDecl(U32 line, U32 column);
+		virtual ~StmtWhileDecl();
 
-		 virtual ~StmtWhileDecl()
-		 {}
+		ExpressionDeclPtr					conditionExprDecl;
+		BlockDeclPtr						blockDecl;
+	};
 
-		 ExpressionDeclPtr					conditionExprDecl;
-		 BlockDeclPtr						blockDecl;
-	 };
-
-	 /**
+	/**
 	 * StmtDoWhileDecl
 	 */
 
-	 class StmtDoWhileDecl : public StmtDecl
-	 {
-	 public:
-		 StmtDoWhileDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::DoWhileStmt, StmtDeclType_e::DoWhile, line, column)
-		 {}
+	class StmtDoWhileDecl : public StmtDecl
+	{
+	public:
+		StmtDoWhileDecl(U32 line, U32 column);
+		virtual ~StmtDoWhileDecl();
 
-		 virtual ~StmtDoWhileDecl()
-		 {}
+		ExpressionDeclPtr					conditionExprDecl;
+		BlockDeclPtr						blockDecl;
+	};
 
-		 ExpressionDeclPtr					conditionExprDecl;
-		 BlockDeclPtr						blockDecl;
-	 };
-
-	 /**
+	/**
 	 * StmtMatchDecl
 	 */
 
-	 class StmtMatchDecl : public StmtDecl
-	 {
-	 public:
-		 StmtMatchDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::MatchStmt, StmtDeclType_e::Match, line, column)
-		 {}
+	class StmtMatchDecl : public StmtDecl
+	{
+	public:
+		StmtMatchDecl(U32 line, U32 column);
+		virtual ~StmtMatchDecl();
 
-		 virtual ~StmtMatchDecl()
-		 {}
+		ExpressionDeclPtr					conditionExprDecl;
+		MatchWhenStmtDeclPtrList			whenDeclList;
+	};
 
-		 ExpressionDeclPtr					conditionExprDecl;
-		 MatchWhenStmtDeclPtrList			whenDeclList;
-	 };
-
-	 /**
+	/**
 	 * StmtReturnDecl
 	 */
 
-	 class StmtReturnDecl : public StmtDecl
-	 {
-	 public:
-		 StmtReturnDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::ReturnStmt, StmtDeclType_e::Return, line, column)
-		 {}
+	class StmtReturnDecl : public StmtDecl
+	{
+	public:
+		StmtReturnDecl(U32 line, U32 column);
+		virtual ~StmtReturnDecl();
 
-		 virtual ~StmtReturnDecl()
-		 {}
+		ExpressionDeclPtr					exprDecl;
+	};
 
-		 ExpressionDeclPtr					exprDecl;
-	 };
-
-	 /**
+	/**
 	 * StmtContinueDecl
 	 */
 
-	 class StmtContinueDecl : public StmtDecl
-	 {
-	 public:
-		 StmtContinueDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::ContinueStmt, StmtDeclType_e::Continue, line, column)
-		 {}
+	class StmtContinueDecl : public StmtDecl
+	{
+	public:
+		StmtContinueDecl(U32 line, U32 column);
+		virtual ~StmtContinueDecl();
+	};
 
-		 virtual ~StmtContinueDecl()
-		 {}
-	 };
-
-	 /**
+	/**
 	 * StmtBreakDecl
 	 */
 
-	 class StmtBreakDecl : public StmtDecl
-	 {
-	 public:
-		 StmtBreakDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::BreakStmt, StmtDeclType_e::Break, line, column)
-		 {}
+	class StmtBreakDecl : public StmtDecl
+	{
+	public:
+		StmtBreakDecl(U32 line, U32 column);
+		virtual ~StmtBreakDecl();
+	};
 
-		 virtual ~StmtBreakDecl()
-		 {}
-	 };
-
-	 /**
+	/**
 	 * StmtGotoDecl
 	 */
 
-	 class StmtGotoDecl : public StmtDecl
-	 {
-	 public:
-		 StmtGotoDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::GotoStmt, StmtDeclType_e::Goto, line, column)
-		 {}
+	class StmtGotoDecl : public StmtDecl
+	{
+	public:
+		StmtGotoDecl(U32 line, U32 column);
+		virtual ~StmtGotoDecl();
 
-		 virtual ~StmtGotoDecl()
-		 {}
+		TString							labelIdentifier;
+	};
 
-		 TString							labelIdentifier;
-	 };
-
-	 /**
+	/**
 	 * StmtLabelDecl
 	 */
 
-	 class StmtLabelDecl : public StmtDecl
-	 {
-	 public:
-		 StmtLabelDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::LabelStmt, StmtDeclType_e::Label, line, column)
-		 {}
+	class StmtLabelDecl : public StmtDecl
+	{
+	public:
+		StmtLabelDecl(U32 line, U32 column);
+		virtual ~StmtLabelDecl();
 
-		 virtual ~StmtLabelDecl()
-		 {}
+		TString							identifier;
+	};
 
-		 TString							identifier;
-	 };
-
-	 /**
+	/**
 	 * StmtTryDecl
 	 */
 
-	 class StmtTryDecl : public StmtDecl
-	 {
-	 public:
-		 StmtTryDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::TryStmt, StmtDeclType_e::Try, line, column)
-		 {}
+	class StmtTryDecl : public StmtDecl
+	{
+	public:
+		StmtTryDecl(U32 line, U32 column);
+		virtual ~StmtTryDecl();
 
-		 virtual ~StmtTryDecl()
-		 {}
+		BlockDeclPtr						blockDecl;
+		StmtCatchBlockDeclPtrList			catchDeclList;
+	};
 
-		 BlockDeclPtr						blockDecl;
-		 StmtCatchBlockDeclPtrList		catchDeclList;
-	 };
-
-	 /**
+	/**
 	 * StmtPanicDecl
 	 */
 
-	 class StmtPanicDecl : public StmtDecl
-	 {
-	 public:
-		 StmtPanicDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::PanicStmt, StmtDeclType_e::Panic, line, column)
-		 {}
+	class StmtPanicDecl : public StmtDecl
+	{
+	public:
+		StmtPanicDecl(U32 line, U32 column);
+		virtual ~StmtPanicDecl();
 
-		 virtual ~StmtPanicDecl()
-		 {}
+		ExpressionDeclPtr					exprDecl;
+	};
 
-		 ExpressionDeclPtr					exprDecl;
-	 };
-
-	 /**
+	/**
 	 * StmtVariableDecl
 	 */
 
-	 class StmtVariableDecl : public StmtDecl
-	 {
-	 public:
-		 StmtVariableDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::VariableStmt, StmtDeclType_e::Variable, line, column)
-			 , isShared(false)
-			 , isConst(false)
-			 , isReference(false)
-		 {}
+	class StmtVariableDecl : public StmtDecl
+	{
+	public:
+		StmtVariableDecl(U32 line, U32 column);
+		virtual ~StmtVariableDecl();
 
-		 virtual ~StmtVariableDecl()
-		 {}
+		virtual Bool
+		hasChildren();
 
-		 Bool								isShared;
-		 TString							identifier;
-		 Bool								isConst;
-		 Bool								isReference;
-		 TypeDeclPtr						typeDecl;
-		 ExpressionDeclPtr					initExpression;
-		 PatternDeclPtr						destructuringPatternDecl;
-	 };
+		virtual std::vector<AstNode*>
+		getChildren();
 
-	 /**
+		TString								identifier;
+		Bool								isShared;
+		Bool								isUnique;
+		Bool								isConst;
+		Bool								isReference;
+		TypeDeclPtr							typeDecl;
+		ExpressionDeclPtr					initExpression;
+		PatternDeclPtr						patternDecl;
+	};
+
+	/**
 	 * StmtExprDecl
 	 */
 
-	 class StmtExprDecl : public StmtDecl
-	 {
-	 public:
-		 StmtExprDecl(U32 line, U32 column)
-			 : StmtDecl(AstNodeType_e::ExprStmt, StmtDeclType_e::Expr, line, column)
-		 {}
+	class StmtExprDecl : public StmtDecl
+	{
+	public:
+		StmtExprDecl(U32 line, U32 column);
+		virtual ~StmtExprDecl();
 
-		 virtual ~StmtExprDecl()
-		 {}
+		ExpressionDeclPtr					exprDecl;
+	};
 
-		 ExpressionDeclPtr					exprDecl;
-	 };
+	/**
+	 * StmtForInitDecl
+	 */
 
-	 /**
-	  * StmtForInitDecl
-	  */
+	class StmtForInitDecl : public AstNode
+	{
+	public:
+		StmtForInitDecl(U32 line, U32 column);
+		virtual ~StmtForInitDecl();
 
-	 class StmtForInitDecl : public AstNode
-	 {
-	 public:
-		 StmtForInitDecl(U32 line, U32 column)
-			 : AstNode(AstNodeType_e::ForInitDecl, line, column)
-		 {}
+		TString								identifier;
+		TypeDeclPtr							typeDecl;
+		ExpressionDeclPtr					initExpression;
+	};
 
-		 virtual ~StmtForInitDecl()
-		 {}
+	/**
+	 * MatchWhenStmtDecl
+	 */
 
-		 TString							identifier;
-		 TypeDeclPtr						type;
-		 ExpressionDeclPtr					initExpression;
-	 };
+	class MatchWhenStmtDecl : public AstNode
+	{
+	public:
+		MatchWhenStmtDecl(U32 line, U32 column);
+		virtual ~MatchWhenStmtDecl();
 
-	 /**
-	  * MatchWhenStmtDecl
-	  */
+		PatternDeclPtr						patternDecl;
+		BlockDeclPtr						blockDecl;
+	};
 
-	 class MatchWhenStmtDecl : public AstNode
-	 {
-	 public:
-		 MatchWhenStmtDecl(U32 line, U32 column)
-			 : AstNode(AstNodeType_e::MatchWhenStmtDecl, line, column)
-		 {}
+	/**
+	 * StmtCatchBlockDecl
+	 */
 
-		 virtual ~MatchWhenStmtDecl()
-		 {}
+	class StmtCatchBlockDecl : public AstNode
+	{
+	public:
+		StmtCatchBlockDecl(U32 line, U32 column);
+		virtual ~StmtCatchBlockDecl();
 
-		 PatternDeclPtr						patternDecl;		 
-		 BlockDeclPtr						blockDecl;
-	 };
-
-	 /**
-	  * StmtCatchBlockDecl
-	  */
-
-	 class StmtCatchBlockDecl : public AstNode
-	 {
-	 public:
-		 StmtCatchBlockDecl(U32 line, U32 column)
-			 : AstNode(AstNodeType_e::CatchBlockStmtDecl, line, column)
-		 {}
-
-		 virtual ~StmtCatchBlockDecl()
-		 {}
-
-		 TypeDeclPtr						typeDecl;
-		 TString							identifier;
-		 BlockDeclPtr						blockDecl;
-	 };
+		TypeDeclPtr							typeDecl;
+		PatternDeclPtr						patternDecl;
+		BlockDeclPtr						blockDecl;
+	};
 } } }

@@ -96,6 +96,7 @@ namespace fluffy {
 		, m_cursor(0)
 		, m_length(bufferSize)
 		, m_fileSize(0)
+		, m_position(0)
 	{
 		m_memory = reinterpret_cast<I8*>(malloc(bufferSize));
 	}
@@ -164,7 +165,7 @@ namespace fluffy {
 
 	U32 LazyBuffer::getPosition()
 	{
-		return static_cast<U32>(m_stream->tellg()) + m_cursor;
+		return m_position + m_cursor;
 	}
 
 	const I8 LazyBuffer::readByte(U8 offset)
@@ -220,6 +221,7 @@ namespace fluffy {
 					m_memory[readedBytes] = 0;
 				}
 				m_cursor = 0;
+				m_position = totalReadedBytes;
 			}
 			else
 			{
@@ -236,28 +238,42 @@ namespace fluffy {
 
 	void LazyBuffer::reset(U32 position)
 	{
-		// Vai para a posicao indicada.
-		m_stream->seekg(position, std::fstream::beg);
-
-		// Recarrega o buffer.
-		if (m_stream->good())
+		if (m_length > m_fileSize)
 		{
-			const U32 totalReadedBytes = static_cast<U32>(m_stream->tellg());
-			m_stream->read(
-				m_memory,
-				totalReadedBytes + m_length > m_fileSize
-				? m_fileSize - totalReadedBytes
-				: m_length
-			);
-			size_t readedBytes = m_stream->gcount();
-			if (readedBytes < m_length) {
-				m_memory[readedBytes] = 0;
-			}
-			m_cursor = 0;
+			m_cursor = position;
 		}
 		else
 		{
-			throw std::out_of_range("Failed to read source file");
+			// Vai para a posicao indicada.
+			m_stream->seekg(position, std::ios_base::beg);
+
+			// Recarrega o buffer.
+			if (m_stream->good())
+			{
+				const U32 totalReadedBytes = static_cast<U32>(m_stream->tellg());
+				m_stream->read(
+					m_memory,
+					totalReadedBytes + m_length > m_fileSize
+					? m_fileSize - totalReadedBytes
+					: m_length
+				);
+
+				// Se o buffer e maior que o tamanho do arquivo deve resetar os bits.
+				if (!m_stream->good())
+				{
+					m_stream->clear();
+				}
+				size_t readedBytes = m_stream->gcount();
+				if (readedBytes < m_length) {
+					m_memory[readedBytes] = 0;
+				}
+				m_cursor = 0;
+				m_position = position;
+			}
+			else
+			{
+				throw std::out_of_range("Failed to read source file");
+			}
 		}
 	}
 }

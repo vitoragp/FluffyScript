@@ -68,5 +68,6 @@ namespace fluffy
 		U32						m_cursor;
 		U32						m_length;
 		U32						m_fileSize;
+		U32						m_position;
 	};
 }

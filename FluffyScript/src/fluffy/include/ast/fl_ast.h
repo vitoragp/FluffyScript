@@ -9,15 +9,19 @@ namespace fluffy { namespace ast {
 	class AstNode
 	{
 	protected:
-		AstNode(const AstNodeType_e	nodeType, U32 line, U32 column)
-			: nodeType(nodeType)
-			, line(line)
-			, column(column)
-		{}
+		AstNode(const AstNodeType_e	nodeType, U32 line, U32 column);
 
 	public:
-		virtual ~AstNode()
-		{}
+		virtual ~AstNode();
+
+		virtual Bool
+		hasChildren();
+
+		virtual std::vector<AstNode*>
+		getChildren();
+
+		virtual const I8*
+		getIdentifier();
 
 		const AstNodeType_e		nodeType;
 		U32						line;
@@ -31,12 +35,11 @@ namespace fluffy { namespace ast {
 	class AstNodeIdentified : public AstNode
 	{
 	public:
-		AstNodeIdentified(const AstNodeType_e nodeType, U32 line, U32 column)
-			: AstNode(nodeType, line, column)
-		{}
+		AstNodeIdentified(const AstNodeType_e nodeType, U32 line, U32 column);
+		virtual ~AstNodeIdentified();
 
-		virtual ~AstNodeIdentified()
-		{}
+		virtual const I8*
+		getIdentifier() final;
 
 		TString					identifier;
 	};

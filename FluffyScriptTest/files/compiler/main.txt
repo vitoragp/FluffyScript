@@ -1,6 +1,170 @@
+include { * } in mobile;
+
 namespace application
 {
+	class MainActivity extends AppCompatActivity {
+        private let mAddTaskButton: FloatingActionButton;
+        private let mViewModel: MainViewModel;
+        private let mSignUILauncher: ActivityResultLauncher<Intent>;
+        private let mTaskRecycler: RecyclerView;
+        private let mAdapter: TaskAdapter;
+        private let mSplash: FrameLayout;
+        private let mUserName: TextView;
+        private let mUserImage: ImageView;
+        private let mRepository: TaskRepository;
+        private let mStartForResult: ActivityResultLauncher<Intent?>;
+
+        private let mTouchHelper: ITouchHelper = object:ITouchHelper {
+            let p = 0;
+            let p = 0;
+
+            virtual fn OnTouch() override
+            {}
+        };
+
+        public constructor()
+            : super()
+            , mRepository(new TaskRepository())
+        {}
+
+        virtual fn onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+
+            mTaskRecycler = findViewById(R.id.taskRecycler);
+            mSplash = findViewById(R.id.splashContainer);
+            mUserName = findViewById(R.id.userName);
+            mUserImage = findViewById(R.id.userImage);
+
+            mStartForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), |it| {
+                if it.resultCode == 0
+                {
+                    updateTask(false);
+                }
+            });
+
+            // Cria o view model
+            mViewModel = MainViewModel();
+
+            mViewModel.observeUser(|it| {
+                mUserName.setText(it.displayName);
+
+                it.photoUrl?.let_(|it| {
+                    new Picasso()
+                        .with(this)
+                        .load(it)
+                        .into(mUserImage);
+                });
+            });
+
+            // Inicia activity de autenticacao
+            launchSignInActivity();
+
+            // Abre a janela para adicionar uma nova tarefa.
+            mAddTaskButton = findViewById(R.id.addTask) as FloatingActionButton;
+            mAddTaskButton.setOnClickListener(|it| {
+                let intent = new Intent(this, CreateTaskActivity::getClass());
+                intent.putExtra("position", mAdapter.itemCount);
+                mStartForResult.launch(intent);
+            });
+
+            let viewTask: fn(Task) = |it| {
+                let intent = Intent(this, ViewTaskActivity::getClass());
+                intent.putExtra("taskId", it.id);
+                mStartForResult.launch(intent);
+            };
+
+            let deleteTask: fn(Task) = |it| {
+                AlertDialog.Builder(this)
+                    .setTitle("Deletar tarefa?")
+                    .setView(LayoutInflater.from_(this).inflate(R.layout.ask_delete_fragment, null))
+                    .setPositiveButton("Apagar", |_,_| { 
+                        mRepository.delete(it, || {
+                            updateTask(true);
+                        });
+                    })
+                    .setNegativeButton("Não apagar", |_,_| { })
+                    .create()
+                    .show();
+            };
+
+            let markTask: fn(Intent) = |it| {
+                startActivity(it);
+            };
+            mAdapter = TaskAdapter(this, mRepository, viewTask, deleteTask, markTask);
+
+            // Atualiza registros
+            updateTask(false);
+
+            mTaskRecycler.adapter = mAdapter;
+            mTaskRecycler.layoutManager = LinearLayoutManager(this);
+
+            let itemTouchHelper = ItemTouchHelper(mItemTouchHelperCallback);
+            itemTouchHelper.attachToRecyclerView(mTaskRecycler);
+        }
+
+        private fn launchSignInActivity() {
+            mSignUILauncher = registerForActivityResult(
+                FirebaseAuthUIActivityResultContract()
+            , |res| {
+                this.onSignInResult(res);
+            });
+
+            let providers = arrayListOf(
+                AuthUI.IdpConfig.GoogleBuilder().build()
+            );
+
+            let signInItent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build();
+
+            mSignUILauncher.launch(signInItent);
+        }
+
+        private fn onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+            if result.resultCode == RESULT_OK {
+                // Successfully signed in
+                FirebaseAuth.getInstance().currentUser?.let_(|it| { mViewModel.setUser(it); });
+
+                // Remove splash
+                mSplash.visibility = View.GONE;
+            } else {
+                finish();
+            }
+        }
+
+        private fn updateTask(needRearrange: boolean)
+        {
+            mRepository.getAll(|it| {
+                let mutableTaskList = mutableListOf<Task>();
+
+                mutableTaskList.addAll(it);
+
+                let pendingTasks: ArrayList<Task> = arrayListOf();
+                let completeTasks: ArrayList<Task> = arrayListOf();
+
+                pendingTasks.addAll(mutableTaskList.filter(|it| = it.done == false));
+                completeTasks.addAll(mutableTaskList.filter(|it| = it.done == true));
+
+                mutableTaskList.clear();
+                pendingTasks.sortBy(|it| = it.position);
+                mutableTaskList += pendingTasks;
+                completeTasks.sortBy(|it| = it.position);
+                mutableTaskList += completeTasks;
+
+                mAdapter.updateTaskList(mutableTaskList as ArrayList<Task>);
+
+                if (needRearrange) {
+                    mAdapter.rearrangeTaskPosition();
+                }
+            });
+        }
+    }
+
 	fn main()
 	{
+
 	}
 }
+

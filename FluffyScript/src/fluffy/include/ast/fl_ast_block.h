@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "fl_ast.h"
 
 namespace fluffy { namespace ast { namespace stmt {
@@ -16,20 +17,16 @@ namespace fluffy { namespace ast {
 	class BlockDecl : public AstNode
 	{
 	public:
-		BlockDecl(U32 line, U32 column)
-			: AstNode(AstNodeType_e::Block, line, column)
-			, beginPosition(0)
-			, endPosition(0)
-		{}
+		BlockDecl(U32 line, U32 column);
+		BlockDecl(U32 beginPosition, U32 endPosition, U32 line, U32 column);
 
-		BlockDecl(U32 beginPosition, U32 endPosition, U32 line, U32 column)
-			: AstNode(AstNodeType_e::Block, line, column)
-			, beginPosition(beginPosition)
-			, endPosition(endPosition)
-		{}
+		virtual ~BlockDecl();
 
-		virtual ~BlockDecl()
-		{}
+		virtual Bool
+		hasChildren() final;
+
+		virtual std::vector<AstNode*>
+		getChildren() final;
 
 		StmtDeclPtrList						stmtList;
 

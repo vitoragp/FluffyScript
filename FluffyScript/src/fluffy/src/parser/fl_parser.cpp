@@ -47,6 +47,7 @@ namespace fluffy {
 		case TokenType_e::LSquBracket:
 		case TokenType_e::LParBracket:
 		case TokenType_e::Dot:
+		case TokenType_e::SafeDot:
 		case TokenType_e::BitWiseNot:
 		case TokenType_e::LogicalNot:
 		case TokenType_e::ScopeResolution:
@@ -54,6 +55,7 @@ namespace fluffy {
 		case TokenType_e::Match:
 		case TokenType_e::Shared:
 		case TokenType_e::Ref:
+		case TokenType_e::Object:
 			return true;
 		default:
 			break;
@@ -118,6 +120,7 @@ namespace fluffy {
 		{ TokenType_e::Increment,			14, true },   // Postfix
 		{ TokenType_e::Decrement,			14, true },   // Postfix
 		{ TokenType_e::Dot,					14, true },
+		{ TokenType_e::SafeDot,				14, true },
 		{ TokenType_e::BitWiseNot,			14, true },
 		{ TokenType_e::LogicalNot,			14, true },
 		{ TokenType_e::ScopeResolution,		15, true },
@@ -171,6 +174,12 @@ namespace fluffy { namespace parser {
 	Parser::finished()
 	{
 		return m_lexer->isEof();
+	}
+
+	void
+	Parser::skipToken()
+	{
+		m_lexer->nextToken();
 	}
 
 	std::unique_ptr<ast::CodeUnit>
@@ -258,7 +267,7 @@ namespace fluffy { namespace parser {
 			includeDecl->includedItemList.push_back(m_lexer->expectIdentifier());
 
 			// Verifica se ha mais declaracoes.
-			if (!m_lexer->isComma()) {
+			if (m_lexer->isRightBracket()) {
 				break;
 			}
 
@@ -269,8 +278,8 @@ namespace fluffy { namespace parser {
 		// Consome '}'
 		m_lexer->expectToken(TokenType_e::RBracket);
 
-		// Consome 'from'
-		m_lexer->expectToken(TokenType_e::From);
+		// Consome 'in'
+		m_lexer->expectToken(TokenType_e::In);
 
 		// Consome o identificador do namespace.
 		includeDecl->fromNamespace = parseScopedIdentifier(ctx);
@@ -324,7 +333,7 @@ namespace fluffy { namespace parser {
 	}
 
 	std::unique_ptr<ast::ClassDecl>
-	Parser::parseClass(ParserContext_s& ctx, Bool hasExport, Bool hasAbstract)
+	Parser::parseClass(ParserContext_s& ctx, Bool hasExport)
 	{
 		auto classDecl = std::make_unique<ast::ClassDecl>(
 			m_lexer->getToken().line,
@@ -332,7 +341,14 @@ namespace fluffy { namespace parser {
 		);
 
 		classDecl->isExported = hasExport;
-		classDecl->isAbstract = hasAbstract;
+
+		// Verifica se a declaracao para a classe ser abstrata.
+		if (m_lexer->isAbstract())
+		{
+			// Consome 'abtract'.
+			m_lexer->expectToken(TokenType_e::Abstract);
+			classDecl->isAbstract = true;
+		}
 
 		// Consome 'class'.
 		m_lexer->expectToken(TokenType_e::Class);
@@ -375,10 +391,10 @@ namespace fluffy { namespace parser {
 
 			while (true)
 			{
-				classDecl->interfaceList.push_back(parseType(ctx));
+				auto implementsDecl = parseType(ctx);
 
 				// Valida a interface.
-				if (classDecl->interfaceList.back()->typeID != TypeDeclID_e::Named)
+				if (implementsDecl->typeID != TypeDeclID_e::Named)
 				{
 					throw exceptions::custom_exception(
 						"class '%s' implements must be a interface element",
@@ -387,6 +403,7 @@ namespace fluffy { namespace parser {
 						classDecl->identifier.str()
 					);
 				}
+				classDecl->interfaceList.push_back(std::move(implementsDecl));
 
 				// Verifica se ha mais declaracoes.
 				if (m_lexer->isComma())
@@ -831,9 +848,33 @@ namespace fluffy { namespace parser {
 			);
 		}
 
-		// Consome bloco se houver.
-		functionPtr->blockDecl = parseBlock(ctx);
-		
+		// Consome bloco ou expressao.
+		if (m_lexer->isAssign())
+		{
+			// Consome '='
+			m_lexer->expectToken(TokenType_e::Assign);
+
+			// Esse tipo de declaracao so pode ser usado com retorno.
+			if (functionPtr->returnType->nodeType == AstNodeType_e::VoidType)
+			{
+				throw exceptions::custom_exception(
+					"Function '%s' with assign('=') can't be void type return",
+					functionPtr->identifier.str(),
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
+			}
+
+			// consome expressao.
+			functionPtr->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+
+			// Consome ';'
+			m_lexer->expectToken(TokenType_e::SemiColon);
+		}
+		else
+		{
+			functionPtr->blockDecl = parseBlock(ctx);
+		}
 		return functionPtr;
 	}
 
@@ -879,6 +920,11 @@ namespace fluffy { namespace parser {
 			// Consome 'shared'.
 			m_lexer->expectToken(TokenType_e::Shared);
 			variableDecl->isShared = true;
+		}
+		else if (m_lexer->isUnique())
+		{
+			m_lexer->expectToken(TokenType_e::Unique);
+			variableDecl->isUnique = true;
 		}
 
 		// Consome identificador.
@@ -951,11 +997,8 @@ namespace fluffy { namespace parser {
 			genericDecl->identifier = m_lexer->expectIdentifier();
 
 			// Processa a clausula where.
-			if (m_lexer->isColon())
+			if (m_lexer->isWhere())
 			{
-				// Consome ':'
-				m_lexer->expectToken(TokenType_e::Colon);
-
 				// Consome 'where'
 				m_lexer->expectToken(TokenType_e::Where);
 
@@ -1052,16 +1095,10 @@ namespace fluffy { namespace parser {
 		const U32 line = m_lexer->getToken().line;
 		const U32 column = m_lexer->getToken().column;
 
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		TokenType_e type = TokenType_e::Unknown;
-
 		switch (m_lexer->getToken().type)
 		{
 		case TokenType_e::Void:
-			type = TokenType_e::Void;
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclVoid>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1069,7 +1106,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::I8:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclI8>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1077,7 +1113,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::U8:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclU8>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1085,7 +1120,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::I16:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclI16>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1093,7 +1127,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::U16:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclU16>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1101,7 +1134,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::I32:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclI32>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1109,7 +1141,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::U32:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclU32>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1117,7 +1148,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::I64:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclI64>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1125,7 +1155,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::U64:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclU64>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1133,7 +1162,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::Fp32:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclFp32>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1141,7 +1169,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::Fp64:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclFp64>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1149,7 +1176,6 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::String:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclString>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1157,31 +1183,21 @@ namespace fluffy { namespace parser {
 			break;
 		case TokenType_e::Object:
 			m_lexer->nextToken();
-			if (skipOnly) { break; }
 			typeDecl = std::make_unique<ast::TypeDeclObject>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
 			break;
 		case TokenType_e::Fn:
-			if (skipOnly) {
-				parseFunctionType(ctx);
-				break;
-			}
 			typeDecl = parseFunctionType(ctx);
 			break;
 		case TokenType_e::LParBracket:
-			if (skipOnly) {
-				parseTupleType(ctx);
-				break;
-			}
 			typeDecl = parseTupleType(ctx);
 			break;
 		case TokenType_e::Self:
 			if (ctx.insideTrait)
 			{
 				m_lexer->nextToken();
-				if (skipOnly) { break; }
 				typeDecl = std::make_unique<ast::SelfTypeDecl>(
 					m_lexer->getToken().line,
 					m_lexer->getToken().column
@@ -1200,10 +1216,6 @@ namespace fluffy { namespace parser {
 			// NamedType
 			if (m_lexer->isIdentifier() || m_lexer->isScopeResolution())
 			{
-				if (skipOnly) {
-					parseNamedType(ctx);
-					break;
-				}
 				typeDecl = parseNamedType(ctx);
 				break;
 			}
@@ -1218,17 +1230,6 @@ namespace fluffy { namespace parser {
 		// Verifica se o tipo e anulavel.
 		if (m_lexer->isInterrogation())
 		{
-			if (skipOnly)
-			{
-				if (type == TokenType_e::Void)
-				{
-					throw exceptions::custom_exception("'void' type can't be nullable",
-						line,
-						column
-					);
-				}
-			}
-
 			if (typeDecl->typeID == TypeDeclID_e::Void)
 			{
 				throw exceptions::custom_exception("'void' type can't be nullable",
@@ -1246,24 +1247,6 @@ namespace fluffy { namespace parser {
 		// Verifica se e um array
 		if (m_lexer->isLeftSquBracket())
 		{
-			if (skipOnly)
-			{
-				while (true)
-				{
-					if (!m_lexer->isLeftSquBracket())
-					{
-						break;
-					}
-					parseArrayDecl(ctx);
-				}
-				if (m_lexer->isInterrogation())
-				{
-					// Consome '?'
-					m_lexer->expectToken(TokenType_e::Interrogation);
-				}
-				return nullptr;
-			}
-
 			auto arrayType = std::make_unique<ast::TypeDeclArray>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1291,49 +1274,12 @@ namespace fluffy { namespace parser {
 			}
 			typeDecl = std::move(arrayType);
 		}
-		if (skipOnly) {
-			return nullptr;
-		}
 		return typeDecl;
 	}
 
 	std::unique_ptr<ast::BlockDecl>
 	Parser::parseBlock(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly) {
-			const U32 line = m_lexer->getToken().line;
-			const U32 column = m_lexer->getToken().column;
-
-			const U32 beginPosition = m_lexer->getToken().position;
-
-			// Consome '{'
-			m_lexer->expectToken(TokenType_e::LBracket);
-
-			while (true)
-			{
-				if (m_lexer->isRightBracket())
-				{
-					break;
-				}
-
-				parseStmtDecl(ctx);
-			}
-
-			// Consome '}'
-			m_lexer->expectToken(TokenType_e::RBracket);
-
-			const U32 endPosition = m_lexer->getToken().position;
-
-			return std::make_unique<ast::BlockDecl>(
-				beginPosition,
-				endPosition,
-				line,
-				column
-			);
-		}
-
 		auto blockDecl = std::make_unique<ast::BlockDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -1416,25 +1362,18 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::expr::ExpressionDecl>
 	Parser::parseExpression(ParserContext_s& ctx, OperatorPrecLevel_e prec)
 	{
+		Bool needGenericValidation = false;
 		std::unique_ptr<ast::expr::ExpressionDecl> expr;
 
+		const U32 beginPosition = m_lexer->getToken().position;
+
 		ctx.insideExpr = true;
-
-		if (ctx.isFirstPass)
-		{
-			const U32 line = m_lexer->getToken().line;
-			const U32 column = m_lexer->getToken().column;
-			const U32 beginPosition = m_lexer->getToken().position;
-			parseExpressionImp(ctx, prec);
-			const U32 endPosition = m_lexer->getToken().position;
-			expr = std::make_unique<ast::expr::ExpressionDeclMark>(line, column, beginPosition, endPosition);
-		}
-		else
-		{
-			expr = parseExpressionImp(ctx, prec);
-		}
-
+		expr = parseExpressionImp(ctx, prec, &needGenericValidation);
 		ctx.insideExpr = false;
+
+		expr->beginPosition = beginPosition;
+		expr->endPosition = m_lexer->getToken().position;
+		expr->needGenericValidation = needGenericValidation;
 
 		return expr;
 	}
@@ -1448,7 +1387,9 @@ namespace fluffy { namespace parser {
 			return parseLiteralPattern(ctx);
 		case TokenType_e::Identifier:
 			{
-				U32 position = m_lexer->getToken().position;
+				const U32 position = m_lexer->getToken().position;
+				const U32 line = m_lexer->getToken().line;
+				const U32 column = m_lexer->getToken().column;
 
 				// Verifica se pode ser um enum destructuring.
 				while (true)
@@ -1467,10 +1408,10 @@ namespace fluffy { namespace parser {
 
 					if (m_lexer->isLeftParBracket())
 					{
-						m_lexer->resetToPosition(position);
-						return parseEnumPattern(ctx);
+						m_lexer->resetToPosition(position, line, column);
+						return parseEnumerablePattern(ctx);
 					}
-					m_lexer->resetToPosition(position);
+					m_lexer->resetToPosition(position, line, column);
 					break;
 				}
 				return parseLiteralPattern(ctx);
@@ -1479,7 +1420,7 @@ namespace fluffy { namespace parser {
 		case TokenType_e::LParBracket:
 			return parseTuplePattern(ctx);
 		case TokenType_e::LBracket:
-			return parseClassOrStructPattern(ctx);
+			return parseStructurePattern(ctx);
 		default:
 			throw exceptions::not_implemented_feature_exception("pattern matching");
 		}
@@ -1506,6 +1447,7 @@ namespace fluffy { namespace parser {
 		{
 			Bool isReference = false;
 			Bool isShared = false;
+			Bool isUnique = false;
 
 			if (m_lexer->isRef())
 			{
@@ -1517,6 +1459,11 @@ namespace fluffy { namespace parser {
 				m_lexer->expectToken(TokenType_e::Shared);
 				isShared = true;
 			}
+			else if (m_lexer->isUnique())
+			{
+				m_lexer->expectToken(TokenType_e::Unique);
+				isUnique = true;
+			}
 
 			if (m_lexer->isIdentifier())
 			{
@@ -1527,6 +1474,7 @@ namespace fluffy { namespace parser {
 
 				parameterDecl->isReference = isReference;
 				parameterDecl->isShared = isShared;
+				parameterDecl->isUnique = isUnique;
 				parameterDecl->identifier = m_lexer->expectIdentifier();
 
 				// Verifica se e uma ellipsis
@@ -1557,7 +1505,7 @@ namespace fluffy { namespace parser {
 				// Adiciona o parametro a lista.
 				functionParameters.push_back(std::move(parameterDecl));
 			}
-			else if (m_lexer->isLeftBracket())
+			else if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
 			{
 				auto parameterDecl = std::make_unique<ast::FunctionParameterDecl>(
 					m_lexer->getToken().line,
@@ -1565,9 +1513,11 @@ namespace fluffy { namespace parser {
 				);
 
 				parameterDecl->isReference = isReference;
+				parameterDecl->isShared = isShared;
+				parameterDecl->isUnique = isUnique;
 
 				// Consome destructuring.
-				parameterDecl->destructuringPatternDecl = parsePattern(ctx);
+				parameterDecl->patternDecl = parsePattern(ctx);
 
 				// Consome ':'
 				m_lexer->expectToken(TokenType_e::Colon);
@@ -1637,7 +1587,7 @@ namespace fluffy { namespace parser {
 		// Verifica se a mais declaracoes de escopo.
 		if (m_lexer->isScopeResolution())
 		{
-			scopedIdentifierDecl->tailIdentifier = parseChildScopedIdentifiers(ctx);
+			scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
 		}
 		return scopedIdentifierDecl;
 	}
@@ -1646,7 +1596,6 @@ namespace fluffy { namespace parser {
 	Parser::parseGeneralStmt(ParserContext_s& ctx)
 	{
 		Bool hasExport = false;
-		Bool hasAbtract = false;
 
 		// Verifica se houve a declararao para exportar o elemento.
 		if (m_lexer->isExport())
@@ -1656,30 +1605,12 @@ namespace fluffy { namespace parser {
 			hasExport = true;
 		}
 
-		// Verifica se a declaracao para a classe ser abstrata.
-		if (m_lexer->isAbstract())
-		{
-			// Consome 'abtract'.
-			m_lexer->expectToken(TokenType_e::Abstract);
-			hasAbtract = true;
-
-			// Obrigatoriamente 'abstract' deve se referir a uma classe.
-			if (!m_lexer->isClass()) {
-				throw exceptions::unexpected_token_exception(
-					m_lexer->getToken().value,
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
-				);
-			}
-		}
-
-		// export, abstract, class, interface, struct, enum, trait, let, fn
-
 		// Verifica qual declaracao processar.
 		switch (m_lexer->getToken().type)
 		{
+		case TokenType_e::Abstract:
 		case TokenType_e::Class:
-			return parseClass(ctx, hasExport, hasAbtract);
+			return parseClass(ctx, hasExport);
 		case TokenType_e::Interface:
 			return parseInterface(ctx, hasExport);
 		case TokenType_e::Struct:
@@ -1697,6 +1628,7 @@ namespace fluffy { namespace parser {
 			throw exceptions::unexpected_with_possibilities_token_exception(
 				m_lexer->getToken().value,
 				{
+					TokenType_e::Abstract,
 					TokenType_e::Class,
 					TokenType_e::Interface,
 					TokenType_e::Struct,
@@ -1764,6 +1696,8 @@ namespace fluffy { namespace parser {
 		// e segue a seguint sintaxe: <tipo> '.'
 		Bool	hasSourceTypeDecl = false;
 		U32		position = m_lexer->getToken().position;
+		U32		line = m_lexer->getToken().line;
+		U32		column = m_lexer->getToken().column;
 
 		while (!m_lexer->isLeftParBracket()) {
 			if (m_lexer->isDot())
@@ -1773,7 +1707,7 @@ namespace fluffy { namespace parser {
 			}
 			m_lexer->nextToken();
 		}
-		m_lexer->resetToPosition(position);
+		m_lexer->resetToPosition(position, line, column);
 
 		// Consome o <tipo> seguido de '.'
 		if (hasSourceTypeDecl)
@@ -1854,8 +1788,33 @@ namespace fluffy { namespace parser {
 			return classFunctionDecl;
 		}
 
-		classFunctionDecl->blockDecl = parseBlock(ctx);
+		// Consome bloco ou expressao.
+		if (m_lexer->isAssign())
+		{
+			// Consome '='
+			m_lexer->expectToken(TokenType_e::Assign);
 
+			// Esse tipo de declaracao so pode ser usado com retorno.
+			if (classFunctionDecl->returnType->nodeType == AstNodeType_e::VoidType)
+			{
+				throw exceptions::custom_exception(
+					"Function '%s' with assign('=') can't be void type return",
+					classFunctionDecl->identifier.str(),
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
+			}
+
+			// consome expressao.
+			classFunctionDecl->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+
+			// Consome ';'
+			m_lexer->expectToken(TokenType_e::SemiColon);
+		}
+		else
+		{
+			classFunctionDecl->blockDecl = parseBlock(ctx);
+		}
 		return classFunctionDecl;
 	}
 
@@ -1919,6 +1878,11 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Shared);
 			classVariableDecl->isShared = true;
 		}
+		else if (m_lexer->isUnique())
+		{
+			m_lexer->expectToken(TokenType_e::Unique);
+			classVariableDecl->isUnique = true;
+		}
 
 		// Consome identificador.
 		classVariableDecl->identifier = m_lexer->expectIdentifier();
@@ -1952,7 +1916,7 @@ namespace fluffy { namespace parser {
 		}
 
 		// Consome a expressao de inicializacao.
-		if (mustHaveInitExpression)
+		if (mustHaveInitExpression || m_lexer->isAssign())
 		{
 			// Consome '='.
 			m_lexer->expectToken(TokenType_e::Assign);
@@ -1997,7 +1961,10 @@ namespace fluffy { namespace parser {
 				m_lexer->expectToken(TokenType_e::LParBracket);
 
 				// Consome os parametros.
-				classConstructorDecl->superParameters = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				if (!m_lexer->isRightParBracket())
+				{
+					classConstructorDecl->superInitExpr = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				}
 
 				// Consome ')'.
 				m_lexer->expectToken(TokenType_e::RParBracket);
@@ -2171,6 +2138,11 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Shared);
 			structVariableDecl->isShared = true;
 		}
+		else if (m_lexer->isUnique())
+		{
+			m_lexer->expectToken(TokenType_e::Unique);
+			structVariableDecl->isUnique = true;
+		}
 
 		// Consome identificador.
 		structVariableDecl->identifier = m_lexer->expectIdentifier();
@@ -2275,8 +2247,33 @@ namespace fluffy { namespace parser {
 		if (isDefinition) {
 			ctx.insideTrait = true;
 
-			// Processa bloco.
-			traitFunctionDecl->blockDecl = parseBlock(ctx);
+			// Consome bloco ou expressao.
+			if (m_lexer->isAssign())
+			{
+				// Consome '='
+				m_lexer->expectToken(TokenType_e::Assign);
+
+				// Esse tipo de declaracao so pode ser usado com retorno.
+				if (traitFunctionDecl->returnType->nodeType == AstNodeType_e::VoidType)
+				{
+					throw exceptions::custom_exception(
+						"Function '%s' with assign('=') can't be void type return",
+						traitFunctionDecl->identifier.str(),
+						m_lexer->getToken().line,
+						m_lexer->getToken().column
+					);
+				}
+
+				// consome expressao.
+				traitFunctionDecl->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+
+				// Consome ';'
+				m_lexer->expectToken(TokenType_e::SemiColon);
+			}
+			else
+			{
+				traitFunctionDecl->blockDecl = parseBlock(ctx);
+			}
 
 			ctx.insideTrait = false;
 		} else {
@@ -2345,15 +2342,9 @@ namespace fluffy { namespace parser {
 				m_lexer->expectToken(TokenType_e::RParBracket);
 			}
 			break;
-		case TokenType_e::Comma:
-			break;
+
 		default:
-			throw exceptions::unexpected_with_possibilities_token_exception(
-				m_lexer->getToken().value,
-				{ TokenType_e::Assign, TokenType_e::LParBracket, TokenType_e::Comma },
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
-			);
+			break;
 		}
 
 		return enumItemDecl;
@@ -2362,19 +2353,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseIf(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::If);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			if (m_lexer->isElse()) {
-				m_lexer->expectToken(TokenType_e::Else);
-				parseBlock(ctx);
-			}
-			return nullptr;
-		}
-
 		auto ifDecl = std::make_unique<ast::StmtIfDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2405,23 +2383,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseIfLet(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::If);
-			m_lexer->expectToken(TokenType_e::Let);
-			parsePattern(ctx);
-			m_lexer->expectToken(TokenType_e::Assign);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			parseBlock(ctx);
-			if (m_lexer->isElse()) {
-				m_lexer->expectToken(TokenType_e::Else);
-				parseBlock(ctx);
-			}
-			return nullptr;
-		}
-
 		auto ifLefDecl = std::make_unique<ast::StmtIfLetDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2460,27 +2421,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseFor(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::For);
-			if (m_lexer->isLet())
-			{
-				m_lexer->expectIdentifier();
-				m_lexer->expectToken(TokenType_e::Assign);
-				parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			} else {
-				parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			}
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			parseBlock(ctx);
-			return nullptr;
-		}
-
 		auto forDecl = std::make_unique<ast::StmtForDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2531,16 +2471,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseWhile(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::While);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			parseBlock(ctx);
-			return nullptr;
-		}
-
 		auto whileDecl = std::make_unique<ast::StmtWhileDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2561,17 +2491,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseDoWhile(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Do);
-			parseBlock(ctx);
-			m_lexer->expectToken(TokenType_e::While);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			return nullptr;
-		}
-
 		auto doWhileDecl = std::make_unique<ast::StmtDoWhileDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2598,52 +2517,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseMatch(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Match);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			m_lexer->expectToken(TokenType_e::LBracket);
-			while (true)
-			{
-				if (m_lexer->isRightBracket())
-				{
-					break;
-				}
-
-			parsePatternlabelSkip:
-				m_lexer->expectToken(TokenType_e::When);
-				parsePattern(ctx);
-				m_lexer->expectToken(TokenType_e::Arrow);
-				parseBlock(ctx);
-				if (m_lexer->isComma())
-				{
-					m_lexer->expectToken(TokenType_e::Comma);
-					if (m_lexer->isRightBracket()) {
-						break;
-					}
-					goto parsePatternlabelSkip;
-				}
-				if (m_lexer->isRightBracket())
-				{
-					break;
-				}
-				throw exceptions::unexpected_with_possibilities_token_exception(
-					m_lexer->getToken().value,
-					{
-						TokenType_e::When,
-						TokenType_e::Comma,
-						TokenType_e::RBracket
-					},
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
-				);
-			}
-			m_lexer->expectToken(TokenType_e::RBracket);
-			return nullptr;
-		}
-
 		auto matchDecl = std::make_unique<ast::StmtMatchDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2723,16 +2596,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseReturn(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Return);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto returnDecl = std::make_unique<ast::StmtReturnDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2753,15 +2616,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseContinue(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Continue);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto continueDecl = std::make_unique<ast::StmtContinueDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2779,15 +2633,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseBreak(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Break);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto continueDecl = std::make_unique<ast::StmtBreakDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2805,15 +2650,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseGoto(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Goto);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto gotoDecl = std::make_unique<ast::StmtGotoDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2834,31 +2670,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseTry(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Do);
-			parseBlock(ctx);
-			m_lexer->expectToken(TokenType_e::Catch);
-			parseType(ctx);
-			m_lexer->expectIdentifier();
-			parseBlock(ctx);
-			while (true)
-			{
-				if (m_lexer->isCatch())
-				{
-					m_lexer->expectToken(TokenType_e::Catch);
-					parseType(ctx);
-					m_lexer->expectIdentifier();
-					parseBlock(ctx);
-					continue;
-				}
-				break;
-			}
-			return nullptr;
-		}
-
 		auto tryDecl = std::make_unique<ast::StmtTryDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2882,7 +2693,7 @@ namespace fluffy { namespace parser {
 			catchDecl->typeDecl = parseType(ctx);
 
 			// Consome identificador.
-			catchDecl->identifier = m_lexer->expectIdentifier();
+			catchDecl->patternDecl = parsePattern(ctx);
 
 			// Consome bloco.
 			catchDecl->blockDecl = parseBlock(ctx);
@@ -2907,7 +2718,7 @@ namespace fluffy { namespace parser {
 				catchDecl->typeDecl = parseType(ctx);
 
 				// Consome identificador.
-				catchDecl->identifier = m_lexer->expectIdentifier();
+				catchDecl->patternDecl = parsePattern(ctx);
 
 				// Consome bloco.
 				catchDecl->blockDecl = parseBlock(ctx);
@@ -2924,18 +2735,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parsePanic(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Panic);
-			m_lexer->expectToken(TokenType_e::LParBracket);
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			m_lexer->expectToken(TokenType_e::RParBracket);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto panicDecl = std::make_unique<ast::StmtPanicDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -2962,80 +2761,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseVariable(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			Bool isConst = false;
-			switch (m_lexer->getToken().type)
-			{
-			case TokenType_e::Let:
-				isConst = false;
-				m_lexer->expectToken(TokenType_e::Let);
-				break;
-			case TokenType_e::Const:
-				isConst = true;
-				m_lexer->expectToken(TokenType_e::Const);
-				break;
-			default:
-				throw exceptions::unexpected_with_possibilities_token_exception(
-					m_lexer->getToken().value,
-					{
-						TokenType_e::Let,
-						TokenType_e::Const
-					},
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
-				);
-			}
-			if (m_lexer->isRef())
-			{
-				m_lexer->expectToken(TokenType_e::Ref);
-			}
-			else if (m_lexer->isShared())
-			{
-				m_lexer->expectToken(TokenType_e::Shared);
-			}
-
-			if (m_lexer->isIdentifier())
-			{
-				m_lexer->expectIdentifier();
-			}
-			else if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
-			{
-				parsePattern(ctx);
-			}
-
-			Bool mustHaveInitExpression = isConst ? true : false;
-
-			// Verifica se o tipo foi declarado.
-			if (m_lexer->isColon())
-			{
-				m_lexer->expectToken(TokenType_e::Colon);
-				if (m_lexer->isVoid())
-				{
-					throw exceptions::custom_exception(
-						"Variables or constant can't have void type",
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
-				}
-				parseType(ctx);
-			} else {
-				mustHaveInitExpression = true;
-			}
-			if (mustHaveInitExpression)
-			{
-				m_lexer->expectToken(TokenType_e::Assign);
-				parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
-			}
-
-			// Consome ';'.
-			m_lexer->expectToken(TokenType_e::SemiColon);
-
-			return nullptr;
-		}
-
 		auto variableDecl = std::make_unique<ast::StmtVariableDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -3075,6 +2800,11 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Shared);
 			variableDecl->isShared = true;
 		}
+		else if (m_lexer->isUnique())
+		{
+			m_lexer->expectToken(TokenType_e::Unique);
+			variableDecl->isUnique = true;
+		}
 
 		// Consome identificador.
 		if (m_lexer->isIdentifier())
@@ -3083,7 +2813,7 @@ namespace fluffy { namespace parser {
 		}
 		else if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
 		{
-			variableDecl->destructuringPatternDecl = parsePattern(ctx);
+			variableDecl->patternDecl = parsePattern(ctx);
 		}
 
 		Bool mustHaveInitExpression = variableDecl->isConst ? true : false;
@@ -3109,20 +2839,19 @@ namespace fluffy { namespace parser {
 					column
 				);
 			}
-		}
-		else {
+		} else {
 			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
 			mustHaveInitExpression = true;
 		}
 
 		// Consome a expressao de inicializacao.
-		if (mustHaveInitExpression)
+		if (mustHaveInitExpression || m_lexer->isAssign())
 		{
 			// Consome '='.
 			m_lexer->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);;
+			variableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
 		}
 
 		// Consome ';'.
@@ -3134,15 +2863,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseLabel(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectIdentifier();
-			m_lexer->expectToken(TokenType_e::Colon);
-			return nullptr;
-		}
-
 		auto labelDecl = std::make_unique<ast::StmtLabelDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -3160,15 +2880,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::stmt::StmtDecl>
 	Parser::parseExprStmt(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-			m_lexer->expectToken(TokenType_e::SemiColon);
-			return nullptr;
-		}
-
 		auto exprDecl = std::make_unique<ast::StmtExprDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -3184,10 +2895,8 @@ namespace fluffy { namespace parser {
 	}
 
 	std::unique_ptr<ast::expr::ExpressionDecl>
-	Parser::parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec)
+	Parser::parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec, Bool* requiredGenericValidation)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
 		std::unique_ptr<ast::expr::ExpressionDecl> lhs;
 		std::unique_ptr<ast::expr::ExpressionDecl> rhs;
 
@@ -3208,44 +2917,35 @@ namespace fluffy { namespace parser {
 			case TokenType_e::Ref:
 				{
 					// Processa superficialmente
-					auto unaryExprDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionUnaryDecl>(
+					auto unaryExprDecl = std::make_unique<ast::expr::ExpressionUnaryDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
-					) : nullptr;
+					);
 
-					if (!skipOnly) {
-						unaryExprDecl->op = m_lexer->getToken().type;
-						unaryExprDecl->unaryType = ExpressionUnaryType_e::Prefix;
-					}
+					unaryExprDecl->op = m_lexer->getToken().type;
+					unaryExprDecl->unaryType = ExpressionUnaryType_e::Prefix;
 
 					// Consome operator.
 					m_lexer->nextToken();
 
 					// Processa expressao a direita.
-					if (!skipOnly) {
-						unaryExprDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Unary);
-					} else {
-						parseExpressionImp(ctx, OperatorPrecLevel_e::Unary);
-					}
+					unaryExprDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Unary, requiredGenericValidation);
+
 					return unaryExprDecl;
 				}
 				break;
 			case TokenType_e::Match:
 				{
-					auto matchExprDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionMatchDecl>(
+					auto matchExprDecl = std::make_unique<ast::expr::ExpressionMatchDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
-					) : nullptr;
+					);
 
 					// Consome operator.
 					m_lexer->nextToken();
 
 					// Processa expressao a direita.
-					if (!skipOnly) {
-						matchExprDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Unary);
-					} else {
-						parseExpressionImp(ctx, OperatorPrecLevel_e::Unary);
-					}
+					matchExprDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Unary, requiredGenericValidation);
 
 					// Consome '{'
 					m_lexer->expectToken(TokenType_e::LBracket);
@@ -3253,30 +2953,22 @@ namespace fluffy { namespace parser {
 					// Processa declaracao 'when'
 					while (true)
 					{
-						auto whenDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionMatchWhenDecl>(
+						auto whenDecl = std::make_unique<ast::expr::ExpressionMatchWhenDecl>(
 							m_lexer->getToken().line,
 							m_lexer->getToken().column
-						) : nullptr;
+						);
 
 						// Consome 'when'
 						m_lexer->expectToken(TokenType_e::When);
 
 						// Consome pattern.
-						if (!skipOnly) {
-							whenDecl->patternDecl = parsePattern(ctx);
-						} else {
-							parsePattern(ctx);
-						}
+						whenDecl->patternDecl = parsePattern(ctx);
 
 						// Consome '->'
 						m_lexer->expectToken(TokenType_e::Arrow);
 
 						// Consome o expressao.
-						if (!skipOnly) {
-							whenDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation);
-						} else {
-							parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation);
-						}
+						whenDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation, requiredGenericValidation);
 
 						if (m_lexer->isComma())
 						{
@@ -3304,15 +2996,11 @@ namespace fluffy { namespace parser {
 		// Processa atomos: operadores de precedencia maxima
 		// como constantes e identificadores.
 		if (prec > OperatorPrecLevel_e::Max) {
-			return parseAtom(ctx);
+			return parseAtom(ctx, requiredGenericValidation);
 		}
 
 		// Processa expressao a esquerda.
-		if (!skipOnly) {
-			lhs = parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(prec + 1));
-		} else {
-			parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(prec + 1));
-		}
+		lhs = parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(prec + 1), requiredGenericValidation);
 
 		while (true)
 		{
@@ -3333,18 +3021,16 @@ namespace fluffy { namespace parser {
 					// Consome o token: '++' ou '--'
 					m_lexer->nextToken();
 
-					auto unaryExprDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionUnaryDecl>(
+					auto unaryExprDecl = std::make_unique<ast::expr::ExpressionUnaryDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
-					) : nullptr;
+					);
 
-					if (!skipOnly) {
-						unaryExprDecl->op = m_lexer->getToken().type;
-						unaryExprDecl->unaryType = ExpressionUnaryType_e::Posfix;
-						unaryExprDecl->exprDecl = std::move(lhs);
+					unaryExprDecl->op = m_lexer->getToken().type;
+					unaryExprDecl->unaryType = ExpressionUnaryType_e::Posfix;
+					unaryExprDecl->exprDecl = std::move(lhs);
 
-						lhs = std::move(unaryExprDecl);
-					}
+					lhs = std::move(unaryExprDecl);
 				}
 				continue;
 			default:
@@ -3376,73 +3062,59 @@ namespace fluffy { namespace parser {
 						// Consome ')'
 						m_lexer->expectToken(TokenType_e::RParBracket);
 
-						auto functionCallExpr = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionCall>(
+						auto functionCallExpr = std::make_unique<ast::expr::ExpressionFunctionCall>(
 							line,
 							column
-						) : nullptr;
-
-						if (!skipOnly) {
-							functionCallExpr->leftDecl = std::move(lhs);
-							lhs = std::move(functionCallExpr);
-						}
+						);
+						functionCallExpr->lhsDecl = std::move(lhs);
+						lhs = std::move(functionCallExpr);
 						continue;
 					}
 
-					auto functionCallExpr = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionCall>(
+					auto functionCallExpr = std::make_unique<ast::expr::ExpressionFunctionCall>(
 						line,
 						column
-					) : nullptr;
-
-					if (!skipOnly) {
-						functionCallExpr->leftDecl = std::move(lhs);
-						functionCallExpr->rightDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-					} else {
-						parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-					}
+					);
+					functionCallExpr->lhsDecl = std::move(lhs);
+					functionCallExpr->rhsDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
 
 					// Consome ')'
 					m_lexer->expectToken(TokenType_e::RParBracket);
 
-					if (!skipOnly) {
-						lhs = std::move(functionCallExpr);
-					}
+					lhs = std::move(functionCallExpr);
 					continue;
 				}
 				break;
 			case TokenType_e::LSquBracket:
 				{
-					auto indexAddressExpr = !skipOnly ? std::make_unique<ast::expr::ExpressionIndexDecl>(
+					auto indexAddressExpr = std::make_unique<ast::expr::ExpressionIndexDecl>(
 						line,
 						column
-					) : nullptr;
+					);
 
-					if (!skipOnly) {
-						indexAddressExpr->leftDecl = std::move(lhs);
-						indexAddressExpr->rightDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-					} else {
-						parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-					}
+					indexAddressExpr->lhsDecl = std::move(lhs);
+					indexAddressExpr->rhsDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
 
 					// Consome ']'
 					m_lexer->expectToken(TokenType_e::RSquBracket);
 
-					if (!skipOnly) {
-						lhs = std::move(indexAddressExpr);
-					}
+					lhs = std::move(indexAddressExpr);
 					continue;
 				}
 				break;
 			case TokenType_e::LessThan:
 				{
-					auto exprGenericDef = !skipOnly ? std::make_unique<ast::expr::ExpressionGenericDecl>(
+					auto exprGenericDef = std::make_unique<ast::expr::ExpressionGenericCallDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
-					) : nullptr;
+					);
 
 					Bool		parseGeneric = false;
 					Bool		finishParse = false;
 					Bool		expectType = false;
 					const U32	position = m_lexer->getToken().position;
+					const U32	line = m_lexer->getToken().line;
+					const U32	column = m_lexer->getToken().column;
 
 					while (true)
 					{
@@ -3496,6 +3168,8 @@ namespace fluffy { namespace parser {
 								m_lexer->nextToken();	// Consome '>'
 								m_lexer->nextToken();	// Consome '('
 
+								*requiredGenericValidation = true;
+
 								parseGeneric = true;
 								finishParse = true;
 
@@ -3509,8 +3183,12 @@ namespace fluffy { namespace parser {
 									);
 								}
 
-								exprGenericDef->lhs = std::move(lhs);
-								exprGenericDef->rhs = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
+								exprGenericDef->lhsDecl = std::move(lhs);
+
+								if (!m_lexer->isRightParBracket())
+								{
+									exprGenericDef->rhsDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
+								}
 
 								// Consome ')'
 								m_lexer->expectToken(TokenType_e::RParBracket);
@@ -3518,12 +3196,12 @@ namespace fluffy { namespace parser {
 								lhs = std::move(exprGenericDef);
 							} else {
 								finishParse = true;
-								m_lexer->resetToPosition(position);
+								m_lexer->resetToPosition(position, line, column);
 							}
 							break;
 						default:
 							finishParse = true;
-							m_lexer->resetToPosition(position);
+							m_lexer->resetToPosition(position, line, column);
 							break;
 						}
 
@@ -3541,60 +3219,81 @@ namespace fluffy { namespace parser {
 					}
 				}
 				break;
+
+			case TokenType_e::As:
+				{
+					auto asExpr = std::make_unique<ast::expr::ExpressionAsDecl>(
+						m_lexer->getToken().line,
+						m_lexer->getToken().column
+					);
+
+					asExpr->exprDecl = std::move(lhs);
+					asExpr->typeDecl = parseType(ctx);
+
+					lhs = std::move(asExpr);
+
+					continue;
+				}
+				break;
+			case TokenType_e::Is:
+				{
+					auto isExpr = std::make_unique<ast::expr::ExpressionIsDecl>(
+						m_lexer->getToken().line,
+						m_lexer->getToken().column
+					);
+
+					isExpr->exprDecl = std::move(lhs);
+					isExpr->typeDecl = parseType(ctx);
+
+					lhs = std::move(isExpr);
+
+					continue;
+				}
+				break;
 			default:
 				break;
 			}
 
 			// Processa expressao a direita.
-			if (!skipOnly) {
-				rhs = parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(nextMinPrec));
-			} else {
-				parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(nextMinPrec));
-			}
+			rhs = parseExpressionImp(ctx, static_cast<OperatorPrecLevel_e>(nextMinPrec), requiredGenericValidation);
 
 			// Verifica se a operacao e ternaria
 			if (op == TokenType_e::Interrogation)
 			{
-				auto ternaryExprDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionTernaryDecl>(
-					line,
-					column
-				) : nullptr;
-
-				// Consome ':'
-				m_lexer->expectToken(TokenType_e::Colon);
-
-				if (!skipOnly) {
-					ternaryExprDecl->conditionDecl = std::move(lhs);
-					ternaryExprDecl->leftDecl = std::move(rhs);
-					ternaryExprDecl->rightDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-
-					lhs = std::move(ternaryExprDecl);
-				}
-				break;
-			}
-
-			// Processa operador binario.
-			if (!skipOnly) {
-				auto binaryExprDecl = std::make_unique<ast::expr::ExpressionBinaryDecl>(
+				auto ternaryExprDecl = std::make_unique<ast::expr::ExpressionTernaryDecl>(
 					line,
 					column
 				);
 
-				binaryExprDecl->op = op;
-				binaryExprDecl->leftDecl = std::move(lhs);
-				binaryExprDecl->rightDecl = std::move(rhs);
+				// Consome ':'
+				m_lexer->expectToken(TokenType_e::Colon);
 
-				lhs = std::move(binaryExprDecl);				
+				ternaryExprDecl->conditionDecl = std::move(lhs);
+				ternaryExprDecl->leftDecl = std::move(rhs);
+				ternaryExprDecl->rightDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
+
+				lhs = std::move(ternaryExprDecl);
+				break;
 			}
+
+			// Processa operador binario.
+			auto binaryExprDecl = std::make_unique<ast::expr::ExpressionBinaryDecl>(
+				line,
+				column
+			);
+
+			binaryExprDecl->op = op;
+			binaryExprDecl->leftDecl = std::move(lhs);
+			binaryExprDecl->rightDecl = std::move(rhs);
+
+			lhs = std::move(binaryExprDecl);
 		}
 		return lhs;
 	}
 
 	std::unique_ptr<ast::expr::ExpressionDecl>
-	Parser::parseAtom(ParserContext_s& ctx)
+	Parser::parseAtom(ParserContext_s& ctx, Bool* requiredGenericValidation)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
 		const U32 line = m_lexer->getToken().line;
 		const U32 column = m_lexer->getToken().column;
 
@@ -3607,31 +3306,25 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::LParBracket);
 
 			// Processa expressao.
-			if (!skipOnly) {
-				expr = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
+			expr = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
 
-				// Ajusta a posicao inicial
-				expr->line = line;
-				expr->column = column;
+			// Ajusta a posicao inicial
+			expr->line = line;
+			expr->column = column;
 
-				// Consome ')'
-				m_lexer->expectToken(TokenType_e::RParBracket);
-			} else {
-				parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
+			// Consome ')'
+			m_lexer->expectToken(TokenType_e::RParBracket);
 
-				// Consome ')'
-				m_lexer->expectToken(TokenType_e::RParBracket);
-			}
 			return expr;
 		}
 
 		// Processa declaracao de array.
 		if (m_lexer->isLeftSquBracket())
 		{
-			auto arrayIniDecl = !skipOnly ? std::make_unique<ast::ExpressionArrayInitDecl>(
+			auto arrayIniDecl = std::make_unique<ast::ExpressionArrayInitDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
-			) : nullptr;
+			);
 
 			// Consome '['
 			m_lexer->expectToken(TokenType_e::LSquBracket);
@@ -3644,11 +3337,7 @@ namespace fluffy { namespace parser {
 				}
 
 				// Consome elemento
-				if (!skipOnly) {
-					arrayIniDecl->arrayElementDeclList.push_back(parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation));
-				} else {
-					parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation);
-				}
+				arrayIniDecl->arrayElementDeclList.push_back(parseExpressionImp(ctx, OperatorPrecLevel_e::Interrogation, requiredGenericValidation));
 
 				if (m_lexer->isComma())
 				{
@@ -3671,10 +3360,10 @@ namespace fluffy { namespace parser {
 				m_lexer->reinterpretToken(TokenType_e::BitWiseOr, 1);
 			}
 
-			auto functionDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionDecl>(
+			auto functionDecl = std::make_unique<ast::expr::ExpressionFunctionDecl>(
 				line,
 				column
-			) : nullptr;
+			);
 
 			// Consome '|'
 			m_lexer->expectToken(TokenType_e::BitWiseOr);
@@ -3686,51 +3375,70 @@ namespace fluffy { namespace parser {
 			// Porem ha casos onde a tipagem de faz necessaria por exemplo ao usar uma declaracao de variavel
 			// ou constate onde o tipo e omitido, logo, nao se poderia fazer a deducao.
 
-			if (m_lexer->isIdentifier()) {
-				if (m_lexer->predictNextToken().type == TokenType_e::Colon)
+			if (m_lexer->isIdentifier() || m_lexer->isLeftBracket() || m_lexer->isLeftParBracket()) {
+				auto paramDecl = std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
+
+				// Consome os patterns ou o identificador.
+				if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
 				{
-					// Processa o restante do parametros se houver.
-					while (true)
+					paramDecl->patternDecl = parsePattern(ctx);
+				}
+				else
+				{
+					paramDecl->identifier = m_lexer->expectIdentifier();
+				}
+
+				if (m_lexer->isColon())
+				{
+					// Consome ':'
+					m_lexer->nextToken(); 
+
+					// Consome tipo.
+					paramDecl->typeDecl = parseType(ctx);
+
+					// Adiciona parametro a lista.
+					functionDecl->parametersDeclList.push_back(std::move(paramDecl));
+
+					if (m_lexer->isComma())
 					{
-						if (m_lexer->isBitWiseOr())
+						m_lexer->nextToken(); // Consome ','
+
+						// Processa o restante do parametros se houver.
+						while (true)
 						{
-							break;
-						}
+							paramDecl = std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
+								m_lexer->getToken().line,
+								m_lexer->getToken().column
+							);
 
-					parseParamterDecl:
-						auto paramDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
-						) : nullptr;
-
-						// Consome identificador.
-						if (!skipOnly) {
-							paramDecl->identifier = m_lexer->expectIdentifier();
-						} else {
-							m_lexer->expectIdentifier();
-						}
-
-						// Consome ellipsis
-						if (m_lexer->isEllipsis()) {
-							if (!skipOnly) {
-								paramDecl->isEllipsis = true;
+							// Consome os patterns ou o identificador.
+							if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
+							{
+								paramDecl->patternDecl = parsePattern(ctx);
 							}
-							m_lexer->expectToken(TokenType_e::Ellipsis);
-							goto parseFunctionRetOrBody;
-						}
+							else
+							{
+								paramDecl->identifier = m_lexer->expectIdentifier();
 
-						// Consome ':'
-						m_lexer->expectToken(TokenType_e::Colon);
+								// Consome ellipsis
+								if (m_lexer->isEllipsis()) {
+									paramDecl->isEllipsis = true;
+									functionDecl->parametersDeclList.push_back(std::move(paramDecl));
+									m_lexer->expectToken(TokenType_e::Ellipsis);
+									goto parseFunctionRetOrBody;
+								}
+							}
 
-						// Consome o tipo do parametro.
-						if (!skipOnly) {
+							// Consome ':'
+							m_lexer->expectToken(TokenType_e::Colon);
+
+							// Consome tipo.
 							paramDecl->typeDecl = parseType(ctx);
-						} else {
-							parseType(ctx);
-						}
 
-						// Parametro nao podem ter tipo nulo.
-						if (!skipOnly) {
+							// Parametro nao podem ter tipo nulo.
 							if (paramDecl->typeDecl->typeID == TypeDeclID_e::Void)
 							{
 								throw exceptions::custom_exception(
@@ -3741,93 +3449,101 @@ namespace fluffy { namespace parser {
 								);
 							}
 
-							// Adiciona o parametro a lista
-							functionDecl->parametersDecl.push_back(std::move(paramDecl));
-						}
+							// Adiciona parametro a lista.
+							functionDecl->parametersDeclList.push_back(std::move(paramDecl));
 
-						// Consome ','
-						if (m_lexer->isComma())
-						{
-							m_lexer->expectToken(TokenType_e::Comma);
-							goto parseParamterDecl;
-						}
-
-						if (m_lexer->isBitWiseOr())
-						{
-							break;
-						}
-
-						throw exceptions::unexpected_with_possibilities_token_exception(
-							m_lexer->getToken().value,
+							if (m_lexer->isComma())
 							{
-								TokenType_e::Comma,
-								TokenType_e::BitWiseOr
-							},
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
-						);
+								// Consome ','
+								m_lexer->expectToken(TokenType_e::Comma);
+								continue;
+							}
+
+							if (m_lexer->isBitWiseOr())
+							{
+								break;
+							}
+
+							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_lexer->getToken().value,
+								{
+									TokenType_e::Comma,
+									TokenType_e::BitWiseOr
+								},
+								m_lexer->getToken().line,
+								m_lexer->getToken().column
+							);
+						}
 					}
 				} else {
 					// Atribui nivel de inferencia.
-					if (!skipOnly) {
-						functionDecl->inferenceType = InferenceType_e::OnlyParams;
-					}
-
-					auto paramDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					) : nullptr;
-
-					if (!skipOnly) {
-						paramDecl->identifier = m_lexer->expectIdentifier();
-					} else {
-						m_lexer->expectIdentifier();
-					}
-
+					functionDecl->inferenceType = InferenceType_e::OnlyParams;
+					
 					// Consome ellipsis
 					if (m_lexer->isEllipsis()) {
-						if (!skipOnly) {
-							paramDecl->isEllipsis = true;
-						}
+						paramDecl->isEllipsis = true;
+						functionDecl->parametersDeclList.push_back(std::move(paramDecl));
 						m_lexer->expectToken(TokenType_e::Ellipsis);
 						goto parseFunctionRetOrBody;
 					}
 
 					// Adiciona o parametro a lista
-					if (!skipOnly) {
-						functionDecl->parametersDecl.push_back(std::move(paramDecl));
-					}
+					functionDecl->parametersDeclList.push_back(std::move(paramDecl));
 
-					// Processa o restante do parametros se houver.
-					while (true)
+					if (m_lexer->isComma())
 					{
-						if (m_lexer->isBitWiseOr())
-						{
-							break;
-						}
-
 						// Consome ','
 						m_lexer->expectToken(TokenType_e::Comma);
 
-						auto paramDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
-						) : nullptr;
+						while (true)
+						{
+							auto paramDecl = std::make_unique<ast::expr::ExpressionFunctionParameterDecl>(
+								m_lexer->getToken().line,
+								m_lexer->getToken().column
+							);
 
-						if (!skipOnly) {
-							paramDecl->identifier = m_lexer->expectIdentifier();
-						} else {
-							m_lexer->expectIdentifier();
-						}
-
-						// Consome ellipsis
-						if (m_lexer->isEllipsis()) {
-							if (!skipOnly) {
-								paramDecl->isEllipsis = true;
-								functionDecl->parametersDecl.push_back(std::move(paramDecl));
+							// Consome os patterns ou o identificador.
+							if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
+							{
+								paramDecl->patternDecl = parsePattern(ctx);
 							}
-							m_lexer->expectToken(TokenType_e::Ellipsis);
-							goto parseFunctionRetOrBody;
+							else
+							{
+								paramDecl->identifier = m_lexer->expectIdentifier();
+
+								// Consome ellipsis
+								if (m_lexer->isEllipsis()) {
+									paramDecl->isEllipsis = true;
+									functionDecl->parametersDeclList.push_back(std::move(paramDecl));
+									m_lexer->expectToken(TokenType_e::Ellipsis);
+									goto parseFunctionRetOrBody;
+								}
+							}
+
+							// Adiciona o parametro a lista
+							functionDecl->parametersDeclList.push_back(std::move(paramDecl));
+
+							if (m_lexer->isComma())
+							{
+								// Consome ','
+								m_lexer->expectToken(TokenType_e::Comma);
+								continue;
+							}
+
+							if (m_lexer->isBitWiseOr())
+							{
+								break;
+							}
+
+							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_lexer->getToken().value,
+								{
+									TokenType_e::Comma,
+									TokenType_e::BitWiseOr
+								},
+								m_lexer->getToken().line,
+								m_lexer->getToken().column
+							);
 						}
 					}
 				}
@@ -3843,32 +3559,38 @@ namespace fluffy { namespace parser {
 				// Consome '->'
 				m_lexer->expectToken(TokenType_e::Arrow);
 
-				if (!skipOnly) {
-					functionDecl->returnTypeDecl = parseType(ctx);
-				} else {
-					parseType(ctx);
-				}
+				functionDecl->returnTypeDecl = parseType(ctx);
 			} else {
 				// Atribui nivel de inferencia.
-				if (!skipOnly) {
-					if (functionDecl->inferenceType == InferenceType_e::OnlyParams)	{
-						functionDecl->inferenceType = InferenceType_e::Full;
-					} else {
-						functionDecl->inferenceType = InferenceType_e::OnlyReturn;
-					}
+				if (functionDecl->inferenceType == InferenceType_e::OnlyParams)	{
+					functionDecl->inferenceType = InferenceType_e::Full;
+				} else {
+					functionDecl->inferenceType = InferenceType_e::OnlyReturn;
+				}
+			}
 
-					functionDecl->returnTypeDecl = std::make_unique<ast::TypeDeclVoid>(
+			// Consome bloco ou expressao.
+			if (m_lexer->isAssign())
+			{
+				// Consome '='
+				m_lexer->expectToken(TokenType_e::Assign);
+
+				// Esse tipo de declaracao so pode ser usado com retorno.
+				if (functionDecl->returnTypeDecl && functionDecl->returnTypeDecl->nodeType == AstNodeType_e::VoidType)
+				{
+					throw exceptions::custom_exception(
+						"Anom function with assign('=') can't be void type return",
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
 					);
 				}
-			}
 
-			// Consome bloco.
-			if (!skipOnly) {
+				// Consom expressao
+				functionDecl->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+			}
+			else
+			{
 				functionDecl->blockDecl = parseBlock(ctx);
-			} else {
-				parseBlock(ctx);
 			}
 
 			return functionDecl;
@@ -3877,36 +3599,31 @@ namespace fluffy { namespace parser {
 		// Processa new.
 		if (m_lexer->isNew())
 		{
-			auto newDecl = !skipOnly ? std::make_unique<ast::ExpressionNewDecl>(
+			auto newDecl = std::make_unique<ast::ExpressionNewDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
-			) : nullptr;
+			);
 
 			// Consome 'new'
 			m_lexer->expectToken(TokenType_e::New);
 
 			// Consome o tipo.
-			if (!skipOnly) {
-				newDecl->objectTypeDecl = parseType(ctx);
-			} else {
-				parseType(ctx);
-			}
+			newDecl->objTypeDecl = parseType(ctx);
 
-			// Consome '('
-			m_lexer->expectToken(TokenType_e::LParBracket);
-
-			// Consome expressao no caso os parametros passados para o construtor.
-			if (!m_lexer->isRightParBracket())
+			if (m_lexer->isLeftParBracket())
 			{
-				if (!skipOnly) {
-					newDecl->expressionDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-				} else {
-					parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec);
-				}
-			}
+				// Consome '('
+				m_lexer->expectToken(TokenType_e::LParBracket);
 
-			// Consome ')'
-			m_lexer->expectToken(TokenType_e::RParBracket);
+				// Consome expressao no caso os parametros passados para o construtor.
+				if (!m_lexer->isRightParBracket())
+				{
+					newDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::MinPrec, requiredGenericValidation);
+				}
+
+				// Consome ')'
+				m_lexer->expectToken(TokenType_e::RParBracket);
+			}			
 
 			// Processa o bloco de inicio.
 			if (m_lexer->isLeftBracket())
@@ -3914,12 +3631,10 @@ namespace fluffy { namespace parser {
 				// Consome '{'
 				m_lexer->expectToken(TokenType_e::LBracket);
 				
-				if (!skipOnly) {
-					newDecl->objectInitBlockDecl = std::make_unique<ast::ExpressionNewBlockDecl>(
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
-				}
+				newDecl->objInitBlockDecl = std::make_unique<ast::ExpressionNewBlockDecl>(
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
 
 				while (true)
 				{
@@ -3928,17 +3643,13 @@ namespace fluffy { namespace parser {
 						break;
 					}
 
-					auto itemDecl = !skipOnly ? std::make_unique<ast::expr::ExpressionNewItemDecl>(
+					auto itemDecl = std::make_unique<ast::expr::ExpressionNewItemDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
-					) : nullptr;
+					);
 
 					// Processa identificador.
-					if (!skipOnly) {
-						itemDecl->identifier = m_lexer->expectIdentifier();
-					} else {
-						m_lexer->expectIdentifier();
-					}
+					itemDecl->identifier = m_lexer->expectIdentifier();
 
 					// Consome ':'
 					if (m_lexer->isColon())
@@ -3946,17 +3657,11 @@ namespace fluffy { namespace parser {
 						m_lexer->expectToken(TokenType_e::Colon);
 
 						// Consome expressao.
-						if (!skipOnly) {
-							itemDecl->expressionDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::EnumExpr);
-						} else {
-							parseExpressionImp(ctx, OperatorPrecLevel_e::EnumExpr);
-						}
+						itemDecl->exprDecl = parseExpressionImp(ctx, OperatorPrecLevel_e::EnumExpr, requiredGenericValidation);
 					}
 
 					// Adiciona item ao bloco.
-					if (!skipOnly) {
-						newDecl->objectInitBlockDecl->itemDeclList.push_back(std::move(itemDecl));
-					}
+					newDecl->objInitBlockDecl->itemDeclList.push_back(std::move(itemDecl));
 
 					// Verifica se existem mais itens.
 					if (m_lexer->isComma())
@@ -3975,12 +3680,6 @@ namespace fluffy { namespace parser {
 		// Processa this.
 		if (m_lexer->isThis())
 		{
-			// Processa superficialmente.
-			if (skipOnly) {
-				m_lexer->expectToken(TokenType_e::This);
-				return nullptr;
-			}
-
 			// Consome 'this'
 			m_lexer->expectToken(TokenType_e::This);
 
@@ -3990,12 +3689,6 @@ namespace fluffy { namespace parser {
 		// Processa super.
 		if (m_lexer->isSuper())
 		{
-			// Processa superficialmente.
-			if (skipOnly) {
-				m_lexer->expectToken(TokenType_e::Super);
-				return nullptr;
-			}
-
 			// Consome 'super'
 			m_lexer->expectToken(TokenType_e::Super);
 
@@ -4005,178 +3698,10 @@ namespace fluffy { namespace parser {
 		// Processa null.
 		if (m_lexer->isNull())
 		{
-			// Processa superficialmente.
-			if (skipOnly) {
-				m_lexer->expectToken(TokenType_e::Null);
-				return nullptr;
-			}
-
 			// Consome 'null'
 			m_lexer->expectToken(TokenType_e::Null);
 
 			return std::make_unique<ast::expr::ExpressionConstantNullDecl>(line, column);
-		}
-
-		// Processa superficialmente.
-		if (skipOnly) {
-			// Processa algumas constantes
-			switch (m_lexer->getToken().type)
-			{
-			case TokenType_e::False:
-			case TokenType_e::True:
-				{
-					m_lexer->nextToken();
-					return nullptr;
-				}
-				break;
-			case TokenType_e::ConstantInteger:
-				{
-					m_lexer->expectConstantInteger();
-					return nullptr;
-				}
-				break;
-			case TokenType_e::ConstantFp32:
-				{
-					m_lexer->expectConstantFp32();
-					return nullptr;
-				}
-				break;
-			case TokenType_e::ConstantFp64:
-				{
-					m_lexer->expectConstantFp64();
-					return nullptr;
-				}
-				break;
-			case TokenType_e::ConstantString:
-				{
-					m_lexer->expectConstantString();
-					return nullptr;
-				}
-				break;
-			case TokenType_e::ConstantChar:
-				{
-					m_lexer->expectConstantChar();
-					return nullptr;
-				}
-				break;
-			default:
-				break;
-			}
-
-			// Resolucao de escopo unaria, indica acesso ao escopo global.
-			if (m_lexer->isScopeResolution())
-			{
-				m_lexer->expectToken(TokenType_e::ScopeResolution);
-				m_lexer->expectIdentifier();
-
-				U32 position = m_lexer->getToken().position;
-				if (m_lexer->isLessThan())
-				{
-					m_lexer->nextToken();
-
-					while (true)
-					{
-						switch (m_lexer->getToken().type)
-						{
-						case TokenType_e::Bool:
-						case TokenType_e::I8:
-						case TokenType_e::U8:
-						case TokenType_e::I16:
-						case TokenType_e::U16:
-						case TokenType_e::I32:
-						case TokenType_e::U32:
-						case TokenType_e::I64:
-						case TokenType_e::U64:
-						case TokenType_e::Fp32:
-						case TokenType_e::Fp64:
-						case TokenType_e::String:
-						case TokenType_e::Object:
-						case TokenType_e::Comma:
-						case TokenType_e::Identifier:
-							m_lexer->nextToken();
-							break;
-						case TokenType_e::ScopeResolution:
-							if (m_lexer->predictNextToken().type == TokenType_e::Identifier) {
-								m_lexer->nextToken();
-								m_lexer->nextToken();
-							}
-							break;
-						case TokenType_e::GreaterThan:
-							if (m_lexer->predictNextToken().type == TokenType_e::LParBracket) {
-								m_lexer->nextToken();
-								m_lexer->nextToken();
-								return nullptr;
-							}
-							m_lexer->resetToPosition(position);
-							return nullptr;
-						default:
-							m_lexer->resetToPosition(position);
-							return nullptr;
-						}
-					}
-				}
-				return nullptr;
-			}
-
-			// Processa expressao named
-			if (m_lexer->isIdentifier())
-			{
-				m_lexer->expectIdentifier();
-
-				U32 position = m_lexer->getToken().position;
-				if (m_lexer->isLessThan())
-				{
-					m_lexer->nextToken();
-
-					while (true)
-					{
-						switch (m_lexer->getToken().type)
-						{
-						case TokenType_e::Bool:
-						case TokenType_e::I8:
-						case TokenType_e::U8:
-						case TokenType_e::I16:
-						case TokenType_e::U16:
-						case TokenType_e::I32:
-						case TokenType_e::U32:
-						case TokenType_e::I64:
-						case TokenType_e::U64:
-						case TokenType_e::Fp32:
-						case TokenType_e::Fp64:
-						case TokenType_e::String:
-						case TokenType_e::Object:
-						case TokenType_e::Comma:
-						case TokenType_e::Identifier:
-							m_lexer->nextToken();
-							break;
-						case TokenType_e::ScopeResolution:
-							if (m_lexer->predictNextToken().type == TokenType_e::Identifier) {
-								m_lexer->nextToken();
-								m_lexer->nextToken();
-							}
-							break;
-						case TokenType_e::GreaterThan:
-							if (m_lexer->predictNextToken().type == TokenType_e::LParBracket) {
-								m_lexer->nextToken();
-								m_lexer->nextToken();
-								return nullptr;
-							}
-							m_lexer->resetToPosition(position);
-							return nullptr;
-						default:
-							m_lexer->resetToPosition(position);
-							return nullptr;
-						}
-					}
-				}
-				return nullptr;
-			}
-		
-			throw exceptions::unexpected_token_exception(
-				m_lexer->getToken().value,
-				line,
-				column
-			);
 		}
 
 		// Processa algumas constantes
@@ -4244,15 +3769,144 @@ namespace fluffy { namespace parser {
 		case TokenType_e::String:
 		case TokenType_e::Object:
 			{
-				auto typeExprDecl = std::make_unique<ast::expr::ExpressionPrimitiveTypeDecl>(line, column);
+				if (m_lexer->getToken().type == TokenType_e::Object && m_lexer->predictNextToken().type == TokenType_e::Colon)
+				{
+					auto anomObjectImpl = std::make_unique<ast::expr::ExpressionAnomClassDecl>(line, column);
 
-				// Processa superficialmente.
-				if (skipOnly) {
-					parseType(ctx);
-					return nullptr;
+					// Consome 'object'
+					m_lexer->expectToken(TokenType_e::Object);
+
+					// Consome ':'
+					m_lexer->expectToken(TokenType_e::Colon);
+
+					// Consome o base referenced
+					anomObjectImpl->baseReferencedDecl = parseType(ctx);
+
+					// Consome '{'
+					m_lexer->expectToken(TokenType_e::LBracket);
+
+					while (true)
+					{
+						Bool hasAccessModifier = false;
+						TokenType_e accessModifier = TokenType_e::Unknown;
+						Bool staticModifier = false;
+
+						// Verifica se terminou a declaracao.
+						if (m_lexer->isRightBracket())
+						{
+							break;
+						}
+
+						// Processa declaracao de modificador de acesso.
+						if (m_lexer->isPublic() || m_lexer->isProtected() || m_lexer->isPrivate())
+						{
+							hasAccessModifier = true;
+							accessModifier = m_lexer->getToken().type;
+							m_lexer->nextToken();
+						}
+
+						// Processa modificador static
+						if (m_lexer->isStatic())
+						{
+							staticModifier = true;
+							m_lexer->nextToken();
+						}
+
+						switch (m_lexer->getToken().type)
+						{
+						case TokenType_e::Abstract:
+							if (staticModifier)
+							{
+								throw exceptions::custom_exception(
+									"Static function can't be abstract",
+									m_lexer->getToken().line,
+									m_lexer->getToken().column
+								);
+							}
+							goto processFunction;
+
+						case TokenType_e::Virtual:
+							if (staticModifier)
+							{
+								throw exceptions::custom_exception(
+									"Static function can't be virtual",
+									m_lexer->getToken().line,
+									m_lexer->getToken().column
+								);
+							}
+							goto processFunction;
+
+						case TokenType_e::Fn:
+						processFunction:
+							anomObjectImpl->functionList.push_back(parseClassFunction(ctx, accessModifier, staticModifier));
+							break;
+
+						case TokenType_e::Const:
+						case TokenType_e::Let:
+							anomObjectImpl->variableList.push_back(parseClassVariable(ctx, accessModifier, staticModifier));
+							break;
+
+						case TokenType_e::Constructor:
+							{
+								if (staticModifier)
+								{
+									throw exceptions::custom_exception(
+										"Constructors can't be static",
+										m_lexer->getToken().line,
+										m_lexer->getToken().column
+									);
+								}
+								anomObjectImpl->constructorList.push_back(parseClassConstructor(ctx, accessModifier));
+							}
+							break;
+
+						case TokenType_e::Destructor:
+							{
+								if (staticModifier)
+								{
+									throw exceptions::custom_exception(
+										"Destructor can't be static",
+										m_lexer->getToken().line,
+										m_lexer->getToken().column
+									);
+								}
+
+								if (hasAccessModifier)
+								{
+									throw exceptions::custom_exception(
+										"Destructors are public, can't have any access modifier",
+										m_lexer->getToken().line,
+										m_lexer->getToken().column
+									);
+								}
+								anomObjectImpl->destructorDecl = parseClassDestructor(ctx);
+							}
+							break;
+
+						default:
+							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_lexer->getToken().value,
+								{
+									TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
+									TokenType_e::Let, TokenType_e::Const,
+									TokenType_e::Virtual, TokenType_e::Abstract, TokenType_e::Fn,
+									TokenType_e::LBracket
+								},
+								m_lexer->getToken().line,
+								m_lexer->getToken().column
+							);
+						}
+					}
+
+					// Consome '}'
+					m_lexer->expectToken(TokenType_e::RBracket);
+
+					return anomObjectImpl;
 				}
 
-				// Consome 'super'
+				auto typeExprDecl = std::make_unique<ast::expr::ExpressionPrimitiveTypeDecl>(line, column);
+
+				// Consome o tipo
 				typeExprDecl->typeDecl = parseType(ctx);
 
 				return typeExprDecl;
@@ -4272,7 +3926,8 @@ namespace fluffy { namespace parser {
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
-			namedExpressionDecl->identifierDecl = m_lexer->expectIdentifier();
+
+			namedExpressionDecl->identifier = m_lexer->expectIdentifier();
 			namedExpressionDecl->startFromRoot = true;
 			return namedExpressionDecl;
 		}
@@ -4284,7 +3939,8 @@ namespace fluffy { namespace parser {
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
-			namedExpressionDecl->identifierDecl = m_lexer->expectIdentifier();
+
+			namedExpressionDecl->identifier = m_lexer->expectIdentifier();
 			return namedExpressionDecl;
 		}
 
@@ -4305,102 +3961,26 @@ namespace fluffy { namespace parser {
 		);
 
 		// Consome uma expressao.
-		literalPatternDecl->patternExpr = parseExpression(ctx, OperatorPrecLevel_e::Max);
+		literalPatternDecl->literalExpr = parseExpression(ctx, OperatorPrecLevel_e::Max);
 
 		return literalPatternDecl;
 	}
 
 	std::unique_ptr<ast::pattern::PatternDecl>
-	Parser::parseEnumPattern(ParserContext_s& ctx)
-	{
-		auto enumPatternDecl = std::make_unique<ast::pattern::DestructuringPatternDecl>(
-			m_lexer->getToken().line,
-			m_lexer->getToken().column
-		);
-
-		// Atribui tipo de destructuring.
-		enumPatternDecl->destructuringType = DestructuringType_e::Enum;
-
-		// Consome expressao.
-		enumPatternDecl->enumExpr = parseExpression(ctx, OperatorPrecLevel_e::Max);
-
-		// Consome '('
-		m_lexer->expectToken(TokenType_e::LParBracket);
-
-		while (true)
-		{
-			auto destructuringItem = std::make_unique<ast::pattern::DestructuringItemDecl>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
-			);
-
-			// Atribui o tipo de destructuring item.
-			destructuringItem->destructuringItemType = DestructuringItemType_e::DirectReference;
-
-			// Consome o identificador.
-			destructuringItem->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Max);
-
-			// Adiciona item a lista.
-			enumPatternDecl->destructuringItemDeclList.push_back(std::move(destructuringItem));
-
-			if (m_lexer->isComma())
-			{
-				// Consome ','
-				m_lexer->expectToken(TokenType_e::Comma);
-				continue;
-			}
-
-			if (m_lexer->isRightParBracket())
-			{
-				break;
-			}
-
-			throw exceptions::unexpected_with_possibilities_token_exception(
-				m_lexer->getToken().value,
-				{
-					TokenType_e::RParBracket,
-					TokenType_e::Identifier
-				},
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
-			);
-		}
-
-		// Consome ')'
-		m_lexer->expectToken(TokenType_e::RParBracket);
-
-		return enumPatternDecl;
-	}
-
-	std::unique_ptr<ast::pattern::PatternDecl>
 	Parser::parseTuplePattern(ParserContext_s& ctx)
 	{
-		auto tuplePatternDecl = std::make_unique<ast::pattern::DestructuringPatternDecl>(
+		auto tuplePatternDecl = std::make_unique<ast::pattern::TuplePatternDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
 		);
-
-		// Atribui tipo de destructuring.
-		tuplePatternDecl->destructuringType = DestructuringType_e::Tuple;
 
 		// Consome '('
 		m_lexer->expectToken(TokenType_e::LParBracket);
 
 		while (true)
 		{
-			auto destructuringItem = std::make_unique<ast::pattern::DestructuringItemDecl>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
-			);
-
-			// Atribui o tipo de destructuring item.
-			destructuringItem->destructuringItemType = DestructuringItemType_e::DirectReference;
-
-			// Consome o identificador.
-			destructuringItem->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Max);
-
-			// Adiciona item a lista.
-			tuplePatternDecl->destructuringItemDeclList.push_back(std::move(destructuringItem));
+			// Consome o pattern
+			tuplePatternDecl->patternItemDeclList.push_back(parsePattern(ctx));
 
 			if (m_lexer->isComma())
 			{
@@ -4432,32 +4012,24 @@ namespace fluffy { namespace parser {
 	}
 
 	std::unique_ptr<ast::pattern::PatternDecl>
-	Parser::parseClassOrStructPattern(ParserContext_s& ctx)
+	Parser::parseStructurePattern(ParserContext_s& ctx)
 	{
-		auto destructuringDecl = std::make_unique<ast::pattern::DestructuringPatternDecl>(
+		auto structurePatternDecl = std::make_unique<ast::pattern::StructurePatternDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
 		);
-
-		// Atribui o tipo de destructuring pattern.
-		destructuringDecl->destructuringType = DestructuringType_e::ClassOrStruct;
 
 		// Consome '{'
 		m_lexer->expectToken(TokenType_e::LBracket);
 
 		while (true) {
-			if (m_lexer->isRightBracket())
-			{
-				break;
-			}
-
-			auto destructuringItem = std::make_unique<ast::pattern::DestructuringItemDecl>(
+			auto structureItemPatternDecl = std::make_unique<ast::pattern::StructureItemPatternDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
 
 			// Consome o identificador.
-			destructuringItem->exprDecl = parseExpression(ctx, OperatorPrecLevel_e::Max);
+			structureItemPatternDecl->identifier = m_lexer->expectIdentifier();
 
 			// Verifica se e uma referenciacao.
 			if (m_lexer->isColon())
@@ -4465,26 +4037,12 @@ namespace fluffy { namespace parser {
 				// Consome ':'
 				m_lexer->expectToken(TokenType_e::Colon);
 
-				// Verifica se faz uma referencia indireta ou a
-				// um sub destructuring.
-				if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
-				{
-					destructuringItem->destructuringItemType = DestructuringItemType_e::SubDestructuring;
-					destructuringItem->subDestructuringPattern = parsePattern(ctx);
-				}
-				else
-				{
-					destructuringItem->destructuringItemType = DestructuringItemType_e::IndirectReferenceOrMatch;
-					destructuringItem->indirectRefOrMatchingDecl = parseExpression(ctx, OperatorPrecLevel_e::Max);
-				}
-			}
-			else
-			{
-				destructuringItem->destructuringItemType = DestructuringItemType_e::DirectReference;
+				// Consome o subpattern
+				structureItemPatternDecl->referencedPattern = std::move(parsePattern(ctx));
 			}
 
 			// Adiciona item a lista.
-			destructuringDecl->destructuringItemDeclList.push_back(std::move(destructuringItem));
+			structurePatternDecl->structureItemDeclList.push_back(std::move(structureItemPatternDecl));
 
 			// Consome ','.
 			if (m_lexer->isComma()) {
@@ -4511,60 +4069,60 @@ namespace fluffy { namespace parser {
 		// Consome '}'
 		m_lexer->expectToken(TokenType_e::RBracket);
 
-		return destructuringDecl;
+		return structurePatternDecl;
+	}
+
+	std::unique_ptr<ast::pattern::PatternDecl>
+	Parser::parseEnumerablePattern(ParserContext_s& ctx)
+	{
+		auto enumPatternDecl = std::make_unique<ast::pattern::EnumerablePatternDecl>(
+			m_lexer->getToken().line,
+			m_lexer->getToken().column
+		);
+
+		// Consome tipo.
+		enumPatternDecl->enumReferenced = parseType(ctx);
+
+		// Consome '('
+		m_lexer->expectToken(TokenType_e::LParBracket);
+
+		while (true)
+		{
+			// Consome o identificador.
+			enumPatternDecl->patternDeclItemList.push_back(parsePattern(ctx));
+
+			if (m_lexer->isComma())
+			{
+				// Consome ','
+				m_lexer->expectToken(TokenType_e::Comma);
+				continue;
+			}
+
+			if (m_lexer->isRightParBracket())
+			{
+				break;
+			}
+
+			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_lexer->getToken().value,
+				{
+					TokenType_e::RParBracket,
+					TokenType_e::Identifier
+				},
+				m_lexer->getToken().line,
+				m_lexer->getToken().column
+			);
+		}
+
+		// Consome ')'
+		m_lexer->expectToken(TokenType_e::RParBracket);
+
+		return enumPatternDecl;
 	}
 
 	std::unique_ptr<ast::TypeDecl>
 	Parser::parseFunctionType(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::Fn);
-			m_lexer->expectToken(TokenType_e::LParBracket);
-
-			while (true)
-			{
-				if (m_lexer->isRightParBracket())
-				{
-					break;
-				}
-			parseParameterTypeLabelSkip:
-
-				// Parametros nao podem ser nulos.
-				if (m_lexer->isVoid())
-				{
-					throw exceptions::unexpected_type_exception(
-						"void",
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
-				}
-
-				parseType(ctx);
-
-				if (m_lexer->isComma()) {
-					m_lexer->expectToken(TokenType_e::Comma);
-					goto parseParameterTypeLabelSkip;
-				}
-
-				if (m_lexer->isArrow())
-				{
-					m_lexer->expectToken(TokenType_e::Arrow);
-					parseType(ctx);
-					break;
-				}
-
-				throw exceptions::custom_exception("Expected ')', '->' or ',' declaration",
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
-				);
-			}
-			m_lexer->expectToken(TokenType_e::RParBracket);
-			return nullptr;
-		}
-
 		auto functionTypeDecl = std::make_unique<ast::TypeDeclFunction>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -4620,6 +4178,11 @@ namespace fluffy { namespace parser {
 				break;
 			}
 
+			if (m_lexer->isRightParBracket())
+			{
+				break;
+			}
+
 			throw exceptions::custom_exception("Expected ')', '->' or ',' declaration",
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -4644,55 +4207,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::TypeDecl>
 	Parser::parseTupleType(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::LParBracket);
-			
-			while (true)
-			{
-				if (m_lexer->isVoid())
-				{
-					throw exceptions::unexpected_type_exception("void",
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
-				}
-
-				parseType(ctx);
-
-				if (m_lexer->isComma())
-				{
-					m_lexer->expectToken(TokenType_e::Comma);
-					if (m_lexer->isVoid())
-					{
-						throw exceptions::unexpected_type_exception("void",
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
-						);
-					}
-					parseType(ctx);
-					continue;
-				}
-
-				if (m_lexer->isRightBracket())
-				{
-					break;
-				}
-
-				throw exceptions::unexpected_token_exception(
-					m_lexer->getToken().value,
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
-				);
-			}
-
-			// Consome ')'.
-			m_lexer->expectToken(TokenType_e::RParBracket);
-			return nullptr;
-		}
-
 		auto tupleTypeDecl = std::make_unique<ast::TypeDeclTuple>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -4720,23 +4234,10 @@ namespace fluffy { namespace parser {
 			{
 				// Consome ','.
 				m_lexer->expectToken(TokenType_e::Comma);
-
-				// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
-				if (auto tupleItemDecl = parseType(ctx))
-				{
-					if (tupleItemDecl->typeID == TypeDeclID_e::Void)
-					{
-						throw exceptions::unexpected_type_exception("void",
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
-						);
-					}
-					tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
-				}
 				continue;
 			}
 
-			if (m_lexer->isRightBracket())
+			if (m_lexer->isRightParBracket())
 			{
 				break;
 			}
@@ -4757,58 +4258,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::TypeDecl>
 	Parser::parseNamedType(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			if (m_lexer->isScopeResolution())
-			{
-				m_lexer->expectToken(TokenType_e::ScopeResolution);
-			}
-			m_lexer->expectIdentifier();
-			if (m_lexer->isLessThan())
-			{
-				m_lexer->expectToken(TokenType_e::LessThan);
-				while (true)
-				{
-					if (m_lexer->isBitWiseRightShift() || m_lexer->isBitWiseRightShiftAssign())
-					{
-						switch (m_lexer->getToken().type)
-						{
-						case TokenType_e::BitWiseRShift:		// >>
-						case TokenType_e::GreaterThanOrEqual:	// >=
-						case TokenType_e::BitWiseRShiftAssign:	// >>=
-							m_lexer->reinterpretToken(TokenType_e::GreaterThan, 1);
-							break;
-						default:
-							break;
-						}
-					}
-
-					if (m_lexer->isGreaterThan())
-					{
-						break;
-					}
-
-					parseType(ctx);
-
-					if (m_lexer->isComma())
-					{
-						m_lexer->expectToken(TokenType_e::Comma);
-						continue;
-					}
-				}
-				m_lexer->expectToken(TokenType_e::GreaterThan);
-			}
-
-			// Verifica se ha identificadores internos.
-			if (m_lexer->isScopeResolution())
-			{
-				parseInternalNamedType(ctx);
-			}
-			return nullptr;
-		}
-
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -4882,63 +4331,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::TypeDeclNamed>
 	Parser::parseInternalNamedType(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::ScopeResolution);
-			m_lexer->expectIdentifier();
-
-			if (m_lexer->isLessThan())
-			{
-				m_lexer->expectToken(TokenType_e::LessThan);
-				while (true)
-				{
-					// Para evitar conflitos durando o processamento de tipo, os caracteres >> e >>=
-					// serao quebrados em tokens menores.
-					if (m_lexer->isBitWiseRightShift() || m_lexer->isBitWiseRightShiftAssign())
-					{
-						switch (m_lexer->getToken().type)
-						{
-						case TokenType_e::BitWiseRShift:		// >>
-						case TokenType_e::GreaterThanOrEqual:	// >=
-						case TokenType_e::BitWiseRShiftAssign:	// >>=
-							m_lexer->reinterpretToken(TokenType_e::GreaterThan, 1);
-							break;
-						default:
-							break;
-						}
-					}
-
-					// Verifica se terminou a definicao dos generics
-					if (m_lexer->isGreaterThan())
-					{
-						break;
-					}
-
-					parseType(ctx);
-
-					// Verifica se ha mais definicoes de generic
-					if (m_lexer->isComma())
-					{
-						// Consome ','.
-						m_lexer->expectToken(TokenType_e::Comma);
-						continue;
-					}
-				}
-
-				// Consome '>'.
-				m_lexer->expectToken(TokenType_e::GreaterThan);
-			}
-
-			// Verifica se ha identificadores internos.
-			if (m_lexer->isScopeResolution())
-			{
-				parseInternalNamedType(ctx);
-			}
-			return nullptr;
-		}
-
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -5007,20 +4399,6 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::ArrayDecl>
 	Parser::parseArrayDecl(ParserContext_s& ctx)
 	{
-		const Bool skipOnly = ctx.isFirstPass && ctx.insideExpr;
-
-		if (skipOnly)
-		{
-			m_lexer->expectToken(TokenType_e::LSquBracket);
-			if (m_lexer->isRightSquBracket()) {
-				m_lexer->expectToken(TokenType_e::RSquBracket);
-				return nullptr;
-			}
-			m_lexer->expectConstantInteger();
-			m_lexer->expectToken(TokenType_e::RSquBracket);
-			return nullptr;
-		}
-
 		// Consome '['
 		m_lexer->expectToken(TokenType_e::LSquBracket);
 
@@ -5066,7 +4444,7 @@ namespace fluffy { namespace parser {
 		// Verifica se a mais declaracoes de escopo.
 		if (m_lexer->isScopeResolution())
 		{
-			scopedIdentifierDecl->tailIdentifier = parseChildScopedIdentifiers(ctx);
+			scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
 		}
 		return scopedIdentifierDecl;
 	}

@@ -58,7 +58,7 @@ namespace fluffy { namespace jobs {
 	void
 	JobParseFromSourceFile::doJob()
 	{
-		parser::ParserContext_s context = parser::ParserContext_s { true, false, false };
+		parser::ParserContext_s context = parser::ParserContext_s { false };
 		auto parser = std::make_unique<parser::Parser>(
 			new LazyBuffer()
 		);
@@ -85,5 +85,11 @@ namespace fluffy { namespace jobs {
 	JobParseFromSourceFile::getCodeUnit()
 	{
 		return std::move(m_codeUnit);
+	}
+
+	ast::CodeUnit*
+	JobParseFromSourceFile::getCodeUnitPointer()
+	{
+		return m_codeUnit.get();
 	}
 } }

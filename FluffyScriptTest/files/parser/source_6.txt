@@ -1,0 +1,14 @@
+namespace App
+{
+	class Model {
+		fn get() {
+			let p = 0;
+		}
+	}
+
+	fn main()
+	{
+		let p = 0;
+		let i = 10;
+	}
+}

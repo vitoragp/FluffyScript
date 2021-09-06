@@ -1,4 +1,5 @@
 #include <memory>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "parser\fl_parser.h"
@@ -16,7 +17,7 @@ namespace fluffy { namespace testing {
 	struct ParserClassFunctionTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -36,7 +37,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { fn Foo() {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -62,7 +63,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { fn Foo(test: i32) {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -96,7 +97,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { fn Foo(test: i32, test2: string) {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -139,7 +140,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { fn Foo(test: i32, test2: string) -> i32 {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -183,7 +184,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 override {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -227,7 +228,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -271,7 +272,7 @@ namespace fluffy { namespace testing {
 		parser->loadSource("class Foo { protected virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
 		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);		
 
@@ -314,7 +315,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32; }");		
 
-		auto classObject = parser->parseClass(ctx,  false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->functionList.size(), 1);
 
@@ -359,7 +360,7 @@ namespace fluffy { namespace testing {
 
 		try
 		{
-			auto classObject = parser->parseClass(ctx,  false, false);
+			auto classObject = parser->parseClass(ctx, false);
 			throw std::exception();
 		}
 		catch (exceptions::custom_exception& e)
@@ -374,7 +375,7 @@ namespace fluffy { namespace testing {
 
 		try
 		{
-			auto classObject = parser->parseClass(ctx,  false, false);
+			auto classObject = parser->parseClass(ctx, false);
 			throw std::exception();
 		}
 		catch (exceptions::custom_exception& e)
@@ -390,7 +391,7 @@ namespace fluffy { namespace testing {
 
 		try
 		{
-			auto classObject = parser->parseClass(ctx,  false, false);
+			auto classObject = parser->parseClass(ctx, false);
 			throw std::exception();
 		}
 		catch (exceptions::unexpected_token_exception& e)
@@ -405,9 +406,8 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestStaticFunctionAndFunctionPass)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_2.txt");
-		
-
-		parser->parseClass(ctx,  false, false);
+		String file = getProjectFilePath(".\\files\\parser\\source_2.txt");
+		parser->loadSourceFromFile(file.c_str());
+		parser->parseClass(ctx, false);
 	}
 } }

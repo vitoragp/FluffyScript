@@ -1,4 +1,5 @@
 #include <memory>
+#include "test.h"
 #include "gtest/gtest.h"
 
 #include "parser/fl_parser.h"
@@ -16,7 +17,7 @@ namespace fluffy { namespace testing {
 	struct ParserClassTest : public ::testing::Test
 	{
 		std::unique_ptr<Parser> parser;
-		fluffy::parser::ParserContext_s ctx{ true, false, false };
+		fluffy::parser::ParserContext_s ctx{ false };
 
 		// Sets up the test fixture.
 		virtual void SetUp()
@@ -35,7 +36,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 	}
@@ -44,7 +45,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo<T> {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -60,7 +61,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo<T, R> extends ::Window {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -84,7 +85,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo extends ::Window {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -102,7 +103,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo<T, R> implements ::Clickable<T>, UI::Viewable<R> {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -162,7 +163,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo implements ::Clickable, UI::Viewable {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -204,7 +205,7 @@ namespace fluffy { namespace testing {
 	{
 		parser->loadSource("class Foo<T, R> extends ::Window implements ::Clickable, UI::Viewable {}");
 
-		auto classObject = parser->parseClass(ctx, false, false);
+		auto classObject = parser->parseClass(ctx, false);
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
@@ -273,13 +274,15 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassTest, TestFullClassDeclaration)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_4.txt");
-		parser->parseClass(ctx, false, false);
+		String file = getProjectFilePath("files\\parser\\source_4.txt");
+		parser->loadSourceFromFile(file.c_str());
+		parser->parseClass(ctx, false);
 	}
 
 	TEST_F(ParserClassTest, TestFullClassDeclaration2)
 	{
-		parser->loadSourceFromFile(".\\files\\parser\\source_5.txt");
+		String file = getProjectFilePath("files\\parser\\source_5.txt");
+		parser->loadSourceFromFile(file.c_str());
 
 		auto codeUnit = parser->parseCodeUnit(ctx);
 

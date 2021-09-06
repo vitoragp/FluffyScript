@@ -50,7 +50,6 @@ namespace fluffy {
 		 */
 
 		Include,			// ok
-		From,				// ok
 		Export,				// ok
 		Namespace,			// ok
 		Class,				// ok
@@ -95,6 +94,7 @@ namespace fluffy {
 		Let,				// ok
 		This,				// ok
 		Shared,				// ok
+		Unique,				// ok
 		Ref,				// ok
 		Self,				// ok
 		New,				// ok
@@ -176,6 +176,7 @@ namespace fluffy {
 
 		Comma,						// ,
 		Dot,						// .
+		SafeDot,					// ?.
 
 		Ellipsis,					// ...
 
@@ -216,6 +217,7 @@ namespace fluffy {
 		New,
 		This,
 		Super,
+		AnomClassDecl,
 		PrimitiveType,
 		ConstantBool,
 		ConstantInteger,
@@ -238,17 +240,6 @@ namespace fluffy {
 
 		Prefix,
 		Posfix
-	};
-
-	/**
-		* PatternType_e
-		*/
-
-	enum class PatterType_e
-	{
-		Unknown,
-		Literal,
-		Destructuring
 	};
 
 	/**
@@ -441,7 +432,7 @@ namespace fluffy {
 		EnumItem,
 		Function,
 		Variable,
-		FunctionParamters,
+		FunctionParameter,
 		Generic,
 		GenericItem,
 		ScopedIdentifier,
@@ -456,7 +447,7 @@ namespace fluffy {
 		MatchExpr,
 		FunctionDeclExpr,
 		FunctionCallExpr,
-		GenericFunctionCallExpr,
+		GenericCallExpr,
 		IndexExpr,
 		NewExpr,
 		ConstantBoolExpr,
@@ -467,20 +458,21 @@ namespace fluffy {
 		ConstantNullExpr,
 		ThisExpr,
 		SuperExpr,
+		AnomClassDeclExpr,
 		PrimitiveTypeExpr,
 		IdentifierExpr,
-		MarkExpr,
 		ArrayInitExpr,
 
-		MatchWhenExprDecl,
-		FunctionParameterDecl,
-		NewBlockDecl,
-		NewItemDecl,
+		MatchWhenExpr,
+		ExprFunctionParameterDecl,
+		NewBlockExpr,
+		NewItemExpr,
 
 		LiteralPattern,
-		DestructuringPattern,
-
-		DestructuringItemDecl,
+		TuplePattern,
+		StructurePattern,
+		EnumerablePattern,
+		StructureItemPatternDecl,
 
 		IfStmt,
 		IfLetStmt,
