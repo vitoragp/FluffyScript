@@ -19,7 +19,7 @@ namespace fluffy { namespace utils {
 		{
 			switch (nodeA->nodeType)
 			{
-			case AstNodeType_e::Trait:
+			case AstNodeType_e::TraitDecl:
 				{
 					ast::TraitDecl* traitA = reinterpret_cast<ast::TraitDecl*>(nodeA);
 					ast::TraitDecl* traitB = reinterpret_cast<ast::TraitDecl*>(nodeB);
@@ -39,7 +39,7 @@ namespace fluffy { namespace utils {
 				}
 				return true;
 
-			case AstNodeType_e::Function:
+			case AstNodeType_e::FunctionDecl:
 				{
 					ast::FunctionDecl* funcA = reinterpret_cast<ast::FunctionDecl*>(nodeA);
 					ast::FunctionDecl* funcB = reinterpret_cast<ast::FunctionDecl*>(nodeB);
@@ -68,7 +68,7 @@ namespace fluffy { namespace utils {
 				}
 				return false;
 
-			case AstNodeType_e::ClassFunction:
+			case AstNodeType_e::ClassFunctionDecl:
 				{
 					ast::ClassFunctionDecl* funcA = reinterpret_cast<ast::ClassFunctionDecl*>(nodeA);
 					ast::ClassFunctionDecl* funcB = reinterpret_cast<ast::ClassFunctionDecl*>(nodeB);
@@ -97,7 +97,7 @@ namespace fluffy { namespace utils {
 				}
 				return false;
 
-			case AstNodeType_e::ClassConstructor:
+			case AstNodeType_e::ClassConstructorDecl:
 				{
 					ast::ClassConstructorDecl* funcA = reinterpret_cast<ast::ClassConstructorDecl*>(nodeA);
 					ast::ClassConstructorDecl* funcB = reinterpret_cast<ast::ClassConstructorDecl*>(nodeB);
@@ -122,7 +122,16 @@ namespace fluffy { namespace utils {
 				}
 				return true;
 
-			case AstNodeType_e::ExprFunctionParameterDecl:
+			case AstNodeType_e::FunctionParameterDeclExpr:
+				{
+					auto paramA = reinterpret_cast<ast::expr::ExpressionFunctionParameterDecl*>(nodeA);
+					auto paramB = reinterpret_cast<ast::expr::ExpressionFunctionParameterDecl*>(nodeB);
+
+					if (paramA->identifier == paramB->identifier)
+					{
+						return true;
+					}
+				}
 				break;
 
 			case AstNodeType_e::ArrayType:
@@ -251,7 +260,7 @@ namespace fluffy { namespace utils {
 				}
 				return true;
 
-			case AstNodeType_e::ScopedIdentifier:
+			case AstNodeType_e::ScopedIdentifierDecl:
 				{
 					ast::ScopedIdentifierDecl* typeA = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeA);
 					ast::ScopedIdentifierDecl* typeB = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeB);
@@ -292,8 +301,8 @@ namespace fluffy { namespace utils {
 
 			default:
 				{
-					ast::AstNodeIdentified* nodeIdA = dynamic_cast<ast::AstNodeIdentified*>(nodeA);
-					ast::AstNodeIdentified* nodeIdB = dynamic_cast<ast::AstNodeIdentified*>(nodeB);
+					ast::AstNode* nodeIdA = dynamic_cast<ast::AstNode*>(nodeA);
+					ast::AstNode* nodeIdB = dynamic_cast<ast::AstNode*>(nodeB);
 
 					if (nodeIdA && nodeIdB)
 					{
@@ -309,10 +318,7 @@ namespace fluffy { namespace utils {
 		}
 		else
 		{
-			ast::AstNodeIdentified* nodeIdA = dynamic_cast<ast::AstNodeIdentified*>(nodeA);
-			ast::AstNodeIdentified* nodeIdB = dynamic_cast<ast::AstNodeIdentified*>(nodeB);
-
-			if (nodeIdA && nodeIdB && nodeIdA->identifier == nodeIdB->identifier)
+			if (nodeA->identifier == nodeB->identifier)
 			{
 				return true;
 			}
@@ -326,7 +332,7 @@ namespace fluffy { namespace utils {
 		std::vector<std::tuple<TString, U32, U32>> identifiers;
 		switch (node->nodeType)
 		{
-		case AstNodeType_e::Function:
+		case AstNodeType_e::FunctionDecl:
 			if (auto function = reinterpret_cast<ast::FunctionDecl*>(node))
 			{
 				for (auto& parameter : function->parameterList)
@@ -353,7 +359,7 @@ namespace fluffy { namespace utils {
 			}
 			break;
 
-		case AstNodeType_e::ClassFunction:
+		case AstNodeType_e::ClassFunctionDecl:
 			if (auto function = reinterpret_cast<ast::ClassFunctionDecl*>(node))
 			{
 				for (auto& parameter : function->parameterList)
@@ -380,7 +386,7 @@ namespace fluffy { namespace utils {
 			}
 			break;
 
-		case AstNodeType_e::ClassConstructor:
+		case AstNodeType_e::ClassConstructorDecl:
 			if (auto function = reinterpret_cast<ast::ClassConstructorDecl*>(node))
 			{
 				for (auto& parameter : function->parameterList)
@@ -407,7 +413,7 @@ namespace fluffy { namespace utils {
 			}
 			break;
 
-		case AstNodeType_e::InterfaceFunction:
+		case AstNodeType_e::InterfaceFunctionDecl:
 			if (auto function = reinterpret_cast<ast::InterfaceFunctionDecl*>(node))
 			{
 				for (auto& parameter : function->parameterList)
@@ -434,7 +440,7 @@ namespace fluffy { namespace utils {
 			}
 			break;
 
-		case AstNodeType_e::TraitFunction:
+		case AstNodeType_e::TraitFunctionDecl:
 			if (auto function = reinterpret_cast<ast::TraitFunctionDecl*>(node))
 			{
 				for (auto& parameter : function->parameterList)

@@ -25,11 +25,5 @@ namespace fluffy { namespace utils {
 
 		static std::vector<std::tuple<TString, U32, U32>>
 		extractPatternIdentifiers(ast::pattern::PatternDecl* pattern);
-
-		static U32
-		getNodeCount();
-
-		static void
-		resetNodeCount();
 	};
 } }

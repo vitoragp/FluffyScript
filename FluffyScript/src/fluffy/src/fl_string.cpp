@@ -183,6 +183,11 @@ namespace fluffy {
 		, m_hash(0)
 	{}
 
+	TString::TString(const I8* str)
+		: m_data(str != nullptr ? const_cast<I8*>(TStringBuffer::getSingleton()->put(str)) : nullptr)
+		, m_hash(str != nullptr ? std::hash<std::string>{}(str) : 0)
+	{}
+
 	TString::TString(std::string& str)
 		: m_data(const_cast<I8*>(TStringBuffer::getSingleton()->put(str.c_str())))
 		, m_hash(std::hash<std::string>{}(str))
@@ -246,6 +251,9 @@ namespace fluffy {
 
 	const Bool operator==(const TString& str1, const std::string& str2)
 	{
+		if (str1.str() == nullptr) {
+			return str1.str() == str2.c_str();
+		}
 		return str1.str() == str2;
 	}
 
@@ -256,6 +264,9 @@ namespace fluffy {
 
 	const Bool operator!=(const TString& str1, const std::string& str2)
 	{
+		if (str1.str() == nullptr) {
+			return str1.str() != str2.c_str();
+		}
 		return str1.str() != str2;
 	}
 

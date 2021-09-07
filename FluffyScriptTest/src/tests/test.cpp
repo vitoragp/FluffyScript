@@ -6,7 +6,7 @@ namespace fluffy { namespace testing {
 	{
 		String url;
 		url.resize(1024);
-		sprintf_s(const_cast<I8*>(url.c_str()), 1024, "C:\\Users\\NPShinigami\\source\\repos\\FluffyScript\\FluffyScriptTest\\%s", file);
+		sprintf_s(const_cast<I8*>(url.c_str()), 1024, "FluffyScriptTest\\%s", file);
 		return url;
 	}
 } }

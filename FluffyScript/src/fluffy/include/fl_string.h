@@ -9,6 +9,7 @@ namespace fluffy {
 	{
 	public:
 								TString();
+					   explicit TString(const I8* str);
 								TString(std::string& str);
 								TString(std::string&& str);
 

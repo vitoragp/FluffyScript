@@ -1,5 +1,5 @@
 #include "ast\fl_ast.h"
-#include "utils\fl_ast_utils.h"
+#include "utils\fl_info_util.h"
 #include "fl_string.h"
 #include "fl_defs.h"
 
@@ -8,13 +8,13 @@ namespace fluffy { namespace utils {
 	g_totalNodeCount = 0;
 
 	U32
-	AstUtils::getNodeCount()
+	InfoUtil::getNodeCount()
 	{
 		return g_totalNodeCount;
 	}
 
 	void
-	AstUtils::resetNodeCount()
+	InfoUtil::resetNodeCount()
 	{
 		g_totalNodeCount = 0;
 	}
@@ -26,8 +26,9 @@ namespace fluffy { namespace ast {
 	 * AstNode
 	 */
 
-	AstNode::AstNode(const AstNodeType_e	nodeType, U32 line, U32 column)
+	AstNode::AstNode(const AstNodeType_e nodeType, U32 line, U32 column)
 		: nodeType(nodeType)
+		, identifier(getTokenString(nodeType))
 		, line(line)
 		, column(column)
 	{
@@ -53,23 +54,5 @@ namespace fluffy { namespace ast {
 	AstNode::getIdentifier()
 	{
 		return "";
-	}
-
-	/**
-	 * AstNodeIdentified
-	 */
-
-
-	AstNodeIdentified::AstNodeIdentified(const AstNodeType_e nodeType, U32 line, U32 column)
-		: AstNode(nodeType, line, column)
-	{}
-
-	AstNodeIdentified::~AstNodeIdentified()
-	{}
-
-	const I8*
-	AstNodeIdentified::getIdentifier()
-	{
-		return identifier.str();
 	}
 } }

@@ -263,8 +263,34 @@ namespace fluffy { namespace parser {
 				break;
 			}
 
-			// Consome identificador.
-			includeDecl->includedItemList.push_back(m_lexer->expectIdentifier());
+			auto includeItemDecl = std::make_unique<ast::IncludeItemDecl>(
+				m_lexer->getToken().line,
+				m_lexer->getToken().column
+			);
+
+			if (m_lexer->predictNextToken().type == TokenType_e::As)
+			{
+				// Consome identificador.
+				includeItemDecl->referencedId = m_lexer->expectIdentifier();
+			}
+			else
+			{
+				// Consome identificador.
+				includeItemDecl->identifier = m_lexer->expectIdentifier();
+			}
+
+			// Verifica se o item possui um alias.
+			if (m_lexer->isAs())
+			{
+				// Consome 'as'
+				m_lexer->expectToken(TokenType_e::As);
+
+				// Consome identificador.
+				includeItemDecl->identifier = m_lexer->expectIdentifier();
+			}
+
+			// Inclui item a lista
+			includeDecl->includedItemList.push_back(std::move(includeItemDecl));
 
 			// Verifica se ha mais declaracoes.
 			if (m_lexer->isRightBracket()) {
@@ -282,7 +308,7 @@ namespace fluffy { namespace parser {
 		m_lexer->expectToken(TokenType_e::In);
 
 		// Consome o identificador do namespace.
-		includeDecl->fromNamespace = parseScopedIdentifier(ctx);
+		includeDecl->inNamespace = parseScopedIdentifier(ctx);
 
 		// Consome ';'
 		m_lexer->expectToken(TokenType_e::SemiColon);
@@ -965,7 +991,7 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+			variableDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
@@ -1922,7 +1948,7 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			classVariableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+			classVariableDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
@@ -1981,7 +2007,9 @@ namespace fluffy { namespace parser {
 				m_lexer->expectToken(TokenType_e::LParBracket);
 
 				// Consome expressao.
-				variableInitDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				if (!m_lexer->isRightParBracket()) {
+					variableInitDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				}
 
 				// Consome ')'.
 				m_lexer->expectToken(TokenType_e::RParBracket);
@@ -2013,7 +2041,9 @@ namespace fluffy { namespace parser {
 				m_lexer->expectToken(TokenType_e::LParBracket);
 
 				// Consome expressao.
-				variableInitDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				if (!m_lexer->isRightParBracket()) {
+					variableInitDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				}
 
 				// Consome ')'.
 				m_lexer->expectToken(TokenType_e::RParBracket);
@@ -2182,7 +2212,7 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			structVariableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+			structVariableDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
 		}
 
 		// Toda declaracao de variavel ou constante deve terminar com ';'
@@ -2429,38 +2459,55 @@ namespace fluffy { namespace parser {
 		// Consome 'for'.
 		m_lexer->expectToken(TokenType_e::For);
 
-		// Verifica se e uma expressao e inicilizacao.
-		if (m_lexer->isLet())
+		// Verifica se possui declaracao
+		if (!m_lexer->isSemiColon())
 		{
-			forDecl->initStmtDecl = std::make_unique<ast::StmtForInitDecl>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
-			);
+			// Verifica se e uma expressao e inicilizacao.
+			if (m_lexer->isLet())
+			{
+				// Consome 'let'.
+				m_lexer->expectToken(TokenType_e::Let);
 
-			// Consome o identificador.
-			forDecl->initStmtDecl->identifier = m_lexer->expectIdentifier();
+				forDecl->initStmtDecl = std::make_unique<ast::StmtForInitDecl>(
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
 
-			// Consome '='.
-			m_lexer->expectToken(TokenType_e::Assign);
+				// Consome o identificador.
+				forDecl->initStmtDecl->identifier = m_lexer->expectIdentifier();
 
-			// Consome expressao.
-			forDecl->initStmtDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
-		} else {
-			// Consome expressao.
-			forDecl->initExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+				// Consome '='.
+				m_lexer->expectToken(TokenType_e::Assign);
+
+				// Consome expressao.
+				forDecl->initStmtDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+			}
+			else
+			{
+				// Consome expressao.
+				forDecl->initExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+			}
 		}
 
 		// Consome ';'.
 		m_lexer->expectToken(TokenType_e::SemiColon);
 
-		// Consome expressao.
-		forDecl->conditionExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+		// Verifica se possui declaracao
+		if (!m_lexer->isSemiColon())
+		{
+			// Consome expressao.
+			forDecl->conditionExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+		}
 
 		// Consome ';'.
 		m_lexer->expectToken(TokenType_e::SemiColon);
 
-		// Consome expressao.
-		forDecl->updateExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+		// Verifica se possui declaracao
+		if (!m_lexer->isSemiColon())
+		{
+			// Consome expressao.
+			forDecl->updateExprDecl = parseExpression(ctx, OperatorPrecLevel_e::MinPrec);
+		}
 
 		// Consome bloco.
 		forDecl->blockDecl = parseBlock(ctx);
@@ -2539,7 +2586,7 @@ namespace fluffy { namespace parser {
 			}
 
 		parsePatternlabel:
-			auto whenDecl = std::make_unique<ast::MatchWhenStmtDecl>(
+			auto whenDecl = std::make_unique<ast::StmtMatchWhenDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
@@ -2689,11 +2736,14 @@ namespace fluffy { namespace parser {
 			// Consome 'catch'
 			m_lexer->expectToken(TokenType_e::Catch);
 
-			// Consome declaracao catch.
-			catchDecl->typeDecl = parseType(ctx);
-
 			// Consome identificador.
 			catchDecl->patternDecl = parsePattern(ctx);
+
+			// Consome ':'.
+			m_lexer->expectToken(TokenType_e::Colon);
+
+			// Consome declaracao catch.
+			catchDecl->typeDecl = parseType(ctx);
 
 			// Consome bloco.
 			catchDecl->blockDecl = parseBlock(ctx);
@@ -2709,16 +2759,19 @@ namespace fluffy { namespace parser {
 				auto catchDecl = std::make_unique<ast::StmtCatchBlockDecl>(
 					m_lexer->getToken().line,
 					m_lexer->getToken().column
-					);
+				);
 
 				// Consome 'catch'
 				m_lexer->expectToken(TokenType_e::Catch);
 
-				// Consome declaracao catch.
-				catchDecl->typeDecl = parseType(ctx);
-
 				// Consome identificador.
 				catchDecl->patternDecl = parsePattern(ctx);
+
+				// Consome ':'.
+				m_lexer->expectToken(TokenType_e::Colon);
+
+				// Consome declaracao catch.
+				catchDecl->typeDecl = parseType(ctx);
 
 				// Consome bloco.
 				catchDecl->blockDecl = parseBlock(ctx);
@@ -2851,7 +2904,7 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Assign);
 
 			// Processa a expressao superficialmente em busca de erros de sintaxe.
-			variableDecl->initExpression = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
+			variableDecl->initExpr = parseExpression(ctx, OperatorPrecLevel_e::Interrogation);
 		}
 
 		// Consome ';'.
@@ -3104,17 +3157,70 @@ namespace fluffy { namespace parser {
 				break;
 			case TokenType_e::LessThan:
 				{
+					const U32	position = m_lexer->getToken().position;
+					const U32	line = m_lexer->getToken().line;
+					const U32	column = m_lexer->getToken().column;
+
+					// Tenta predizer a presenca de um generic.
+					Bool hasGeneric = false;
+					Bool finishParse = false;
+					while (!finishParse) {
+						switch (m_lexer->getToken().type)
+						{
+						case TokenType_e::Void:
+							finishParse = true;
+							break;
+						case TokenType_e::Bool:
+						case TokenType_e::I8:
+						case TokenType_e::U8:
+						case TokenType_e::I16:
+						case TokenType_e::U16:
+						case TokenType_e::I32:
+						case TokenType_e::U32:
+						case TokenType_e::I64:
+						case TokenType_e::U64:
+						case TokenType_e::Fp32:
+						case TokenType_e::Fp64:
+						case TokenType_e::String:
+						case TokenType_e::Object:
+						case TokenType_e::Identifier:
+						case TokenType_e::ScopeResolution:
+						case TokenType_e::Comma:
+							m_lexer->nextToken();	// Consome token.
+							continue;
+						case TokenType_e::GreaterThan:
+							if (m_lexer->predictNextToken().type == TokenType_e::LParBracket)
+							{
+								finishParse = true;
+								hasGeneric = true;
+								m_lexer->resetToPosition(position, line, column);
+							}
+							else
+							{
+								finishParse = true;
+								m_lexer->resetToPosition(position, line, column);
+							}
+							break;
+						default:
+							finishParse = true;
+							m_lexer->resetToPosition(position, line, column);
+							break;
+						}
+					}
+
+					// Verifica deve fazer o processamento do generic.
+					if (!hasGeneric)
+					{
+						break;
+					}
+
 					auto exprGenericDef = std::make_unique<ast::expr::ExpressionGenericCallDecl>(
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
 					);
 
 					Bool		parseGeneric = false;
-					Bool		finishParse = false;
-					Bool		expectType = false;
-					const U32	position = m_lexer->getToken().position;
-					const U32	line = m_lexer->getToken().line;
-					const U32	column = m_lexer->getToken().column;
+					Bool		expectType = false;					
 
 					while (true)
 					{
@@ -4130,6 +4236,19 @@ namespace fluffy { namespace parser {
 
 		// Consome 'fn'
 		m_lexer->expectToken(TokenType_e::Fn);
+
+		// Verifica se e um tipo de funcao de um objeto.
+		if (m_lexer->isLessThan())
+		{
+			// Consome '<'
+			m_lexer->expectToken(TokenType_e::LessThan);
+
+			// Consome tipo.
+			functionTypeDecl->objectOwnerDecl = parseType(ctx);
+
+			// Consome '>'
+			m_lexer->expectToken(TokenType_e::GreaterThan);
+		}
 
 		// Consome '('
 		m_lexer->expectToken(TokenType_e::LParBracket);

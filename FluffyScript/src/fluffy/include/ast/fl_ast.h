@@ -24,23 +24,8 @@ namespace fluffy { namespace ast {
 		getIdentifier();
 
 		const AstNodeType_e		nodeType;
+		TString					identifier;
 		U32						line;
 		U32						column;
-	};
-
-	/**
-	 * AstNodeIdentified
-	 */
-
-	class AstNodeIdentified : public AstNode
-	{
-	public:
-		AstNodeIdentified(const AstNodeType_e nodeType, U32 line, U32 column);
-		virtual ~AstNodeIdentified();
-
-		virtual const I8*
-		getIdentifier() final;
-
-		TString					identifier;
 	};
 } }

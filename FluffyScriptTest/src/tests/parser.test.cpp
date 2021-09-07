@@ -4,7 +4,7 @@
 
 #include "parser\fl_parser.h"
 #include "validation\fl_validate.h"
-#include "utils\fl_ast_utils.h"
+#include "utils\fl_info_util.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 
@@ -48,11 +48,11 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includedItemList[0], "print");
+		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
 
-		EXPECT_EQ(treeAst->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseIncludeTwoIdentifier)
@@ -63,12 +63,12 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 		
 		EXPECT_EQ(treeAst->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includedItemList[0], "print");
-		EXPECT_EQ(treeAst->includedItemList[1], "scan");
+		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includedItemList[1]->identifier, "scan");
 
-		EXPECT_EQ(treeAst->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseIncludeAll)
@@ -80,12 +80,12 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(treeAst->includedItemList.size(), 0);
 
-		EXPECT_EQ(treeAst->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->fromNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
 	
-		EXPECT_EQ(treeAst->fromNamespace->referencedIdentifier->identifier, "math");
-		EXPECT_EQ(treeAst->fromNamespace->referencedIdentifier->startFromRoot, false);
-		EXPECT_EQ(treeAst->fromNamespace->referencedIdentifier->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->identifier, "math");
+		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->startFromRoot, false);
+		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeTwoIdentifierWithGeneric)
@@ -98,22 +98,22 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0], "print");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1], "scan");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
 
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0], "Window");
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->identifier, "Window");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->referencedIdentifier->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->referencedIdentifier->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->referencedIdentifier->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->identifier, "UI");
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeAll)
@@ -127,15 +127,15 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 0);
 				
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 0);
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "UI");
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesInclude)
@@ -149,18 +149,18 @@ namespace fluffy { namespace testing {
 
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0], "print2");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1], "scan");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print2");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
 
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 0);
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "UI");
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserTest, TestParseOnlyOneNamespaceEmpty)
@@ -243,7 +243,7 @@ namespace fluffy { namespace testing {
 
 		// Include
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0], "print");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
 
 		// Namespace
 		EXPECT_EQ(treeAst->namespaceDeclList[0]->identifier, "application");
@@ -314,7 +314,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestValidation)
 	{
-		utils::AstUtils::resetNodeCount();
+		utils::InfoUtil::resetNodeCount();
 
 		parser->loadSourceFromFile(getProjectFilePath("files\\compiler\\main.txt").c_str());
 
@@ -323,6 +323,6 @@ namespace fluffy { namespace testing {
 		std::unique_ptr<ValidateTest> validate = std::make_unique<ValidateTest>();
 		validate->validate(codeUnit.get());
 
-		EXPECT_EQ(utils::AstUtils::getNodeCount(), validate->getNodeCount());
+		EXPECT_EQ(utils::InfoUtil::getNodeCount(), validate->getNodeCount());
 	}
 } }

@@ -40,10 +40,10 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(inc->includedItemList.size(), 0);
 
-		EXPECT_NE(inc->fromNamespace, nullptr);
-		EXPECT_EQ(inc->fromNamespace->identifier, "std");
-		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_NE(inc->inNamespace, nullptr);
+		EXPECT_EQ(inc->inNamespace->identifier, "std");
+		EXPECT_EQ(inc->inNamespace->startFromRoot, false);
+		EXPECT_EQ(inc->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_OneInc)
@@ -55,12 +55,12 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(inc != nullptr);
 
 		EXPECT_EQ(inc->includedItemList.size(), 1);
-		EXPECT_EQ(inc->includedItemList[0], "print");
+		EXPECT_EQ(inc->includedItemList[0]->identifier, "print");
 
-		EXPECT_NE(inc->fromNamespace, nullptr);
-		EXPECT_EQ(inc->fromNamespace->identifier, "std");
-		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_NE(inc->inNamespace, nullptr);
+		EXPECT_EQ(inc->inNamespace->identifier, "std");
+		EXPECT_EQ(inc->inNamespace->startFromRoot, false);
+		EXPECT_EQ(inc->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc)
@@ -72,13 +72,13 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(inc != nullptr);
 
 		EXPECT_EQ(inc->includedItemList.size(), 2);
-		EXPECT_EQ(inc->includedItemList[0], "print");
-		EXPECT_EQ(inc->includedItemList[1], "scan");
+		EXPECT_EQ(inc->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(inc->includedItemList[1]->identifier, "scan");
 
-		EXPECT_NE(inc->fromNamespace, nullptr);
-		EXPECT_EQ(inc->fromNamespace->identifier, "std");
-		EXPECT_EQ(inc->fromNamespace->startFromRoot, false);
-		EXPECT_EQ(inc->fromNamespace->referencedIdentifier, nullptr);
+		EXPECT_NE(inc->inNamespace, nullptr);
+		EXPECT_EQ(inc->inNamespace->identifier, "std");
+		EXPECT_EQ(inc->inNamespace->startFromRoot, false);
+		EXPECT_EQ(inc->inNamespace->referencedIdentifier, nullptr);
 	}
 
 	TEST_F(ParserIncludeTest, TestIncludeDecl_TwoInc_ScopedRoot)
@@ -90,12 +90,12 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(inc != nullptr);
 
 		EXPECT_EQ(inc->includedItemList.size(), 2);
-		EXPECT_EQ(inc->includedItemList[0], "print");
-		EXPECT_EQ(inc->includedItemList[1], "scan");
+		EXPECT_EQ(inc->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(inc->includedItemList[1]->identifier, "scan");
 
-		EXPECT_NE(inc->fromNamespace, nullptr);
-		EXPECT_EQ(inc->fromNamespace->identifier, "std");
-		EXPECT_EQ(inc->fromNamespace->startFromRoot, true);
-		EXPECT_EQ(inc->fromNamespace->referencedIdentifier->identifier, "next");
+		EXPECT_NE(inc->inNamespace, nullptr);
+		EXPECT_EQ(inc->inNamespace->identifier, "std");
+		EXPECT_EQ(inc->inNamespace->startFromRoot, true);
+		EXPECT_EQ(inc->inNamespace->referencedIdentifier->identifier, "next");
 	}
 } }

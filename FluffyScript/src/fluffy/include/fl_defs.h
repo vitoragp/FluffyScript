@@ -4,7 +4,7 @@
 
 namespace fluffy { namespace parser {
 	class Parser;
-	class AstNodeIdentified;
+	class AstNode;
 } }
 
 namespace fluffy {
@@ -392,19 +392,6 @@ namespace fluffy {
 	};
 
 	/**
-	 * DestructuringItemType_e
-	 */
-
-	enum class DestructuringItemType_e
-	{
-		Unknown,
-
-		DirectReference,			// Faz referencia a uma variavel, ex: { t }.
-		IndirectReferenceOrMatch,	// Faz referencia a uma variavel e redireciona para outro identifiador ou e matching, ex: { t: id }.
-		SubDestructuring			// Faz referencia ao destructuring de uma variavel, ex: { t: { } }
-	};
-
-	/**
 	 * AstNodeType_e
 	 */
 
@@ -414,28 +401,29 @@ namespace fluffy {
 
 		CodeUnit,
 
-		Include,
-		Namespace,
-		Class,
-		ClassFunction,
-		ClassVariable,
-		ClassConstructor,
-		ClassDestructor,
+		IncludeDecl,
+		IncludeItemDecl,
+		NamespaceDecl,
+		ClassDecl,
+		ClassFunctionDecl,
+		ClassVariableDecl,
+		ClassConstructorDecl,
+		ClassDestructorDecl,
 		ClassVariableInitDecl,
-		Interface,
-		InterfaceFunction,
-		Struct,
-		StructVariable,
-		Trait,
-		TraitFunction,
-		Enum,
-		EnumItem,
-		Function,
-		Variable,
-		FunctionParameter,
-		Generic,
-		GenericItem,
-		ScopedIdentifier,
+		InterfaceDecl,
+		InterfaceFunctionDecl,
+		StructDecl,
+		StructVariableDecl,
+		TraitDecl,
+		TraitFunctionDecl,
+		EnumDecl,
+		EnumItemDecl,
+		FunctionDecl,
+		VariableDecl,
+		FunctionParameterDecl,
+		GenericDecl,
+		GenericItemDecl,
+		ScopedIdentifierDecl,
 
 		Block,
 
@@ -464,7 +452,7 @@ namespace fluffy {
 		ArrayInitExpr,
 
 		MatchWhenExpr,
-		ExprFunctionParameterDecl,
+		FunctionParameterDeclExpr,
 		NewBlockExpr,
 		NewItemExpr,
 
@@ -474,25 +462,25 @@ namespace fluffy {
 		EnumerablePattern,
 		StructureItemPatternDecl,
 
-		IfStmt,
-		IfLetStmt,
-		ForStmt,
-		WhileStmt,
-		DoWhileStmt,
-		MatchStmt,
-		ReturnStmt,
-		ContinueStmt,
-		BreakStmt,
-		GotoStmt,
-		LabelStmt,
-		TryStmt,
-		PanicStmt,
-		VariableStmt,
-		ExprStmt,
+		StmtIf,
+		StmtIfLet,
+		StmtFor,
+		StmtWhile,
+		StmtDoWhile,
+		StmtMatch,
+		StmtReturn,
+		StmtContinue,
+		StmtBreak,
+		StmtGoto,
+		StmtLabel,
+		StmtTry,
+		StmtPanic,
+		StmtVariable,
+		StmtExpr,
 
-		ForInitDecl,
-		MatchWhenStmtDecl,
-		CatchBlockStmtDecl,
+		StmtForInitDecl,
+		StmtMatchWhenDecl,
+		StmtCatchBlockDecl,
 
 		VoidType,
 		BoolType,
@@ -542,4 +530,5 @@ namespace fluffy {
 	 */
 
 	const I8*			getTokenString(const TokenType_e tokentype);
+	const I8*			getTokenString(const AstNodeType_e nodeType);
 }

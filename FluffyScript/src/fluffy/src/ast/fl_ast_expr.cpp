@@ -350,7 +350,7 @@ namespace fluffy { namespace ast { namespace expr {
 	 */
 
 	ExpressionFunctionParameterDecl::ExpressionFunctionParameterDecl(const U32 line, const U32 column)
-		: AstNodeIdentified(AstNodeType_e::ExprFunctionParameterDecl, line, column)
+		: AstNode(AstNodeType_e::FunctionParameterDeclExpr, line, column)
 		, isEllipsis(false)
 	{}
 

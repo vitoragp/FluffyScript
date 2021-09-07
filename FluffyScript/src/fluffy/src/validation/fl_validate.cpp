@@ -35,14 +35,15 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Include:
+		case AstNodeType_e::IncludeDecl:
 			if (auto n = reinterpret_cast<ast::IncludeDecl*>(decl))
 			{
-				validate_single(n->fromNamespace);
+				validate_each(n->includedItemList);
+				validate_single(n->inNamespace);
 			}
 			break;
 
-		case AstNodeType_e::Namespace:
+		case AstNodeType_e::NamespaceDecl:
 			if (auto n = reinterpret_cast<ast::NamespaceDecl*>(decl))
 			{
 				validate_each(n->namespaceDeclList);
@@ -50,7 +51,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Class:
+		case AstNodeType_e::ClassDecl:
 			if (auto n = reinterpret_cast<ast::ClassDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -66,7 +67,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ClassConstructor:
+		case AstNodeType_e::ClassConstructorDecl:
 			if (auto n = reinterpret_cast<ast::ClassConstructorDecl*>(decl))
 			{
 				validate_each(n->parameterList);
@@ -76,14 +77,14 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ClassDestructor:
+		case AstNodeType_e::ClassDestructorDecl:
 			if (auto n = reinterpret_cast<ast::ClassDestructorDecl*>(decl))
 			{
 				validate_single(n->blockDecl);
 			}
 			break;
 
-		case AstNodeType_e::ClassFunction:
+		case AstNodeType_e::ClassFunctionDecl:
 			if (auto n = reinterpret_cast<ast::ClassFunctionDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -95,22 +96,22 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ClassVariable:
+		case AstNodeType_e::ClassVariableDecl:
 			if (auto n = reinterpret_cast<ast::ClassVariableDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 			}
 			break;
 
 		case AstNodeType_e::ClassVariableInitDecl:
 			if (auto n = reinterpret_cast<ast::ClassVariableInitDecl*>(decl))
 			{
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 			}
 			break;
 
-		case AstNodeType_e::Interface:
+		case AstNodeType_e::InterfaceDecl:
 			if (auto n = reinterpret_cast<ast::InterfaceDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -118,7 +119,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::InterfaceFunction:
+		case AstNodeType_e::InterfaceFunctionDecl:
 			if (auto n = reinterpret_cast<ast::InterfaceFunctionDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -127,7 +128,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Struct:
+		case AstNodeType_e::StructDecl:
 			if (auto n = reinterpret_cast<ast::StructDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -135,15 +136,15 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::StructVariable:
+		case AstNodeType_e::StructVariableDecl:
 			if (auto n = reinterpret_cast<ast::StructVariableDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 			}
 			break;
 
-		case AstNodeType_e::Enum:
+		case AstNodeType_e::EnumDecl:
 			if (auto n = reinterpret_cast<ast::EnumDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -151,7 +152,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::EnumItem:
+		case AstNodeType_e::EnumItemDecl:
 			if (auto n = reinterpret_cast<ast::EnumItemDecl*>(decl))
 			{
 				validate_each(n->dataTypeDeclList);
@@ -159,7 +160,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Trait:
+		case AstNodeType_e::TraitDecl:
 			if (auto n = reinterpret_cast<ast::TraitDecl*>(decl))
 			{
 				validate_single(n->typeDefinitionDecl);
@@ -168,7 +169,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::TraitFunction:
+		case AstNodeType_e::TraitFunctionDecl:
 			if (auto n = reinterpret_cast<ast::TraitFunctionDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -179,7 +180,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Function:
+		case AstNodeType_e::FunctionDecl:
 			if (auto n = reinterpret_cast<ast::FunctionDecl*>(decl))
 			{
 				validate_single(n->genericDecl);
@@ -190,15 +191,15 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Variable:
+		case AstNodeType_e::VariableDecl:
 			if (auto n = reinterpret_cast<ast::VariableDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 			}
 			break;
 
-		case AstNodeType_e::FunctionParameter:
+		case AstNodeType_e::FunctionParameterDecl:
 			if (auto n = reinterpret_cast<ast::FunctionParameterDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
@@ -206,21 +207,21 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::Generic:
+		case AstNodeType_e::GenericDecl:
 			if (auto n = reinterpret_cast<ast::GenericDecl*>(decl))
 			{
 				validate_each(n->genericDeclItemList);
 			}
 			break;
 
-		case AstNodeType_e::GenericItem:
+		case AstNodeType_e::GenericItemDecl:
 			if (auto n = reinterpret_cast<ast::GenericItemDecl*>(decl))
 			{
 				validate_each(n->whereTypeList);
 			}
 			break;
 
-		case AstNodeType_e::ScopedIdentifier:
+		case AstNodeType_e::ScopedIdentifierDecl:
 			if (auto n = reinterpret_cast<ast::ScopedIdentifierDecl*>(decl))
 			{
 				validate_single(n->referencedIdentifier);
@@ -234,7 +235,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::IfStmt:
+		case AstNodeType_e::StmtIf:
 			if (auto n = reinterpret_cast<ast::stmt::StmtIfDecl*>(decl))
 			{
 				validate_single(n->conditionExprDecl);
@@ -243,7 +244,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::IfLetStmt:
+		case AstNodeType_e::StmtIfLet:
 			if (auto n = reinterpret_cast<ast::stmt::StmtIfLetDecl*>(decl))
 			{
 				validate_single(n->patternDecl);
@@ -253,7 +254,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ForStmt:
+		case AstNodeType_e::StmtFor:
 			if (auto n = reinterpret_cast<ast::stmt::StmtForDecl*>(decl))
 			{
 				validate_single(n->initStmtDecl);
@@ -264,7 +265,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::WhileStmt:
+		case AstNodeType_e::StmtWhile:
 			if (auto n = reinterpret_cast<ast::stmt::StmtWhileDecl*>(decl))
 			{
 				validate_single(n->conditionExprDecl);
@@ -272,7 +273,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::DoWhileStmt:
+		case AstNodeType_e::StmtDoWhile:
 			if (auto n = reinterpret_cast<ast::stmt::StmtDoWhileDecl*>(decl))
 			{
 				validate_single(n->conditionExprDecl);
@@ -280,7 +281,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::MatchStmt:
+		case AstNodeType_e::StmtMatch:
 			if (auto n = reinterpret_cast<ast::stmt::StmtMatchDecl*>(decl))
 			{
 				validate_single(n->conditionExprDecl);
@@ -288,14 +289,14 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ReturnStmt:
+		case AstNodeType_e::StmtReturn:
 			if (auto n = reinterpret_cast<ast::stmt::StmtReturnDecl*>(decl))
 			{
 				validate_single(n->exprDecl);
 			}
 			break;
 
-		case AstNodeType_e::TryStmt:
+		case AstNodeType_e::StmtTry:
 			if (auto n = reinterpret_cast<ast::stmt::StmtTryDecl*>(decl))
 			{
 				validate_single(n->blockDecl);
@@ -303,50 +304,50 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::PanicStmt:
+		case AstNodeType_e::StmtPanic:
 			if (auto n = reinterpret_cast<ast::stmt::StmtPanicDecl*>(decl))
 			{
 				validate_single(n->exprDecl);
 			}
 			break;
 
-		case AstNodeType_e::VariableStmt:
+		case AstNodeType_e::StmtVariable:
 			if (auto n = reinterpret_cast<ast::stmt::StmtVariableDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 				validate_single(n->patternDecl);
 			}
 			break;
 
-		case AstNodeType_e::ExprStmt:
+		case AstNodeType_e::StmtExpr:
 			if (auto n = reinterpret_cast<ast::stmt::StmtExprDecl*>(decl))
 			{
 				validate_single(n->exprDecl);
 			}
 			break;
 
-		case AstNodeType_e::ForInitDecl:
+		case AstNodeType_e::StmtForInitDecl:
 			if (auto n = reinterpret_cast<ast::stmt::StmtForInitDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
-				validate_single(n->initExpression);
+				validate_single(n->initExpr);
 			}
 			break;
 
-		case AstNodeType_e::MatchWhenStmtDecl:
-			if (auto n = reinterpret_cast<ast::stmt::MatchWhenStmtDecl*>(decl))
+		case AstNodeType_e::StmtMatchWhenDecl:
+			if (auto n = reinterpret_cast<ast::stmt::StmtMatchWhenDecl*>(decl))
 			{
 				validate_single(n->patternDecl);
 				validate_single(n->blockDecl);
 			}
 			break;
 
-		case AstNodeType_e::CatchBlockStmtDecl:
+		case AstNodeType_e::StmtCatchBlockDecl:
 			if (auto n = reinterpret_cast<ast::stmt::StmtCatchBlockDecl*>(decl))
 			{
-				validate_single(n->typeDecl);
 				validate_single(n->patternDecl);
+				validate_single(n->typeDecl);
 				validate_single(n->blockDecl);
 			}
 			break;
@@ -476,7 +477,7 @@ namespace fluffy { namespace validations {
 			}
 			break;
 
-		case AstNodeType_e::ExprFunctionParameterDecl:
+		case AstNodeType_e::FunctionParameterDeclExpr:
 			if (auto n = reinterpret_cast<ast::expr::ExpressionFunctionParameterDecl*>(decl))
 			{
 				validate_single(n->typeDecl);
@@ -545,6 +546,7 @@ namespace fluffy { namespace validations {
 		case AstNodeType_e::FunctionType:
 			if (auto n = reinterpret_cast<ast::TypeDeclFunction*>(decl))
 			{
+				validate_single(n->objectOwnerDecl);
 				validate_each(n->parameterTypeList);
 				validate_single(n->returnType);
 			}

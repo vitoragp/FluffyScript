@@ -114,7 +114,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * StructureItemPatternDecl
 	 */
 
-	class StructureItemPatternDecl : public AstNodeIdentified
+	class StructureItemPatternDecl : public AstNode
 	{
 	public:
 		StructureItemPatternDecl(U32 line, U32 column);

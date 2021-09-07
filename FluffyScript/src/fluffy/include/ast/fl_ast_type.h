@@ -81,6 +81,7 @@ namespace fluffy { namespace ast {
 		TypeDeclFunction(U32 line, U32 column);
 		virtual ~TypeDeclFunction();
 
+		TypeDeclPtr							objectOwnerDecl;
 		TypeDeclPtrList						parameterTypeList;
 		TypeDeclPtr							returnType;
 	};
@@ -108,7 +109,6 @@ namespace fluffy { namespace ast {
 		TypeDeclNamed(U32 line, U32 column);
 		virtual ~TypeDeclNamed();
 
-		TString								identifier;
 		TypeDeclNamedPtr					internalIdentifier;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;

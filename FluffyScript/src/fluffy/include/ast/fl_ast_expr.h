@@ -394,7 +394,6 @@ namespace fluffy { namespace ast { namespace expr {
 		ExpressionConstantIdentifierDecl(const U32 line, const U32 column);
 		virtual ~ExpressionConstantIdentifierDecl();
 
-		TString									identifier;
 		Bool									startFromRoot;
 	};
 
@@ -429,7 +428,7 @@ namespace fluffy { namespace ast { namespace expr {
 	 * ExpressionFunctionParameterDecl
 	 */
 
-	class ExpressionFunctionParameterDecl : public AstNodeIdentified
+	class ExpressionFunctionParameterDecl : public AstNode
 	{
 	public:
 		ExpressionFunctionParameterDecl(const U32 line, const U32 column);
@@ -463,7 +462,6 @@ namespace fluffy { namespace ast { namespace expr {
 		ExpressionNewItemDecl(U32 line, U32 column);
 		virtual ~ExpressionNewItemDecl();
 
-		TString									identifier;
 		ExpressionDeclPtr						exprDecl;
 	};
 

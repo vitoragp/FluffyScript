@@ -26,7 +26,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtIfDecl::StmtIfDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::IfStmt, StmtDeclType_e::If, line, column)
+		: StmtDecl(AstNodeType_e::StmtIf, StmtDeclType_e::If, line, column)
 	{}
 
 	StmtIfDecl::~StmtIfDecl()
@@ -37,7 +37,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtIfLetDecl::StmtIfLetDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::IfLetStmt, StmtDeclType_e::IfLet, line, column)
+		: StmtDecl(AstNodeType_e::StmtIfLet, StmtDeclType_e::IfLet, line, column)
 	{}
 
 	StmtIfLetDecl::~StmtIfLetDecl()
@@ -60,7 +60,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtForDecl::StmtForDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::ForStmt, StmtDeclType_e::For, line, column)
+		: StmtDecl(AstNodeType_e::StmtFor, StmtDeclType_e::For, line, column)
 	{}
 
 	StmtForDecl::~StmtForDecl()
@@ -83,7 +83,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtWhileDecl::StmtWhileDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::WhileStmt, StmtDeclType_e::While, line, column)
+		: StmtDecl(AstNodeType_e::StmtWhile, StmtDeclType_e::While, line, column)
 	{}
 
 	StmtWhileDecl::~StmtWhileDecl()
@@ -94,7 +94,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtDoWhileDecl::StmtDoWhileDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::DoWhileStmt, StmtDeclType_e::DoWhile, line, column)
+		: StmtDecl(AstNodeType_e::StmtDoWhile, StmtDeclType_e::DoWhile, line, column)
 	{}
 
 	StmtDoWhileDecl::~StmtDoWhileDecl()
@@ -105,7 +105,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtMatchDecl::StmtMatchDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::MatchStmt, StmtDeclType_e::Match, line, column)
+		: StmtDecl(AstNodeType_e::StmtMatch, StmtDeclType_e::Match, line, column)
 	{}
 
 	StmtMatchDecl::~StmtMatchDecl()
@@ -116,7 +116,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtReturnDecl::StmtReturnDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::ReturnStmt, StmtDeclType_e::Return, line, column)
+		: StmtDecl(AstNodeType_e::StmtReturn, StmtDeclType_e::Return, line, column)
 	{}
 
 	StmtReturnDecl::~StmtReturnDecl()
@@ -127,7 +127,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtContinueDecl::StmtContinueDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::ContinueStmt, StmtDeclType_e::Continue, line, column)
+		: StmtDecl(AstNodeType_e::StmtContinue, StmtDeclType_e::Continue, line, column)
 	{}
 
 	StmtContinueDecl::~StmtContinueDecl()
@@ -138,7 +138,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtBreakDecl::StmtBreakDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::BreakStmt, StmtDeclType_e::Break, line, column)
+		: StmtDecl(AstNodeType_e::StmtBreak, StmtDeclType_e::Break, line, column)
 	{}
 
 	StmtBreakDecl::~StmtBreakDecl()
@@ -149,7 +149,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtGotoDecl::StmtGotoDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::GotoStmt, StmtDeclType_e::Goto, line, column)
+		: StmtDecl(AstNodeType_e::StmtGoto, StmtDeclType_e::Goto, line, column)
 	{}
 
 	StmtGotoDecl::~StmtGotoDecl()
@@ -160,7 +160,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtLabelDecl::StmtLabelDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::LabelStmt, StmtDeclType_e::Label, line, column)
+		: StmtDecl(AstNodeType_e::StmtLabel, StmtDeclType_e::Label, line, column)
 	{}
 
 	StmtLabelDecl::~StmtLabelDecl()
@@ -171,7 +171,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtTryDecl::StmtTryDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::TryStmt, StmtDeclType_e::Try, line, column)
+		: StmtDecl(AstNodeType_e::StmtTry, StmtDeclType_e::Try, line, column)
 	{}
 
 	StmtTryDecl::~StmtTryDecl()
@@ -182,7 +182,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtPanicDecl::StmtPanicDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::PanicStmt, StmtDeclType_e::Panic, line, column)
+		: StmtDecl(AstNodeType_e::StmtPanic, StmtDeclType_e::Panic, line, column)
 	{}
 
 	StmtPanicDecl::~StmtPanicDecl()
@@ -193,7 +193,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtVariableDecl::StmtVariableDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::VariableStmt, StmtDeclType_e::Variable, line, column)
+		: StmtDecl(AstNodeType_e::StmtVariable, StmtDeclType_e::Variable, line, column)
 		, isShared(false)
 		, isUnique(false)
 		, isConst(false)
@@ -224,7 +224,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtExprDecl::StmtExprDecl(U32 line, U32 column)
-		: StmtDecl(AstNodeType_e::ExprStmt, StmtDeclType_e::Expr, line, column)
+		: StmtDecl(AstNodeType_e::StmtExpr, StmtDeclType_e::Expr, line, column)
 	{}
 
 	StmtExprDecl::~StmtExprDecl()
@@ -235,21 +235,21 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtForInitDecl::StmtForInitDecl(U32 line, U32 column)
-		: AstNode(AstNodeType_e::ForInitDecl, line, column)
+		: AstNode(AstNodeType_e::StmtForInitDecl, line, column)
 	{}
 
 	StmtForInitDecl::~StmtForInitDecl()
 	{}
 
 	/**
-	 * MatchWhenStmtDecl
+	 * StmtMatchWhenDecl
 	 */
 
-	MatchWhenStmtDecl::MatchWhenStmtDecl(U32 line, U32 column)
-		: AstNode(AstNodeType_e::MatchWhenStmtDecl, line, column)
+	StmtMatchWhenDecl::StmtMatchWhenDecl(U32 line, U32 column)
+		: AstNode(AstNodeType_e::StmtMatchWhenDecl, line, column)
 	{}
 
-	MatchWhenStmtDecl::~MatchWhenStmtDecl()
+	StmtMatchWhenDecl::~StmtMatchWhenDecl()
 	{}
 
 	/**
@@ -257,7 +257,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 */
 
 	StmtCatchBlockDecl::StmtCatchBlockDecl(U32 line, U32 column)
-		: AstNode(AstNodeType_e::CatchBlockStmtDecl, line, column)
+		: AstNode(AstNodeType_e::StmtCatchBlockDecl, line, column)
 	{}
 
 	StmtCatchBlockDecl::~StmtCatchBlockDecl()

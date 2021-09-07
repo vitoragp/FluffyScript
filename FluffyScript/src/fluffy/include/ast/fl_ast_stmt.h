@@ -18,7 +18,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	using PatternDeclPtr			= std::unique_ptr<PatternDecl>;
 	using PatternDeclPtrList		= std::vector<PatternDeclPtr>;
 
-	using MatchWhenStmtDeclPtr		= std::unique_ptr<class MatchWhenStmtDecl>;
+	using MatchWhenStmtDeclPtr		= std::unique_ptr<class StmtMatchWhenDecl>;
 	using MatchWhenStmtDeclPtrList	= std::vector<MatchWhenStmtDeclPtr>;
 
 	using ExpressionDeclPtr			= std::unique_ptr<ExpressionDecl>;
@@ -205,7 +205,6 @@ namespace fluffy { namespace ast { namespace stmt {
 		StmtLabelDecl(U32 line, U32 column);
 		virtual ~StmtLabelDecl();
 
-		TString							identifier;
 	};
 
 	/**
@@ -251,13 +250,12 @@ namespace fluffy { namespace ast { namespace stmt {
 		virtual std::vector<AstNode*>
 		getChildren();
 
-		TString								identifier;
 		Bool								isShared;
 		Bool								isUnique;
 		Bool								isConst;
 		Bool								isReference;
 		TypeDeclPtr							typeDecl;
-		ExpressionDeclPtr					initExpression;
+		ExpressionDeclPtr					initExpr;
 		PatternDeclPtr						patternDecl;
 	};
 
@@ -284,20 +282,19 @@ namespace fluffy { namespace ast { namespace stmt {
 		StmtForInitDecl(U32 line, U32 column);
 		virtual ~StmtForInitDecl();
 
-		TString								identifier;
 		TypeDeclPtr							typeDecl;
-		ExpressionDeclPtr					initExpression;
+		ExpressionDeclPtr					initExpr;
 	};
 
 	/**
-	 * MatchWhenStmtDecl
+	 * StmtMatchWhenDecl
 	 */
 
-	class MatchWhenStmtDecl : public AstNode
+	class StmtMatchWhenDecl : public AstNode
 	{
 	public:
-		MatchWhenStmtDecl(U32 line, U32 column);
-		virtual ~MatchWhenStmtDecl();
+		StmtMatchWhenDecl(U32 line, U32 column);
+		virtual ~StmtMatchWhenDecl();
 
 		PatternDeclPtr						patternDecl;
 		BlockDeclPtr						blockDecl;

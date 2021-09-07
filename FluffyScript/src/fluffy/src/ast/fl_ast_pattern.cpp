@@ -151,7 +151,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 */
 
 	StructureItemPatternDecl::StructureItemPatternDecl(U32 line, U32 column)
-		: AstNodeIdentified(AstNodeType_e::StructureItemPatternDecl, line, column)
+		: AstNode(AstNodeType_e::StructureItemPatternDecl, line, column)
 	{}
 
 	StructureItemPatternDecl::~StructureItemPatternDecl()

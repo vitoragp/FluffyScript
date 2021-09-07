@@ -130,7 +130,7 @@ namespace fluffy {
 		case TokenType_e::LogicalOr:				return "||";
 		case TokenType_e::LogicalNot:				return "!";
 		case TokenType_e::Interrogation:			return "?";
-		case TokenType_e::Comma:					return ":";
+		case TokenType_e::Comma:					return ",";
 		case TokenType_e::Dot:						return ".";
 		case TokenType_e::SafeDot:					return "?.";
 		case TokenType_e::ConstantInteger:			return "i8 constant";
@@ -142,7 +142,156 @@ namespace fluffy {
 		case TokenType_e::ConstantString:			return "string constant";
 		case TokenType_e::Identifier:				return "<identifier>";
 		default:
-			return "Unknown token";
+			break;
 		}
+		return "Unknown token";
+	}
+
+	const I8* getTokenString(const AstNodeType_e nodeType)
+	{
+		switch (nodeType)
+		{
+		case AstNodeType_e::ClassConstructorDecl:
+			return "constructor";
+		case AstNodeType_e::ClassDestructorDecl:
+			return "destructor";
+		case AstNodeType_e::GenericDecl:
+			return "generic";
+		case AstNodeType_e::Block:
+			return "block";
+		case AstNodeType_e::TernaryExpr:
+			return "ternary expr";
+		case AstNodeType_e::BinaryExpr:
+			return "binary expr";
+		case AstNodeType_e::UnaryExpr:
+			return "unary expr";
+		case AstNodeType_e::AsExpr:
+			return "as expr";
+		case AstNodeType_e::IsExpr:
+			return "is expr";
+		case AstNodeType_e::MatchExpr:
+			return "match expr";
+		case AstNodeType_e::FunctionDeclExpr:
+			return "function decl expr";
+		case AstNodeType_e::FunctionCallExpr:
+			return "function call expr";
+		case AstNodeType_e::GenericCallExpr:
+			return "generic call expr";
+		case AstNodeType_e::IndexExpr:
+			return "index expr";
+		case AstNodeType_e::NewExpr:
+			return "new expr";
+		case AstNodeType_e::ConstantBoolExpr:
+			return "constant bool expr";
+		case AstNodeType_e::ConstantIntegerExpr:
+			return "constant integer expr";
+		case AstNodeType_e::ConstantRealExpr:
+			return "constant real expr";
+		case AstNodeType_e::ConstantStringExpr:
+			return "constant string expr";
+		case AstNodeType_e::ConstantCharExpr:
+			return "constant char expr";
+		case AstNodeType_e::ConstantNullExpr:
+			return "constant null expr";
+		case AstNodeType_e::ThisExpr:
+			return "this expr";
+		case AstNodeType_e::SuperExpr:
+			return "super expr";
+		case AstNodeType_e::AnomClassDeclExpr:
+			return "anom class decl expr";
+		case AstNodeType_e::PrimitiveTypeExpr:
+			return "primitive type expr";
+		case AstNodeType_e::ArrayInitExpr:
+			return "array init expr";
+		case AstNodeType_e::MatchWhenExpr:
+			return "match when expr";
+		case AstNodeType_e::NewBlockExpr:
+			return "new block expr";
+		case AstNodeType_e::NewItemExpr:
+			return "new item expr";
+		case AstNodeType_e::LiteralPattern:
+			return "literal pattern";
+		case AstNodeType_e::TuplePattern:
+			return "tuple pattern";
+		case AstNodeType_e::StructurePattern:
+			return "structure pattern";
+		case AstNodeType_e::EnumerablePattern:
+			return "enumerable pattern";
+		case AstNodeType_e::StructureItemPatternDecl:
+			return "structure item pattern";
+		case AstNodeType_e::StmtIf:
+			return "if stmt";
+		case AstNodeType_e::StmtIfLet:
+			return "if let stmt";
+		case AstNodeType_e::StmtFor:
+			return "for stmt";
+		case AstNodeType_e::StmtWhile:
+			return "while stmt";
+		case AstNodeType_e::StmtDoWhile:
+			return "do while stmt";
+		case AstNodeType_e::StmtMatch:
+			return "match stmt";
+		case AstNodeType_e::StmtReturn:
+			return "return stmt";
+		case AstNodeType_e::StmtContinue:
+			return "continue stmt";
+		case AstNodeType_e::StmtBreak:
+			return "break stmt";
+		case AstNodeType_e::StmtTry:
+			return "try stmt";
+		case AstNodeType_e::StmtPanic:
+			return "panic stmt";
+		case AstNodeType_e::StmtExpr:
+			return "expr stmt";
+		case AstNodeType_e::StmtForInitDecl:
+			return "stmt for init decl";
+		case AstNodeType_e::StmtMatchWhenDecl:
+			return "stmt match when decl";
+		case AstNodeType_e::StmtCatchBlockDecl:
+			return "stmt catch block decl";
+		case AstNodeType_e::VoidType:
+			return "void type";
+		case AstNodeType_e::BoolType:
+			return "bool type";
+		case AstNodeType_e::I8Type:
+			return "i8 type";
+		case AstNodeType_e::U8Type:
+			return "u8 type";
+		case AstNodeType_e::I16Type:
+			return "i16 type";
+		case AstNodeType_e::U16Type:
+			return "u16 type";
+		case AstNodeType_e::I32Type:
+			return "i32 type";
+		case AstNodeType_e::U32Type:
+			return "u32 type";
+		case AstNodeType_e::I64Type:
+			return "i64 type";
+		case AstNodeType_e::U64Type:
+			return "u64 type";
+		case AstNodeType_e::Fp32Type:
+			return "fp32 type";
+		case AstNodeType_e::Fp64Type:
+			return "fp64 type";
+		case AstNodeType_e::StringType:
+			return "string type";
+		case AstNodeType_e::ObjectType:
+			return "object type";
+		case AstNodeType_e::ArrayType:
+			return "array type";
+		case AstNodeType_e::FunctionType:
+			return "function type";
+		case AstNodeType_e::SelfType:
+			return "self type";
+		case AstNodeType_e::TupleType:
+			return "tuple type";
+		case AstNodeType_e::SizedArray:
+			return "sized type";
+		case AstNodeType_e::UnsizedArray:
+			return "unsized type";
+		default:
+			break;
+		}
+		return nullptr;
 	}
 }
