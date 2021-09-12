@@ -1,6 +1,0 @@
-namespace application
-{
-	fn main2()
-	{
-	}
-}

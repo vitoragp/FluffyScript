@@ -37,7 +37,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * LiteralPatternDecl
 	 */
 
-	class LiteralPatternDecl : public PatternDecl
+	class LiteralPatternDecl : public PatternDecl, public AstSafeCast<AstNodeType_e::LiteralPattern>
 	{
 	public:
 		LiteralPatternDecl(U32 line, U32 column);
@@ -56,7 +56,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * TuplePatternDecl
 	 */
 
-	class TuplePatternDecl : public PatternDecl
+	class TuplePatternDecl : public PatternDecl, public AstSafeCast<AstNodeType_e::TuplePatternDecl>
 	{	
 	public:
 		TuplePatternDecl(U32 line, U32 column);
@@ -75,7 +75,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * StructurePatternDecl
 	 */
 
-	class StructurePatternDecl : public PatternDecl
+	class StructurePatternDecl : public PatternDecl, public AstSafeCast<AstNodeType_e::StructurePatternDecl>
 	{
 	public:
 		StructurePatternDecl(U32 line, U32 column);
@@ -94,7 +94,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * EnumerablePatternDecl
 	 */
 
-	class EnumerablePatternDecl : public PatternDecl
+	class EnumerablePatternDecl : public PatternDecl, public AstSafeCast<AstNodeType_e::EnumerablePatternDecl>
 	{
 	public:
 		EnumerablePatternDecl(U32 line, U32 column);
@@ -106,7 +106,6 @@ namespace fluffy { namespace ast { namespace pattern {
 		virtual std::vector<AstNode*>
 		getChildren();
 
-		TypeDeclPtr							enumReferenced;
 		PatternDeclPtrList					patternDeclItemList;
 	};
 
@@ -114,7 +113,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 * StructureItemPatternDecl
 	 */
 
-	class StructureItemPatternDecl : public AstNode
+	class StructureItemPatternDecl : public AstNode, public AstSafeCast<AstNodeType_e::StructureItemPatternDecl>
 	{
 	public:
 		StructureItemPatternDecl(U32 line, U32 column);

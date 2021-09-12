@@ -41,9 +41,9 @@ namespace {
 		__validateExpr(expr, callback, "ExpressionBinaryDecl");
 	}
 	
-	void validateIdeExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIdentifierDecl*)> callback)
+	void validateIdeExpr(ExpressionDecl* expr, std::function<void(ExpressionIdentifierDecl*)> callback)
 	{
-		__validateExpr(expr, callback, "ExpressionConstantIdentifierDecl");
+		__validateExpr(expr, callback, "ExpressionIdentifierDecl");
 	}
 
 	void validateIntExpr(ExpressionDecl* expr, std::function<void(ExpressionConstantIntegerDecl*)> callback)
@@ -185,7 +185,7 @@ namespace fluffy { namespace testing {
 				EXPECT_EQ(binExpr->column, 1);
 
 				// [a] > 5 ? 5 : 3 * 4
-				validateIdeExpr(binExpr->leftDecl.get(), [](ExpressionConstantIdentifierDecl* ident) {
+				validateIdeExpr(binExpr->leftDecl.get(), [](ExpressionIdentifierDecl* ident) {
 					EXPECT_EQ(ident->identifier, "a");
 					EXPECT_EQ(ident->startFromRoot, false);
 					EXPECT_EQ(ident->line, 1);

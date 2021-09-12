@@ -49,7 +49,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtIfDecl
 	 */
 
-	class StmtIfDecl : public StmtDecl
+	class StmtIfDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtIf>
 	{
 	public:
 		StmtIfDecl(U32 line, U32 column);
@@ -64,7 +64,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtIfLetDecl
 	 */
 
-	class StmtIfLetDecl : public StmtDecl
+	class StmtIfLetDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtIfLet>
 	{
 	public:
 		StmtIfLetDecl(U32 line, U32 column);
@@ -86,7 +86,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtForDecl
 	 */
 
-	class StmtForDecl : public StmtDecl
+	class StmtForDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtFor>
 	{
 	public:
 		StmtForDecl(U32 line, U32 column);
@@ -109,7 +109,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtWhileDecl
 	 */
 
-	class StmtWhileDecl : public StmtDecl
+	class StmtWhileDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtWhile>
 	{
 	public:
 		StmtWhileDecl(U32 line, U32 column);
@@ -123,7 +123,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtDoWhileDecl
 	 */
 
-	class StmtDoWhileDecl : public StmtDecl
+	class StmtDoWhileDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtDoWhile>
 	{
 	public:
 		StmtDoWhileDecl(U32 line, U32 column);
@@ -137,7 +137,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtMatchDecl
 	 */
 
-	class StmtMatchDecl : public StmtDecl
+	class StmtMatchDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtMatch>
 	{
 	public:
 		StmtMatchDecl(U32 line, U32 column);
@@ -151,7 +151,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtReturnDecl
 	 */
 
-	class StmtReturnDecl : public StmtDecl
+	class StmtReturnDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtReturn>
 	{
 	public:
 		StmtReturnDecl(U32 line, U32 column);
@@ -164,7 +164,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtContinueDecl
 	 */
 
-	class StmtContinueDecl : public StmtDecl
+	class StmtContinueDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtContinue>
 	{
 	public:
 		StmtContinueDecl(U32 line, U32 column);
@@ -175,7 +175,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtBreakDecl
 	 */
 
-	class StmtBreakDecl : public StmtDecl
+	class StmtBreakDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtBreak>
 	{
 	public:
 		StmtBreakDecl(U32 line, U32 column);
@@ -186,7 +186,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtGotoDecl
 	 */
 
-	class StmtGotoDecl : public StmtDecl
+	class StmtGotoDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtGoto>
 	{
 	public:
 		StmtGotoDecl(U32 line, U32 column);
@@ -199,7 +199,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtLabelDecl
 	 */
 
-	class StmtLabelDecl : public StmtDecl
+	class StmtLabelDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtLabel>
 	{
 	public:
 		StmtLabelDecl(U32 line, U32 column);
@@ -211,7 +211,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtTryDecl
 	 */
 
-	class StmtTryDecl : public StmtDecl
+	class StmtTryDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtTry>
 	{
 	public:
 		StmtTryDecl(U32 line, U32 column);
@@ -225,7 +225,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtPanicDecl
 	 */
 
-	class StmtPanicDecl : public StmtDecl
+	class StmtPanicDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtPanic>
 	{
 	public:
 		StmtPanicDecl(U32 line, U32 column);
@@ -238,7 +238,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtVariableDecl
 	 */
 
-	class StmtVariableDecl : public StmtDecl
+	class StmtVariableDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtVariable>
 	{
 	public:
 		StmtVariableDecl(U32 line, U32 column);
@@ -263,7 +263,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtExprDecl
 	 */
 
-	class StmtExprDecl : public StmtDecl
+	class StmtExprDecl : public StmtDecl, public AstSafeCast<AstNodeType_e::StmtExpr>
 	{
 	public:
 		StmtExprDecl(U32 line, U32 column);
@@ -276,7 +276,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtForInitDecl
 	 */
 
-	class StmtForInitDecl : public AstNode
+	class StmtForInitDecl : public AstNode, public AstSafeCast<AstNodeType_e::StmtForInitDecl>
 	{
 	public:
 		StmtForInitDecl(U32 line, U32 column);
@@ -290,7 +290,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtMatchWhenDecl
 	 */
 
-	class StmtMatchWhenDecl : public AstNode
+	class StmtMatchWhenDecl : public AstNode, public AstSafeCast<AstNodeType_e::StmtMatchWhenDecl>
 	{
 	public:
 		StmtMatchWhenDecl(U32 line, U32 column);
@@ -304,7 +304,7 @@ namespace fluffy { namespace ast { namespace stmt {
 	 * StmtCatchBlockDecl
 	 */
 
-	class StmtCatchBlockDecl : public AstNode
+	class StmtCatchBlockDecl : public AstNode, public AstSafeCast<AstNodeType_e::StmtCatchBlockDecl>
 	{
 	public:
 		StmtCatchBlockDecl(U32 line, U32 column);

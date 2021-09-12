@@ -1,10 +1,12 @@
 #include <iostream>
+#include <cstdlib>
 #include "ast\fl_ast_decl.h"
 #include "parser\fl_parser.h"
-#include "validation\fl_validate_duplication.h"
 #include "job\fl_job_pool.h"
 #include "job\fl_job.h"
 #include "utils\fl_ast_utils.h"
+#include "utils\fl_include_utils.h"
+#include "scope\fl_scope_manager.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 #include "fl_compiler.h"
@@ -17,162 +19,103 @@ namespace fluffy {
 	 */
 	
 	Compiler::Compiler()
-		: m_parser(new parser::Parser(new LazyBuffer(bufferSize)))
-		, m_jobCount(4)
-		, m_initialized(false)
+		: mScopeManager(new scope::ScopeManager())
+		, mJobCount(4)
+		, mInitialized(false)
 	{}
 
 	Compiler::~Compiler()
 	{}
 
 	void
-	Compiler::initialize()
+	Compiler::initialize(String basePath)
 	{
-		m_initialized = true;
+		mBasePath = basePath;
+		mInitialized = true;
 	}
 
 	void
-	Compiler::buildMultiThread(std::vector<String> sourceFileList)
+	Compiler::build(String sourceFile)
 	{
-		std::unordered_map<String, std::unique_ptr<jobs::Job>> sourceJobMap;
-		{
-			auto jobPool = std::make_unique<jobs::JobPool>(4);
-
-			jobPool->initialize();
-
-			// Cria tarefa e enfileira na fila.
-			for (auto& sourceFile : sourceFileList)
-			{
-				auto job = std::make_unique<jobs::JobParseFromSourceFile>(sourceFile.c_str());
-				jobPool->addJob(job.get());
-				sourceJobMap.insert(std::pair<String, std::unique_ptr<jobs::Job>>(sourceFile, std::move(job)));
-			}
-
-			// Executa todas as tarefas em fila.
-			jobPool->run();
-
-			// Valida os code units por ambiguidades.
-			for (auto& job : sourceJobMap)
-			{
-				if (job.second->getJobStatus() == jobs::JobStatus_e::Error)
-				{
-					throw exceptions::custom_exception(job.second->getError());
-				}
-
-				if (auto jobParse = reinterpret_cast<jobs::JobParseFromSourceFile*>(job.second.get()))
-				{
-					if (jobParse->getCodeUnitPointer())
-					{
-						auto validation = validations::DuplicatedValidation();
-						validation.validate(jobParse->getCodeUnitPointer());
-					}
-				}
-			}
-		}
-
-		// Verifica o estado das tarefas.
-		for (auto& sourceJob : sourceJobMap)
-		{
-			if (sourceJob.second->getJobStatus() == jobs::JobStatus_e::Error) {
-				throw exceptions::custom_exception(
-					"%s: error %s", sourceJob.first.c_str(), sourceJob.second->getError()
-				);
-			}
-		}
-
-		// Junta todos as AST das tarefas.
-		for (auto& sourceJob : sourceJobMap)
-		{
-			if (auto job = dynamic_cast<jobs::JobParseFromSourceFile*>(sourceJob.second.get()))
-			{
-				auto codeUnit = job->getCodeUnit();
-
-				// Valida a duplicacao de elementos individualmente em cada code unit.
-				auto validateDuplication = std::make_unique<validations::DuplicatedValidation>();
-				validateDuplication->validate(codeUnit.get());
-
-				// Insere o code unit no rootscope
-				m_rootScope.insert(
-					std::pair<const I8*, std::unique_ptr<ast::CodeUnit>>(
-						codeUnit->name.c_str(), std::move(codeUnit)
-					)
-				);
-			}
-		}
-	}
-
-	void
-	Compiler::buildSingleThread(std::vector<String> sourceFileList)
-	{
-		std::unordered_map<String, std::unique_ptr<jobs::Job>> sourceJobMap;
-		{
-			// Cria tarefa e enfileira na fila.
-			for (auto& sourceFile : sourceFileList)
-			{
-				auto job = std::make_unique<jobs::JobParseFromSourceFile>(sourceFile.c_str());
-				job->doJob();
-				sourceJobMap.insert(std::pair<String, std::unique_ptr<jobs::Job>>(sourceFile, std::move(job)));
-			}
-
-			// Valida os code units por ambiguidades.
-			for (auto& job : sourceJobMap)
-			{
-				if (job.second->getJobStatus() == jobs::JobStatus_e::Error)
-				{
-					throw exceptions::custom_exception(job.second->getError());
-				}
-
-				if (auto jobParse = reinterpret_cast<jobs::JobParseFromSourceFile*>(job.second.get()))
-				{
-					if (jobParse->getCodeUnitPointer())
-					{
-						auto validation = validations::DuplicatedValidation();
-						validation.validate(jobParse->getCodeUnitPointer());
-					}
-				}
-			}
-		}
-
-		// Verifica o estado das tarefas.
-		for (auto& sourceJob : sourceJobMap)
-		{
-			if (sourceJob.second->getJobStatus() == jobs::JobStatus_e::Error) {
-				throw exceptions::custom_exception(
-					"%s: error %s", sourceJob.first.c_str(), sourceJob.second->getError()
-				);
-			}
-		}
-
-		// Junta todos as AST das tarefas.
-		for (auto& sourceJob : sourceJobMap)
-		{
-			if (auto job = dynamic_cast<jobs::JobParseFromSourceFile*>(sourceJob.second.get()))
-			{
-				auto codeUnit = job->getCodeUnit();
-
-				// Valida a duplicacao de elementos individualmente em cada code unit.
-				auto validateDuplication = std::make_unique<validations::DuplicatedValidation>();
-				validateDuplication->validate(codeUnit.get());
-
-				// Insere o code unit no rootscope
-				m_rootScope.insert(
-					std::pair<const I8*, std::unique_ptr<ast::CodeUnit>>(
-						codeUnit->name.c_str(), std::move(codeUnit)
-					)
-				);
-			}
-		}
+		buildInternal(mBasePath + sourceFile.c_str());
 	}
 
 	void
 	Compiler::setNumberOfJobs(U32 jobCount)
 	{
-		if (m_initialized)
+		if (mInitialized)
 		{
 			throw exceptions::custom_exception(
 				"Job count must be changed before initialize compiler"
 			);
 		}
-		m_jobCount = jobCount;
+		mJobCount = jobCount;
 	}
+
+	void
+	Compiler::buildInternal(String sourceFile)
+	{
+		std::unique_ptr<jobs::JobParseFromSourceFile> job;
+		{
+			// Cria tarefa e enfileira na fila.
+			job = std::make_unique<jobs::JobParseFromSourceFile>(sourceFile.c_str());
+			job->doJob();
+
+			// Valida os code units por ambiguidades.
+			if (job != nullptr)
+			{
+				if (job->getJobStatus() == jobs::JobStatus_e::Error)
+				{
+					throw exceptions::custom_exception(job->getError());
+				}
+			}
+		}
+
+		// Junta todos as AST das tarefas.
+		ast::CodeUnit* const codeUnit = job->getCodeUnitPointer();
+
+		// TODO: Implementar o processamento de includes em multithread.
+		// Processa includes.
+		for (auto& include : codeUnit->includeDeclList)
+		{
+			String fileWithPath;
+			if (utils::IncludeUtils::isIncludeFromSystem(include.get()))
+			{
+				size_t strSize = 0;
+				getenv_s(&strSize, nullptr, 0, "FLUFFY_HOME");
+
+				// Verifica se a variavel ambiente 'FLUFFY_HOME' existe.
+				if (strSize == 0) {
+					throw exceptions::custom_exception("Invalid 'FLUFFY_HOME' environment variable.");
+				}
+
+				String str(strSize, 0);
+				getenv_s(&strSize, const_cast<char*>(str.c_str()), strSize, "FLUFFY_HOME");
+
+				fileWithPath = str + include->inFile + ".txt";
+				throw exceptions::not_implemented_feature_exception("include from system");
+			}
+			else
+			{
+				fileWithPath = mBasePath + include->inFile + ".txt";
+			}
+			buildInternal(fileWithPath);
+			
+			// Atualiza o nome do arquivo
+			include->inFile = fileWithPath;
+		}
+
+		// Insere o code unit no arvore de referencia.
+		mApplicationTree.emplace(codeUnit->name.c_str(), std::move(job->getCodeUnit()));
+
+		// Insere o code unit na arvore de execucao, essa arvore contem a ordem em que os
+		// arquivos foram processados, sendo o primeiro o include mais distante do arquivo fonte de inicio
+		// e o ultimo o proprio arquivo de iniciao da aplicação, essa estrutura e importante pois determinara
+		// a ordem da validacao e transformacao do codigo.
+		mExecutionTree.emplace_back(codeUnit);
+
+		// Insere o code unit no gerenciador de escopo.
+		mScopeManager->insertCodeUnit(codeUnit);
+	}
+
 }

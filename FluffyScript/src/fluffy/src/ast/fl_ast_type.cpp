@@ -1,3 +1,4 @@
+#include "ast\fl_ast_decl.h"
 #include "ast\fl_ast_type.h"
 #define FLUFFY_PRIMITIVE_TYPE_DECL_IMP(type) \
 		TypeDecl##type::TypeDecl##type(U32 line, U32 column) \
@@ -25,6 +26,7 @@ namespace fluffy { namespace ast {
 	 */
 
 	FLUFFY_PRIMITIVE_TYPE_DECL_IMP(Void);
+	FLUFFY_PRIMITIVE_TYPE_DECL_IMP(Bool);
 	FLUFFY_PRIMITIVE_TYPE_DECL_IMP(I8);
 	FLUFFY_PRIMITIVE_TYPE_DECL_IMP(U8);
 	FLUFFY_PRIMITIVE_TYPE_DECL_IMP(I16);
@@ -79,6 +81,7 @@ namespace fluffy { namespace ast {
 	TypeDeclNamed::TypeDeclNamed(U32 line, U32 column)
 		: TypeDecl(AstNodeType_e::NamedType, TypeDeclID_e::Named, line, column)
 		, startFromRoot(false)
+		, resolvedReference(nullptr)
 	{}
 
 	TypeDeclNamed::~TypeDeclNamed()

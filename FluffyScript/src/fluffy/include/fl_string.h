@@ -34,4 +34,28 @@ namespace fluffy {
 	const Bool					operator==(const TString& str1, const TString& str2);
 	const Bool					operator!=(const TString& str1, const std::string& str2);
 	const Bool					operator!=(const TString& str1, const TString& str2);
+
+	/**
+	 * TStringHash
+	 */
+
+	class TStringHash {
+	public:
+		size_t operator() (TString const& key) const
+		{
+			return key.hash();
+		}
+	};
+
+	/**
+	 * TStringEqual
+	 */
+
+	class TStringEqual {
+	public:
+		size_t operator() (TString const& a, TString const& b) const
+		{
+			return a.hash() == b.hash();
+		}
+	};
 }

@@ -6,7 +6,6 @@
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace testing {
-	using Compiler = fluffy::Compiler;
 
 	/**
 	 * CompilerTest
@@ -14,11 +13,11 @@ namespace fluffy { namespace testing {
 
 	struct CompilerTest : public ::testing::Test
 	{
-		std::unique_ptr<Compiler> compiler;
+		std::unique_ptr<fluffy::Compiler> compiler;
 
 		// Antes de cada test
 		virtual void SetUp() override {
-			compiler = std::make_unique<Compiler>();
+			compiler = std::make_unique<fluffy::Compiler>();
 		}
 	};
 
@@ -28,11 +27,9 @@ namespace fluffy { namespace testing {
 
 	TEST_F(CompilerTest, TestOne)
 	{
-		compiler->initialize();
-		compiler->buildSingleThread({
-			getProjectFilePath("files\\compiler\\main.txt"),
-			getProjectFilePath("files\\compiler\\subfile.txt"),
-		});
+		String path = _BASE_PATH;
+		compiler->initialize(path + "\\files\\compiler\\");
+		compiler->build("main.txt");
 	}
 
 } }

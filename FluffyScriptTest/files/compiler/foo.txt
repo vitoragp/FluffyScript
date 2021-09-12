@@ -1,0 +1,11 @@
+namespace foo {
+	export class Loo {}
+
+	export trait Foo {}
+
+	export trait Foo for Loo {}
+
+	export trait Foo for u32 {}
+
+	trait Foo for i32 {}
+}

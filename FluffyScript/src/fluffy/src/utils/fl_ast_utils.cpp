@@ -1,6 +1,8 @@
 #include <functional>
+#include <sstream>
 #include "ast\fl_ast.h"
 #include "ast\fl_ast_decl.h"
+#include "ast\fl_ast_type.h"
 #include "utils\fl_ast_utils.h"
 namespace fluffy { namespace utils {
 	/**
@@ -23,6 +25,26 @@ namespace fluffy { namespace utils {
 				{
 					ast::TraitDecl* traitA = reinterpret_cast<ast::TraitDecl*>(nodeA);
 					ast::TraitDecl* traitB = reinterpret_cast<ast::TraitDecl*>(nodeB);
+
+					if (traitA->identifier != traitB->identifier)
+					{
+						return false;
+					}
+					if ((traitA->isDefinition && !traitB->isDefinition) || (!traitA->isDefinition && traitB->isDefinition))
+					{
+						return false;
+					}
+					if (traitA->isDefinition && traitB->isDefinition)
+					{
+						return false;
+					}
+				}
+				return true;
+
+			case AstNodeType_e::TraitForDecl:
+				{
+					ast::TraitForDecl* traitA = reinterpret_cast<ast::TraitForDecl*>(nodeA);
+					ast::TraitForDecl* traitB = reinterpret_cast<ast::TraitForDecl*>(nodeB);
 
 					if (traitA->identifier != traitB->identifier)
 					{
@@ -227,9 +249,30 @@ namespace fluffy { namespace utils {
 					{
 						return false;
 					}
-					if (typeA->startFromRoot != typeB->startFromRoot)
+					if (typeA->resolvedReference && typeB->resolvedReference)
 					{
-						return false;
+						if (typeA->resolvedReference != typeB->resolvedReference)
+						{
+							return false;
+						}
+					}
+					else if (typeA->resolvedReference == nullptr && typeB->resolvedReference == nullptr)
+					{
+						if (typeA->startFromRoot != typeB->startFromRoot)
+						{
+							return false;
+						}
+						if (typeA->scopedReferenceDecl && typeB->scopedReferenceDecl)
+						{
+							if (!equals(typeA->scopedReferenceDecl.get(), typeB->scopedReferenceDecl.get()))
+							{
+								return false;
+							}
+						}
+						else if (typeA->scopedReferenceDecl || typeB->scopedReferenceDecl)
+						{
+							return false;
+						}
 					}
 					if (typeA->identifier != typeB->identifier)
 					{
@@ -245,18 +288,7 @@ namespace fluffy { namespace utils {
 						{
 							return false;
 						}
-					}
-					if (typeA->internalIdentifier && typeB->internalIdentifier)
-					{
-						if (!equals(typeA->internalIdentifier.get(), typeB->internalIdentifier.get()))
-						{
-							return false;
-						}
-					}
-					else if (typeA->internalIdentifier || typeB->internalIdentifier)
-					{
-						return false;
-					}
+					}					
 				}
 				return true;
 
@@ -265,10 +297,6 @@ namespace fluffy { namespace utils {
 					ast::ScopedIdentifierDecl* typeA = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeA);
 					ast::ScopedIdentifierDecl* typeB = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeB);
 
-					if (typeA->startFromRoot != typeB->startFromRoot)
-					{
-						return false;
-					}
 					if (typeA->identifier != typeB->identifier)
 					{
 						return false;
@@ -318,8 +346,13 @@ namespace fluffy { namespace utils {
 		}
 		else
 		{
+
 			if (nodeA->identifier == nodeB->identifier)
 			{
+				if ((nodeA->nodeType == AstNodeType_e::TraitDecl && nodeB->nodeType == AstNodeType_e::TraitForDecl) ||
+					(nodeA->nodeType == AstNodeType_e::TraitForDecl && nodeB->nodeType == AstNodeType_e::TraitDecl)) {
+					return false;
+				}
 				return true;
 			}
 		}
@@ -339,7 +372,7 @@ namespace fluffy { namespace utils {
 				{
 					if (parameter->patternDecl == nullptr)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -366,7 +399,7 @@ namespace fluffy { namespace utils {
 				{
 					if (parameter->patternDecl == nullptr)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -393,7 +426,7 @@ namespace fluffy { namespace utils {
 				{
 					if (parameter->patternDecl == nullptr)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -420,7 +453,7 @@ namespace fluffy { namespace utils {
 				{
 					if (parameter->patternDecl == nullptr)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -447,7 +480,7 @@ namespace fluffy { namespace utils {
 				{
 					if (parameter->patternDecl == nullptr)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -474,7 +507,7 @@ namespace fluffy { namespace utils {
 				{
 					if (!parameter->patternDecl)
 					{
-						if (parameter->identifier != "_")
+						if (parameter->identifier != String("_"))
 						{
 							identifiers.push_back(
 								std::tuple<TString, U32, U32>(
@@ -511,21 +544,18 @@ namespace fluffy { namespace utils {
 			case AstNodeType_e::LiteralPattern:
 				if (auto literalPattern = reinterpret_cast<ast::pattern::LiteralPatternDecl*>(pattern))
 				{
-					if (auto exprId = reinterpret_cast<ast::expr::ExpressionConstantIdentifierDecl*>(literalPattern->literalExpr.get()))
+					if (literalPattern->literalExpr == nullptr)
 					{
-						if (exprId->identifier != "_")
-						{
-							identifiers.push_back(std::tuple<TString, U32, U32>(
-								exprId->identifier,
-								exprId->line,
-								exprId->column
-							));
-						}
+						identifiers.push_back(std::tuple<TString, U32, U32>(
+							literalPattern->identifier,
+							literalPattern->line,
+							literalPattern->column
+						));
 					}
 				}
 				break;
 
-			case AstNodeType_e::TuplePattern:
+			case AstNodeType_e::TuplePatternDecl:
 				if (auto tuplePattern = reinterpret_cast<ast::pattern::TuplePatternDecl*>(pattern))
 				{
 					for (auto& subPattern : tuplePattern->patternItemDeclList)
@@ -535,14 +565,14 @@ namespace fluffy { namespace utils {
 				}
 				break;
 
-			case AstNodeType_e::StructurePattern:
+			case AstNodeType_e::StructurePatternDecl:
 				if (auto structurePattern = reinterpret_cast<ast::pattern::StructurePatternDecl*>(pattern))
 				{
 					for (auto& structureItem : structurePattern->structureItemDeclList)
 					{
 						if (!structureItem->referencedPattern)
 						{
-							if (structureItem->identifier != "_")
+							if (structureItem->identifier != String("_"))
 							{
 								identifiers.push_back(std::tuple<TString, U32, U32>(
 									structureItem->identifier,
@@ -559,7 +589,7 @@ namespace fluffy { namespace utils {
 				}
 				break;
 
-			case AstNodeType_e::EnumerablePattern:
+			case AstNodeType_e::EnumerablePatternDecl:
 				if (auto enumerablePattern = reinterpret_cast<ast::pattern::EnumerablePatternDecl*>(pattern))
 				{
 					for (auto& enumerableItem : enumerablePattern->patternDeclItemList)
@@ -577,5 +607,83 @@ namespace fluffy { namespace utils {
 
 		_extractPatternIdentifiers(pattern);
 		return identifiers;
+	}
+
+	String
+	AstUtils::printScopedIdentifier(ast::AstNode* const scopedIdentifier)
+	{
+		std::stringstream ss;
+
+		if (scopedIdentifier->nodeType == AstNodeType_e::ScopedIdentifierDecl)
+		{
+			if (auto n = reinterpret_cast<ast::ScopedIdentifierDecl*>(scopedIdentifier))
+			{
+				if (n->referencedIdentifier)
+				{
+					ast::ScopedIdentifierDecl* nextId = n->referencedIdentifier.get();
+					while (nextId)
+					{
+						ss << nextId->identifier.str() << "::";
+						nextId = nextId->referencedIdentifier.get();
+					}
+				}
+				ss << n->identifier.str();
+			}
+		}
+		return ss.str();
+	}
+
+	String
+	AstUtils::printIncludeItem(ast::AstNode* const includeItem)
+	{
+		std::stringstream ss;
+
+		if (includeItem->nodeType == AstNodeType_e::IncludeItemDecl)
+		{
+			if (auto n = reinterpret_cast<ast::IncludeItemDecl*>(includeItem))
+			{
+				if (n->referencedPath)
+				{
+					ast::ScopedIdentifierDecl* nextId = n->referencedPath.get();
+					while (nextId)
+					{
+						ss << nextId->identifier.str() << "::";
+						nextId = nextId->referencedIdentifier.get();
+					}
+				}
+				ss << n->identifier.str();
+			}
+		}
+		return ss.str();
+	}
+
+	Bool
+	AstUtils::getExtendsFromClass(ast::AstNode* const decl, ast::AstNode** outDecl)
+	{
+		if (auto classDecl = reinterpret_cast<ast::ClassDecl*>(decl))
+		{
+			if (classDecl->baseClass)
+			{
+				if (classDecl->baseClass->nodeType == AstNodeType_e::NamedType)
+				{
+					if (auto baseClassType = reinterpret_cast<ast::TypeDeclNamed*>(classDecl->baseClass.get()))
+					{
+						if (baseClassType->resolvedReference)
+						{
+							*outDecl = baseClassType->resolvedReference;
+						}
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 } }

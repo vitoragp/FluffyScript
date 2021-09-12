@@ -1,9 +1,6 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
-#include <functional>
-#include <set>
 #include "fl_defs.h"
+#include "fl_string.h"
 
 namespace fluffy { namespace ast {
 	class AstNode;
@@ -19,6 +16,14 @@ namespace fluffy { namespace jobs {
 	class JobPool;
 } }
 
+namespace fluffy { namespace transformation {
+	class Transformation;
+} }
+
+namespace fluffy { namespace scope {
+	class ScopeManager;
+} }
+
 namespace fluffy {
 	/**
 	 * Compiler
@@ -31,31 +36,35 @@ namespace fluffy {
 		virtual ~Compiler();
 
 		void
-		initialize();
+		initialize(String basePath);
 
 		void
-		buildMultiThread(std::vector<String> sourceFileList);
-
-		void
-		buildSingleThread(std::vector<String> sourceFileList);
+		build(String sourceFile);
 
 		void
 		setNumberOfJobs(U32 jobCount);
 
 	private:
-		std::unique_ptr<parser::Parser>
-		m_parser;
+		void
+		buildInternal(String sourceFile);
 
-		std::unordered_map<const I8*, std::unique_ptr<ast::CodeUnit>>
-		m_rootScope;
+	private:
+		std::unordered_map<String, std::unique_ptr<ast::CodeUnit>>
+		mApplicationTree;
 
-		std::vector<ast::AstNode*>
-		m_scopeReference;
+		std::vector<ast::CodeUnit*>
+		mExecutionTree;
+
+		std::unique_ptr<scope::ScopeManager>
+		mScopeManager;
+
+		String
+		mBasePath;
 
 		U32
-		m_jobCount;
+		mJobCount;
 
 		Bool
-		m_initialized;
+		mInitialized;
 	};
 }

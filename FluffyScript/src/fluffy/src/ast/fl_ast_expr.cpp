@@ -312,15 +312,15 @@ namespace fluffy { namespace ast { namespace expr {
 	{}
 
 	/**
-	 * ExpressionConstantIdentifierDecl
+	 * ExpressionIdentifierDecl
 	 */
 
-	ExpressionConstantIdentifierDecl::ExpressionConstantIdentifierDecl(const U32 line, const U32 column)
+	ExpressionIdentifierDecl::ExpressionIdentifierDecl(const U32 line, const U32 column)
 		: ExpressionDecl(AstNodeType_e::IdentifierExpr, ExpressionDeclType_e::ConstantIdentifier, line, column)
 		, startFromRoot(false)
 	{}
 
-	ExpressionConstantIdentifierDecl::~ExpressionConstantIdentifierDecl()
+	ExpressionIdentifierDecl::~ExpressionIdentifierDecl()
 	{}
 
 	/**

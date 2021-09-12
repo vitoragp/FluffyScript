@@ -1,12 +1,13 @@
 #include <cstring>
 #include "test.h"
+
 namespace fluffy { namespace testing {
 	String
 	getProjectFilePath(const I8* file)
 	{
 		String url;
 		url.resize(1024);
-		sprintf_s(const_cast<I8*>(url.c_str()), 1024, "FluffyScriptTest\\%s", file);
+		sprintf_s(const_cast<I8*>(url.c_str()), 1024, "%s\\%s", _BASE_PATH, file);
 		return url;
 	}
 } }

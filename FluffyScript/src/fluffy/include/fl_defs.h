@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -65,7 +66,6 @@ namespace fluffy {
 		Final,				// ok
 		Override,			// ok
 		Abstract,			// ok
-		Virtual,			// ok
 		Interface,			// ok
 		Struct,				// ok
 		Enum,				// ok
@@ -415,6 +415,7 @@ namespace fluffy {
 		StructDecl,
 		StructVariableDecl,
 		TraitDecl,
+		TraitForDecl,
 		TraitFunctionDecl,
 		EnumDecl,
 		EnumItemDecl,
@@ -457,9 +458,9 @@ namespace fluffy {
 		NewItemExpr,
 
 		LiteralPattern,
-		TuplePattern,
-		StructurePattern,
-		EnumerablePattern,
+		TuplePatternDecl,
+		StructurePatternDecl,
+		EnumerablePatternDecl,
 		StructureItemPatternDecl,
 
 		StmtIf,

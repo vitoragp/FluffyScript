@@ -4,12 +4,17 @@
 #include "fl_ast.h"
 #include "fl_defs.h"
 #define FLUFFY_PRIMITIVE_TYPE_DECL(type) \
-	class TypeDecl##type : public TypeDecl \
+	class TypeDecl##type : public TypeDecl, public AstSafeCast<AstNodeType_e::type##Type> \
 	{ \
 	public: \
 		TypeDecl##type(U32 line, U32 column); \
 		virtual ~TypeDecl##type(); \
 	}
+
+namespace fluffy { namespace ast {
+	class ScopedIdentifierDecl;
+	class TraitDecl;
+} }
 
 namespace fluffy { namespace ast {
 	using std::unique_ptr;
@@ -19,6 +24,8 @@ namespace fluffy { namespace ast {
 	using TypeDeclPtrList					= vector<TypeDeclPtr>;
 
 	using TypeDeclNamedPtr					= unique_ptr<class TypeDeclNamed>;
+
+	using ScopedIdentifierDeclPtr			= unique_ptr<ast::ScopedIdentifierDecl>;
 
 	using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
 	using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
@@ -44,6 +51,7 @@ namespace fluffy { namespace ast {
 	 */
 
 	FLUFFY_PRIMITIVE_TYPE_DECL(Void);
+	FLUFFY_PRIMITIVE_TYPE_DECL(Bool);
 	FLUFFY_PRIMITIVE_TYPE_DECL(I8);
 	FLUFFY_PRIMITIVE_TYPE_DECL(U8);
 	FLUFFY_PRIMITIVE_TYPE_DECL(I16);
@@ -61,7 +69,7 @@ namespace fluffy { namespace ast {
 	 * TypeDeclArray
 	 */
 
-	class TypeDeclArray : public TypeDecl
+	class TypeDeclArray : public TypeDecl, public AstSafeCast<AstNodeType_e::ArrayType>
 	{
 	public:
 		TypeDeclArray(U32 line, U32 column);
@@ -75,7 +83,7 @@ namespace fluffy { namespace ast {
 	 * TypeDeclFunction
 	 */
 
-	class TypeDeclFunction : public TypeDecl
+	class TypeDeclFunction : public TypeDecl, public AstSafeCast<AstNodeType_e::FunctionType>
 	{
 	public:
 		TypeDeclFunction(U32 line, U32 column);
@@ -90,7 +98,7 @@ namespace fluffy { namespace ast {
 	 * TypeDeclTuple
 	 */
 
-	class TypeDeclTuple : public TypeDecl
+	class TypeDeclTuple : public TypeDecl, public AstSafeCast<AstNodeType_e::TupleType>
 	{
 	public:
 		TypeDeclTuple(U32 line, U32 column);
@@ -103,22 +111,24 @@ namespace fluffy { namespace ast {
 	 * TypeDeclNamed
 	 */
 
-	class TypeDeclNamed : public TypeDecl
+	class TypeDeclNamed : public TypeDecl, public AstSafeCast<AstNodeType_e::NamedType>
 	{
 	public:
 		TypeDeclNamed(U32 line, U32 column);
 		virtual ~TypeDeclNamed();
 
-		TypeDeclNamedPtr					internalIdentifier;
+		ScopedIdentifierDeclPtr				scopedReferenceDecl;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
+
+		AstNode*							resolvedReference;
 	};
 
 	/**
 	 * SelfTypeDecl
 	 */
 
-	class SelfTypeDecl : public TypeDecl
+	class SelfTypeDecl : public TypeDecl, public AstSafeCast<AstNodeType_e::SelfType>
 	{
 	public:
 		SelfTypeDecl(U32 line, U32 column);
@@ -145,7 +155,7 @@ namespace fluffy { namespace ast {
 	 * SizedArrayDecl
 	 */
 
-	class SizedArrayDecl : public ArrayDecl
+	class SizedArrayDecl : public ArrayDecl, public AstSafeCast<AstNodeType_e::SizedArray>
 	{
 	public:
 		SizedArrayDecl(U32 line, U32 column);
@@ -158,7 +168,7 @@ namespace fluffy { namespace ast {
 	 * UnsizedArrayDecl
 	 */
 
-	class UnsizedArrayDecl : public ArrayDecl
+	class UnsizedArrayDecl : public ArrayDecl, public AstSafeCast<AstNodeType_e::UnsizedArray>
 	{
 	public:
 		UnsizedArrayDecl(U32 line, U32 column);

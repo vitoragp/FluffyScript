@@ -21,7 +21,6 @@ namespace fluffy {
 		std::make_tuple("final",		TokenType_e::Final),		// ok
 		std::make_tuple("override", 	TokenType_e::Override),		// ok
 		std::make_tuple("abstract", 	TokenType_e::Abstract),		// ok
-		std::make_tuple("virtual", 		TokenType_e::Virtual),		// ok
 		std::make_tuple("interface",	TokenType_e::Interface),	// ok
 		std::make_tuple("struct",		TokenType_e::Struct),		// ok
 		std::make_tuple("enum", 		TokenType_e::Enum),			// ok
@@ -492,12 +491,6 @@ namespace fluffy { namespace lexer {
 	Lexer::isAbstract()
 	{
 		return is(TokenType_e::Abstract);
-	}
-
-	Bool
-	Lexer::isVirtual()
-	{
-		return is(TokenType_e::Virtual);
 	}
 
 	Bool

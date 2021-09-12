@@ -46,7 +46,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(AstUtilsTest, TestCompareNamedOne)
 	{
-		parser->loadSource("::Test<T>::ID, Test<T>::ID, ::Test<T>::ID");
+		parser->loadSource("::Test::ID, Test::ID, ::Test::ID");
 
 		auto typeA = parser->parseType(ctx); parser->skipToken();
 		auto typeB = parser->parseType(ctx); parser->skipToken();

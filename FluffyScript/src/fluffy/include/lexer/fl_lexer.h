@@ -147,9 +147,6 @@ namespace fluffy { namespace lexer {
 		isAbstract();
 
 		Bool
-		isVirtual();
-
-		Bool
 		isInterface();
 
 		Bool

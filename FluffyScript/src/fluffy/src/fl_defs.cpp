@@ -18,7 +18,6 @@ namespace fluffy {
 		std::make_tuple("final",		TokenType_e::Final),		// ok
 		std::make_tuple("override", 	TokenType_e::Override),		// ok
 		std::make_tuple("abstract", 	TokenType_e::Abstract),		// ok
-		std::make_tuple("virtual", 		TokenType_e::Virtual),		// ok
 		std::make_tuple("interface",	TokenType_e::Interface),	// ok
 		std::make_tuple("struct",		TokenType_e::Struct),		// ok
 		std::make_tuple("enum", 		TokenType_e::Enum),			// ok
@@ -211,11 +210,11 @@ namespace fluffy {
 			return "new item expr";
 		case AstNodeType_e::LiteralPattern:
 			return "literal pattern";
-		case AstNodeType_e::TuplePattern:
+		case AstNodeType_e::TuplePatternDecl:
 			return "tuple pattern";
-		case AstNodeType_e::StructurePattern:
+		case AstNodeType_e::StructurePatternDecl:
 			return "structure pattern";
-		case AstNodeType_e::EnumerablePattern:
+		case AstNodeType_e::EnumerablePatternDecl:
 			return "enumerable pattern";
 		case AstNodeType_e::StructureItemPatternDecl:
 			return "structure item pattern";

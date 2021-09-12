@@ -47,7 +47,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, false);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
@@ -73,7 +72,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, false);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
@@ -107,7 +105,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, false);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
@@ -150,7 +147,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, false);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
@@ -181,7 +177,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithOverride)
 	{
-		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 override {} }");
+		parser->loadSource("class Foo { override fn Foo(test: i32, test2: string) -> i32 {} }");
 		
 
 		auto classObject = parser->parseClass(ctx, false);
@@ -194,7 +190,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, true);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, true);
 
@@ -225,7 +220,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithFinal)
 	{
-		parser->loadSource("class Foo { virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
+		parser->loadSource("class Foo { override fn Foo(test: i32, test2: string) -> i32 final {} }");
 		
 
 		auto classObject = parser->parseClass(ctx, false);
@@ -238,9 +233,8 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, true);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, true);
-		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
+		EXPECT_EQ(classObject->functionList[0]->isOverride, true);
 
 		EXPECT_EQ(classObject->functionList[0]->genericDecl, nullptr);
 
@@ -269,7 +263,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestVirtualFunctionWithModWithMultiplesParamsWithRetWithFinal)
 	{
-		parser->loadSource("class Foo { protected virtual fn Foo(test: i32, test2: string) -> i32 final {} }");
+		parser->loadSource("class Foo { protected override fn Foo(test: i32, test2: string) -> i32 final {} }");
 		
 
 		auto classObject = parser->parseClass(ctx, false);
@@ -282,9 +276,8 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, false);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, true);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, true);
-		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
+		EXPECT_EQ(classObject->functionList[0]->isOverride, true);
 
 		EXPECT_EQ(classObject->functionList[0]->genericDecl, nullptr);
 
@@ -325,7 +318,6 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->isStatic, false);
 		EXPECT_EQ(classObject->functionList[0]->isAbstract, true);
-		EXPECT_EQ(classObject->functionList[0]->isVirtual, false);
 		EXPECT_EQ(classObject->functionList[0]->isFinal, false);
 		EXPECT_EQ(classObject->functionList[0]->isOverride, false);
 
@@ -356,7 +348,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserClassFunctionTest, TestInvalidStaticFunctionWithVirtual)
 	{
-		parser->loadSource("class Foo { static virtual fn Foo(test: i32, test2: string) -> i32 {} }");
+		parser->loadSource("class Foo { static override fn Foo(test: i32, test2: string) -> i32 {} }");
 
 		try
 		{

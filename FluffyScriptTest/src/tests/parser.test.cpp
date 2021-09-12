@@ -3,7 +3,7 @@
 #include "test.h"
 
 #include "parser\fl_parser.h"
-#include "validation\fl_validate.h"
+#include "scope\fl_scope_manager.h"
 #include "utils\fl_info_util.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -42,55 +42,52 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseIncludeOnlyOneIdentifier)
 	{
-		parser->loadSource("include { print } in std;");
+		parser->loadSource("include { io::print } in \"\\system\"; ");
 
 		auto treeAst = parser->parseInclude(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includedItemList.size(), 1);
 		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "io");
 
-		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseIncludeTwoIdentifier)
 	{
-		parser->loadSource("include { print, scan } in std;");
+		parser->loadSource("include { io::print, io::scan } in \"\\system\";");
 
 		auto treeAst = parser->parseInclude(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
 		
 		EXPECT_EQ(treeAst->includedItemList.size(), 2);
 		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "io");
 		EXPECT_EQ(treeAst->includedItemList[1]->identifier, "scan");
+		EXPECT_EQ(treeAst->includedItemList[1]->referencedPath->identifier, "io");
 
-		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseIncludeAll)
 	{
-		parser->loadSource("include { * } in std::math;");
+		parser->loadSource("include { math::* } in \"\\system\";");
 
 		auto treeAst = parser->parseInclude(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
 
-		EXPECT_EQ(treeAst->includedItemList.size(), 0);
+		EXPECT_EQ(treeAst->includedItemList.size(), 1);
 
-		EXPECT_EQ(treeAst->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->inNamespace->startFromRoot, false);
+		EXPECT_EQ(treeAst->includedItemList[0]->includeAll, true);
+		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "math");
 	
-		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->identifier, "math");
-		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->startFromRoot, false);
-		EXPECT_EQ(treeAst->inNamespace->referencedIdentifier->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeTwoIdentifierWithGeneric)
 	{
-		parser->loadSource("include { print, scan } in std;\ninclude { Window } in std::UI;");
+		parser->loadSource("include { io::print, io::scan } in \"\\system\";\ninclude { ui::Window } in \"\\system\";");
 
 		auto treeAst = parser->parseCodeUnit(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
@@ -99,68 +96,63 @@ namespace fluffy { namespace testing {
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->referencedPath->identifier, "io");
 
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->identifier, "Window");
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
-
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesIncludeAll)
 	{
-		parser->loadSource("include { * } in std;\ninclude { * } in UI;");
+		parser->loadSource("include { io::* } in \"\\system\";\ninclude { ui::* } in \"\\system\";");
 
 		auto treeAst = parser->parseCodeUnit(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
 
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 0);
-				
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 1);
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->includeAll, true);
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 0);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->includeAll, true);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
+
+		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseMultiplesInclude)
 	{
-		parser->loadSource("include { print2, scan } in std;\ninclude { * } in UI;");
+		parser->loadSource("include { io::print, io::scan } in \"\\system\";\ninclude { ui::* } in \"\\system\";");
 
 		auto treeAst = parser->parseCodeUnit(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
-
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print2");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
+		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->referencedPath->identifier, "io");
 
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->identifier, "std");
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[0]->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 0);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->includeAll, true);
+		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
 
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->identifier, "UI");
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->startFromRoot, false);
-		EXPECT_EQ(treeAst->includeDeclList[1]->inNamespace->referencedIdentifier, nullptr);
+		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}
 
 	TEST_F(ParserTest, TestParseOnlyOneNamespaceEmpty)
@@ -233,7 +225,7 @@ namespace fluffy { namespace testing {
 
 	TEST_F(ParserTest, TestParseMixedIncludeAndNamespace)
 	{
-		parser->loadSource("include { print } in std;\nnamespace application { namespace detail { } }\nnamespace testing {}");
+		parser->loadSource("include { io::print } in \"\\std\";\nnamespace application { namespace detail { } }\nnamespace testing {}");
 
 		auto treeAst = parser->parseCodeUnit(ctx);
 		EXPECT_FALSE(treeAst == nullptr);
@@ -280,49 +272,4 @@ namespace fluffy { namespace testing {
 		auto pattern8 = parser->parsePattern(ctx);
 	}
 
-	class ValidateTest : public validations::Validation
-	{
-	public:
-		ValidateTest()
-			: m_nodeCount(0)
-		{}
-
-		virtual ~ValidateTest()
-		{}
-
-		U32
-		getNodeCount()
-		{
-			return m_nodeCount;
-		}
-
-	protected:
-		virtual void
-		beginValidation(ast::AstNode* const decl) override
-		{
-			m_nodeCount++;
-		}
-
-		virtual void
-		endValidation(ast::AstNode* const decl) override
-		{}
-
-	private:
-		U32 m_nodeCount;
-
-	};
-
-	TEST_F(ParserTest, TestValidation)
-	{
-		utils::InfoUtil::resetNodeCount();
-
-		parser->loadSourceFromFile(getProjectFilePath("files\\compiler\\main.txt").c_str());
-
-		auto codeUnit = parser->parseCodeUnit(ctx);
-
-		std::unique_ptr<ValidateTest> validate = std::make_unique<ValidateTest>();
-		validate->validate(codeUnit.get());
-
-		EXPECT_EQ(utils::InfoUtil::getNodeCount(), validate->getNodeCount());
-	}
 } }

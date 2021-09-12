@@ -142,16 +142,14 @@ namespace fluffy { namespace testing {
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
-			EXPECT_EQ(namedTypeDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
+			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, TypeDeclID_e::Named);
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 1);
+			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
 
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList[0]->typeID, TypeDeclID_e::Named);
-
-			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->internalIdentifier->genericDefinitionList[0].get());
+			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefinitionList[0].get());
 
 			EXPECT_EQ(genericTypeDecl->identifier, "R");
 			EXPECT_EQ(genericTypeDecl->startFromRoot, false);
@@ -192,12 +190,10 @@ namespace fluffy { namespace testing {
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
-			EXPECT_EQ(namedTypeDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
 		}
 	}
 
@@ -241,12 +237,10 @@ namespace fluffy { namespace testing {
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
-			EXPECT_EQ(namedTypeDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->identifier, "Viewable");
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->internalIdentifier->genericDefinitionList.size(), 0);
+			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
 		}
 	}
 

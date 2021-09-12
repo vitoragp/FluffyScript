@@ -43,7 +43,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 */
 
 	TuplePatternDecl::TuplePatternDecl(U32 line, U32 column)
-		: PatternDecl(AstNodeType_e::TuplePattern, line, column)
+		: PatternDecl(AstNodeType_e::TuplePatternDecl, line, column)
 	{}
 
 	TuplePatternDecl::~TuplePatternDecl()
@@ -79,7 +79,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 */
 
 	StructurePatternDecl::StructurePatternDecl(U32 line, U32 column)
-		: PatternDecl(AstNodeType_e::StructurePattern, line, column)
+		: PatternDecl(AstNodeType_e::StructurePatternDecl, line, column)
 	{}
 
 	StructurePatternDecl::~StructurePatternDecl()
@@ -115,7 +115,7 @@ namespace fluffy { namespace ast { namespace pattern {
 	 */
 
 	EnumerablePatternDecl::EnumerablePatternDecl(U32 line, U32 column)
-		: PatternDecl(AstNodeType_e::EnumerablePattern, line, column)
+		: PatternDecl(AstNodeType_e::EnumerablePatternDecl, line, column)
 	{}
 
 	EnumerablePatternDecl::~EnumerablePatternDecl()

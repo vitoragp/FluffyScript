@@ -14,7 +14,7 @@ namespace fluffy { namespace ast {
 	 * BlockDecl
 	 */
 
-	class BlockDecl : public AstNode
+	class BlockDecl : public AstNode, public AstSafeCast<AstNodeType_e::Block>
 	{
 	public:
 		BlockDecl(U32 line, U32 column);

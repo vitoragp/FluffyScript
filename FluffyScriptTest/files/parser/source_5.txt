@@ -1,5 +1,5 @@
-include { * } in UI;
-include { fetch, Method, Body, Jsonable } in Net;
+include { ui::* } in "\system";
+include { net::* } in "\net";
 
 namespace application
 {
@@ -128,7 +128,7 @@ namespace application
 			: repository(repository)
 		{}
 
-		public virtual fn build() -> Widget
+		public override fn build() -> Widget
 		{
 			return new LinearLayout(Orientation::Vertical) {
 				padding: new Padding(5),
@@ -170,7 +170,7 @@ namespace application
 			};
 		}
 
-		virtual fn onEvent(evt: WindowEvent) override
+		override fn onEvent(evt: WindowEvent)
 		{
 			const (lparam, wparam) = evt.params;
 			const {event} = evt;

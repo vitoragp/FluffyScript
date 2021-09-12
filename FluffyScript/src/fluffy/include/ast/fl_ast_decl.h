@@ -89,7 +89,7 @@ namespace fluffy { namespace ast {
 	 * CodeUnit
 	 */
 
-	class CodeUnit : public AstNode
+	class CodeUnit : public AstNode, public AstSafeCast<AstNodeType_e::CodeUnit>
 	{
 	public:
 		CodeUnit(const String& name);
@@ -110,7 +110,7 @@ namespace fluffy { namespace ast {
 	 * IncludeDecl
 	 */
 
-	class IncludeDecl : public AstNode
+	class IncludeDecl : public AstNode, public AstSafeCast<AstNodeType_e::IncludeDecl>
 	{
 	public:
 		IncludeDecl(U32 line, U32 column);
@@ -123,27 +123,29 @@ namespace fluffy { namespace ast {
 		getChildren() final;
 
 		IncludeItemDeclPtrList				includedItemList;
-		ScopedIdentifierDeclPtr				inNamespace;
+		String								inFile;
 	};
 
 	/**
 	 * IncludeItemDecl
 	 */
 
-	class IncludeItemDecl : public AstNode
+	class IncludeItemDecl : public AstNode, public AstSafeCast<AstNodeType_e::IncludeItemDecl>
 	{
 	public:
 		IncludeItemDecl(U32 line, U32 column);
 		virtual ~IncludeItemDecl();
 
-		TString								referencedId;
+		ScopedIdentifierDeclPtr				referencedPath;
+		TString								referencedAlias;
+		Bool								includeAll;
 	};
 
 	/**
 	 * NamespaceDecl
 	 */
 
-	class NamespaceDecl : public AstNode
+	class NamespaceDecl : public AstNode, public AstSafeCast<AstNodeType_e::NamespaceDecl>
 	{
 	public:
 		NamespaceDecl(U32 line, U32 column);
@@ -172,6 +174,7 @@ namespace fluffy { namespace ast {
 		virtual	~GeneralStmtDecl();
 
 		const GeneralDeclType_e				type;
+		Bool								isExported;
 
 	};
 
@@ -179,7 +182,7 @@ namespace fluffy { namespace ast {
 	 * ClassDecl
 	 */
 
-	class ClassDecl : public GeneralStmtDecl
+	class ClassDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::ClassDecl>
 	{
 	public:
 		ClassDecl(U32 line, U32 column);
@@ -191,7 +194,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
 		Bool								isAbstract;
 		GenericDeclPtr						genericDecl;
 		TypeDeclPtr							baseClass;
@@ -222,7 +224,7 @@ namespace fluffy { namespace ast {
 	 * ClassFunctionDecl
 	 */
 
-	class ClassFunctionDecl : public ClassMemberDecl
+	class ClassFunctionDecl : public ClassMemberDecl, public AstSafeCast<AstNodeType_e::ClassFunctionDecl>
 	{
 	public:
 		ClassFunctionDecl(U32 line, U32 column);
@@ -235,7 +237,6 @@ namespace fluffy { namespace ast {
 		getChildren() final;
 
 		Bool								isStatic;
-		Bool								isVirtual;
 		Bool								isAbstract;
 		Bool								isOverride;
 		Bool								isFinal;
@@ -255,7 +256,7 @@ namespace fluffy { namespace ast {
 	 * ClassVariableDecl
 	 */
 
-	class ClassVariableDecl : public ClassMemberDecl
+	class ClassVariableDecl : public ClassMemberDecl, public AstSafeCast<AstNodeType_e::ClassVariableDecl>
 	{
 	public:
 		ClassVariableDecl(U32 line, U32 column);
@@ -274,7 +275,7 @@ namespace fluffy { namespace ast {
 	 * ClassConstructorDecl
 	 */
 
-	class ClassConstructorDecl : public ClassMemberDecl
+	class ClassConstructorDecl : public ClassMemberDecl, public AstSafeCast<AstNodeType_e::ClassConstructorDecl>
 	{
 	public:
 		ClassConstructorDecl(U32 line, U32 column);
@@ -296,7 +297,7 @@ namespace fluffy { namespace ast {
 	 * ClassDestructorDecl
 	 */
 
-	class ClassDestructorDecl : public ClassMemberDecl
+	class ClassDestructorDecl : public ClassMemberDecl, public AstSafeCast<AstNodeType_e::ClassDestructorDecl>
 	{
 	public:
 		ClassDestructorDecl(U32 line, U32 column);
@@ -309,7 +310,7 @@ namespace fluffy { namespace ast {
 	 * ClassVariableInitDecl
 	 */
 
-	class ClassVariableInitDecl : public AstNode
+	class ClassVariableInitDecl : public AstNode, public AstSafeCast<AstNodeType_e::ClassVariableInitDecl>
 	{
 	public:
 		ClassVariableInitDecl(U32 line, U32 column);
@@ -322,7 +323,7 @@ namespace fluffy { namespace ast {
 	 * InterfaceDecl
 	 */
 
-	class InterfaceDecl : public GeneralStmtDecl
+	class InterfaceDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::InterfaceDecl>
 	{
 	public:
 		InterfaceDecl(U32 line, U32 column);
@@ -334,7 +335,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
 		GenericDeclPtr						genericDecl;
 		InterfaceFunctionDeclPtrList		functionDeclList;
 	};
@@ -343,7 +343,7 @@ namespace fluffy { namespace ast {
 	 * InterfaceFunctionDecl
 	 */
 
-	class InterfaceFunctionDecl : public AstNode
+	class InterfaceFunctionDecl : public AstNode, public AstSafeCast<AstNodeType_e::InterfaceFunctionDecl>
 	{
 	public:
 		InterfaceFunctionDecl(U32 line, U32 column);
@@ -364,7 +364,7 @@ namespace fluffy { namespace ast {
 	 * StructDecl
 	 */
 
-	class StructDecl : public GeneralStmtDecl
+	class StructDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::StructDecl>
 	{
 	public:
 		StructDecl(U32 line, U32 column);
@@ -376,7 +376,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
 		GenericDeclPtr						genericDecl;
 		StructVariableDeclPtrList			variableList;
 	};
@@ -385,7 +384,7 @@ namespace fluffy { namespace ast {
 	 * StructVariableDecl
 	 */
 
-	class StructVariableDecl : public AstNode
+	class StructVariableDecl : public AstNode, public AstSafeCast<AstNodeType_e::StructVariableDecl>
 	{
 	public:
 		StructVariableDecl(U32 line, U32 column);
@@ -403,7 +402,7 @@ namespace fluffy { namespace ast {
 	 * EnumDecl
 	 */
 
-	class EnumDecl : public GeneralStmtDecl
+	class EnumDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::EnumDecl>
 	{
 	public:
 		EnumDecl(U32 line, U32 column);
@@ -415,7 +414,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
 		GenericDeclPtr						genericDecl;
 		EnumItemDeclPtrList					enumItemDeclList;
 	};
@@ -424,7 +422,7 @@ namespace fluffy { namespace ast {
 	 * EnumItemDecl 
 	 */
 
-	class EnumItemDecl : public AstNode
+	class EnumItemDecl : public AstNode, public AstSafeCast<AstNodeType_e::EnumItemDecl>
 	{
 	public:
 		EnumItemDecl(U32 line, U32 column);
@@ -440,7 +438,7 @@ namespace fluffy { namespace ast {
 	 * TraitDecl
 	 */
 
-	class TraitDecl : public GeneralStmtDecl
+	class TraitDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::TraitDecl>
 	{
 	public:
 		TraitDecl(U32 line, U32 column);
@@ -452,7 +450,27 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
+		Bool								isDefinition;
+		GenericDeclPtr						genericDecl;
+		TraitFunctionDeclPtrList			functionDeclList;
+	};
+
+	/**
+	 * TraitForDecl
+	 */
+
+	class TraitForDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::TraitForDecl>
+	{
+	public:
+		TraitForDecl(U32 line, U32 column);
+		virtual ~TraitForDecl();
+
+		virtual Bool
+		hasChildren() final;
+
+		virtual std::vector<AstNode*>
+		getChildren() final;
+
 		Bool								isDefinition;
 		TypeDeclPtr							typeDefinitionDecl;
 		GenericDeclPtr						genericDecl;
@@ -463,7 +481,7 @@ namespace fluffy { namespace ast {
 	 * TraitFunctionDecl
 	 */
 
-	class TraitFunctionDecl : public AstNode
+	class TraitFunctionDecl : public AstNode, public AstSafeCast<AstNodeType_e::TraitFunctionDecl>
 	{
 	public:
 		TraitFunctionDecl(U32 line, U32 column);
@@ -487,7 +505,7 @@ namespace fluffy { namespace ast {
 	 * FunctionDecl
 	 */
 
-	class FunctionDecl : public GeneralStmtDecl
+	class FunctionDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::FunctionDecl>
 	{
 	public:
 		FunctionDecl(U32 line, U32 column);
@@ -499,7 +517,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		Bool								isExported;
 		GenericDeclPtr						genericDecl;
 		FunctionParameterDeclPtrList		parameterList;
 		TypeDeclPtr							returnType;
@@ -511,13 +528,12 @@ namespace fluffy { namespace ast {
 	 * VariableDecl
 	 */
 
-	class VariableDecl : public GeneralStmtDecl
+	class VariableDecl : public GeneralStmtDecl, public AstSafeCast<AstNodeType_e::VariableDecl>
 	{
 	public:
 		VariableDecl(U32 line, U32 column);
 		virtual ~VariableDecl();
 
-		Bool								isExported;
 		Bool								isShared;
 		Bool								isUnique;
 		Bool								isConst;
@@ -530,7 +546,7 @@ namespace fluffy { namespace ast {
 	 * FunctionParameterDecl
 	 */
 
-	class FunctionParameterDecl : public AstNode
+	class FunctionParameterDecl : public AstNode, public AstSafeCast<AstNodeType_e::FunctionParameterDecl>
 	{
 	public:
 		FunctionParameterDecl(U32 line, U32 column);
@@ -554,7 +570,7 @@ namespace fluffy { namespace ast {
 	 * GenericDecl
 	 */
 
-	class GenericDecl : public AstNode
+	class GenericDecl : public AstNode, public AstSafeCast<AstNodeType_e::GenericDecl>
 	{
 	public:
 		GenericDecl(U32 line, U32 column);
@@ -573,7 +589,7 @@ namespace fluffy { namespace ast {
 	 * GenericItemDecl
 	 */
 
-	class GenericItemDecl : public AstNode
+	class GenericItemDecl : public AstNode, public AstSafeCast<AstNodeType_e::GenericItemDecl>
 	{
 	public:
 		GenericItemDecl(U32 line, U32 column);
@@ -592,13 +608,12 @@ namespace fluffy { namespace ast {
 	 * ScopedIdentifierDecl
 	 */
 
-	class ScopedIdentifierDecl : public AstNode
+	class ScopedIdentifierDecl : public AstNode, public AstSafeCast<AstNodeType_e::ScopedIdentifierDecl>
 	{
 	public:
 		ScopedIdentifierDecl(U32 line, U32 column);
 		virtual ~ScopedIdentifierDecl();
 
 		ScopedIdentifierDeclPtr				referencedIdentifier;
-		Bool								startFromRoot;
 	};
 } }

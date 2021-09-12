@@ -1,70 +1,14 @@
-include { print as p } in std;
+include { foo::Foo } in "foo";
 
-namespace print
+namespace test1
 {
-	class Foo {
-		constructor()
-		{}
+	interface Loo {}
 
-		constructor(val: i32)
-		{}
+	class Xoo {}
 
-		fn test(_: i32, _: i32)
-		{
-		}
+	class Boo implements Loo {}
 
-		fn main(){}
-		fn main(a: i32) {}
-		fn main(a: i32, {a: { a: (b, c, d) }}: Foo) {
-			let { a: { b: { c: ( e, f ) } } } = foo;
-
-			if let a = foo
-			{
-				let b = |a, b| {
-					let c = |a: i32, {a: { a: { a: b } } }: Foo| {};
-				};
-			}
-			
-			let p = new Foo() {
-				a: 0,
-				b: 0,
-			};
-
-			for let a = 0; a < 100 ;  a++
-			{
-				let b = 0;
-			}
-			
-			while (true)
-			{
-				let a = 0;
-				let b = 0;
-			}
-
-			do
-			{
-				let a = 0;
-				let b = 0;
-			}
-			while (true);
-
-			match foo
-			{
-				when { a, b, c } -> {},
-				when { b: 1 } -> {},
-				when _ -> {},
-			}
-			
-			try
-			{
-				let a = 0;
-			}
-			catch a : MyException1
-			{
-			}
-			catch a : MyException2
-			{
-			}
-		}
+	fn main(v: Foo)
+	{
 	}
 }

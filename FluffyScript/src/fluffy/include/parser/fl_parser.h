@@ -62,7 +62,7 @@ namespace fluffy { namespace parser {
 		std::unique_ptr<ast::StructDecl>
 		parseStruct(ParserContext_s& ctx, Bool hasExport);
 
-		std::unique_ptr<ast::TraitDecl>
+		std::unique_ptr<ast::GeneralStmtDecl>
 		parseTrait(ParserContext_s& ctx, Bool hasExport);
 
 		std::unique_ptr<ast::EnumDecl>
@@ -103,7 +103,7 @@ namespace fluffy { namespace parser {
 		///
 		
 		std::unique_ptr<ast::expr::ExpressionDecl>
-		parseExpression(ParserContext_s& ctx, OperatorPrecLevel_e prec);
+		parseExpression(ParserContext_s& ctx, U32 prec);
 
 		///
 		/// Pattern
@@ -196,7 +196,7 @@ namespace fluffy { namespace parser {
 		parseExprStmt(ParserContext_s& ctx);
 
 		std::unique_ptr<ast::expr::ExpressionDecl>
-		parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec, Bool* requiredGenericValidation);
+		parseExpressionImp(ParserContext_s& ctx, U32 prec, Bool* requiredGenericValidation);
 
 		std::unique_ptr<ast::expr::ExpressionDecl>
 		parseAtom(ParserContext_s& ctx, Bool* requiredGenericValidation);
@@ -230,6 +230,9 @@ namespace fluffy { namespace parser {
 
 		std::unique_ptr<ast::ScopedIdentifierDecl>
 		parseChildScopedIdentifiers(ParserContext_s& ctx);
+
+		void
+		validateIdentifier(TString& id);
 
 	private:
 		std::unique_ptr<lexer::Lexer>

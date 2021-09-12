@@ -247,46 +247,37 @@ namespace fluffy { namespace parser {
 		// Consome Identificadores.
 		while (true)
 		{
-			if (m_lexer->isMultiplication()) {
-				// Se existe identificaores declarados, o caractere coringa
-				// nao pode ser usado.
-				if (includeDecl->includedItemList.size()) {
-					throw exceptions::unexpected_token_exception(
-						m_lexer->getToken().value,
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
-				}
-
-				// Consome '*'
-				m_lexer->expectToken(TokenType_e::Multiplication);
-				break;
-			}
-
 			auto includeItemDecl = std::make_unique<ast::IncludeItemDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
 
-			if (m_lexer->predictNextToken().type == TokenType_e::As)
-			{
-				// Consome identificador.
-				includeItemDecl->referencedId = m_lexer->expectIdentifier();
-			}
-			else
-			{
-				// Consome identificador.
-				includeItemDecl->identifier = m_lexer->expectIdentifier();
-			}
+			// Consome identificador
+			includeItemDecl->referencedPath = parseScopedIdentifier(ctx);
 
-			// Verifica se o item possui um alias.
-			if (m_lexer->isAs())
+			// Verifica se e o coringa(*).
+			if (m_lexer->isMultiplication())
 			{
-				// Consome 'as'
-				m_lexer->expectToken(TokenType_e::As);
+				// Consome '*'
+				m_lexer->expectToken(TokenType_e::Multiplication);
 
-				// Consome identificador.
+				includeItemDecl->includeAll = true;				
+			}
+			else if (m_lexer->isIdentifier())
+			{
 				includeItemDecl->identifier = m_lexer->expectIdentifier();
+
+				// Valida o identificador.
+				validateIdentifier(includeItemDecl->identifier);
+
+				if (m_lexer->isAs())
+				{
+					// Consome 'as'
+					m_lexer->expectToken(TokenType_e::As);
+
+					// Consome identificador.
+					includeItemDecl->referencedAlias = m_lexer->expectIdentifier();
+				}
 			}
 
 			// Inclui item a lista
@@ -308,7 +299,7 @@ namespace fluffy { namespace parser {
 		m_lexer->expectToken(TokenType_e::In);
 
 		// Consome o identificador do namespace.
-		includeDecl->inNamespace = parseScopedIdentifier(ctx);
+		includeDecl->inFile = m_lexer->expectConstantString();
 
 		// Consome ';'
 		m_lexer->expectToken(TokenType_e::SemiColon);
@@ -329,6 +320,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identficador com o nome do namespace.
 		namespaceDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(namespaceDecl->identifier);
 
 		// Consome '{'.
 		m_lexer->expectToken(TokenType_e::LBracket);
@@ -381,6 +375,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o nome da classe.
 		classDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(classDecl->identifier);
 
 		// Verifica se a declaracao de generic.
 		if (m_lexer->isLessThan())
@@ -484,11 +481,11 @@ namespace fluffy { namespace parser {
 				}
 				goto processFunction;
 
-			case TokenType_e::Virtual:
+			case TokenType_e::Override:
 				if (staticModifier)
 				{
 					throw exceptions::custom_exception(
-						"Static function can't be virtual",
+						"Static function can't be overrided",
 						m_lexer->getToken().line,
 						m_lexer->getToken().column
 					);
@@ -548,7 +545,7 @@ namespace fluffy { namespace parser {
 					{
 						TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
 						TokenType_e::Let, TokenType_e::Const,
-						TokenType_e::Virtual, TokenType_e::Abstract, TokenType_e::Fn,
+						TokenType_e::Override, TokenType_e::Abstract, TokenType_e::Fn,
 						TokenType_e::LBracket
 					},
 					m_lexer->getToken().line,
@@ -578,6 +575,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		interfaceDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(interfaceDecl->identifier);
 
 		// Consome generic se houver.
 		if (m_lexer->isLessThan())
@@ -638,6 +638,9 @@ namespace fluffy { namespace parser {
 		// Consome o identificador.
 		structDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(structDecl->identifier);
+
 		// Consome generic se houver.
 		if (m_lexer->isLessThan())
 		{
@@ -681,34 +684,37 @@ namespace fluffy { namespace parser {
 		return structDecl;
 	}
 
-	std::unique_ptr<ast::TraitDecl>
+	std::unique_ptr<ast::GeneralStmtDecl>
 	Parser::parseTrait(ParserContext_s& ctx, Bool hasExport)
 	{
-		Bool isDefinition = false;
-
-		auto traitDecl = std::make_unique<ast::TraitDecl>(
-			m_lexer->getToken().line,
-			m_lexer->getToken().column
-		);
-
-		traitDecl->isExported = hasExport;
-
 		// Consome 'trait'.
 		m_lexer->expectToken(TokenType_e::Trait);
 
 		// Consome o identificador.
-		traitDecl->identifier = m_lexer->expectIdentifier();
+		TString identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(identifier);
 
 		// Consome generic se houver.
+		std::unique_ptr<ast::GenericDecl> genericDecl;
 		if (m_lexer->isLessThan())
 		{
-			traitDecl->genericDecl = parseGenericDecl(ctx);
+			genericDecl = parseGenericDecl(ctx);
 		}
 
 		// Verifica se e um definicao de trait.
 		if (m_lexer->isFor())
 		{
+			auto traitDecl = std::make_unique<ast::TraitForDecl>(
+				m_lexer->getToken().line,
+				m_lexer->getToken().column
+			);
+
+			traitDecl->isExported = hasExport;
 			traitDecl->isDefinition = true;
+			traitDecl->identifier = identifier;
+			traitDecl->genericDecl = std::move(genericDecl);
 
 			// Consome 'for'.
 			m_lexer->expectToken(TokenType_e::For);
@@ -720,54 +726,109 @@ namespace fluffy { namespace parser {
 
 			ctx.insideTrait = false;
 
-			// Indica que e uma definicao, permitindo assim que tenho um bloco de codigo.
-			isDefinition = true;
+			// Consome '{'.
+			m_lexer->expectToken(TokenType_e::LBracket);
+
+			while (true)
+			{
+				if (m_lexer->isRightBracket())
+				{
+					break;
+				}
+
+			parseTraitForFunctionLabel:
+				Bool isStatic = false;
+
+				// Consome 'static'.
+				if (m_lexer->isStatic())
+				{
+					m_lexer->expectToken(TokenType_e::Static);
+					isStatic = true;
+				}
+
+				if (m_lexer->isFn())
+				{
+					// Consome a funcao.
+					traitDecl->functionDeclList.push_back(parseTraitFunction(ctx, true, isStatic));
+					goto parseTraitForFunctionLabel;
+				}
+
+				if (m_lexer->isRightBracket())
+				{
+					break;
+				}
+
+				throw exceptions::unexpected_with_possibilities_token_exception(
+					m_lexer->getToken().value,
+					{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
+			}
+
+			// Consome '}'.
+			m_lexer->expectToken(TokenType_e::RBracket);
+
+			return traitDecl;
 		}
-
-		// Consome '{'.
-		m_lexer->expectToken(TokenType_e::LBracket);
-
-		while (true)
+		else
 		{
-			if (m_lexer->isRightBracket())
-			{
-				break;
-			}
-
-		parseFunctionLabel:
-			Bool isStatic = false;
-
-			// Consome 'static'.
-			if (m_lexer->isStatic())
-			{
-				m_lexer->expectToken(TokenType_e::Static);
-				isStatic = true;
-			}
-
-			if (m_lexer->isFn())
-			{
-				// Consome a funcao.
-				traitDecl->functionDeclList.push_back(parseTraitFunction(ctx, isDefinition, isStatic));
-				goto parseFunctionLabel;
-			}
-
-			if (m_lexer->isRightBracket())
-			{
-				break;
-			}
-
-			throw exceptions::unexpected_with_possibilities_token_exception(
-				m_lexer->getToken().value,
-				{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
+			auto traitDecl = std::make_unique<ast::TraitDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
+
+			traitDecl->isExported = hasExport;
+			traitDecl->isDefinition = true;
+			traitDecl->identifier = identifier;
+			traitDecl->genericDecl = std::move(genericDecl);
+
+			// Consome '{'.
+			m_lexer->expectToken(TokenType_e::LBracket);
+
+			while (true)
+			{
+				if (m_lexer->isRightBracket())
+				{
+					break;
+				}
+
+			parseTraitFunctionLabel:
+				Bool isStatic = false;
+
+				// Consome 'static'.
+				if (m_lexer->isStatic())
+				{
+					m_lexer->expectToken(TokenType_e::Static);
+					isStatic = true;
+				}
+
+				if (m_lexer->isFn())
+				{
+					// Consome a funcao.
+					traitDecl->functionDeclList.push_back(parseTraitFunction(ctx, false, isStatic));
+					goto parseTraitFunctionLabel;
+				}
+
+				if (m_lexer->isRightBracket())
+				{
+					break;
+				}
+
+				throw exceptions::unexpected_with_possibilities_token_exception(
+					m_lexer->getToken().value,
+					{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
+					m_lexer->getToken().line,
+					m_lexer->getToken().column
+				);
+			}
+
+			// Consome '}'.
+			m_lexer->expectToken(TokenType_e::RBracket);
+
+			return traitDecl;
 		}
-
-		// Consome '}'.
-		m_lexer->expectToken(TokenType_e::RBracket);
-
-		return traitDecl;
+		return nullptr;
 	}
 
 	std::unique_ptr<ast::EnumDecl>
@@ -785,6 +846,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		enumDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(enumDecl->identifier);
 
 		// Consome generic se houver.
 		if (m_lexer->isLessThan())
@@ -846,6 +910,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		functionPtr->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(functionPtr->identifier);
 
 		// Consome o Generic.
 		if (m_lexer->isLessThan())
@@ -956,6 +1023,9 @@ namespace fluffy { namespace parser {
 		// Consome identificador.
 		variableDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(variableDecl->identifier);
+
 		Bool mustHaveInitExpression = variableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
@@ -1021,6 +1091,9 @@ namespace fluffy { namespace parser {
 
 			// Consome o identificador.
 			genericDecl->identifier = m_lexer->expectIdentifier();
+
+			// Valida o identificador.
+			validateIdentifier(genericDecl->identifier);
 
 			// Processa a clausula where.
 			if (m_lexer->isWhere())
@@ -1126,92 +1199,101 @@ namespace fluffy { namespace parser {
 		case TokenType_e::Void:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 			);
 			break;
+
+		case TokenType_e::Bool:
+			m_lexer->nextToken();
+			typeDecl = std::make_unique<ast::TypeDeclBool>(
+				line,
+				column
+			);
+			break;
+
 		case TokenType_e::I8:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI8>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::U8:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU8>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::I16:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI16>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::U16:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU16>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::I32:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI32>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::U32:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU32>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::I64:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclI64>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::U64:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclU64>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::Fp32:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp32>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::Fp64:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclFp64>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::String:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclString>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 				);
 			break;
 		case TokenType_e::Object:
 			m_lexer->nextToken();
 			typeDecl = std::make_unique<ast::TypeDeclObject>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line,
+				column
 			);
 			break;
 		case TokenType_e::Fn:
@@ -1225,16 +1307,16 @@ namespace fluffy { namespace parser {
 			{
 				m_lexer->nextToken();
 				typeDecl = std::make_unique<ast::SelfTypeDecl>(
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
+					line,
+					column
 				);
 			}
 			else
 			{
 				throw exceptions::custom_exception(
 					"Self type only can be declared in traits",
-					m_lexer->getToken().line,
-					m_lexer->getToken().column
+					line,
+					column
 				);
 			}
 			break;
@@ -1386,7 +1468,7 @@ namespace fluffy { namespace parser {
 	}
 
 	std::unique_ptr<ast::expr::ExpressionDecl>
-	Parser::parseExpression(ParserContext_s& ctx, OperatorPrecLevel_e prec)
+	Parser::parseExpression(ParserContext_s& ctx, U32 prec)
 	{
 		Bool needGenericValidation = false;
 		std::unique_ptr<ast::expr::ExpressionDecl> expr;
@@ -1599,21 +1681,25 @@ namespace fluffy { namespace parser {
 			m_lexer->getToken().column
 		);
 
-		// Se o escopo vem antes identificador
-		if (m_lexer->isScopeResolution())
-		{
-			// Consome '::'.
-			m_lexer->expectToken(TokenType_e::ScopeResolution);
-			scopedIdentifierDecl->startFromRoot = true;
-		}
-
 		// Consome o identificador.
 		scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
 
-		// Verifica se a mais declaracoes de escopo.
-		if (m_lexer->isScopeResolution())
+		// Valida o identificador.
+		validateIdentifier(scopedIdentifierDecl->identifier);
+
+		// Consome '::'.
+		m_lexer->expectToken(TokenType_e::ScopeResolution);
+
+		if (m_lexer->isMultiplication())
 		{
-			scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
+			return scopedIdentifierDecl;
+		}
+		else if (m_lexer->isIdentifier())
+		{
+			if (m_lexer->predictNextToken().type == TokenType_e::ScopeResolution)
+			{
+				scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
+			}
 		}
 		return scopedIdentifierDecl;
 	}
@@ -1690,9 +1776,9 @@ namespace fluffy { namespace parser {
 			m_lexer->expectToken(TokenType_e::Abstract);
 			classFunctionDecl->isAbstract = true;
 			break;
-		case TokenType_e::Virtual:
-			m_lexer->expectToken(TokenType_e::Virtual);
-			classFunctionDecl->isVirtual = true;
+		case TokenType_e::Override:
+			m_lexer->expectToken(TokenType_e::Override);
+			classFunctionDecl->isOverride = true;
 			break;
 		default:
 			break;
@@ -1745,6 +1831,9 @@ namespace fluffy { namespace parser {
 		// Consome o identificador.
 		classFunctionDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(classFunctionDecl->identifier);
+
 		// Consome o Generic.
 		if (m_lexer->isLessThan())
 		{
@@ -1774,21 +1863,6 @@ namespace fluffy { namespace parser {
 
 		switch (m_lexer->getToken().type)
 		{
-		case TokenType_e::Override:
-			// Funcoes abstratas nao podem ser override ou final
-			if (classFunctionDecl->isAbstract)
-			{
-				throw exceptions::custom_exception(
-					"Abstract function '%s' can't have override or final modifiers",
-					m_lexer->getToken().line,
-					m_lexer->getToken().column,
-					classFunctionDecl->identifier.str()
-				);
-			}
-			m_lexer->expectToken(TokenType_e::Override);
-			classFunctionDecl->isOverride = true;
-			break;
-
 		case TokenType_e::Final:
 			// Funcoes abstratas nao podem ser override ou final
 			if (classFunctionDecl->isAbstract)
@@ -1913,6 +1987,9 @@ namespace fluffy { namespace parser {
 		// Consome identificador.
 		classVariableDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(classVariableDecl->identifier);
+
 		Bool mustHaveInitExpression = classVariableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
@@ -2003,6 +2080,9 @@ namespace fluffy { namespace parser {
 				// Consome o identificador
 				variableInitDecl->identifier = m_lexer->expectIdentifier();
 
+				// Valida o identificador.
+				validateIdentifier(variableInitDecl->identifier);
+
 				// Consome '('.
 				m_lexer->expectToken(TokenType_e::LParBracket);
 
@@ -2036,6 +2116,9 @@ namespace fluffy { namespace parser {
 
 				// Consome o identificador
 				variableInitDecl->identifier = m_lexer->expectIdentifier();
+
+				// Valida o identificador.
+				validateIdentifier(variableInitDecl->identifier);
 
 				// Consome '('.
 				m_lexer->expectToken(TokenType_e::LParBracket);
@@ -2095,6 +2178,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		interfaceFunctionDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(interfaceFunctionDecl->identifier);
 
 		// Consome o Generic.
 		if (m_lexer->isLessThan())
@@ -2177,6 +2263,9 @@ namespace fluffy { namespace parser {
 		// Consome identificador.
 		structVariableDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(structVariableDecl->identifier);
+
 		Bool mustHaveInitExpression = structVariableDecl->isConst ? true : false;
 
 		// Verifica se o tipo foi declarado.
@@ -2237,6 +2326,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		traitFunctionDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(traitFunctionDecl->identifier);
 
 		// Consome o Generic.
 		if (m_lexer->isLessThan())
@@ -2323,6 +2415,9 @@ namespace fluffy { namespace parser {
 
 		// Consome o identificador.
 		enumItemDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(enumItemDecl->identifier);
 
 		switch (m_lexer->getToken().type)
 		{
@@ -2475,6 +2570,9 @@ namespace fluffy { namespace parser {
 
 				// Consome o identificador.
 				forDecl->initStmtDecl->identifier = m_lexer->expectIdentifier();
+
+				// Valida o identificador.
+				validateIdentifier(forDecl->initStmtDecl->identifier);
 
 				// Consome '='.
 				m_lexer->expectToken(TokenType_e::Assign);
@@ -2863,6 +2961,9 @@ namespace fluffy { namespace parser {
 		if (m_lexer->isIdentifier())
 		{
 			variableDecl->identifier = m_lexer->expectIdentifier();
+
+			// Valida o identificador.
+			validateIdentifier(variableDecl->identifier);
 		}
 		else if (m_lexer->isLeftBracket() || m_lexer->isLeftParBracket())
 		{
@@ -2924,6 +3025,9 @@ namespace fluffy { namespace parser {
 		// Consome identificador.
 		labelDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(labelDecl->identifier);
+
 		// Consome ':'.
 		m_lexer->expectToken(TokenType_e::Colon);
 
@@ -2948,7 +3052,7 @@ namespace fluffy { namespace parser {
 	}
 
 	std::unique_ptr<ast::expr::ExpressionDecl>
-	Parser::parseExpressionImp(ParserContext_s& ctx, OperatorPrecLevel_e prec, Bool* requiredGenericValidation)
+	Parser::parseExpressionImp(ParserContext_s& ctx, U32 prec, Bool* requiredGenericValidation)
 	{
 		std::unique_ptr<ast::expr::ExpressionDecl> lhs;
 		std::unique_ptr<ast::expr::ExpressionDecl> rhs;
@@ -3757,6 +3861,9 @@ namespace fluffy { namespace parser {
 					// Processa identificador.
 					itemDecl->identifier = m_lexer->expectIdentifier();
 
+					// Valida o identificador.
+					validateIdentifier(itemDecl->identifier);
+
 					// Consome ':'
 					if (m_lexer->isColon())
 					{
@@ -3931,11 +4038,11 @@ namespace fluffy { namespace parser {
 							}
 							goto processFunction;
 
-						case TokenType_e::Virtual:
+						case TokenType_e::Override:
 							if (staticModifier)
 							{
 								throw exceptions::custom_exception(
-									"Static function can't be virtual",
+									"Static function can't be overrided",
 									m_lexer->getToken().line,
 									m_lexer->getToken().column
 								);
@@ -3995,7 +4102,7 @@ namespace fluffy { namespace parser {
 								{
 									TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
 									TokenType_e::Let, TokenType_e::Const,
-									TokenType_e::Virtual, TokenType_e::Abstract, TokenType_e::Fn,
+									TokenType_e::Override, TokenType_e::Abstract, TokenType_e::Fn,
 									TokenType_e::LBracket
 								},
 								m_lexer->getToken().line,
@@ -4028,20 +4135,24 @@ namespace fluffy { namespace parser {
 			// Consome '::'
 			m_lexer->expectToken(TokenType_e::ScopeResolution);
 
-			auto namedExpressionDecl = std::make_unique<ast::expr::ExpressionConstantIdentifierDecl>(
+			auto namedExpressionDecl = std::make_unique<ast::expr::ExpressionIdentifierDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
 
 			namedExpressionDecl->identifier = m_lexer->expectIdentifier();
 			namedExpressionDecl->startFromRoot = true;
+
+			// Valida o identificador.
+			validateIdentifier(namedExpressionDecl->identifier);
+
 			return namedExpressionDecl;
 		}
 
 		// Processa expressao named
 		if (m_lexer->isIdentifier())
 		{
-			auto namedExpressionDecl = std::make_unique<ast::expr::ExpressionConstantIdentifierDecl>(
+			auto namedExpressionDecl = std::make_unique<ast::expr::ExpressionIdentifierDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
@@ -4067,8 +4178,14 @@ namespace fluffy { namespace parser {
 		);
 
 		// Consome uma expressao.
-		literalPatternDecl->literalExpr = parseExpression(ctx, OperatorPrecLevel_e::Max);
-
+		if (m_lexer->isIdentifier())
+		{
+			literalPatternDecl->identifier = m_lexer->expectIdentifier();
+		}
+		else
+		{
+			literalPatternDecl->literalExpr = parseExpression(ctx, OperatorPrecLevel_e::Max);
+		}
 		return literalPatternDecl;
 	}
 
@@ -4140,6 +4257,9 @@ namespace fluffy { namespace parser {
 			// Verifica se e uma referenciacao.
 			if (m_lexer->isColon())
 			{
+				// Valida o identificador.
+				validateIdentifier(structureItemPatternDecl->identifier);
+
 				// Consome ':'
 				m_lexer->expectToken(TokenType_e::Colon);
 
@@ -4187,7 +4307,7 @@ namespace fluffy { namespace parser {
 		);
 
 		// Consome tipo.
-		enumPatternDecl->enumReferenced = parseType(ctx);
+		enumPatternDecl->identifier = m_lexer->expectIdentifier();
 
 		// Consome '('
 		m_lexer->expectToken(TokenType_e::LParBracket);
@@ -4381,8 +4501,7 @@ namespace fluffy { namespace parser {
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
 		);
-
-		// Verifica se inicia pelo escopo global.
+				
 		if (m_lexer->isScopeResolution())
 		{
 			// Consome '::'.
@@ -4390,8 +4509,43 @@ namespace fluffy { namespace parser {
 			namedTypeDecl->startFromRoot = true;
 		}
 
+		// Verifica se inicia pelo escopo global.
+		while (m_lexer->isIdentifier() && m_lexer->predictNextToken().type == TokenType_e::ScopeResolution)
+		{
+			auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
+				m_lexer->getToken().line,
+				m_lexer->getToken().column
+			);
+
+			// Consome identificador.
+			scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
+
+			// Valida o identificador.
+			validateIdentifier(scopedIdentifierDecl->identifier);
+
+			// Consome '::'.
+			m_lexer->expectToken(TokenType_e::ScopeResolution);
+
+			if (namedTypeDecl->scopedReferenceDecl == nullptr)
+			{
+				namedTypeDecl->scopedReferenceDecl = std::move(scopedIdentifierDecl);
+			}
+			else
+			{
+				auto pathRef = namedTypeDecl->scopedReferenceDecl.get();
+				while (pathRef->referencedIdentifier != nullptr)
+				{
+					pathRef = pathRef->referencedIdentifier.get();
+				}
+				pathRef->referencedIdentifier = std::move(scopedIdentifierDecl);
+			}
+		}
+
 		// Consome o identificador.
 		namedTypeDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(namedTypeDecl->identifier);
 
 		// Verefica se a definicao de generic.
 		if (m_lexer->isLessThan())
@@ -4438,18 +4592,13 @@ namespace fluffy { namespace parser {
 			// Consome '>'.
 			m_lexer->expectToken(TokenType_e::GreaterThan);
 		}
-
-		// Verifica se ha identificadores internos.
-		if (m_lexer->isScopeResolution())
-		{
-			namedTypeDecl->internalIdentifier = parseInternalNamedType(ctx);
-		}
 		return namedTypeDecl;
 	}
 
 	std::unique_ptr<ast::TypeDeclNamed>
 	Parser::parseInternalNamedType(ParserContext_s& ctx)
 	{
+		/*
 		auto namedTypeDecl = std::make_unique<ast::TypeDeclNamed>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
@@ -4461,6 +4610,9 @@ namespace fluffy { namespace parser {
 		// Consome o identificador.
 		namedTypeDecl->identifier = m_lexer->expectIdentifier();
 
+		// Valida o identificador.
+		validateIdentifier(namedTypeDecl->identifier);
+
 		// Verefica se a definicao de generic.
 		if (m_lexer->isLessThan())
 		{
@@ -4513,6 +4665,8 @@ namespace fluffy { namespace parser {
 			namedTypeDecl->internalIdentifier = parseInternalNamedType(ctx);
 		}
 		return namedTypeDecl;
+		*/
+		return nullptr;
 	}
 
 	std::unique_ptr<ast::ArrayDecl>
@@ -4554,11 +4708,14 @@ namespace fluffy { namespace parser {
 			m_lexer->getToken().column
 		);
 
-		// Consome '::'.
-		m_lexer->expectToken(TokenType_e::ScopeResolution);
-
 		// Consome o identificador.
 		scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
+
+		// Valida o identificador.
+		validateIdentifier(scopedIdentifierDecl->identifier);
+
+		// Consome '::'.
+		m_lexer->expectToken(TokenType_e::ScopeResolution);
 
 		// Verifica se a mais declaracoes de escopo.
 		if (m_lexer->isScopeResolution())
@@ -4566,5 +4723,18 @@ namespace fluffy { namespace parser {
 			scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
 		}
 		return scopedIdentifierDecl;
+	}
+
+	void
+	Parser::validateIdentifier(TString& id)
+	{
+		if (id == String("_"))
+		{
+			throw exceptions::custom_exception(
+				"Invalid 'joker' identifier declaration",
+				m_lexer->getToken().line,
+				m_lexer->getToken().column
+			);
+		}
 	}
 } }

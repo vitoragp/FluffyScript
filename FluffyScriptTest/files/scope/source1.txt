@@ -1,0 +1,248 @@
+include { std::print } in "stl";
+
+// Importa tudo dentro da biblioteca.
+include { ui::* } in "UI";
+
+namespace application
+{
+	// Struct sao estruturas de dados apenas,
+	// todos membro e publico.
+	struct User
+	{
+		let id: u64;
+		let name: string;
+		let age: u8;
+		let weight: fp32;
+		
+		let factor_wl: fp32;
+		let factor_wh: fp64;
+		
+		let factor_a: i8;
+		let factor_ax: u8;
+		
+		let factor_uv: u16;
+		let factor_vv: i16;
+		
+		let factor_buv: u32;
+		let factor_bvv: i32;
+		
+		let factor_xuv: u64;
+		let factor_xvv: i64;
+		
+		// object e semelhante a Object do java
+		// e base de todos os tipos da linguagem.
+		let relationship: map<string, object>;
+	}
+	
+	// Traits sao usados para estender a funcionalidade de estruturas de dados ou classes,
+	// servem de interface para essas estruturas, porem se tratando de classes traits so podem
+	// usar metodos e membros publicos suas funcoes podem ser estaticas pertencendes ao objeto
+	// ou referentes a instancia do objeto. A palavra reservada self indica o tipo de objeto
+	// para o qual o trait esta sendo implementado. 
+	// obs: traits dependem da existencia deles no ao escopo da linguagem, se um objeto possui
+	// um trait, porem em nenhum momento ele foi chamado no codigo, entao naquele contexto o objeto
+	// nao tera essa extensao, exemplo:
+	// o trait traitA foi declarado para o objeto objA em uma biblioteca biblioA.
+	// o programa chama o objA em biblioA, nesse programa as funcionalidade extendidas em
+	// traitA nao irao existir, a menos que o traitA seja incluido nas declaracoes.
+	trait ValidateAgeOfMajority
+	{		
+		fn validate() -> bool;
+		static fn validateList(list: self[]) -> bool;
+	}
+	
+	// Nesse caso todos os tipos self devem ser trocados por User.
+	trait ValidateAgeOfMajority for User
+	{
+		fn validate()-> bool
+		{
+			return this.age > 18;
+		}
+		
+		static fn validateUsers(list: User[])-> bool
+		{
+			for let user = list.begin(); user != list.end(); user++
+			{
+				if user.age < 18
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	class MyWindow extends Window implements Clickable
+	{
+		/*
+		 * A iniciacao de constantes pode ocorrer explicitamente
+		 * ou no construtor.
+		 * explicitamente ocorre durante a compilacao.
+		 * no construtor durante a execucao.
+		 */
+		 
+		private const title: string = "Minha";
+		private const subTitle: string = "hello";
+		
+		protected let numClicks: u32 = 0;
+		protected let numDbClicks: u32 = 0;
+		
+		// gender e um tipo anulavel e por padrao e iniciado com nulo,
+		// mas pode ser declararado explicitamente tambem.
+		protected let gender: i32? = null;
+		
+		protected let isMale: bool = false;
+		protected let isFemale: bool = false;
+		
+		protected let user: User?;
+		
+		protected let userMemoryAllocated: u64 = 0; 
+		
+		protected let icon: object?;
+	
+		public constructor()
+			: subTitle("janela")
+		{
+			super(title + subTitle);
+		}
+		
+		destructor()
+		{}
+		
+		override fn builder()
+		{
+			// Chama o metodo builder da classes extendida.
+			super.builder();
+			
+			if this.icon?.rounded
+			{
+				const iconRounded = this.icon as IconRounded;
+				iconRounded.radius = 10;
+				
+				this.addChild(iconRounded);
+				
+				goto skipLabelBlock;
+			}
+		
+			// E possivel atribuir valores de membros publicos
+			// durante a instanciacao do objeto.			
+			this.addChild(
+				new Label()
+				{
+					value: "Selecione seu sexo:"					
+				}
+			);
+			
+		skipLabelBlock:
+			let maxIt = 10;
+			let i = 0;
+			
+			while i < maxIt
+			{				
+				if i == 5 && this.gender
+				{
+					continue;		
+				}
+				this.add(new Badge(i));
+				i++;
+			}
+
+			i = 0;
+			do			
+			{				
+				if i == 5 && this.gender
+				{
+					continue;		
+				}
+				this.add(new Badge(i));
+				i++;
+			}
+			while i < maxIt;
+						
+			this.addChild(
+				// Ao instanciar um objeto parametros devem ser informacoes obrigatorias,
+				// informacoes adicionais devem preferencialmente ser passadas pela inicializacao
+				// de membros como foi feito em onClick.
+				new Select(GenderOptions.toMap())
+				{
+					// Como onClick ja possui assinatura, o compilador pode
+					// deduzir os tipos de parametros e de retorno da funcao
+					// anonima atraves dela(assinatura de onClick).
+					onClick: |owner| {
+						// como gender e um tipo anulavel,
+						// se selected for nulo, gender recebera nulo
+						// tambem. obs: se gender nao fosse anulavel,
+						// o compilador emitiria um erro.
+						this.gender = owner?.selected?.index;
+						
+						if this.user is ValidateAgeOfMajority
+						{
+							this.user.validate();
+						}
+						else
+						{
+							panic("user cannot be validated!");
+						}
+						
+						match this.gender
+						{
+							when 0 -> {
+								isMale = true;
+								isFemale = false;
+								break;
+							},
+								
+							when 1 -> {
+								isMale = false;
+								isFemale = true;
+								break;
+							},
+								
+							when _ -> { panic("Unexpected gender option"); },
+						}
+					}
+				}
+			);
+			
+			this.addChild(
+				new Button("Enviar")
+				{
+					// Anula o parametro owner.
+					onClick: |_| {
+						if this.gender
+						{
+							this.close(true, false);
+						}
+					}
+				}
+			);
+		}
+		
+		override fn click() -> void 
+		{
+			this.numClicks++;
+		}
+		
+		// Nao tipificar o retorno significa ": void".
+		override fn dbClick() final
+		{
+			this.numDbClicks++;
+		}
+	}
+	
+	interface Clickable
+	{
+		fn click() -> void;
+		fn dbClick();		
+	}
+
+	/*	
+	// Enumeracoes tem valores nesse caso(Male e Female),
+	// mas cada posicao tambem possui em indice sempre comecando por 0.	
+	enum GenderOptions
+	{
+		Male = "Male",		// index: 0
+		Female = "Female"	// index: 1
+	}
+	/**/
+}

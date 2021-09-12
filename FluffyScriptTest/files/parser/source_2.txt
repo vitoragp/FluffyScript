@@ -1,11 +1,11 @@
 class Foo
 {
-	virtual fn Foo() {}
-	virtual fn Foo(a: i32) {}
-	virtual fn Foo(a: i32, b: i32) {}
-	virtual fn Foo() -> i32 {}
-	virtual fn Foo(a: i32) -> i32 {}
-	virtual fn Foo(a: i32, b: i32) -> i32 {}
+	override fn Foo() {}
+	override fn Foo(a: i32) {}
+	override fn Foo(a: i32, b: i32) {}
+	override fn Foo() -> i32 {}
+	override fn Foo(a: i32) -> i32 {}
+	override fn Foo(a: i32, b: i32) -> i32 {}
 
 	static fn Foo() {}
 	static fn Foo(a: i32) {}
@@ -14,19 +14,19 @@ class Foo
 	static fn Foo(a: i32) -> i32 {}
 	static fn Foo(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo() override {}
-	virtual fn Foo(a: i32) override {}
-	virtual fn Foo(a: i32, b: i32) override {}
-	virtual fn Foo() -> i32 override {}
-	virtual fn Foo(a: i32) -> i32 override {}
-	virtual fn Foo(a: i32, b: i32) -> i32 override {}
+	override fn Foo() {}
+	override fn Foo(a: i32) {}
+	override fn Foo(a: i32, b: i32) {}
+	override fn Foo() -> i32 {}
+	override fn Foo(a: i32) -> i32 {}
+	override fn Foo(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo() final {}
-	virtual fn Foo(a: i32) final {}
-	virtual fn Foo(a: i32, b: i32) final {}
-	virtual fn Foo() -> i32 final {}
-	virtual fn Foo(a: i32) -> i32 final {}
-	virtual fn Foo(a: i32, b: i32) -> i32 final {}
+	override fn Foo() final {}
+	override fn Foo(a: i32) final {}
+	override fn Foo(a: i32, b: i32) final {}
+	override fn Foo() -> i32 final {}
+	override fn Foo(a: i32) -> i32 final {}
+	override fn Foo(a: i32, b: i32) -> i32 final {}
 
 	abstract fn Foo();
 	abstract fn Foo(a: i32);
@@ -42,26 +42,26 @@ class Foo
 	fn Foo(a: i32) -> i32 {}
 	fn Foo(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() override {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) override {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) override {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 override {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 override {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 override {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() final {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) final {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) final {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 final {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 final {}
-	virtual fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>() -> i32 final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 final {}
+	override fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 final {}
 
 	abstract fn Foo<T where T is ::Model, U where U is ::User, T>();
 	abstract fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32);
@@ -77,26 +77,26 @@ class Foo
 	fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32) -> i32 {}
 	fn Foo<T where T is ::Model, U where U is ::User, T>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model>() {}
-	virtual fn Foo<T where T is ::Model>(a: i32) {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) {}
-	virtual fn Foo<T where T is ::Model>() -> i32 {}
-	virtual fn Foo<T where T is ::Model>(a: i32) -> i32 {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 {}
+	override fn Foo<T where T is ::Model>() {}
+	override fn Foo<T where T is ::Model>(a: i32) {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) {}
+	override fn Foo<T where T is ::Model>() -> i32 {}
+	override fn Foo<T where T is ::Model>(a: i32) -> i32 {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model>() override {}
-	virtual fn Foo<T where T is ::Model>(a: i32) override {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) override {}
-	virtual fn Foo<T where T is ::Model>() -> i32 override {}
-	virtual fn Foo<T where T is ::Model>(a: i32) -> i32 override {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 override {}
+	override fn Foo<T where T is ::Model>() {}
+	override fn Foo<T where T is ::Model>(a: i32) {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) {}
+	override fn Foo<T where T is ::Model>() -> i32 {}
+	override fn Foo<T where T is ::Model>(a: i32) -> i32 {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T where T is ::Model>() final {}
-	virtual fn Foo<T where T is ::Model>(a: i32) final {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) final {}
-	virtual fn Foo<T where T is ::Model>() -> i32 final {}
-	virtual fn Foo<T where T is ::Model>(a: i32) -> i32 final {}
-	virtual fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 final {}
+	override fn Foo<T where T is ::Model>() final {}
+	override fn Foo<T where T is ::Model>(a: i32) final {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) final {}
+	override fn Foo<T where T is ::Model>() -> i32 final {}
+	override fn Foo<T where T is ::Model>(a: i32) -> i32 final {}
+	override fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 final {}
 
 	abstract fn Foo<T where T is ::Model>();
 	abstract fn Foo<T where T is ::Model>(a: i32);
@@ -112,26 +112,26 @@ class Foo
 	fn Foo<T where T is ::Model>(a: i32) -> i32 {}
 	fn Foo<T where T is ::Model>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T>() {}
-	virtual fn Foo<T>(a: i32) {}
-	virtual fn Foo<T>(a: i32, b: i32) {}
-	virtual fn Foo<T>() -> i32 {}
-	virtual fn Foo<T>(a: i32) -> i32 {}
-	virtual fn Foo<T>(a: i32, b: i32) -> i32 {}
+	override fn Foo<T>() {}
+	override fn Foo<T>(a: i32) {}
+	override fn Foo<T>(a: i32, b: i32) {}
+	override fn Foo<T>() -> i32 {}
+	override fn Foo<T>(a: i32) -> i32 {}
+	override fn Foo<T>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T>() override {}
-	virtual fn Foo<T>(a: i32) override {}
-	virtual fn Foo<T>(a: i32, b: i32) override {}
-	virtual fn Foo<T>() -> i32 override {}
-	virtual fn Foo<T>(a: i32) -> i32 override {}
-	virtual fn Foo<T>(a: i32, b: i32) -> i32 override {}
+	override fn Foo<T>() {}
+	override fn Foo<T>(a: i32) {}
+	override fn Foo<T>(a: i32, b: i32) {}
+	override fn Foo<T>() -> i32 {}
+	override fn Foo<T>(a: i32) -> i32 {}
+	override fn Foo<T>(a: i32, b: i32) -> i32 {}
 
-	virtual fn Foo<T>() final {}
-	virtual fn Foo<T>(a: i32) final {}
-	virtual fn Foo<T>(a: i32, b: i32) final {}
-	virtual fn Foo<T>() -> i32 final {}
-	virtual fn Foo<T>(a: i32) -> i32 final {}
-	virtual fn Foo<T>(a: i32, b: i32) -> i32 final {}
+	override fn Foo<T>() final {}
+	override fn Foo<T>(a: i32) final {}
+	override fn Foo<T>(a: i32, b: i32) final {}
+	override fn Foo<T>() -> i32 final {}
+	override fn Foo<T>(a: i32) -> i32 final {}
+	override fn Foo<T>(a: i32, b: i32) -> i32 final {}
 
 	abstract fn Foo<T>();
 	abstract fn Foo<T>(a: i32);
