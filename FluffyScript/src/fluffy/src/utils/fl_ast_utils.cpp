@@ -21,6 +21,38 @@ namespace fluffy { namespace utils {
 		{
 			switch (nodeA->nodeType)
 			{
+			case AstNodeType_e::IncludeItemDecl:
+				{
+					TString idA, idB;
+
+					ast::IncludeItemDecl* incItemA = reinterpret_cast<ast::IncludeItemDecl*>(nodeA);
+					ast::IncludeItemDecl* incItemB = reinterpret_cast<ast::IncludeItemDecl*>(nodeB);
+
+					if (incItemA->referencedAlias == TString(nullptr))
+					{
+						idA = incItemA->identifier;
+					}
+					else
+					{
+						idA = incItemA->referencedAlias;
+					}
+
+					if (incItemB->referencedAlias == TString(nullptr))
+					{
+						idB = incItemB->identifier;
+					}
+					else
+					{
+						idB = incItemB->referencedAlias;
+					}
+
+					if (idA != idB)
+					{
+						return false;
+					}
+				}
+				return true;
+
 			case AstNodeType_e::TraitDecl:
 				{
 					ast::TraitDecl* traitA = reinterpret_cast<ast::TraitDecl*>(nodeA);
@@ -249,27 +281,27 @@ namespace fluffy { namespace utils {
 					{
 						return false;
 					}
-					if (typeA->resolvedReference && typeB->resolvedReference)
+					if (typeA->hasBeenResolved && typeB->hasBeenResolved)
 					{
-						if (typeA->resolvedReference != typeB->resolvedReference)
+						if (typeA->referencedNode != typeB->referencedNode)
 						{
 							return false;
 						}
 					}
-					else if (typeA->resolvedReference == nullptr && typeB->resolvedReference == nullptr)
+					else if (!typeA->hasBeenResolved && !typeB->hasBeenResolved)
 					{
 						if (typeA->startFromRoot != typeB->startFromRoot)
 						{
 							return false;
 						}
-						if (typeA->scopedReferenceDecl && typeB->scopedReferenceDecl)
+						if (typeA->scopePath && typeB->scopePath)
 						{
-							if (!equals(typeA->scopedReferenceDecl.get(), typeB->scopedReferenceDecl.get()))
+							if (!equals(typeA->scopePath.get(), typeB->scopePath.get()))
 							{
 								return false;
 							}
 						}
-						else if (typeA->scopedReferenceDecl || typeB->scopedReferenceDecl)
+						else if (typeA->scopePath || typeB->scopePath)
 						{
 							return false;
 						}
@@ -292,23 +324,23 @@ namespace fluffy { namespace utils {
 				}
 				return true;
 
-			case AstNodeType_e::ScopedIdentifierDecl:
+			case AstNodeType_e::ScopedPathDecl:
 				{
-					ast::ScopedIdentifierDecl* typeA = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeA);
-					ast::ScopedIdentifierDecl* typeB = reinterpret_cast<ast::ScopedIdentifierDecl*>(nodeB);
+					ast::ScopedPathDecl* typeA = reinterpret_cast<ast::ScopedPathDecl*>(nodeA);
+					ast::ScopedPathDecl* typeB = reinterpret_cast<ast::ScopedPathDecl*>(nodeB);
 
 					if (typeA->identifier != typeB->identifier)
 					{
 						return false;
 					}
-					if (typeA->referencedIdentifier && typeB->referencedIdentifier)
+					if (typeA->scopedChildPath && typeB->scopedChildPath)
 					{
-						if (!equals(typeA->referencedIdentifier.get(), typeB->referencedIdentifier.get()))
+						if (!equals(typeA->scopedChildPath.get(), typeB->scopedChildPath.get()))
 						{
 							return false;
 						}
 					}
-					else if (typeA->referencedIdentifier || typeB->referencedIdentifier)
+					else if (typeA->scopedChildPath || typeB->scopedChildPath)
 					{
 						return false;
 					}
@@ -346,14 +378,54 @@ namespace fluffy { namespace utils {
 		}
 		else
 		{
-
-			if (nodeA->identifier == nodeB->identifier)
+			if (nodeA->nodeType == AstNodeType_e::IncludeItemDecl)
 			{
-				if ((nodeA->nodeType == AstNodeType_e::TraitDecl && nodeB->nodeType == AstNodeType_e::TraitForDecl) ||
-					(nodeA->nodeType == AstNodeType_e::TraitForDecl && nodeB->nodeType == AstNodeType_e::TraitDecl)) {
-					return false;
+				auto includeItemA = ast::safe_cast<ast::IncludeItemDecl>(nodeA);
+
+				if (includeItemA->referencedAlias == TString(nullptr))
+				{
+					if (includeItemA->identifier == nodeB->identifier)
+					{
+						return true;
+					}
 				}
-				return true;
+				else
+				{
+					if (includeItemA->referencedAlias == nodeB->identifier)
+					{
+						return true;
+					}
+				}
+			}
+			else if (nodeB->nodeType == AstNodeType_e::IncludeItemDecl)
+			{
+				auto includeItemB = ast::safe_cast<ast::IncludeItemDecl>(nodeB);
+
+				if (includeItemB->referencedAlias == TString(nullptr))
+				{
+					if (nodeA->identifier == includeItemB->identifier)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (nodeA->identifier == includeItemB->referencedAlias)
+					{
+						return true;
+					}
+				}
+			}
+			else
+			{
+				if (nodeA->identifier == nodeB->identifier)
+				{
+					if ((nodeA->nodeType == AstNodeType_e::TraitDecl && nodeB->nodeType == AstNodeType_e::TraitForDecl) ||
+						(nodeA->nodeType == AstNodeType_e::TraitForDecl && nodeB->nodeType == AstNodeType_e::TraitDecl)) {
+						return false;
+					}
+					return true;
+				}
 			}
 		}
 		return false;
@@ -610,21 +682,21 @@ namespace fluffy { namespace utils {
 	}
 
 	String
-	AstUtils::printScopedIdentifier(ast::AstNode* const scopedIdentifier)
+	AstUtils::printScopedPath(ast::AstNode* const scopedIdentifier)
 	{
 		std::stringstream ss;
 
-		if (scopedIdentifier->nodeType == AstNodeType_e::ScopedIdentifierDecl)
+		if (scopedIdentifier->nodeType == AstNodeType_e::ScopedPathDecl)
 		{
-			if (auto n = reinterpret_cast<ast::ScopedIdentifierDecl*>(scopedIdentifier))
+			if (auto n = reinterpret_cast<ast::ScopedPathDecl*>(scopedIdentifier))
 			{
-				if (n->referencedIdentifier)
+				if (n->scopedChildPath)
 				{
-					ast::ScopedIdentifierDecl* nextId = n->referencedIdentifier.get();
+					ast::ScopedPathDecl* nextId = n->scopedChildPath.get();
 					while (nextId)
 					{
 						ss << nextId->identifier.str() << "::";
-						nextId = nextId->referencedIdentifier.get();
+						nextId = nextId->scopedChildPath.get();
 					}
 				}
 				ss << n->identifier.str();
@@ -642,13 +714,13 @@ namespace fluffy { namespace utils {
 		{
 			if (auto n = reinterpret_cast<ast::IncludeItemDecl*>(includeItem))
 			{
-				if (n->referencedPath)
+				if (n->scopePath)
 				{
-					ast::ScopedIdentifierDecl* nextId = n->referencedPath.get();
+					ast::ScopedPathDecl* nextId = n->scopePath.get();
 					while (nextId)
 					{
 						ss << nextId->identifier.str() << "::";
-						nextId = nextId->referencedIdentifier.get();
+						nextId = nextId->scopedChildPath.get();
 					}
 				}
 				ss << n->identifier.str();
@@ -668,9 +740,9 @@ namespace fluffy { namespace utils {
 				{
 					if (auto baseClassType = reinterpret_cast<ast::TypeDeclNamed*>(classDecl->baseClass.get()))
 					{
-						if (baseClassType->resolvedReference)
+						if (baseClassType->hasBeenResolved)
 						{
-							*outDecl = baseClassType->resolvedReference;
+							*outDecl = baseClassType->referencedNode;
 						}
 					}
 					else

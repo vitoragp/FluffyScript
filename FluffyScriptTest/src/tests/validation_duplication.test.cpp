@@ -4,6 +4,7 @@
 
 #include "fl_buffer.h"
 #include "parser\fl_parser.h"
+#include "validation\fl_validation_duplicated_nodes.h"
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace testing {
@@ -15,7 +16,8 @@ namespace fluffy { namespace testing {
 	struct ValidationDuplicationTest : public ::testing::Test
 	{
 		std::unique_ptr<parser::Parser> parser;
-		parser::ParserContext_s ctx;
+		scope::ScopeManager scopeManager;
+		parser::ParserContext_s ctx = { false };
 
 		// Antes de cada test
 		virtual void SetUp() override {
@@ -26,7 +28,7 @@ namespace fluffy { namespace testing {
 	/**
 	 * Testing
 	 */
-	/*
+
 	TEST_F(ValidationDuplicationTest, TestDuplicatedNamespace)
 	{
 		parser->loadSource(
@@ -38,16 +40,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'app' at: line 2, column 1");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'app' at: line 2, column 1");
 		}
 		catch (std::exception&)
 		{
@@ -67,16 +71,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 17");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 17");
 		}
 		catch (std::exception&)
 		{
@@ -96,16 +102,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 19");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 19");
 		}
 		catch (std::exception&)
 		{
@@ -125,16 +133,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 22");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 22");
 		}
 		catch (std::exception&)
 		{
@@ -154,16 +164,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 23");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 23");
 		}
 		catch (std::exception&)
 		{
@@ -183,16 +195,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 25");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 25");
 		}
 		catch (std::exception&)
 		{
@@ -213,16 +227,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 2, column 28");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 2, column 28");
 		}
 		catch (std::exception&)
 		{
@@ -245,16 +261,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 3, column 1");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 3, column 1");
 		}
 		catch (std::exception&)
 		{
@@ -277,16 +295,18 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 3, column 7");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 3, column 7");
 		}
 		catch (std::exception&)
 		{
@@ -304,21 +324,24 @@ namespace fluffy { namespace testing {
 				"} \n"
 			"}"
 		);
+
 		auto codeUnit = parser->parseCodeUnit(ctx);
 
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 4, column 16");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 4, column 16");
 		}
 		catch (std::exception&)
 		{
@@ -340,21 +363,24 @@ namespace fluffy { namespace testing {
 				"fn main(a: u32, b: app::Foo) {}\n"
 			"}"
 		);
+
 		auto codeUnit = parser->parseCodeUnit(ctx);
 
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'main' at: line 9, column 1");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'main' at: line 9, column 1");
 		}
 		catch (std::exception&)
 		{
@@ -376,21 +402,22 @@ namespace fluffy { namespace testing {
 		try
 		{
 			NodeMultiMap map;
-			map.emplace(codeUnit->name.c_str(), codeUnit.get());
+			map.emplace(codeUnit->identifier, codeUnit.get());
 
-			auto validation = validations::DuplicatedValidation(map);
-			validation.validate(codeUnit.get());
+			scopeManager.insertCodeUnit(codeUnit.get());
+
+			auto validation = validations::ValidationDuplicatedNodes();
+			scopeManager.processCodeUnit(codeUnit.get(), &validation);
 
 			ASSERT_ANY_THROW("Unexpected result");
 		}
 		catch (exceptions::custom_exception& e)
 		{
-			ASSERT_STREQ(e.what(), "anom_block: error duplicated identifier 'a' at: line 3, column 13");
+			ASSERT_STREQ(e.what(), "anom_block error: Duplicated identifier 'a' at: line 3, column 13");
 		}
 		catch (std::exception&)
 		{
 			ASSERT_ANY_THROW("Unexpected exception");
 		}
 	}
-	*/
 } }

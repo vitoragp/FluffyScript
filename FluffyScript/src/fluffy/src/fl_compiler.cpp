@@ -7,6 +7,7 @@
 #include "utils\fl_ast_utils.h"
 #include "utils\fl_include_utils.h"
 #include "scope\fl_scope_manager.h"
+#include "validation\fl_validation_duplicated_nodes.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 #include "fl_compiler.h"
@@ -22,10 +23,17 @@ namespace fluffy {
 		: mScopeManager(new scope::ScopeManager())
 		, mJobCount(4)
 		, mInitialized(false)
+		, mBuildBlock(false)
 	{}
 
 	Compiler::~Compiler()
 	{}
+
+	void
+	Compiler::initialize()
+	{
+		mInitialized = true;
+	}
 
 	void
 	Compiler::initialize(String basePath)
@@ -37,7 +45,64 @@ namespace fluffy {
 	void
 	Compiler::build(String sourceFile)
 	{
-		buildInternal(mBasePath + sourceFile.c_str());
+		if (!mBuildBlock)
+		{
+			buildInternal(mBasePath + sourceFile.c_str());
+		}
+		for (auto codeUnit : mExecutionTree)
+		{
+			for (auto& nodeProcessor : mNodeProcessorList)
+			{
+				mScopeManager->processCodeUnit(codeUnit, nodeProcessor.get());
+			}
+		}
+	}
+
+	void
+	Compiler::build()
+	{
+		for (auto codeUnit : mExecutionTree)
+		{
+			for (auto& nodeProcessor : mNodeProcessorList)
+			{
+				mScopeManager->processCodeUnit(codeUnit, nodeProcessor.get());
+			}
+		}
+	}
+
+	void
+	Compiler::addBlockToBuild(String sourceFile, String sourceCode)
+	{
+		std::unique_ptr<jobs::JobParseFromSourceBlock> job;
+		{
+			// Cria tarefa e enfileira na fila.
+			job = std::make_unique<jobs::JobParseFromSourceBlock>(sourceFile.c_str(), sourceCode.c_str());
+			job->doJob();
+
+			// Valida os code units por ambiguidades.
+			if (job != nullptr)
+			{
+				if (job->getJobStatus() == jobs::JobStatus_e::Error)
+				{
+					throw exceptions::custom_exception(job->getError());
+				}
+			}
+		}
+
+		// Junta todos as AST das tarefas.
+		ast::CodeUnit* const codeUnit = job->getCodeUnitPointer();
+
+		// Insere o code unit na arvore de execucao, essa arvore contem a ordem em que os
+		// arquivos foram processados, sendo o primeiro o include mais distante do arquivo fonte de inicio
+		// e o ultimo o proprio arquivo de iniciao da aplicação, essa estrutura e importante pois determinara
+		// a ordem da validacao e transformacao do codigo.
+		mExecutionTree.emplace_back(codeUnit);
+
+		// Insere o code unit no gerenciador de escopo.
+		mScopeManager->insertCodeUnit(codeUnit);
+
+		// Insere o code unit no arvore de referencia.
+		mApplicationTree.emplace(codeUnit->identifier, std::move(job->getCodeUnit()));
 	}
 
 	void
@@ -50,6 +115,18 @@ namespace fluffy {
 			);
 		}
 		mJobCount = jobCount;
+	}
+
+	void
+	Compiler::applyTransformation(scope::NodeProcessor* const transformationProcessor)
+	{
+		mNodeProcessorList.emplace_back(transformationProcessor);
+	}
+
+	void
+	Compiler::applyValidation(scope::NodeProcessor* const validationProcessor)
+	{
+		mNodeProcessorList.emplace_back(validationProcessor);
 	}
 
 	void
@@ -105,9 +182,6 @@ namespace fluffy {
 			include->inFile = fileWithPath;
 		}
 
-		// Insere o code unit no arvore de referencia.
-		mApplicationTree.emplace(codeUnit->name.c_str(), std::move(job->getCodeUnit()));
-
 		// Insere o code unit na arvore de execucao, essa arvore contem a ordem em que os
 		// arquivos foram processados, sendo o primeiro o include mais distante do arquivo fonte de inicio
 		// e o ultimo o proprio arquivo de iniciao da aplicação, essa estrutura e importante pois determinara
@@ -116,6 +190,9 @@ namespace fluffy {
 
 		// Insere o code unit no gerenciador de escopo.
 		mScopeManager->insertCodeUnit(codeUnit);
+
+		// Insere o code unit no arvore de referencia.
+		mApplicationTree.emplace(codeUnit->identifier, std::move(job->getCodeUnit()));
 	}
 
 }

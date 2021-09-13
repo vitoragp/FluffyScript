@@ -1,7 +1,9 @@
+include { loo::Begin } in "loo";
+
 namespace foo {
 	export class Loo {}
 
-	export trait Foo {}
+	trait Foo {}
 
 	export trait Foo for Loo {}
 

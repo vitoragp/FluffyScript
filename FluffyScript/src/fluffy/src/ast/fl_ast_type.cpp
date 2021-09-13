@@ -81,7 +81,9 @@ namespace fluffy { namespace ast {
 	TypeDeclNamed::TypeDeclNamed(U32 line, U32 column)
 		: TypeDecl(AstNodeType_e::NamedType, TypeDeclID_e::Named, line, column)
 		, startFromRoot(false)
-		, resolvedReference(nullptr)
+		, referencedScope(nullptr)
+		, referencedNode(nullptr)
+		, hasBeenResolved(false)
 	{}
 
 	TypeDeclNamed::~TypeDeclNamed()

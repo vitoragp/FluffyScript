@@ -262,6 +262,11 @@ namespace fluffy {
 		return str1.hash() == str2.hash();
 	}
 
+	const Bool operator==(const TString& str1, const I8* str2)
+	{
+		return str1.hash() == TString(str2).hash();
+	}
+
 	const Bool operator!=(const TString& str1, const std::string& str2)
 	{
 		if (str1.str() == nullptr) {
@@ -273,5 +278,10 @@ namespace fluffy {
 	const Bool operator!=(const TString& str1, const TString& str2)
 	{
 		return str1.hash() != str2.hash();
+	}
+
+	const Bool operator!=(const TString& str1, const I8* str2)
+	{
+		return str1.hash() != TString(str2).hash();
 	}
 }

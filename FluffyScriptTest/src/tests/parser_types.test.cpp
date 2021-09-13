@@ -304,7 +304,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedTypeDecl != nullptr);
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
-		EXPECT_EQ(namedTypeDecl->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedTypeDecl->scopePath, nullptr);
 		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
@@ -324,7 +324,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedTypeDecl != nullptr);
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
-		EXPECT_EQ(namedTypeDecl->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedTypeDecl->scopePath, nullptr);
 		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
@@ -351,7 +351,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedTypeDecl != nullptr);
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
-		EXPECT_EQ(namedTypeDecl->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedTypeDecl->scopePath, nullptr);
 		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
@@ -378,7 +378,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedTypeDecl != nullptr);
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
-		EXPECT_EQ(namedTypeDecl->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedTypeDecl->scopePath, nullptr);
 		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
@@ -398,7 +398,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedTypeDecl != nullptr);
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Foo");
-		EXPECT_EQ(namedTypeDecl->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedTypeDecl->scopePath, nullptr);
 		EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 2);
 		EXPECT_EQ(namedTypeDecl->nullable, false);
 		EXPECT_EQ(namedTypeDecl->startFromRoot, false);
@@ -411,7 +411,7 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(namedParamType != nullptr);
 
 		EXPECT_EQ(namedParamType->identifier, "T");
-		EXPECT_EQ(namedParamType->scopedReferenceDecl, nullptr);
+		EXPECT_EQ(namedParamType->scopePath, nullptr);
 		EXPECT_EQ(namedParamType->genericDefinitionList.size(), 0);
 		EXPECT_EQ(namedParamType->nullable, false);
 		EXPECT_EQ(namedParamType->startFromRoot, false);

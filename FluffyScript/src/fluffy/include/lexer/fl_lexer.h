@@ -21,6 +21,9 @@ namespace fluffy { namespace lexer {
 		loadSource(const I8* sourceCode);
 
 		void
+		loadSource(const I8* sourceFilename, const I8* sourceCode);
+
+		void
 		loadSourceFromFile(const I8* sourceFilename);
 
 		const I8*

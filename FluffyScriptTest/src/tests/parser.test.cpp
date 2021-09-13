@@ -48,8 +48,8 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 
 		EXPECT_EQ(treeAst->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
-		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->identifier, "print");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->scopePath->identifier, "io");
 
 		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
@@ -62,10 +62,10 @@ namespace fluffy { namespace testing {
 		EXPECT_FALSE(treeAst == nullptr);
 		
 		EXPECT_EQ(treeAst->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includedItemList[0]->identifier, "print");
-		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "io");
-		EXPECT_EQ(treeAst->includedItemList[1]->identifier, "scan");
-		EXPECT_EQ(treeAst->includedItemList[1]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->identifier, "print");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->scopePath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[1].get())->identifier, "scan");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[1].get())->scopePath->identifier, "io");
 
 		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
@@ -79,8 +79,8 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(treeAst->includedItemList.size(), 1);
 
-		EXPECT_EQ(treeAst->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(treeAst->includedItemList[0]->referencedPath->identifier, "math");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includedItemList[0].get())->scopePath->identifier, "math");
 	
 		EXPECT_EQ(treeAst->inFile, "\\system");
 	}
@@ -95,16 +95,16 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get())))->identifier, "print");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get())))->scopePath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[1].get()))->identifier, "scan");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[1].get()))->scopePath->identifier, "io");
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->identifier, "Window");
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get())))->identifier, "Window");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get())))->scopePath->identifier, "ui");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}
@@ -119,14 +119,14 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get()))->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get()))->scopePath->identifier, "io");
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get()))->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get()))->scopePath->identifier, "ui");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}
@@ -141,16 +141,16 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(treeAst->includeDeclList.size(), 2);
 		
 		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList.size(), 2);
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->identifier, "print");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[0]->referencedPath->identifier, "io");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->identifier, "scan");
-		EXPECT_EQ(treeAst->includeDeclList[0]->includedItemList[1]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get())->identifier, "print");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[0].get())->scopePath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[1].get())->identifier, "scan");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[0]->includedItemList[1].get())->scopePath->identifier, "io");
 
 		EXPECT_EQ(treeAst->includeDeclList[0]->inFile, "\\system");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList.size(), 1);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(treeAst->includeDeclList[1]->includedItemList[0]->referencedPath->identifier, "ui");
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get())->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)treeAst->includeDeclList[1]->includedItemList[0].get())->scopePath->identifier, "ui");
 
 		EXPECT_EQ(treeAst->includeDeclList[1]->inFile, "\\system");
 	}

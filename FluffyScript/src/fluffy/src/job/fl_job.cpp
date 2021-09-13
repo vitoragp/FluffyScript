@@ -92,4 +92,54 @@ namespace fluffy { namespace jobs {
 	{
 		return m_codeUnit.get();
 	}
+
+	/**
+	 * JobParseFromSourceBlock
+	 */
+
+	JobParseFromSourceBlock::JobParseFromSourceBlock(const I8* sourceFilename, const I8* sourceCode)
+		: m_sourceFilename(sourceFilename)
+		, m_sourceCode(sourceCode)
+	{}
+
+	JobParseFromSourceBlock::~JobParseFromSourceBlock()
+	{}
+
+	void
+	JobParseFromSourceBlock::doJob()
+	{
+		parser::ParserContext_s context = parser::ParserContext_s { false };
+		auto parser = std::make_unique<parser::Parser>(
+			new LazyBuffer()
+		);
+
+		try
+		{
+			parser->loadSource(m_sourceFilename, m_sourceCode);
+			m_codeUnit = parser->parseCodeUnit(context);
+		}
+		catch (std::exception& e)
+		{
+			setJobStatus(JobStatus_e::Error);
+			setError(e.what());
+		}
+	}
+
+	const I8*
+	JobParseFromSourceBlock::getSourceFilename()
+	{
+		return m_sourceFilename;
+	}
+
+	std::unique_ptr<ast::CodeUnit>
+	JobParseFromSourceBlock::getCodeUnit()
+	{
+		return std::move(m_codeUnit);
+	}
+
+	ast::CodeUnit*
+	JobParseFromSourceBlock::getCodeUnitPointer()
+	{
+		return m_codeUnit.get();
+	}
 } }

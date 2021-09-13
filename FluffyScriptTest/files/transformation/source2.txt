@@ -1,0 +1,6 @@
+include { loo::FooThree } in "source3";
+
+namespace foo {
+	export class FooOne {}
+		   class FooTwo {}
+}

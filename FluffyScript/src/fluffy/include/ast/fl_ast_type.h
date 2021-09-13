@@ -1,8 +1,7 @@
 #pragma once
-#include <memory>
-#include <vector>
 #include "fl_ast.h"
 #include "fl_defs.h"
+#include "fl_collections.h"
 #define FLUFFY_PRIMITIVE_TYPE_DECL(type) \
 	class TypeDecl##type : public TypeDecl, public AstSafeCast<AstNodeType_e::type##Type> \
 	{ \
@@ -12,7 +11,7 @@
 	}
 
 namespace fluffy { namespace ast {
-	class ScopedIdentifierDecl;
+	class ScopedPathDecl;
 	class TraitDecl;
 } }
 
@@ -25,7 +24,7 @@ namespace fluffy { namespace ast {
 
 	using TypeDeclNamedPtr					= unique_ptr<class TypeDeclNamed>;
 
-	using ScopedIdentifierDeclPtr			= unique_ptr<ast::ScopedIdentifierDecl>;
+	using ScopedPathDeclPtr					= unique_ptr<ast::ScopedPathDecl>;
 
 	using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
 	using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
@@ -117,11 +116,13 @@ namespace fluffy { namespace ast {
 		TypeDeclNamed(U32 line, U32 column);
 		virtual ~TypeDeclNamed();
 
-		ScopedIdentifierDeclPtr				scopedReferenceDecl;
+		ScopedPathDeclPtr					scopePath;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
 
-		AstNode*							resolvedReference;
+		AstNode*							referencedScope;
+		AstNode*							referencedNode;
+		Bool								hasBeenResolved;
 	};
 
 	/**

@@ -1,6 +1,6 @@
 #pragma once
 #include "scope\fl_scope.h"
-#include "fl_collection.h"
+#include "fl_collections.h"
 
 namespace fluffy { namespace ast {
 	class AstNode;
@@ -12,21 +12,52 @@ namespace fluffy { namespace scope {
 	class Scope;
 
 	/**
-	 * ProcessNode
+	 * NodeProcessor
 	 */
 
-	class ProcessNode
+	class NodeProcessor
 	{
 	public:
-		ProcessNode() {}
-		virtual ~ProcessNode() {}
+		NodeProcessor() {}
+		virtual ~NodeProcessor() {}
 
 		virtual void
-		onBeginProcess(ScopeManager* const scopeManager, ast::AstNode* const node) = 0;
+		onProcess(ScopeManager* const scopeManager, ast::AstNode* const node) = 0;
 
-		virtual void
-		onEndProcess(ScopeManager* const scopeManager, ast::AstNode* const node) = 0;
+	};
 
+	/**
+	 * ExternalRequestAccess_s
+	 */
+
+	struct ExternalRequestAccess_s
+	{
+		// Indica o escopo e o code unit que fizeram a solicitacao.
+		ast::AstNode* const requestorCodeUnit;
+		ast::AstNode* const requesteeCodeUnit;
+	};
+
+	/**
+	 * InternalRequestAccess_s
+	 */
+
+	struct InternalRequestAccess_s
+	{
+		// Indica o escopo e o code unit que fizeram a solicitacao.
+		ast::AstNode* const requestorScope;
+		ast::AstNode* const requesteeScope;
+	};
+
+	/**
+	 * ScopeRelationship_e
+	 */
+
+	enum class ScopeRelationship_e
+	{
+		Irrelevant,
+		Itself,
+		Child,
+		None
 	};
 
 	/**
@@ -37,13 +68,31 @@ namespace fluffy { namespace scope {
 	{
 	public:
 		ScopeManager();
-		~ScopeManager();
+		virtual ~ScopeManager();
 
 		void
 		insertCodeUnit(ast::CodeUnit* const codeUnit);
 
 		void
-		applyOnTree(ast::CodeUnit* const codeUnit, ProcessNode* const processNode);
+		copyReferenceTree(ScopeManager* const scopeManager);
+
+		void
+		processCodeUnit(ast::CodeUnit* const codeUnit, NodeProcessor* const nodeProcessor);
+
+		void
+		setCodeUnit(ast::CodeUnit* const codeUnit);
+
+		ast::CodeUnit* const
+		findCodeUnitByName(const TString& identifier);
+
+		FindResult_t
+		findNodeById(const TString& identifier, Bool findInRoot);
+
+		void
+		interrupt();
+
+		Bool
+		getInterruptFlag();
 
 		Scope
 		getParentScope();
@@ -51,9 +100,15 @@ namespace fluffy { namespace scope {
 		Scope
 		getRootScope();
 
+		NodeMultiMap&
+		getReferenceTree();
+
+		const TString&
+		getCodeUnitName();
+
 	private:
 		void
-		applyOnNode(ast::AstNode* const node, ProcessNode* const processNode);
+		processNode(ast::AstNode* const node, NodeProcessor* const nodeProcessor);
 
 		void
 		pushScope(ast::AstNode* const node);
@@ -68,5 +123,12 @@ namespace fluffy { namespace scope {
 		NodeList
 		mScopeStack;
 
+		ast::CodeUnit*
+		mCodeUnit;
+
+		Bool
+		mInterruptFlag;
+
 	};
+
 } }

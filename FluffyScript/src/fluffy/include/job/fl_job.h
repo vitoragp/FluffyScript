@@ -89,4 +89,37 @@ namespace fluffy { namespace jobs {
 		m_codeUnit;
 	};
 
+	/**
+	 * JobParseFromSourceBlock
+	 */
+
+	class JobParseFromSourceBlock final : public Job
+	{
+	public:
+		JobParseFromSourceBlock(const I8* sourceFilename, const I8* sourceCode);
+		virtual ~JobParseFromSourceBlock();
+
+		virtual void
+		doJob() override;
+
+		const I8*
+		getSourceFilename();
+
+		std::unique_ptr<ast::CodeUnit>
+		getCodeUnit();
+
+		ast::CodeUnit*
+		getCodeUnitPointer();
+
+	private:
+		const I8*
+		m_sourceFilename;
+
+		const I8*
+		m_sourceCode;
+
+		std::unique_ptr<ast::CodeUnit>
+		m_codeUnit;
+	};
+
 } }

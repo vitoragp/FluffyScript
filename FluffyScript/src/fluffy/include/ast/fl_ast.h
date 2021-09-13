@@ -72,7 +72,7 @@ namespace fluffy { namespace ast {
 
 		while (itBegin != itEnd)
 		{
-			func(itBegin->get(), args...);
+			func(itBegin->get(), args...);			
 			itBegin++;
 		}
 	}

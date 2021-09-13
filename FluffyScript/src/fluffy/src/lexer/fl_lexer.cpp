@@ -147,6 +147,14 @@ namespace fluffy { namespace lexer {
 	}
 
 	void
+	Lexer::loadSource(const I8* sourceFilename, const I8* sourceCode)
+	{
+		m_buffer->load(sourceCode, static_cast<U32>(strlen(sourceCode)));
+		m_filename = sourceFilename;
+		parse();
+	}
+
+	void
 	Lexer::loadSourceFromFile(const I8* sourceFilename)
 	{
 		m_buffer->loadFromFile(sourceFilename);

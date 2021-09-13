@@ -1,12 +1,32 @@
 #pragma once
 #include "fl_defs.h"
-#include "fl_collection.h"
+#include "fl_collections.h"
 
 namespace fluffy { namespace ast {
 	class AstNode;
 } }
 
 namespace fluffy { namespace scope {
+	class ScopeManager;
+} }
+
+
+namespace fluffy { namespace scope {
+	/**
+	 * FindResult_t
+	 */
+
+	struct FindResult_t
+	{
+		ast::AstNode* scope;
+		NodeList nodeList;
+
+		Bool foundResult;
+
+		const FindResult_t&
+		operator =(const FindResult_t& fr);
+	};
+
 	/**
 	 * Scope
 	 */
@@ -14,7 +34,7 @@ namespace fluffy { namespace scope {
 	class Scope
 	{
 	public:
-		Scope(ast::AstNode* const scope, ast::AstNode* const node);
+		Scope(ScopeManager* scopeManager, ast::AstNode* const scope, ast::AstNode* const node);
 		~Scope();
 
 		ast::AstNode* const
@@ -23,17 +43,26 @@ namespace fluffy { namespace scope {
 		ast::AstNode* const
 		getScope();
 
-		NodeList
+		const NodeMultiMap&
+		toMap();
+
+		FindResult_t
 		findNodeById(const TString& identifier);
 
 		void
 		fetch();
 
+		void
+		assign(ast::AstNode* const scope, ast::AstNode* const node);
+
 	private:
-		ast::AstNode* const
+		ScopeManager*
+		mScopeManager;
+
+		ast::AstNode*
 		mScope;
 
-		ast::AstNode* const
+		ast::AstNode*
 		mNode;
 
 		NodeMultiMap

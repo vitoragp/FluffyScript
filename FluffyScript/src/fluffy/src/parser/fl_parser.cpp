@@ -165,6 +165,12 @@ namespace fluffy { namespace parser {
 	}
 
 	void
+	Parser::loadSource(const I8* sourceFilename, const I8* sourceCode)
+	{
+		m_lexer->loadSource(sourceFilename, sourceCode);
+	}
+
+	void
 	Parser::loadSourceFromFile(const I8* sourceFilename)
 	{
 		m_lexer->loadSourceFromFile(sourceFilename);
@@ -185,9 +191,10 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::CodeUnit>
 	Parser::parseCodeUnit(ParserContext_s& ctx)
 	{
-		auto codeUnit = std::make_unique<ast::CodeUnit>(
-			m_lexer->getFilename()
-		);
+		auto codeUnit = std::make_unique<ast::CodeUnit>();
+
+		// Atribui ao code unit o nome do arquivo.
+		codeUnit->identifier = TString(m_lexer->getFilename());
 
 		if (m_lexer->isEof()) {
 			return codeUnit;
@@ -253,7 +260,7 @@ namespace fluffy { namespace parser {
 			);
 
 			// Consome identificador
-			includeItemDecl->referencedPath = parseScopedIdentifier(ctx);
+			includeItemDecl->scopePath = parseScopedPath(ctx);
 
 			// Verifica se e o coringa(*).
 			if (m_lexer->isMultiplication())
@@ -1673,35 +1680,35 @@ namespace fluffy { namespace parser {
 		return functionParameters;
 	}
 
-	std::unique_ptr<ast::ScopedIdentifierDecl>
-	Parser::parseScopedIdentifier(ParserContext_s& ctx)
+	std::unique_ptr<ast::ScopedPathDecl>
+	Parser::parseScopedPath(ParserContext_s& ctx)
 	{
-		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
+		auto scopedPathDecl = std::make_unique<ast::ScopedPathDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
 		);
 
 		// Consome o identificador.
-		scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
+		scopedPathDecl->identifier = m_lexer->expectIdentifier();
 
 		// Valida o identificador.
-		validateIdentifier(scopedIdentifierDecl->identifier);
+		validateIdentifier(scopedPathDecl->identifier);
 
 		// Consome '::'.
 		m_lexer->expectToken(TokenType_e::ScopeResolution);
 
 		if (m_lexer->isMultiplication())
 		{
-			return scopedIdentifierDecl;
+			return scopedPathDecl;
 		}
 		else if (m_lexer->isIdentifier())
 		{
 			if (m_lexer->predictNextToken().type == TokenType_e::ScopeResolution)
 			{
-				scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
+				scopedPathDecl->scopedChildPath = parseChildScopedPaths(ctx);
 			}
 		}
-		return scopedIdentifierDecl;
+		return scopedPathDecl;
 	}
 
 	std::unique_ptr<ast::GeneralStmtDecl>
@@ -4512,32 +4519,32 @@ namespace fluffy { namespace parser {
 		// Verifica se inicia pelo escopo global.
 		while (m_lexer->isIdentifier() && m_lexer->predictNextToken().type == TokenType_e::ScopeResolution)
 		{
-			auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
+			auto scopedPathDecl = std::make_unique<ast::ScopedPathDecl>(
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
 			);
 
 			// Consome identificador.
-			scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
+			scopedPathDecl->identifier = m_lexer->expectIdentifier();
 
 			// Valida o identificador.
-			validateIdentifier(scopedIdentifierDecl->identifier);
+			validateIdentifier(scopedPathDecl->identifier);
 
 			// Consome '::'.
 			m_lexer->expectToken(TokenType_e::ScopeResolution);
 
-			if (namedTypeDecl->scopedReferenceDecl == nullptr)
+			if (namedTypeDecl->scopePath == nullptr)
 			{
-				namedTypeDecl->scopedReferenceDecl = std::move(scopedIdentifierDecl);
+				namedTypeDecl->scopePath = std::move(scopedPathDecl);
 			}
 			else
 			{
-				auto pathRef = namedTypeDecl->scopedReferenceDecl.get();
-				while (pathRef->referencedIdentifier != nullptr)
+				auto pathRef = namedTypeDecl->scopePath.get();
+				while (pathRef->scopedChildPath != nullptr)
 				{
-					pathRef = pathRef->referencedIdentifier.get();
+					pathRef = pathRef->scopedChildPath.get();
 				}
-				pathRef->referencedIdentifier = std::move(scopedIdentifierDecl);
+				pathRef->scopedChildPath = std::move(scopedPathDecl);
 			}
 		}
 
@@ -4700,19 +4707,19 @@ namespace fluffy { namespace parser {
 		return sizedArrayDecl;
 	}
 
-	std::unique_ptr<ast::ScopedIdentifierDecl>
-	Parser::parseChildScopedIdentifiers(ParserContext_s& ctx)
+	std::unique_ptr<ast::ScopedPathDecl>
+	Parser::parseChildScopedPaths(ParserContext_s& ctx)
 	{
-		auto scopedIdentifierDecl = std::make_unique<ast::ScopedIdentifierDecl>(
+		auto scopedPathDecl = std::make_unique<ast::ScopedPathDecl>(
 			m_lexer->getToken().line,
 			m_lexer->getToken().column
 		);
 
 		// Consome o identificador.
-		scopedIdentifierDecl->identifier = m_lexer->expectIdentifier();
+		scopedPathDecl->identifier = m_lexer->expectIdentifier();
 
 		// Valida o identificador.
-		validateIdentifier(scopedIdentifierDecl->identifier);
+		validateIdentifier(scopedPathDecl->identifier);
 
 		// Consome '::'.
 		m_lexer->expectToken(TokenType_e::ScopeResolution);
@@ -4720,9 +4727,9 @@ namespace fluffy { namespace parser {
 		// Verifica se a mais declaracoes de escopo.
 		if (m_lexer->isScopeResolution())
 		{
-			scopedIdentifierDecl->referencedIdentifier = parseChildScopedIdentifiers(ctx);
+			scopedPathDecl->scopedChildPath = parseChildScopedPaths(ctx);
 		}
-		return scopedIdentifierDecl;
+		return scopedPathDecl;
 	}
 
 	void

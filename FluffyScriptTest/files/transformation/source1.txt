@@ -1,0 +1,6 @@
+include { foo::FooOne } in "source2";
+
+namespace app {
+	fn main()
+	{}
+}

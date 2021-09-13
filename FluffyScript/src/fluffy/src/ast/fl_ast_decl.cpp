@@ -11,9 +11,8 @@ namespace fluffy { namespace ast {
 	 * CodeUnit
 	 */
 
-	CodeUnit::CodeUnit(const String& name)
+	CodeUnit::CodeUnit()
 		: AstNode(AstNodeType_e::CodeUnit, 0, 0)
-		, name(name)
 	{}
 
 	CodeUnit::~CodeUnit()
@@ -63,17 +62,44 @@ namespace fluffy { namespace ast {
 		}
 		return children;
 	}
+		
+	/**
+	 * BaseIncludeItemDecl
+	 */
+
+	BaseIncludeItemDecl::BaseIncludeItemDecl(AstNodeType_e nodeType, U32 line, U32 column)
+		: AstNode(nodeType, line, column)
+	{}
+
+	BaseIncludeItemDecl::~BaseIncludeItemDecl()
+	{}
 
 	/**
 	 * IncludeItemDecl
 	 */
 
 	IncludeItemDecl::IncludeItemDecl(U32 line, U32 column)
-		: AstNode(AstNodeType_e::IncludeItemDecl, line, column)
+		: BaseIncludeItemDecl(AstNodeType_e::IncludeItemDecl, line, column)
 		, includeAll(false)
+		, referencedScope(nullptr)
+		, hasBeenResolved(false)
 	{}
 
 	IncludeItemDecl::~IncludeItemDecl()
+	{}
+
+	/**
+	 * WeakIncludeItemDecl
+	 */
+
+	WeakIncludeItemDecl::WeakIncludeItemDecl(U32 line, U32 column)
+		: BaseIncludeItemDecl(AstNodeType_e::WeakIncludeItemDecl, line, column)
+		, scopePath(nullptr)
+		, referencedScope(nullptr)
+		, referencedNode(nullptr)
+	{}
+
+	WeakIncludeItemDecl::~WeakIncludeItemDecl()
 	{}
 
 	/**
@@ -638,13 +664,13 @@ namespace fluffy { namespace ast {
 	}
 
 	/**
-	 * ScopedIdentifierDecl
+	 * ScopedPathDecl
 	 */
 
-	ScopedIdentifierDecl::ScopedIdentifierDecl(U32 line, U32 column)
-		: AstNode(AstNodeType_e::ScopedIdentifierDecl, line, column)
+	ScopedPathDecl::ScopedPathDecl(U32 line, U32 column)
+		: AstNode(AstNodeType_e::ScopedPathDecl, line, column)
 	{}
 
-	ScopedIdentifierDecl::~ScopedIdentifierDecl()
+	ScopedPathDecl::~ScopedPathDecl()
 	{}
 } }

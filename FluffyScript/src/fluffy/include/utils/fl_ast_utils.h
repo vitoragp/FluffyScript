@@ -27,7 +27,7 @@ namespace fluffy { namespace utils {
 		extractPatternIdentifiers(ast::pattern::PatternDecl* pattern);
 
 		static String
-		printScopedIdentifier(ast::AstNode* const scopedIdentifier);
+		printScopedPath(ast::AstNode* const scopedIdentifier);
 
 		static String
 		printIncludeItem(ast::AstNode* const includeItem);

@@ -36,6 +36,9 @@ namespace fluffy { namespace parser {
 		loadSource(const I8* sourceCode);
 
 		void
+		loadSource(const I8* sourceFilename, const I8* sourceCode);
+
+		void
 		loadSourceFromFile(const I8* sourceFilename);
 
 		Bool
@@ -119,8 +122,8 @@ namespace fluffy { namespace parser {
 		std::vector<std::unique_ptr<ast::FunctionParameterDecl>>
 		parseFunctionParameters(ParserContext_s& ctx);
 
-		std::unique_ptr<ast::ScopedIdentifierDecl>
-		parseScopedIdentifier(ParserContext_s& ctx);
+		std::unique_ptr<ast::ScopedPathDecl>
+		parseScopedPath(ParserContext_s& ctx);
 
 	private:
 		std::unique_ptr<ast::GeneralStmtDecl>
@@ -228,8 +231,8 @@ namespace fluffy { namespace parser {
 		std::unique_ptr<ast::ArrayDecl>
 		parseArrayDecl(ParserContext_s& ctx);
 
-		std::unique_ptr<ast::ScopedIdentifierDecl>
-		parseChildScopedIdentifiers(ParserContext_s& ctx);
+		std::unique_ptr<ast::ScopedPathDecl>
+		parseChildScopedPaths(ParserContext_s& ctx);
 
 		void
 		validateIdentifier(TString& id);

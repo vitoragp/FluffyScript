@@ -11,13 +11,13 @@
 namespace fluffy { namespace testing {
 
 	/**
-		* ValidationDuplicationTest
-		*/
+	 * ScopeManagerTest
+	 */
 
-	struct ValidationDuplicationTest : public ::testing::Test
+	struct ScopeManagerTest : public ::testing::Test
 	{
 		std::unique_ptr<parser::Parser> parser;
-		parser::ParserContext_s ctx;
+		parser::ParserContext_s ctx = { false };
 
 		// Antes de cada test
 		virtual void SetUp() override {
@@ -29,16 +29,16 @@ namespace fluffy { namespace testing {
 	 * Testing
 	 */
 
-	TEST_F(ValidationDuplicationTest, TestSimpleScope)
+	TEST_F(ScopeManagerTest, TestSimpleScope)
 	{
-		class Validate : public scope::ProcessNode
+		class Validate : public scope::NodeProcessor
 		{
 		public:
 			Validate() {}
 			~Validate() {}
 
 			virtual void
-			onBeginProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -51,14 +51,14 @@ namespace fluffy { namespace testing {
 						auto appIdentifier = TString("app");
 						auto appNode = root.findNodeById(appIdentifier);
 
-						EXPECT_EQ(appNode.size(), 1);
+						EXPECT_EQ(appNode.foundResult, true);
 
-						EXPECT_EQ(appNode[0]->identifier, appIdentifier);
-						EXPECT_EQ(appNode[0]->nodeType, AstNodeType_e::NamespaceDecl);
+						EXPECT_EQ(appNode.nodeList[0]->identifier, appIdentifier);
+						EXPECT_EQ(appNode.nodeList[0]->nodeType, AstNodeType_e::NamespaceDecl);
 
 						// Testa informacoes do namespace app
 						{
-							auto appChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(root.getNode(), appNode[0]);
+							auto appChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(scopeManager, root.getNode(), appNode.nodeList[0]);
 
 							EXPECT_EQ(appChildren.size(), 1);
 
@@ -72,7 +72,7 @@ namespace fluffy { namespace testing {
 
 							// Testa informacoes do namespace Foo
 							{
-								auto fooChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(appNode[0], fooNode->second);
+								auto fooChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(scopeManager, appNode.nodeList[0], fooNode->second);
 
 								EXPECT_EQ(fooChildren.size(), 1);
 
@@ -86,7 +86,7 @@ namespace fluffy { namespace testing {
 
 								// Testa informacoes do parent node: fn main()
 								{
-									auto mainChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(fooNode->second, mainNode->second);
+									auto mainChildren = utils::ScopeUtils::getPositionalSimplifiedNodeChildrenMap(scopeManager, fooNode->second, mainNode->second);
 
 									EXPECT_EQ(mainChildren.size(), 1);
 
@@ -124,19 +124,19 @@ namespace fluffy { namespace testing {
 		scopeManager->insertCodeUnit(codeUnit.get());
 
 		auto validation = Validate();
-		scopeManager->applyOnTree(codeUnit.get(), &validation);
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
 	}
 
-	TEST_F(ValidationDuplicationTest, TestScopeWithParameter)
+	TEST_F(ScopeManagerTest, TestScopeWithParameter)
 	{
-		class Validate : public scope::ProcessNode
+		class Validate : public scope::NodeProcessor
 		{
 		public:
 			Validate() {}
 			~Validate() {}
 
 			virtual void
-			onBeginProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -147,13 +147,13 @@ namespace fluffy { namespace testing {
 					auto aIdentifier = TString("a");
 					auto aNodeList = scope.findNodeById(aIdentifier);
 
-					EXPECT_EQ(aNodeList.size(), 2);
+					EXPECT_EQ(aNodeList.foundResult, true);
 
-					EXPECT_EQ(aNodeList[0]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[0]->nodeType, AstNodeType_e::StmtVariable);
+					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::FunctionParameterDecl);
 
-					EXPECT_EQ(aNodeList[1]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[1]->nodeType, AstNodeType_e::FunctionParameterDecl);
+					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StmtVariable);
 				}
 			}
 
@@ -178,19 +178,19 @@ namespace fluffy { namespace testing {
 		scopeManager->insertCodeUnit(codeUnit.get());
 
 		auto validation = Validate();
-		scopeManager->applyOnTree(codeUnit.get(), &validation);
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
 	}
 
-	TEST_F(ValidationDuplicationTest, TestScopeWithPatternParameter)
+	TEST_F(ScopeManagerTest, TestScopeWithPatternParameter)
 	{
-		class Validate : public scope::ProcessNode
+		class Validate : public scope::NodeProcessor
 		{
 		public:
 			Validate() {}
 			~Validate() {}
 
 			virtual void
-			onBeginProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -201,19 +201,19 @@ namespace fluffy { namespace testing {
 					auto aIdentifier = TString("a");
 					auto aNodeList = scope.findNodeById(aIdentifier);
 
-					EXPECT_EQ(aNodeList.size(), 4);
+					EXPECT_EQ(aNodeList.foundResult, true);
 
-					EXPECT_EQ(aNodeList[0]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[0]->nodeType, AstNodeType_e::StmtVariable);
+					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::FunctionParameterDecl);
 
-					EXPECT_EQ(aNodeList[1]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[1]->nodeType, AstNodeType_e::LiteralPattern);
+					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StructureItemPatternDecl);
 
-					EXPECT_EQ(aNodeList[2]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[2]->nodeType, AstNodeType_e::StructureItemPatternDecl);
+					EXPECT_EQ(aNodeList.nodeList[2]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[2]->nodeType, AstNodeType_e::LiteralPattern);
 
-					EXPECT_EQ(aNodeList[3]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[3]->nodeType, AstNodeType_e::FunctionParameterDecl);
+					EXPECT_EQ(aNodeList.nodeList[3]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[3]->nodeType, AstNodeType_e::StmtVariable);
 				}
 			}
 
@@ -238,19 +238,19 @@ namespace fluffy { namespace testing {
 		scopeManager->insertCodeUnit(codeUnit.get());
 
 		auto validation = Validate();
-		scopeManager->applyOnTree(codeUnit.get(), &validation);
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
 	}
 
-	TEST_F(ValidationDuplicationTest, TestScopeWithPatternParameterAndPatternVariable)
+	TEST_F(ScopeManagerTest, TestScopeWithPatternParameterAndPatternVariable)
 	{
-		class Validate : public scope::ProcessNode
+		class Validate : public scope::NodeProcessor
 		{
 		public:
 			Validate() {}
 			~Validate() {}
 
 			virtual void
-			onBeginProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -261,22 +261,22 @@ namespace fluffy { namespace testing {
 					auto aIdentifier = TString("a");
 					auto aNodeList = scope.findNodeById(aIdentifier);
 
-					EXPECT_EQ(aNodeList.size(), 5);
+					EXPECT_EQ(aNodeList.foundResult, true);
 
-					EXPECT_EQ(aNodeList[0]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[0]->nodeType, AstNodeType_e::LiteralPattern);
+					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::FunctionParameterDecl);
 
-					EXPECT_EQ(aNodeList[1]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[1]->nodeType, AstNodeType_e::StructureItemPatternDecl);
+					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StructureItemPatternDecl);
 
-					EXPECT_EQ(aNodeList[2]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[2]->nodeType, AstNodeType_e::LiteralPattern);
+					EXPECT_EQ(aNodeList.nodeList[2]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[2]->nodeType, AstNodeType_e::LiteralPattern);
 
-					EXPECT_EQ(aNodeList[3]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[3]->nodeType, AstNodeType_e::StructureItemPatternDecl);
+					EXPECT_EQ(aNodeList.nodeList[3]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[3]->nodeType, AstNodeType_e::StructureItemPatternDecl);
 
-					EXPECT_EQ(aNodeList[4]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList[4]->nodeType, AstNodeType_e::FunctionParameterDecl);
+					EXPECT_EQ(aNodeList.nodeList[4]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[4]->nodeType, AstNodeType_e::LiteralPattern);
 				}
 			}
 
@@ -301,6 +301,232 @@ namespace fluffy { namespace testing {
 		scopeManager->insertCodeUnit(codeUnit.get());
 
 		auto validation = Validate();
-		scopeManager->applyOnTree(codeUnit.get(), &validation);
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeIfElseOne)
+	{
+		class Validate : public scope::NodeProcessor
+		{
+		public:
+			Validate() {}
+			~Validate() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (node->nodeType == AstNodeType_e::StmtVariable)
+				{
+					ast::safe_cast<ast::stmt::StmtVariableDecl>(node);
+
+					auto scope = scopeManager->getParentScope();
+
+					auto aNode = scope.findNodeById(TString("a"));
+					auto bNode = scope.findNodeById(TString("b"));
+
+					ASSERT_TRUE(
+						aNode.foundResult == true && bNode.foundResult == false ||
+						aNode.foundResult == false && bNode.foundResult == true
+					);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		parser->loadSource(
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main(a: i32, { a, b: (a) }: Loo) { \n"
+						"if a { let a = 0; } else { let b = 0; } \n"
+					"} \n"
+				"} \n"
+			"}"
+		);
+
+		auto codeUnit = parser->parseCodeUnit(ctx);
+
+		std::unique_ptr<scope::ScopeManager> scopeManager(new scope::ScopeManager());
+		scopeManager->insertCodeUnit(codeUnit.get());
+
+		auto validation = Validate();
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeFor)
+	{
+		class Validate : public scope::NodeProcessor
+		{
+		public:
+			Validate() {}
+			~Validate() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (node->nodeType == AstNodeType_e::StmtVariable)
+				{
+					ast::safe_cast<ast::stmt::StmtVariableDecl>(node);
+
+					auto scope = scopeManager->getParentScope();
+
+					auto aNode = scope.findNodeById(TString("a"));
+
+					ASSERT_TRUE(aNode.foundResult);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		parser->loadSource(
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main(a: i32, { a, b: (a) }: Loo) { \n"
+						"for a = 0; a < 10; a++ { let a = 0; } \n"
+					"} \n"
+				"} \n"
+			"}"
+		);
+
+		auto codeUnit = parser->parseCodeUnit(ctx);
+
+		std::unique_ptr<scope::ScopeManager> scopeManager(new scope::ScopeManager());
+		scopeManager->insertCodeUnit(codeUnit.get());
+
+		auto validation = Validate();
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeForInit)
+	{
+		class Validate : public scope::NodeProcessor
+		{
+		public:
+			Validate() {}
+			~Validate() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (node->nodeType == AstNodeType_e::StmtVariable)
+				{
+					ast::safe_cast<ast::stmt::StmtVariableDecl>(node);
+
+					auto scope = scopeManager->getParentScope();
+
+					auto aIdentifier = TString("a");
+					auto aNodeList = scope.findNodeById(aIdentifier);
+
+					ASSERT_TRUE(aNodeList.foundResult);
+
+					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::StmtForInitDecl);
+
+					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StmtVariable);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		parser->loadSource(
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main(a: i32, { a, b: (a) }: Loo) { \n"
+						"for let a = 0; a < 10; a++ { let a = 0; } \n"
+					"} \n"
+				"} \n"
+			"}"
+		);
+
+		auto codeUnit = parser->parseCodeUnit(ctx);
+
+		std::unique_ptr<scope::ScopeManager> scopeManager(new scope::ScopeManager());
+		scopeManager->insertCodeUnit(codeUnit.get());
+
+		auto validation = Validate();
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeForInitExpr)
+	{
+		class Validate : public scope::NodeProcessor
+		{
+		public:
+			Validate() {}
+			~Validate() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (node->nodeType == AstNodeType_e::StmtVariable)
+				{
+					ast::safe_cast<ast::stmt::StmtVariableDecl>(node);
+
+					if (node->identifier == "a")
+					{
+						auto scope = scopeManager->getParentScope();
+
+						auto aIdentifier = TString("a");
+						auto aNodeList = scope.findNodeById(aIdentifier);
+
+						ASSERT_TRUE(aNodeList.foundResult);
+
+						EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+						EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::StmtForInitDecl);
+
+						EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+						EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StmtVariable);
+					}
+				}
+
+				if (node->nodeType == AstNodeType_e::FunctionParameterDeclExpr)
+				{
+					ast::safe_cast<ast::expr::ExpressionFunctionParameterDecl>(node);
+
+					auto scope = scopeManager->getParentScope();
+
+					auto aIdentifier = TString("a");
+					auto aNodeList = scope.findNodeById(aIdentifier);
+
+					ASSERT_TRUE(aNodeList.foundResult);
+
+					EXPECT_EQ(aNodeList.nodeList[0], node);
+
+					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::FunctionParameterDeclExpr);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		parser->loadSource(
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main(a: i32, { a, b: (a) }: Loo) { \n"
+						"let b = |a| { for let a = 0; a < 10; a++ { let a = 0; } }; \n"
+					"} \n"
+				"} \n"
+			"}"
+		);
+
+		auto codeUnit = parser->parseCodeUnit(ctx);
+
+		std::unique_ptr<scope::ScopeManager> scopeManager(new scope::ScopeManager());
+		scopeManager->insertCodeUnit(codeUnit.get());
+
+		auto validation = Validate();
+		scopeManager->processCodeUnit(codeUnit.get(), &validation);
 	}
 } }

@@ -402,6 +402,7 @@ namespace fluffy {
 		CodeUnit,
 
 		IncludeDecl,
+		WeakIncludeItemDecl,
 		IncludeItemDecl,
 		NamespaceDecl,
 		ClassDecl,
@@ -424,7 +425,7 @@ namespace fluffy {
 		FunctionParameterDecl,
 		GenericDecl,
 		GenericItemDecl,
-		ScopedIdentifierDecl,
+		ScopedPathDecl,
 
 		Block,
 

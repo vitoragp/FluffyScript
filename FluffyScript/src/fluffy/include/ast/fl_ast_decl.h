@@ -6,6 +6,7 @@
 #include "fl_ast_type.h"
 #include "fl_ast_stmt.h"
 #include "fl_defs.h"
+#include "fl_collections.h"
 
 namespace fluffy { namespace ast {
 	using std::vector;
@@ -19,7 +20,7 @@ namespace fluffy { namespace ast {
 	using IncludeDeclPtr					= unique_ptr<class IncludeDecl>;
 	using IncludeDeclPtrList				= vector<IncludeDeclPtr>;
 
-	using IncludeItemDeclPtr				= unique_ptr<class IncludeItemDecl>;
+	using IncludeItemDeclPtr				= unique_ptr<class BaseIncludeItemDecl>;
 	using IncludeItemDeclPtrList			= vector<IncludeItemDeclPtr>;
 
 	using CodeUnitPtr						= unique_ptr<class CodeUnit>;
@@ -82,8 +83,8 @@ namespace fluffy { namespace ast {
 	using ArrayDeclPtr						= unique_ptr<class ArrayDecl>;
 	using ArrayDeclPtrList					= vector<ArrayDeclPtr>;		
 
-	using ScopedIdentifierDeclPtr			= unique_ptr<class ScopedIdentifierDecl>;
-	using ScopedIdentifierDeclPtrList		= vector<ScopedIdentifierDeclPtr>;
+	using ScopedPathDeclPtr			= unique_ptr<class ScopedPathDecl>;
+	using ScopedPathDeclPtrList		= vector<ScopedPathDeclPtr>;
 
 	/**
 	 * CodeUnit
@@ -92,7 +93,7 @@ namespace fluffy { namespace ast {
 	class CodeUnit : public AstNode, public AstSafeCast<AstNodeType_e::CodeUnit>
 	{
 	public:
-		CodeUnit(const String& name);
+		CodeUnit();
 		virtual ~CodeUnit();
 
 		virtual Bool
@@ -101,7 +102,6 @@ namespace fluffy { namespace ast {
 		virtual std::vector<AstNode*>
 		getChildren() final;
 
-		const String						name;
 		IncludeDeclPtrList					includeDeclList;
 		NamespaceDeclPtrList				namespaceDeclList;
 	};
@@ -127,18 +127,52 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
+	 * BaseIncludeItemDecl
+	 */
+
+	class BaseIncludeItemDecl : public AstNode
+	{
+	protected:
+		BaseIncludeItemDecl(AstNodeType_e nodeType, U32 line, U32 column);
+
+	public:
+		virtual ~BaseIncludeItemDecl();
+
+	};
+
+	/**
 	 * IncludeItemDecl
 	 */
 
-	class IncludeItemDecl : public AstNode, public AstSafeCast<AstNodeType_e::IncludeItemDecl>
+	class IncludeItemDecl : public BaseIncludeItemDecl, public AstSafeCast<AstNodeType_e::IncludeItemDecl>
 	{
 	public:
 		IncludeItemDecl(U32 line, U32 column);
 		virtual ~IncludeItemDecl();
 
-		ScopedIdentifierDeclPtr				referencedPath;
+		ScopedPathDeclPtr				scopePath;
 		TString								referencedAlias;
 		Bool								includeAll;
+
+		NodeList							referencedNodeList;
+		AstNode*							referencedScope;
+		Bool								hasBeenResolved;
+	};
+
+	/**
+	 * WeakIncludeItemDecl
+	 */
+
+	class WeakIncludeItemDecl : public BaseIncludeItemDecl, public AstSafeCast<AstNodeType_e::WeakIncludeItemDecl>
+	{
+	public:
+		WeakIncludeItemDecl(U32 line, U32 column);
+		virtual ~WeakIncludeItemDecl();
+
+		ScopedPathDecl*				scopePath;
+
+		AstNode*							referencedScope;
+		AstNode*							referencedNode;
 	};
 
 	/**
@@ -605,15 +639,15 @@ namespace fluffy { namespace ast {
 	};
 
 	/**
-	 * ScopedIdentifierDecl
+	 * ScopedPathDecl
 	 */
 
-	class ScopedIdentifierDecl : public AstNode, public AstSafeCast<AstNodeType_e::ScopedIdentifierDecl>
+	class ScopedPathDecl : public AstNode, public AstSafeCast<AstNodeType_e::ScopedPathDecl>
 	{
 	public:
-		ScopedIdentifierDecl(U32 line, U32 column);
-		virtual ~ScopedIdentifierDecl();
+		ScopedPathDecl(U32 line, U32 column);
+		virtual ~ScopedPathDecl();
 
-		ScopedIdentifierDeclPtr				referencedIdentifier;
+		ScopedPathDeclPtr				scopedChildPath;
 	};
 } }

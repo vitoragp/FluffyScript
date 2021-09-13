@@ -147,7 +147,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, TypeDeclID_e::Named);
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->scopePath->identifier, "UI");
 
 			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefinitionList[0].get());
 
@@ -193,7 +193,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->scopePath->identifier, "UI");
 		}
 	}
 
@@ -240,7 +240,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
-			EXPECT_EQ(namedTypeDecl->scopedReferenceDecl->identifier, "UI");
+			EXPECT_EQ(namedTypeDecl->scopePath->identifier, "UI");
 		}
 	}
 

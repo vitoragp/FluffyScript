@@ -38,8 +38,8 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(inc != nullptr);
 
 		EXPECT_EQ(inc->includedItemList.size(), 1);
-		EXPECT_EQ(inc->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(inc->includedItemList[0]->referencedPath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[0].get())->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[0].get())->scopePath->identifier, "io");
 
 		EXPECT_EQ(inc->inFile, "\\system");
 	}
@@ -53,10 +53,10 @@ namespace fluffy { namespace testing {
 		ASSERT_TRUE(inc != nullptr);
 
 		EXPECT_EQ(inc->includedItemList.size(), 2);
-		EXPECT_EQ(inc->includedItemList[0]->includeAll, true);
-		EXPECT_EQ(inc->includedItemList[0]->referencedPath->identifier, "io");
-		EXPECT_EQ(inc->includedItemList[1]->includeAll, true);
-		EXPECT_EQ(inc->includedItemList[1]->referencedPath->identifier, "ui");
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[0].get())->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[0].get())->scopePath->identifier, "io");
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[1].get())->includeAll, true);
+		EXPECT_EQ(((ast::IncludeItemDecl*)inc->includedItemList[1].get())->scopePath->identifier, "ui");
 
 		EXPECT_EQ(inc->inFile, "\\system");
 	}

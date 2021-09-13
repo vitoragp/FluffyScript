@@ -9,7 +9,7 @@ namespace fluffy {
 	{
 	public:
 								TString();
-					   explicit TString(const I8* str);
+								TString(const I8* str);
 								TString(std::string& str);
 								TString(std::string&& str);
 
@@ -32,8 +32,10 @@ namespace fluffy {
 
 	const Bool					operator==(const TString& str1, const std::string& str2);
 	const Bool					operator==(const TString& str1, const TString& str2);
+	const Bool					operator==(const TString& str1, const I8* str2);
 	const Bool					operator!=(const TString& str1, const std::string& str2);
 	const Bool					operator!=(const TString& str1, const TString& str2);
+	const Bool					operator!=(const TString& str1, const I8* str2);
 
 	/**
 	 * TStringHash
