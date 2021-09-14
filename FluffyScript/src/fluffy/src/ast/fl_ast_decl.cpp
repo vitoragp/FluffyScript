@@ -64,42 +64,15 @@ namespace fluffy { namespace ast {
 	}
 		
 	/**
-	 * BaseIncludeItemDecl
-	 */
-
-	BaseIncludeItemDecl::BaseIncludeItemDecl(AstNodeType_e nodeType, U32 line, U32 column)
-		: AstNode(nodeType, line, column)
-	{}
-
-	BaseIncludeItemDecl::~BaseIncludeItemDecl()
-	{}
-
-	/**
 	 * IncludeItemDecl
 	 */
 
 	IncludeItemDecl::IncludeItemDecl(U32 line, U32 column)
-		: BaseIncludeItemDecl(AstNodeType_e::IncludeItemDecl, line, column)
+		: AstNode(AstNodeType_e::IncludeItemDecl, line, column)
 		, includeAll(false)
-		, referencedScope(nullptr)
-		, hasBeenResolved(false)
 	{}
 
 	IncludeItemDecl::~IncludeItemDecl()
-	{}
-
-	/**
-	 * WeakIncludeItemDecl
-	 */
-
-	WeakIncludeItemDecl::WeakIncludeItemDecl(U32 line, U32 column)
-		: BaseIncludeItemDecl(AstNodeType_e::WeakIncludeItemDecl, line, column)
-		, scopePath(nullptr)
-		, referencedScope(nullptr)
-		, referencedNode(nullptr)
-	{}
-
-	WeakIncludeItemDecl::~WeakIncludeItemDecl()
 	{}
 
 	/**

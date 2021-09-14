@@ -1,5 +1,8 @@
+#include "ast\fl_ast.h"
 #include "ast\fl_ast_decl.h"
 #include "utils\fl_ast_utils.h"
+#include "attributes\fl_reference.h"
+#include "attributes\fl_included_scope.h"
 #include "transformation\fl_transformation_resolve_types.h"
 namespace fluffy { namespace transformations {
 	/**
@@ -19,7 +22,9 @@ namespace fluffy { namespace transformations {
 		scope::FindResult_t findResult = { nullptr, NodeList(), false };
 
 		// Salva o estado do scopeManager.
-		mScopeManager = scopeManager;
+		if (mScopeManager == nullptr) {
+			mScopeManager = scopeManager;
+		}
 
 		if (node->nodeType == AstNodeType_e::NamedType)
 		{
@@ -39,6 +44,8 @@ namespace fluffy { namespace transformations {
 					else
 					{
 						auto scope = scope::Scope(mScopeManager, findResult.scope, findResult.nodeList[0]);
+						validateScope(scope.getNode());
+
 						findResult = scope.findNodeById(nextId->identifier);
 					}
 
@@ -72,6 +79,8 @@ namespace fluffy { namespace transformations {
 				}
 
 				auto scope = scope::Scope(mScopeManager, findResult.scope, findResult.nodeList[0]);
+				validateScope(scope.getNode());
+
 				findResult = scope.findNodeById(namedType->identifier);
 			}
 			else
@@ -91,38 +100,17 @@ namespace fluffy { namespace transformations {
 
 			// Se houver ambiguidade, remover os elementos fracos: aqueles elementos
 			// que vem de includes com coringa.
-			if (findResult.nodeList.size())
+			validateResult(findResult, namedType);
+
+			// Inclui o atributo de referencia no no de tipo.
+			if (findResult.scope->nodeType == AstNodeType_e::CodeUnit)
 			{
-				validateResult(findResult, namedType);
+				updateTypeFromInclude(findResult, namedType);
 			}
-			updateType(findResult, namedType);
-		}
-	}
-
-	void
-	ResolveTypes::updateType(fluffy::scope::FindResult_t& findResult, fluffy::ast::TypeDeclNamed* namedType)
-	{
-		if (findResult.nodeList[0]->nodeType == AstNodeType_e::IncludeItemDecl)
-		{
-			auto includedItem = ast::safe_cast<ast::IncludeItemDecl>(findResult.nodeList[0]);
-
-			namedType->hasBeenResolved = true;
-			namedType->referencedScope = includedItem->referencedScope;
-			namedType->referencedNode = includedItem->referencedNodeList[0];
-		}
-		else if (findResult.nodeList[0]->nodeType == AstNodeType_e::WeakIncludeItemDecl)
-		{
-			auto weakIncludedItem = ast::safe_cast<ast::WeakIncludeItemDecl>(findResult.nodeList[0]);
-
-			namedType->hasBeenResolved = true;
-			namedType->referencedScope = weakIncludedItem->referencedScope;
-			namedType->referencedNode = weakIncludedItem->referencedNode;
-		}
-		else
-		{
-			namedType->hasBeenResolved = true;
-			namedType->referencedScope = findResult.scope;
-			namedType->referencedNode = findResult.nodeList[0];
+			else
+			{
+				namedType->insertAttribute(new attributes::Reference(findResult.scope, findResult.nodeList[0]));
+			}
 		}
 	}
 
@@ -145,36 +133,19 @@ namespace fluffy { namespace transformations {
 			}
 		}
 
-		// Remove elementos fracos, se necessario.
-		if (findResult.nodeList.size() > 1)
-		{
-			for (auto it = findResult.nodeList.begin(); it != findResult.nodeList.end();)
-			{
-				auto node = *it;
-
-				if (node->nodeType == AstNodeType_e::WeakIncludeItemDecl)
-				{
-					it = findResult.nodeList.erase(it);
-				}
-				else
-				{
-					it++;
-				}
-			}
-		}
-
 		if (findResult.nodeList.size() > 1)
 		{
 			throw exceptions::custom_exception(
-				"%s error: Ambiguous search result",
+				"%s error: Ambiguous search result '%s'",
 				namedType->line, namedType->column,
-				mScopeManager->getCodeUnitName().str()
+				mScopeManager->getCodeUnitName().str(),
+				namedType->identifier.str()
 			);
 		}
 		else if (!findResult.nodeList.size())
 		{
 			throw exceptions::custom_exception(
-				"%s error: The '%s' type could not be found in scope",
+				"%s error: The '%s' could not be a valid type or could not be found in scope",
 				namedType->line, namedType->column,
 				mScopeManager->getCodeUnitName().str(),
 				namedType->identifier.str()
@@ -195,52 +166,61 @@ namespace fluffy { namespace transformations {
 		case AstNodeType_e::GenericItemDecl:
 			return true;
 
-		case AstNodeType_e::IncludeItemDecl:
-		{
-			auto includeDecl = ast::safe_cast<ast::IncludeItemDecl>(node);
-
-			if (!includeDecl->hasBeenResolved)
-			{
-				throw exceptions::custom_exception("Unresolved include");
-			}
-
-			if (includeDecl->referencedNodeList.size() > 1)
-			{
-				auto referencedNode = extractTraitForFromList(includeDecl->referencedNodeList);
-				if (referencedNode == nullptr)
-				{
-					throw exceptions::custom_exception("Unresolved include");
-				}
-				return canBeType(referencedNode);
-			}
-			return canBeType(includeDecl->referencedNodeList[0]);
-		}
-		break;
-		case AstNodeType_e::WeakIncludeItemDecl:
-			{
-				auto weakIncludeDecl = ast::safe_cast<ast::WeakIncludeItemDecl>(node);
-				return canBeType(weakIncludeDecl->referencedNode);
-			}
-			break;
-
 		default:
 			break;
 		}
 		return false;
 	}
 
-	ast::AstNode* const
-	ResolveTypes::extractTraitForFromList(NodeList& list)
+	void
+	ResolveTypes::validateScope(ast::AstNode* const node)
 	{
-		ast::AstNode* foundNode = nullptr;
-		for (auto node : list)
+		switch (node->nodeType)
 		{
-			if (node->nodeType != AstNodeType_e::TraitForDecl)
+		case AstNodeType_e::CodeUnit:
+		case AstNodeType_e::NamespaceDecl:
+		case AstNodeType_e::ClassDecl:
+		case AstNodeType_e::EnumDecl:
+			break;
+		default:
+			throw exceptions::custom_exception(
+				"%s error: '%s' is not a valid scope",
+				node->line, node->column,
+				mScopeManager->getCodeUnitName().str(),
+				node->identifier.str()
+			);
+		}
+	}
+
+	void
+	ResolveTypes::updateTypeFromInclude(const scope::FindResult_t& findResult, ast::AstNode* const namedType)
+	{
+		if (auto includedScope = mScopeManager->getRootScope().getNode()->getAttribute<attributes::IncludedScope>())
+		{
+			auto includeList = includedScope->findInclude(findResult.nodeList[0]->identifier);
+
+			if (!includeList.size())
 			{
-				foundNode = node;
-				break;
+				throw exceptions::custom_exception(
+					"Failed to retrieve included scope from '%s",
+					findResult.nodeList[0]->identifier.str()
+				);
+			}
+			for (auto it : includeList)
+			{
+				if (it.node == findResult.nodeList[0])
+				{
+					namedType->insertAttribute(new attributes::Reference(it.scope, it.node));
+					break;
+				}
 			}
 		}
-		return foundNode;
+		else
+		{
+			throw exceptions::custom_exception(
+				"Failed to retrieve included scope from '%s",
+				mScopeManager->getCodeUnitName().str()
+			);
+		}
 	}
 } }

@@ -55,4 +55,10 @@ namespace fluffy { namespace ast {
 	{
 		return "";
 	}
+
+	void
+	AstNode::insertAttribute(attributes::Attribute* const attribute)
+	{
+		attributeMap.emplace(attribute->type, attribute);
+	}
 } }

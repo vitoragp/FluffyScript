@@ -2,6 +2,7 @@
 #include "ast\fl_ast_decl.h"
 #include "scope\fl_scope.h"
 #include "scope\fl_scope_manager.h"
+#include "attributes\fl_included_scope.h"
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace scope {
@@ -147,10 +148,12 @@ namespace fluffy { namespace scope {
 
 	Scope::Scope(ScopeManager* scopeManager, ast::AstNode* const scope, ast::AstNode* const node)
 		: mScopeManager(scopeManager)
-		, mScope(scope)
-		, mNode(node)
+		, mScope(nullptr)
+		, mNode(nullptr)
 		, mFetched(false)
-	{}
+	{
+		assign(scope, node);
+	}
 
 	Scope::~Scope()
 	{}
@@ -202,44 +205,45 @@ namespace fluffy { namespace scope {
 		case AstNodeType_e::CodeUnit:
 			if (auto n = reinterpret_cast<ast::CodeUnit*>(mNode))
 			{
-				filterMap(mMap, n->includeDeclList, [](NodeMultiMap& map, ast::IncludeDecl* const includeDecl) {
-					filterMap(map, includeDecl->includedItemList, [](NodeMultiMap& map, ast::BaseIncludeItemDecl* const baseIncludeItemDecl) {
-						switch (baseIncludeItemDecl->nodeType)
-						{
-						case AstNodeType_e::IncludeItemDecl:
+				if (auto includedScope = n->getAttribute<attributes::IncludedScope>())
+				{
+					auto weakMap = includedScope->weakIncludeMap();
+					auto includeMap = includedScope->includeMap();
+
+					// Remove todos os elementos duplicados de include items fortes.
+					for (auto& it : includeMap)
+					{
+						weakMap.erase(it.first);
+					}
+
+					// Remove todos os elementos duplicados de namespace.
+					for (auto& it : n->namespaceDeclList)
+					{
+						weakMap.erase(it->identifier);
+					}
+					
+					// Apos ajustar o weakMap pode se fazer a montagem do escopo.
+					for (auto& it : weakMap)
+					{
+						mMap.emplace(it.first, it.second.node);
+					}
+
+					for (auto& it : includeMap)
+					{
+						mMap.emplace(it.first, it.second.node);
+					}
+				}
+				else
+				{
+					filterMap(mMap, n->includeDeclList, [](NodeMultiMap& map, ast::IncludeDecl* const includeDecl) {
+						filterMap(map, includeDecl->includedItemList, [](NodeMultiMap& map, ast::IncludeItemDecl* const includeItemDecl) {
+							if (!includeItemDecl->includeAll)
 							{
-								auto includeItemDecl = ast::safe_cast<ast::IncludeItemDecl>(baseIncludeItemDecl);
-
-								if (includeItemDecl->includeAll)
-								{
-									break;
-								}
-
-								if (includeItemDecl->referencedAlias == TString(nullptr))
-								{
-									map.emplace(includeItemDecl->identifier, includeItemDecl);
-								}
-								else
-								{
-									map.emplace(includeItemDecl->referencedAlias, includeItemDecl);
-								}
+								map.emplace(includeItemDecl->identifier, includeItemDecl);
 							}
-							break;
-
-						case AstNodeType_e::WeakIncludeItemDecl:
-							{
-								auto weakIncludeItemDecl = ast::safe_cast<ast::WeakIncludeItemDecl>(baseIncludeItemDecl);
-								map.emplace(weakIncludeItemDecl->identifier, weakIncludeItemDecl);
-							}
-							break;
-
-						default:
-							break;
-
-						}
+						});
 					});
-				});
-
+				}
 				appendMap(mMap, n->namespaceDeclList);
 			}
 			break;

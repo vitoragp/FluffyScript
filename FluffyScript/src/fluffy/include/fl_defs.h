@@ -402,7 +402,6 @@ namespace fluffy {
 		CodeUnit,
 
 		IncludeDecl,
-		WeakIncludeItemDecl,
 		IncludeItemDecl,
 		NamespaceDecl,
 		ClassDecl,
@@ -506,6 +505,18 @@ namespace fluffy {
 
 		SizedArray,
 		UnsizedArray
+	};
+
+	/**
+	 * AttributeType_e
+	 */
+
+	enum class AttributeType_e : U64
+	{
+		Unknown,
+
+		IncludedScope,
+		Reference
 	};
 
 

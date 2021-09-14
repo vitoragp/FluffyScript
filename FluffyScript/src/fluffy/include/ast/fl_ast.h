@@ -2,8 +2,11 @@
 #include "fl_string.h"
 #include "fl_defs.h"
 #include "fl_exceptions.h"
+#include "fl_collections.h"
+#include "attributes\fl_attribute.h"
 
 namespace fluffy { namespace ast {
+
 	/**
 	 * AstNode
 	 */
@@ -25,10 +28,31 @@ namespace fluffy { namespace ast {
 		virtual const I8*
 		getIdentifier();
 
-		const AstNodeType_e		nodeType;
-		TString					identifier;
-		U32						line;
-		U32						column;
+		template <typename TAttribute>
+		TAttribute* const
+		getAttribute();
+
+		template <typename TAttribute, typename ...TArgs>
+		TAttribute* const
+		getOrCreateAttribute(TArgs...args);
+
+		void
+		insertAttribute(attributes::Attribute* const attribute);
+
+		AttributeMap
+		attributeMap;
+
+		const AstNodeType_e
+		nodeType;
+
+		TString
+		identifier;
+
+		U32
+		line;
+
+		U32
+		column;
 	};
 
 	template <AstNodeType_e Type>
@@ -118,6 +142,33 @@ namespace fluffy { namespace ast {
 		if (unique != nullptr) {
 			(owner->* func)(unique.get(), args...);
 		}
+	}
+
+	/**
+	 * AstNode Impl
+	 */
+
+	template <typename TAttribute>
+	TAttribute* const
+	AstNode::getAttribute()
+	{
+		auto it = attributeMap.find(TAttribute::getAttributeTypeKey());
+		return it != attributeMap.end() ? reinterpret_cast<TAttribute* const>(it->second.get()) : nullptr;
+	}
+
+	template <typename TAttribute, typename ...TArgs>
+	TAttribute* const
+	AstNode::getOrCreateAttribute(TArgs...args)
+	{
+		auto it = attributeMap.find(TAttribute::getAttributeTypeKey());
+
+		if (it == attributeMap.end())
+		{
+			auto newAttrib = new TAttribute(args...);
+			insertAttribute(newAttrib);
+			return newAttrib;
+		}
+		return reinterpret_cast<TAttribute* const>(it->second.get());
 	}
 
 } }

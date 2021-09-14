@@ -41,6 +41,9 @@ namespace fluffy { namespace transformations {
 	 */
 
 	ResolveInclude::ResolveInclude()
+		: mScopeManager(nullptr)
+		, mIncludedScope(nullptr)
+		, mCreatedIncludedScope(false)
 	{}
 
 	ResolveInclude::~ResolveInclude()
@@ -49,8 +52,16 @@ namespace fluffy { namespace transformations {
 	void
 	ResolveInclude::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 	{
+		if (mScopeManager == nullptr)
+		{
+			mScopeManager = scopeManager;
+		}
+
 		if (node->nodeType == AstNodeType_e::IncludeDecl)
 		{
+			// Busca um atributo ja
+			mIncludedScope = scopeManager->getRootScope().getNode()->getOrCreateAttribute<attributes::IncludedScope>();
+
 			// Prepara o escopo raiz do code unit da include.
 			auto includeDecl = ast::safe_cast<ast::IncludeDecl>(node);
 
@@ -59,23 +70,17 @@ namespace fluffy { namespace transformations {
 			includeScopeManager.setCodeUnit(includeScopeManager.findCodeUnitByName(includeDecl->inFile));
 
 			auto includeRootScope = includeScopeManager.getRootScope();
+			validateScope(includeRootScope.getNode());
 
-			ast::for_each(this, &ResolveInclude::processIncludeItem, includeDecl->includedItemList, scopeManager, includeDecl, includeRootScope);
-
-			for (auto& weakIncludeItem : mWeakIncludeItemList)
-			{
-				includeDecl->includedItemList.emplace_back(weakIncludeItem);
-			}
-			mWeakIncludeItemList.clear();
+			ast::for_each(this, &ResolveInclude::processIncludeItem, includeDecl->includedItemList, includeDecl, includeRootScope);
 		}
 	}
 
 	void
-	ResolveInclude::processIncludeItem(ast::BaseIncludeItemDecl* const baseIncludeItemDecl, scope::ScopeManager* const scopeManager, ast::IncludeDecl* const includeDecl, scope::Scope& includeRootScope)
+	ResolveInclude::processIncludeItem(ast::IncludeItemDecl* const includeItemDecl, ast::IncludeDecl* const includeDecl, scope::Scope& includeRootScope)
 	{
-		auto includeItemDecl = ast::safe_cast<ast::IncludeItemDecl>(baseIncludeItemDecl);
-
 		scope::Scope scope = includeRootScope;
+
 		auto nextId = includeItemDecl->scopePath.get();
 
 		while (nextId)
@@ -87,21 +92,20 @@ namespace fluffy { namespace transformations {
 				throw exceptions::custom_exception(
 					"%s error: Failed to resolve include item '%s'",
 					includeItemDecl->line, includeItemDecl->column,
-					scopeManager->getCodeUnitName().str(),
-					nextId->identifier.str()
+					mScopeManager->getCodeUnitName().str(), nextId->identifier.str()
 				);
 			}
 
-			if (!checkNodeVisibility(scopeManager, findResult.nodeList[0]))
+			if (!checkNodeVisibility(findResult.nodeList[0]))
 			{
 				throw exceptions::custom_exception(
-					"%s error: Trying to attempt a unexportable element '%s'",
+					"%s error: Trying to attempt include a unimportable element '%s'",
 					includeItemDecl->line, includeItemDecl->column,
-					scopeManager->getCodeUnitName().str(),
-					nextId->identifier.str()
+					mScopeManager->getCodeUnitName().str(), nextId->identifier.str()
 				);
 			}
 			scope.assign(findResult.scope, findResult.nodeList[0]);
+			validateScope(scope.getNode());
 
 			if (nextId->scopedChildPath)
 			{
@@ -111,79 +115,68 @@ namespace fluffy { namespace transformations {
 			{
 				if (!includeItemDecl->includeAll)
 				{
-					auto findResult = scope.findNodeById(includeItemDecl->identifier);
+					TString includedIdentifier;
+
+					scope::FindResult_t findResult;					
+					if (includeItemDecl->referencedAlias == TString(nullptr))
+					{
+						findResult = scope.findNodeById(includeItemDecl->identifier);
+						includedIdentifier = includeItemDecl->identifier;
+					}
+					else
+					{
+						findResult = scope.findNodeById(includeItemDecl->referencedAlias);
+						includedIdentifier = includeItemDecl->referencedAlias;
+					}
 
 					if (!findResult.foundResult)
 					{
 						throw exceptions::custom_exception(
 							"%s error: Failed to resolve include item '%s'",
 							includeItemDecl->line, includeItemDecl->column,
-							scopeManager->getCodeUnitName().str(),
-							includeItemDecl->identifier.str()
+							mScopeManager->getCodeUnitName().str(), includeItemDecl->identifier.str()
 						);
 					}
 
-					Bool hasImportableNode = false;
-					for (auto includedNodeIt = findResult.nodeList.begin(); includedNodeIt != findResult.nodeList.end();)
-					{
-						auto includedNode = *includedNodeIt;
-
-						if (includedNode->nodeType != AstNodeType_e::TraitForDecl)
-						{
-							if (!checkNodeVisibility(scopeManager, includedNode))
-							{
-								throw exceptions::custom_exception(
-									"%s error: Trying to attempt a unexportable element '%s'",
-									includeItemDecl->line, includeItemDecl->column,
-									scopeManager->getCodeUnitName().str(),
-									includeItemDecl->identifier.str()
-								);
-							}
-							hasImportableNode = true;
-						}
-						else
-						{
-							if (!checkNodeVisibility(scopeManager, includedNode))
-							{
-								includedNodeIt = findResult.nodeList.erase(includedNodeIt);
-								continue;
-							}
-						}
-						includedNodeIt++;
-					}
-
-					if (!hasImportableNode)
+					if (!findResult.foundResult)
 					{
 						throw exceptions::custom_exception(
 							"%s error: Failed to resolve include item '%s'",
 							includeItemDecl->line, includeItemDecl->column,
-							scopeManager->getCodeUnitName().str(),
-							utils::AstUtils::printIncludeItem(includeItemDecl).c_str()
+							mScopeManager->getCodeUnitName().str(), includeItemDecl->identifier.str()
 						);
 					}
 
-					includeItemDecl->hasBeenResolved = true;
-					includeItemDecl->referencedScope = findResult.scope;
-					includeItemDecl->referencedNodeList = std::move(findResult.nodeList);
+					for (auto includedNode : findResult.nodeList)
+					{
+						validateIncludedNode(includedNode, includeItemDecl);
 
+						if (includedNode->nodeType == AstNodeType_e::TraitForDecl)
+						{
+							mIncludedScope->insertTraitDefinitionNode(includeItemDecl->identifier, includedNode);
+						}
+						else
+						{
+							mIncludedScope->insertIncludedNode(includeItemDecl->identifier, scope.getNode(), includedNode);
+						}
+					}
 					break;
 				}
 				else
 				{
-					transformations::for_each(scope.toMap(), [scopeManager, includeItemDecl, includeDecl, &scope, this](ast::AstNode* const node) {
-						if (checkNodeVisibility(scopeManager, node))
+					transformations::for_each(scope.toMap(), [includeItemDecl, &scope, this](ast::AstNode* const includedNode) {
+						if (checkNodeVisibility(includedNode))
 						{
-							auto weakInclude = new ast::WeakIncludeItemDecl(
-								includeItemDecl->line, includeItemDecl->column
-							);
+							validateIncludedNode(includedNode, includeItemDecl);
 
-							weakInclude->identifier = node->identifier;
-							
-							weakInclude->scopePath = includeItemDecl->scopePath.get();
-							weakInclude->referencedScope = scope.getNode();
-							weakInclude->referencedNode = node;
-
-							mWeakIncludeItemList.push_back(weakInclude);
+							if (includedNode->nodeType == AstNodeType_e::TraitForDecl)
+							{
+								mIncludedScope->insertTraitDefinitionNode(includedNode->identifier, includedNode);
+							}
+							else
+							{
+								mIncludedScope->insertWeakIncludedNode(includedNode->identifier, scope.getNode(), includedNode);
+							}
 						}
 					});
 
@@ -193,8 +186,66 @@ namespace fluffy { namespace transformations {
 		}
 	}
 
+	void ResolveInclude::validateIncludedNode(fluffy::ast::AstNode* const includedNode, fluffy::ast::AstNode* const includedItem)
+	{
+		if (!checkNodeVisibility(includedNode))
+		{
+			throw exceptions::custom_exception(
+				"%s error: Trying to attempt include a unimportable element '%s'",
+				includedItem->line, includedItem->column,
+				mScopeManager->getCodeUnitName().str(), includedNode->identifier.str()
+			);
+		}
+
+		if (includedNode->nodeType == AstNodeType_e::ClassFunctionDecl)
+		{
+			validateClassMember(includedNode, includedItem);
+		}
+		else if (includedNode->nodeType == AstNodeType_e::ClassVariableDecl)
+		{
+			validateClassMember(includedNode, includedItem);
+		}
+	}
+
+	void ResolveInclude::validateClassMember(fluffy::ast::AstNode* const includedNode, fluffy::ast::AstNode* const includedItem)
+	{
+		switch (includedNode->nodeType)
+		{
+		case AstNodeType_e::ClassFunctionDecl:
+			{
+				auto classFunction = ast::safe_cast<ast::ClassFunctionDecl>(includedNode);
+				if (!classFunction->isStatic)
+				{
+					throw exceptions::custom_exception(
+						"%s error: Failed to include '%s' function, only static functions can be included",
+						includedItem->line, includedItem->column,
+						mScopeManager->getCodeUnitName().str(), classFunction->identifier.str()
+					);
+				}
+			}
+			break;
+
+		case AstNodeType_e::ClassVariableDecl:
+			{
+				auto classVariable = ast::safe_cast<ast::ClassVariableDecl>(includedNode);
+				if (!classVariable->isStatic)
+				{
+					throw exceptions::custom_exception(
+						"%s error: Failed to include '%s' variable, only static variables can be included",
+						includedItem->line, includedItem->column,
+						mScopeManager->getCodeUnitName().str(), classVariable->identifier.str()
+					);
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	Bool
-	ResolveInclude::checkNodeVisibility(scope::ScopeManager* const scopeManager, ast::AstNode* node)
+	ResolveInclude::checkNodeVisibility(ast::AstNode* node)
 	{
 		switch (node->nodeType)
 		{
@@ -223,5 +274,25 @@ namespace fluffy { namespace transformations {
 			break;
 		}
 		return true;
+	}
+
+	void
+	ResolveInclude::validateScope(ast::AstNode* const node)
+	{
+		switch (node->nodeType)
+		{
+		case AstNodeType_e::CodeUnit:
+		case AstNodeType_e::NamespaceDecl:
+		case AstNodeType_e::ClassDecl:
+		case AstNodeType_e::EnumDecl:
+			break;
+		default:
+			throw exceptions::custom_exception(
+				"%s error: '%s' is not a valid scope",
+				node->line, node->column,
+				mScopeManager->getCodeUnitName().str(),
+				node->identifier.str()
+			);
+		}
 	}
 } }

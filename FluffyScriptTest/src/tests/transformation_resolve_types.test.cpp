@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "ast\fl_ast_decl.h"
+#include "attributes\fl_reference.h"
 #include "transformation\fl_transformation_resolve_include.h"
 #include "transformation\fl_transformation_resolve_types.h"
 #include "fl_compiler.h"
@@ -25,27 +26,14 @@ namespace fluffy { namespace testing {
 	};
 
 	void
-	validateNamedType(ast::AstNode* const node, TString scopeId, TString nodeId)
+	validateReference(attributes::Reference* const reference, TString scopeId, TString nodeId, AstNodeType_e scopeType, AstNodeType_e nodeType)
 	{
-		auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
+		ASSERT_TRUE(reference != nullptr);
 
-		ASSERT_TRUE(namedType->hasBeenResolved);
-		ASSERT_TRUE(namedType->referencedScope != nullptr);
-		ASSERT_EQ(namedType->referencedScope->identifier, scopeId);
-		ASSERT_EQ(namedType->referencedNode->identifier, nodeId);
-	}
-
-	void
-	validateNamedType(ast::AstNode* const node, TString scopeId, TString nodeId, AstNodeType_e scopeType, AstNodeType_e nodeType)
-	{
-		auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
-
-		ASSERT_TRUE(namedType->hasBeenResolved);
-		ASSERT_TRUE(namedType->referencedScope != nullptr);
-		ASSERT_EQ(namedType->referencedScope->identifier, scopeId);
-		ASSERT_EQ(namedType->referencedScope->nodeType, scopeType);
-		ASSERT_EQ(namedType->referencedNode->identifier, nodeId);
-		ASSERT_EQ(namedType->referencedNode->nodeType, nodeType);
+		ASSERT_EQ(reference->referencedScope->identifier, scopeId);
+		ASSERT_EQ(reference->referencedScope->nodeType, scopeType);
+		ASSERT_EQ(reference->referencedNode->identifier, nodeId);
+		ASSERT_EQ(reference->referencedNode->nodeType, nodeType);
 	}
 
 	/**
@@ -72,13 +60,13 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("FooOne") && namedType->scopePath == nullptr)
 					{
-						validateNamedType(namedType, "foo", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "foo", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 					
 					if (namedType->identifier == TString("FooOne") && namedType->scopePath && namedType->scopePath->identifier == TString("subapp"))
 					{
-						validateNamedType(namedType, "subapp", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "subapp", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 				}
@@ -136,7 +124,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("FooOne"))
 					{
-						validateNamedType(namedType, "subfoo", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "subfoo", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 				}
@@ -190,7 +178,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("FooTwo"))
 					{
-						validateNamedType(namedType, "foo", "FooTwo", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "foo", "FooTwo", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 				}
@@ -283,7 +271,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("FooTwo"))
 					{
-						validateNamedType(namedType, "foo", "FooTwo", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "foo", "FooTwo", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 				}
@@ -339,7 +327,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("FooOne"))
 					{
-						validateNamedType(namedType, "foo2", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "foo2", "FooOne", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 						validationPasses++;
 					}
 				}
@@ -402,7 +390,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("T"))
 					{
-						validateNamedType(namedType, "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
 						validationPasses++;
 					}
 				}
@@ -452,7 +440,7 @@ namespace fluffy { namespace testing {
 
 					if (namedType->identifier == TString("T"))
 					{
-						validateNamedType(namedType, "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+						validateReference(namedType->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
 						validationPasses++;
 					}
 				}
@@ -501,7 +489,7 @@ namespace fluffy { namespace testing {
 				{
 					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateNamedType(var->typeDecl.get(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 					validationPasses++;
 				}
 
@@ -509,7 +497,7 @@ namespace fluffy { namespace testing {
 				{
 					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateNamedType(var->typeDecl.get(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
 					validationPasses++;
 				}
 			}
@@ -557,7 +545,7 @@ namespace fluffy { namespace testing {
 				{
 					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateNamedType(var->typeDecl.get(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
 					validationPasses++;
 				}
 
@@ -565,7 +553,7 @@ namespace fluffy { namespace testing {
 				{
 					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateNamedType(var->typeDecl.get(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
 					validationPasses++;
 				}
 
@@ -573,7 +561,10 @@ namespace fluffy { namespace testing {
 				{
 					auto var = ast::safe_cast<ast::ClassFunctionDecl>(node);
 
-					validateNamedType(var->parameterList[0]->typeDecl.get(), "main", "T", AstNodeType_e::ClassFunctionDecl, AstNodeType_e::GenericItemDecl);
+					validateReference(
+						var->parameterList[0]->typeDecl->getAttribute<attributes::Reference>(),
+						"main", "T", AstNodeType_e::ClassFunctionDecl, AstNodeType_e::GenericItemDecl
+					);
 					validationPasses++;
 				}
 			}

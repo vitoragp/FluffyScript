@@ -16,16 +16,16 @@ namespace fluffy { namespace transformations {
 
 	private:
 		void
-		updateType(fluffy::scope::FindResult_t& findResult, fluffy::ast::TypeDeclNamed* namedType);
-
-		void
 		validateResult(fluffy::scope::FindResult_t& findResult, ast::AstNode* const namedType);
 
 		Bool
 		canBeType(ast::AstNode* const node);
 
-		ast::AstNode* const
-		extractTraitForFromList(NodeList& list);
+		void
+		validateScope(ast::AstNode* const node);
+
+		void
+		updateTypeFromInclude(const scope::FindResult_t& findResult, ast::AstNode* const namedType);
 
 	private:
 		scope::ScopeManager*

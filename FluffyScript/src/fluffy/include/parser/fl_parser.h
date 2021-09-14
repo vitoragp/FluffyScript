@@ -231,9 +231,6 @@ namespace fluffy { namespace parser {
 		std::unique_ptr<ast::ArrayDecl>
 		parseArrayDecl(ParserContext_s& ctx);
 
-		std::unique_ptr<ast::ScopedPathDecl>
-		parseChildScopedPaths(ParserContext_s& ctx);
-
 		void
 		validateIdentifier(TString& id);
 

@@ -3,9 +3,13 @@
 #include "gtest/gtest.h"
 
 #include "fl_buffer.h"
+#include "ast\fl_ast_decl.h"
 #include "parser\fl_parser.h"
 #include "scope\fl_scope_manager.h"
 #include "utils\fl_scope_utils.h"
+#include "attributes\fl_included_scope.h"
+#include "transformation\fl_transformation_resolve_include.h"
+#include "fl_compiler.h"
 #include "fl_exceptions.h"
 
 namespace fluffy { namespace testing {
@@ -16,12 +20,14 @@ namespace fluffy { namespace testing {
 
 	struct ScopeManagerTest : public ::testing::Test
 	{
+		std::unique_ptr<fluffy::Compiler> compiler;
 		std::unique_ptr<parser::Parser> parser;
 		parser::ParserContext_s ctx = { false };
 
 		// Antes de cada test
 		virtual void SetUp() override {
 			parser = std::make_unique<parser::Parser>(new DirectBuffer());
+			compiler = std::make_unique<fluffy::Compiler>();
 		}
 	};
 
@@ -325,8 +331,8 @@ namespace fluffy { namespace testing {
 					auto bNode = scope.findNodeById(TString("b"));
 
 					ASSERT_TRUE(
-						aNode.foundResult == true && bNode.foundResult == false ||
-						aNode.foundResult == false && bNode.foundResult == true
+						(aNode.foundResult == true && bNode.foundResult == false) ||
+						(aNode.foundResult == false && bNode.foundResult == true)
 					);
 				}
 			}
@@ -528,5 +534,323 @@ namespace fluffy { namespace testing {
 
 		auto validation = Validate();
 		scopeManager->processCodeUnit(codeUnit.get(), &validation);
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeWithIncludeOne)
+	{
+		class CheckResult : public scope::NodeProcessor
+		{
+		public:
+			CheckResult() {}
+			~CheckResult() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
+				{
+					auto scope = scopeManager->getRootScope();
+					auto scopedItems = scope.toMap();				
+
+					U32 foundedItems = 0;
+					for (auto& it : scopedItems)
+					{
+						if (it.first == "app")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "app");
+
+							foundedItems++;
+						}
+
+						if (it.first == "foo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "foo");
+
+							foundedItems++;
+						}
+
+						if (it.first == "FooOne")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooOne");
+
+							foundedItems++;
+						}
+					}
+					ASSERT_EQ(foundedItems, 3);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		compiler->initialize();
+		compiler->applyTransformation(new transformations::ResolveInclude());
+
+		auto checkResult = new CheckResult();
+		compiler->applyValidation(checkResult);
+
+		compiler->addBlockToBuild("source1",
+			"include { loo::FooOne } in \"source2\";"
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main() { \n"
+					"} \n"
+				"} \n"
+			"} \n"
+			"namespace foo {}"
+		);
+
+		compiler->addBlockToBuild("source2",
+			"namespace loo { \n"
+				"export class FooOne {}"
+			"}"
+		);
+
+		compiler->build();
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeWithIncludeTwo)
+	{
+		class CheckResult : public scope::NodeProcessor
+		{
+		public:
+			CheckResult() {}
+			~CheckResult() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
+				{
+					auto scope = scopeManager->getRootScope();
+					auto scopedItems = scope.toMap();				
+
+					U32 foundedItems = 0;
+					for (auto& it : scopedItems)
+					{
+						if (it.first == "app")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "app");
+
+							foundedItems++;
+						}
+
+						if (it.first == "foo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "foo");
+
+							foundedItems++;
+						}
+
+						if (it.first == "FooTwo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooOne");
+
+							foundedItems++;
+						}
+					}
+					ASSERT_EQ(foundedItems, 3);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		compiler->initialize();
+		compiler->applyTransformation(new transformations::ResolveInclude());
+
+		auto checkResult = new CheckResult();
+		compiler->applyValidation(checkResult);
+
+		compiler->addBlockToBuild("source1",
+			"include { loo::FooOne as FooTwo } in \"source2\";"
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main() { \n"
+					"} \n"
+				"} \n"
+			"} \n"
+			"namespace foo {}"
+		);
+
+		compiler->addBlockToBuild("source2",
+			"namespace loo { \n"
+				"export class FooOne {}"
+			"}"
+		);
+
+		compiler->build();
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeWithIncludeThree)
+	{
+		class CheckResult : public scope::NodeProcessor
+		{
+		public:
+			CheckResult() {}
+			~CheckResult() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
+				{
+					auto scope = scopeManager->getRootScope();
+					auto scopedItems = scope.toMap();
+
+					U32 foundedItems = 0;
+					for (auto& it : scopedItems)
+					{
+						if (it.first == "app")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "app");
+
+							foundedItems++;
+						}
+
+						if (it.first == "foo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::NamespaceDecl);
+							ASSERT_EQ(it.second->identifier, "foo");
+
+							foundedItems++;
+						}
+
+						if (it.first == "FooOne")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooOne");
+
+							foundedItems++;
+						}
+
+						if (it.first == "FooTwo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooTwo");
+
+							foundedItems++;
+						}
+					}
+					ASSERT_EQ(foundedItems, 4);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		compiler->initialize();
+		compiler->applyTransformation(new transformations::ResolveInclude());
+
+		auto checkResult = new CheckResult();
+		compiler->applyValidation(checkResult);
+
+		compiler->addBlockToBuild("source1",
+			"include { loo::* } in \"source2\";"
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main() { \n"
+					"} \n"
+				"} \n"
+			"} \n"
+			"namespace foo {}"
+		);
+
+		compiler->addBlockToBuild("source2",
+			"namespace loo { \n"
+				"export class FooOne {}"
+				"export class FooTwo {}"
+				"class FooThree {}"
+			"}"
+		);
+
+		compiler->build();
+	}
+
+	TEST_F(ScopeManagerTest, TestScopeWithIncludeFour)
+	{
+		class CheckResult : public scope::NodeProcessor
+		{
+		public:
+			CheckResult() {}
+			~CheckResult() {}
+
+			virtual void
+			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{
+				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
+				{
+					auto scope = scopeManager->getRootScope();
+					auto scopedItems = scope.toMap();
+
+					U32 foundedItems = 0;
+					for (auto& it : scopedItems)
+					{
+						if (it.first == "FooOne")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooOne");
+
+							foundedItems++;
+						}
+
+						if (it.first == "FooTwo")
+						{
+							ASSERT_EQ(it.second->nodeType, AstNodeType_e::ClassDecl);
+							ASSERT_EQ(it.second->identifier, "FooTwo");
+
+							foundedItems++;
+						}
+					}
+					ASSERT_EQ(foundedItems, 2);
+				}
+			}
+
+			virtual void
+			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			{}
+		};
+
+		compiler->initialize();
+		compiler->applyTransformation(new transformations::ResolveInclude());
+
+		auto checkResult = new CheckResult();
+		compiler->applyValidation(checkResult);
+
+		compiler->addBlockToBuild("source1",
+			"include { loo::app2::*, loo::app2::FooOne } in \"source2\"; \n"
+			"namespace app { \n"
+				"class Foo { \n"
+					"fn main() { \n"
+					"} \n"
+				"} \n"
+			"} \n"
+			"namespace foo {}"
+		);
+
+		compiler->addBlockToBuild("source2",
+			"namespace loo { \n"
+				"namespace app2 { \n"
+					"export class FooOne {}"
+					"export class FooTwo {}"
+					"class FooThree {}"
+				"} \n"
+			"}"
+		);
+
+		compiler->build();
 	}
 } }

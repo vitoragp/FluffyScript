@@ -268,23 +268,35 @@ namespace fluffy { namespace parser {
 				// Consome '*'
 				m_lexer->expectToken(TokenType_e::Multiplication);
 
-				includeItemDecl->includeAll = true;				
+				includeItemDecl->includeAll = true;
 			}
 			else if (m_lexer->isIdentifier())
 			{
-				includeItemDecl->identifier = m_lexer->expectIdentifier();
-
-				// Valida o identificador.
-				validateIdentifier(includeItemDecl->identifier);
-
-				if (m_lexer->isAs())
+				if (m_lexer->predictNextToken().type == TokenType_e::As)
 				{
+					includeItemDecl->referencedAlias = m_lexer->expectIdentifier();
+
+					// Valida o identificador.
+					validateIdentifier(includeItemDecl->referencedAlias);
+
 					// Consome 'as'
 					m_lexer->expectToken(TokenType_e::As);
 
 					// Consome identificador.
-					includeItemDecl->referencedAlias = m_lexer->expectIdentifier();
+					includeItemDecl->identifier = m_lexer->expectIdentifier();
+
+					// Valida o identificador.
+					validateIdentifier(includeItemDecl->identifier);
 				}
+				else
+				{
+					// Consome identificador.
+					includeItemDecl->identifier = m_lexer->expectIdentifier();
+
+					// Valida o identificador.
+					validateIdentifier(includeItemDecl->identifier);
+				}
+
 			}
 
 			// Inclui item a lista
@@ -1705,7 +1717,7 @@ namespace fluffy { namespace parser {
 		{
 			if (m_lexer->predictNextToken().type == TokenType_e::ScopeResolution)
 			{
-				scopedPathDecl->scopedChildPath = parseChildScopedPaths(ctx);
+				scopedPathDecl->scopedChildPath = parseScopedPath(ctx);
 			}
 		}
 		return scopedPathDecl;
@@ -4705,31 +4717,6 @@ namespace fluffy { namespace parser {
 		m_lexer->expectToken(TokenType_e::RSquBracket);
 
 		return sizedArrayDecl;
-	}
-
-	std::unique_ptr<ast::ScopedPathDecl>
-	Parser::parseChildScopedPaths(ParserContext_s& ctx)
-	{
-		auto scopedPathDecl = std::make_unique<ast::ScopedPathDecl>(
-			m_lexer->getToken().line,
-			m_lexer->getToken().column
-		);
-
-		// Consome o identificador.
-		scopedPathDecl->identifier = m_lexer->expectIdentifier();
-
-		// Valida o identificador.
-		validateIdentifier(scopedPathDecl->identifier);
-
-		// Consome '::'.
-		m_lexer->expectToken(TokenType_e::ScopeResolution);
-
-		// Verifica se a mais declaracoes de escopo.
-		if (m_lexer->isScopeResolution())
-		{
-			scopedPathDecl->scopedChildPath = parseChildScopedPaths(ctx);
-		}
-		return scopedPathDecl;
 	}
 
 	void

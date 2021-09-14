@@ -263,15 +263,6 @@ namespace fluffy { namespace utils {
 							);
 						}
 
-						// Resolve o item.
-						mIncludeItem->hasBeenResolved = true;
-						mIncludeItem->referencedScope = findResult.scope;
-						mIncludeItem->referencedNodeList.insert(
-							mIncludeItem->referencedNodeList.end(),
-							findResult.nodeList.begin(),
-							findResult.nodeList.end()
-						);
-
 						// Interrompe o processamento.
 						scopeManager->interrupt();
 
@@ -307,29 +298,8 @@ namespace fluffy { namespace utils {
 				ast::for_each(n->includeDeclList, [n, scopeManager, &children](ast::IncludeDecl* const node) {
 					auto includeCodeUnit = scopeManager->findCodeUnitByName(node->inFile);
 
-					ast::for_each(node->includedItemList, [n, scopeManager, includeCodeUnit, &children](ast::BaseIncludeItemDecl* const node) {
-						auto includeNode = ast::safe_cast<ast::IncludeItemDecl>(node);
+					ast::for_each(node->includedItemList, [n, scopeManager, includeCodeUnit, &children](ast::IncludeItemDecl* const includeNode) {
 
-						if (!includeNode->hasBeenResolved)
-						{
-							scope::ScopeManager scopeManagerInt;
-							scopeManagerInt.copyReferenceTree(scopeManager);
-
-							IncludeItemProcessor includeItemProcessor = IncludeItemProcessor(n, includeNode);
-							scopeManagerInt.processCodeUnit(includeCodeUnit, &includeItemProcessor);
-						}
-
-						for (auto includedNode : includeNode->referencedNodeList)
-						{
-							if (includeNode->referencedAlias == TString(nullptr))
-							{
-								children.emplace(includeNode->identifier, includeNode);
-							}
-							else
-							{
-								children.emplace(includeNode->referencedAlias, includeNode);
-							}
-						}
 					});
 				});
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "scope\fl_scope_manager.h"
+#include "attributes\fl_included_scope.h"
 namespace fluffy { namespace transformations {
 	/**
 	 * ResolveInclude
@@ -16,13 +17,28 @@ namespace fluffy { namespace transformations {
 
 	private:
 		void
-		processIncludeItem(ast::BaseIncludeItemDecl* const baseIncludeItemDecl, scope::ScopeManager* const scopeManager, ast::IncludeDecl* const includeDecl, scope::Scope& includeRootScope);
+		processIncludeItem(ast::IncludeItemDecl* const includeItemDecl, ast::IncludeDecl* const includeDecl, scope::Scope& includeRootScope);
+
+		void
+		validateIncludedNode(fluffy::ast::AstNode* const includedNode, fluffy::ast::AstNode* const includedItem);
+
+		void
+		validateClassMember(fluffy::ast::AstNode* const includedNode, fluffy::ast::AstNode* const includedItem);
 
 		Bool
-		checkNodeVisibility(scope::ScopeManager* const scopeManager, ast::AstNode* node);
+		checkNodeVisibility(ast::AstNode* node);
+
+		void
+		validateScope(ast::AstNode* const node);
 
 	private:
-		std::vector<ast::WeakIncludeItemDecl*>
-		mWeakIncludeItemList;
+		scope::ScopeManager*
+		mScopeManager;
+
+		attributes::IncludedScope*
+		mIncludedScope;
+
+		Bool
+		mCreatedIncludedScope;
 	};
 } }
