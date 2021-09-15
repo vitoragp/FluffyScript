@@ -299,13 +299,12 @@ namespace fluffy {
 	};
 
 	/**
-	 * TypeDeclID_e
+	 *
 	 */
 
-	enum class TypeDeclID_e
+	enum class PrimitiveTypeID_e
 	{
 		Unknown,
-
 		Void,
 		Bool,
 		I8,
@@ -320,16 +319,6 @@ namespace fluffy {
 		Fp64,
 		String,
 		Object,
-
-		Array,
-
-		Function,
-
-		Tuple,
-
-		Self,			// Apenas em traits.
-
-		Named			// Classes, interfaces, trait, enum...
 	};
 
 	/**
@@ -497,6 +486,7 @@ namespace fluffy {
 		Fp64Type,
 		StringType,
 		ObjectType,
+		PrimitiveType,
 		ArrayType,
 		FunctionType,
 		NamedType,
@@ -516,7 +506,8 @@ namespace fluffy {
 		Unknown,
 
 		IncludedScope,
-		Reference
+		Reference,
+		ImplementedTraitList
 	};
 
 

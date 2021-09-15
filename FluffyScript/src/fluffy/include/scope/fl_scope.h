@@ -17,7 +17,7 @@ namespace fluffy { namespace scope {
 	 */
 
 	struct FindResult_t
-	{
+	{		
 		ast::AstNode* scope;
 		NodeList nodeList;
 

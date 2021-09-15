@@ -16,6 +16,10 @@ namespace fluffy { namespace validations {
 		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override;
 
 	private:
+		void
+		validateDuplication(scope::ScopeManager* const scopeManager, ast::AstNode* const node);
+
+	private:
 		NodeMultiMap
 		mIncludedScope;
 	};

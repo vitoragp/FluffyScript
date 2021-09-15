@@ -28,6 +28,14 @@ namespace fluffy { namespace ast {
 		virtual const I8*
 		getIdentifier();
 
+		template <typename T>
+		Bool
+		is();
+
+		template <typename T>
+		T* const
+		to();
+
 		template <typename TAttribute>
 		TAttribute* const
 		getAttribute();
@@ -148,6 +156,20 @@ namespace fluffy { namespace ast {
 	 * AstNode Impl
 	 */
 
+	template <typename T>
+	Bool
+	AstNode::is()
+	{
+		return nodeType == T::getReferenceType();
+	}
+
+	template <typename T>
+	T* const
+	AstNode::to()
+	{
+		return is<T>() ? ast::safe_cast<T>(this) : nullptr;
+	}
+
 	template <typename TAttribute>
 	TAttribute* const
 	AstNode::getAttribute()
@@ -170,5 +192,4 @@ namespace fluffy { namespace ast {
 		}
 		return reinterpret_cast<TAttribute* const>(it->second.get());
 	}
-
 } }

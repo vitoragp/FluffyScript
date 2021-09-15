@@ -92,7 +92,7 @@ namespace fluffy { namespace testing {
 
 			validateIntExpr(binExpr->leftDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 				EXPECT_EQ(val->valueDecl, 2);
-				EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+				EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 				EXPECT_EQ(val->line, 1);
 				EXPECT_EQ(val->column, 1);
 			});
@@ -105,14 +105,14 @@ namespace fluffy { namespace testing {
 
 				validateIntExpr(binExpr->leftDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 2);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 5);
 				});
 
 				validateIntExpr(binExpr->rightDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 3);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 9);
 				});
@@ -142,14 +142,14 @@ namespace fluffy { namespace testing {
 
 				validateIntExpr(binExpr->leftDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 2);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 2);
 				});
 
 				validateIntExpr(binExpr->rightDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 5);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 6);
 				});
@@ -158,7 +158,7 @@ namespace fluffy { namespace testing {
 			// 3
 			validateIntExpr(binExpr->rightDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 				EXPECT_EQ(val->valueDecl, 3);
-				EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+				EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 				EXPECT_EQ(val->line, 1);
 				EXPECT_EQ(val->column, 11);
 			});
@@ -195,7 +195,7 @@ namespace fluffy { namespace testing {
 				// a > [5] ? 5 : 3 * 4
 				validateIntExpr(binExpr->rightDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 5);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 5);
 				});
@@ -204,7 +204,7 @@ namespace fluffy { namespace testing {
 			// a > 5 ? [5] : 3 * 4
 			validateIntExpr(terExpr->leftDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 				EXPECT_EQ(val->valueDecl, 5);
-				EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+				EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 				EXPECT_EQ(val->line, 1);
 				EXPECT_EQ(val->column, 9);
 			});
@@ -218,7 +218,7 @@ namespace fluffy { namespace testing {
 				// a > 5 ? 5 : [3] * 4
 				validateIntExpr(binExpr->leftDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 3);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 13);
 				});
@@ -226,7 +226,7 @@ namespace fluffy { namespace testing {
 				// a > 5 ? 5 : 3 * [4]
 				validateIntExpr(binExpr->rightDecl.get(), [](ExpressionConstantIntegerDecl* val) {
 					EXPECT_EQ(val->valueDecl, 4);
-					EXPECT_EQ(val->valueType, TypeDeclID_e::I32);
+					EXPECT_EQ(val->valueType, PrimitiveTypeID_e::I32);
 					EXPECT_EQ(val->line, 1);
 					EXPECT_EQ(val->column, 17);
 				});

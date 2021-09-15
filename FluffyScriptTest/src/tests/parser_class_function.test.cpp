@@ -2,6 +2,7 @@
 #include "test.h"
 #include "gtest/gtest.h"
 
+#include "ast\fl_ast_type.h"
 #include "parser\fl_parser.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -54,7 +55,8 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->functionList[0]->parameterList.size(), 0);
 
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::Void);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::Void);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithOnlyOneParamNoRet)
@@ -85,9 +87,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::Void);
+
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::Void);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsNoRet)
@@ -118,7 +123,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -127,9 +133,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::Void);
+
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::Void);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRet)
@@ -160,7 +169,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -169,10 +179,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
 
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithOverride)
@@ -203,7 +215,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -212,10 +225,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
 
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestFunctionNoModWithMultiplesParamsWithRetWithFinal)
@@ -246,7 +261,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -255,10 +271,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
 
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestVirtualFunctionWithModWithMultiplesParamsWithRetWithFinal)
@@ -289,7 +307,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -298,10 +317,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
 
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestAbstractFunctionWithModWithMultiplesParamsWithRetWithFinal)
@@ -331,7 +352,8 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::I32);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 		}
 
 		{
@@ -340,10 +362,12 @@ namespace fluffy { namespace testing {
 			ASSERT_TRUE(param != nullptr);
 
 			EXPECT_EQ(param->identifier, "test2");
-			EXPECT_EQ(param->typeDecl->typeID, TypeDeclID_e::String);
+			EXPECT_EQ(param->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+			EXPECT_EQ(param->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::String);
 		}
 		
-		EXPECT_EQ(classObject->functionList[0]->returnType->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classObject->functionList[0]->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classObject->functionList[0]->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassFunctionTest, TestInvalidStaticFunctionWithVirtual)
@@ -379,7 +403,6 @@ namespace fluffy { namespace testing {
 	TEST_F(ParserClassFunctionTest, TestInvalidAbstractFunction)
 	{
 		parser->loadSource("class Foo { protected abstract fn Foo(test: i32, test2: string) -> i32 {} }");
-		
 
 		try
 		{

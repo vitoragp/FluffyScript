@@ -271,7 +271,7 @@ namespace fluffy { namespace ast { namespace expr {
 		virtual ~ExpressionConstantIntegerDecl();
 
 		long long int							valueDecl;
-		TypeDeclID_e							valueType;
+		PrimitiveTypeID_e						valueType;
 	};
 
 	/**
@@ -285,7 +285,7 @@ namespace fluffy { namespace ast { namespace expr {
 		virtual ~ExpressionConstantRealDecl();
 
 		double									valueDecl;
-		TypeDeclID_e							valueType;
+		PrimitiveTypeID_e						valueType;
 	};
 
 	/**

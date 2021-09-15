@@ -186,7 +186,7 @@ namespace fluffy { namespace ast { namespace expr {
 	ExpressionConstantIntegerDecl::ExpressionConstantIntegerDecl(const U32 line, const U32 column)
 		: ExpressionDecl(AstNodeType_e::ConstantIntegerExpr, ExpressionDeclType_e::ConstantInteger, line, column)
 		, valueDecl(0)
-		, valueType(TypeDeclID_e::Unknown)
+		, valueType(PrimitiveTypeID_e::Unknown)
 	{}
 
 	ExpressionConstantIntegerDecl::~ExpressionConstantIntegerDecl()
@@ -199,7 +199,7 @@ namespace fluffy { namespace ast { namespace expr {
 	ExpressionConstantRealDecl::ExpressionConstantRealDecl(const U32 line, const U32 column)
 		: ExpressionDecl(AstNodeType_e::ConstantRealExpr, ExpressionDeclType_e::ConstantReal, line, column)
 		, valueDecl(0.0)
-		, valueType(TypeDeclID_e::Unknown)
+		, valueType(PrimitiveTypeID_e::Unknown)
 	{}
 
 	ExpressionConstantRealDecl::~ExpressionConstantRealDecl()

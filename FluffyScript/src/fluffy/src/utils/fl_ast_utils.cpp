@@ -4,6 +4,7 @@
 #include "ast\fl_ast_decl.h"
 #include "ast\fl_ast_type.h"
 #include "utils\fl_ast_utils.h"
+#include "attributes\fl_reference.h"
 namespace fluffy { namespace utils {
 	/**
 	 * AstUtils
@@ -146,6 +147,22 @@ namespace fluffy { namespace utils {
 						{
 							return false;
 						}
+
+						if ((funcA->sourceTypeDecl != nullptr && funcB->sourceTypeDecl != nullptr))
+						{
+							auto referenceA = funcA->getAttribute<attributes::Reference>();
+							auto referenceB = funcA->getAttribute<attributes::Reference>();
+
+							if (referenceA && referenceB && referenceA->referencedNode != referenceB->referencedNode)
+							{
+								return false;
+							}
+						}
+						else if ((funcA->sourceTypeDecl != nullptr && funcB->sourceTypeDecl == nullptr) ||
+							(funcA->sourceTypeDecl == nullptr && funcB->sourceTypeDecl != nullptr))
+						{
+							return false;
+						}
 						return true;
 					}
 				}
@@ -187,6 +204,18 @@ namespace fluffy { namespace utils {
 					}
 				}
 				break;
+
+			case AstNodeType_e::PrimitiveType:
+				{
+					ast::TypeDeclPrimitive* typeA = reinterpret_cast<ast::TypeDeclPrimitive*>(nodeA);
+					ast::TypeDeclPrimitive* typeB = reinterpret_cast<ast::TypeDeclPrimitive*>(nodeB);
+
+					if (typeA->primitiveType != typeB->primitiveType)
+					{
+						return false;
+					}
+				}
+				return true;
 
 			case AstNodeType_e::ArrayType:
 				{
@@ -281,34 +310,27 @@ namespace fluffy { namespace utils {
 					{
 						return false;
 					}
-					if (typeA->hasBeenResolved && typeB->hasBeenResolved)
+
+					auto referenceA = typeA->getAttribute<attributes::Reference>();
+					auto referenceB = typeB->getAttribute<attributes::Reference>();
+
+					if (referenceA != nullptr && referenceB != nullptr)
 					{
-						if (typeA->referencedNode != typeB->referencedNode)
+						if (referenceA->referencedNode != referenceB->referencedNode)
 						{
 							return false;
-						}
+						}						
 					}
-					else if (!typeA->hasBeenResolved && !typeB->hasBeenResolved)
+					else
 					{
 						if (typeA->startFromRoot != typeB->startFromRoot)
 						{
 							return false;
 						}
-						if (typeA->scopePath && typeB->scopePath)
-						{
-							if (!equals(typeA->scopePath.get(), typeB->scopePath.get()))
-							{
-								return false;
-							}
-						}
-						else if (typeA->scopePath || typeB->scopePath)
+						if (typeA->identifier != typeB->identifier)
 						{
 							return false;
 						}
-					}
-					if (typeA->identifier != typeB->identifier)
-					{
-						return false;
 					}
 					if (typeA->genericDefinitionList.size() != typeB->genericDefinitionList.size())
 					{
@@ -740,10 +762,6 @@ namespace fluffy { namespace utils {
 				{
 					if (auto baseClassType = reinterpret_cast<ast::TypeDeclNamed*>(classDecl->baseClass.get()))
 					{
-						if (baseClassType->hasBeenResolved)
-						{
-							*outDecl = baseClassType->referencedNode;
-						}
 					}
 					else
 					{

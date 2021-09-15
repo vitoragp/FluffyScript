@@ -1,3 +1,10 @@
+#include "ast\fl_ast.h"
+#include "ast\fl_ast_block.h"
+#include "ast\fl_ast_decl.h"
+#include "ast\fl_ast_expr.h"
+#include "ast\fl_ast_pattern.h"
+#include "ast\fl_ast_stmt.h"
+#include "ast\fl_ast_type.h"
 #include "lexer\fl_lexer.h"
 #include "parser\fl_parser.h"
 #include "fl_exceptions.h"
@@ -414,7 +421,7 @@ namespace fluffy { namespace parser {
 			classDecl->baseClass = parseType(ctx);
 
 			// Valida a base class.
-			if (classDecl->baseClass->typeID != TypeDeclID_e::Named)
+			if (classDecl->baseClass->nodeType != AstNodeType_e::NamedType)
 			{
 				throw exceptions::custom_exception(
 					"class '%s' extends must be a class element",
@@ -436,7 +443,7 @@ namespace fluffy { namespace parser {
 				auto implementsDecl = parseType(ctx);
 
 				// Valida a interface.
-				if (implementsDecl->typeID != TypeDeclID_e::Named)
+				if (implementsDecl->nodeType != AstNodeType_e::NamedType)
 				{
 					throw exceptions::custom_exception(
 						"class '%s' implements must be a interface element",
@@ -526,9 +533,9 @@ namespace fluffy { namespace parser {
 					if (staticModifier)
 					{
 						throw exceptions::custom_exception(
-							"Constructors can't be static",
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
+							"%s error: Constructors can't be static",
+							m_lexer->getToken().line, m_lexer->getToken().column,
+							m_filename.c_str()
 						);
 					}
 					classDecl->constructorList.push_back(parseClassConstructor(ctx, accessModifier));
@@ -540,18 +547,27 @@ namespace fluffy { namespace parser {
 					if (staticModifier)
 					{
 						throw exceptions::custom_exception(
-							"Destructor can't be static",
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
+							"%s error: Destructor can't be static",
+							m_lexer->getToken().line, m_lexer->getToken().column,
+							m_filename.c_str()
 						);
 					}
 
-					if (hasAccessModifier)
+					if (hasAccessModifier && accessModifier != TokenType_e::Public)
 					{
 						throw exceptions::custom_exception(
-							"Destructors are public, can't have any access modifier",
-							m_lexer->getToken().line,
-							m_lexer->getToken().column
+							"%s error: Destructors are public, can't have any access modifier",
+							m_lexer->getToken().line, m_lexer->getToken().column,
+							m_filename.c_str()
+						);
+					}
+
+					if (classDecl->destructorDecl)
+					{
+						throw exceptions::custom_exception(
+							"%s error: Classes must have only one destructor declaration",
+							m_lexer->getToken().line, m_lexer->getToken().column,
+							m_filename.c_str()
 						);
 					}
 					classDecl->destructorDecl = parseClassDestructor(ctx);
@@ -954,9 +970,8 @@ namespace fluffy { namespace parser {
 		else
 		{
 			// Consome o tipo retorno.
-			functionPtr->returnType = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+			functionPtr->returnType = ast::makePrimitiveType(
+				m_lexer->getToken().line, m_lexer->getToken().column, PrimitiveTypeID_e::Void
 			);
 		}
 
@@ -1060,13 +1075,17 @@ namespace fluffy { namespace parser {
 			variableDecl->typeDecl = parseType(ctx);
 
 			// Verifica se o tipo e valido.
-			if (variableDecl->typeDecl->typeID == TypeDeclID_e::Void)
+			if (variableDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 			{
-				throw exceptions::custom_exception(
-					"Variables or constant can't have void type",
-					line,
-					column
-				);
+				auto type = variableDecl->typeDecl->to<ast::TypeDeclPrimitive>();
+				if (type->primitiveType == PrimitiveTypeID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Variables or constant can't have void type",
+						line,
+						column
+					);
+				}
 			}
 		} else {
 			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
@@ -1217,102 +1236,88 @@ namespace fluffy { namespace parser {
 		{
 		case TokenType_e::Void:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclVoid>(
-				line,
-				column
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::Void
 			);
 			break;
 
 		case TokenType_e::Bool:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclBool>(
-				line,
-				column
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::Bool
 			);
 			break;
 
 		case TokenType_e::I8:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI8>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::I8
+			);
 			break;
 		case TokenType_e::U8:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU8>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::U8
+			);
 			break;
 		case TokenType_e::I16:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI16>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::I16
+			);
 			break;
 		case TokenType_e::U16:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU16>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::U16
+			);
 			break;
 		case TokenType_e::I32:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI32>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::I32
+			);
 			break;
 		case TokenType_e::U32:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU32>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::U32
+			);
 			break;
 		case TokenType_e::I64:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclI64>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::I64
+			);
 			break;
 		case TokenType_e::U64:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclU64>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::U64
+			);
 			break;
 		case TokenType_e::Fp32:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclFp32>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::Fp32
+			);
 			break;
 		case TokenType_e::Fp64:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclFp64>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::Fp64
+			);
 			break;
 		case TokenType_e::String:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclString>(
-				line,
-				column
-				);
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::String
+			);
 			break;
 		case TokenType_e::Object:
 			m_lexer->nextToken();
-			typeDecl = std::make_unique<ast::TypeDeclObject>(
-				line,
-				column
+			typeDecl = ast::makePrimitiveType(
+				line, column, PrimitiveTypeID_e::Object
 			);
 			break;
 		case TokenType_e::Fn:
@@ -1357,12 +1362,16 @@ namespace fluffy { namespace parser {
 		// Verifica se o tipo e anulavel.
 		if (m_lexer->isInterrogation())
 		{
-			if (typeDecl->typeID == TypeDeclID_e::Void)
+			if (typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 			{
-				throw exceptions::custom_exception("'void' type can't be nullable",
-					line,
-					column
-				);
+				auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(typeDecl.get());
+				if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+				{
+					throw exceptions::custom_exception("'void' type can't be nullable",
+						line,
+						column
+					);
+				}
 			}
 
 			// Consome '?'
@@ -1619,14 +1628,18 @@ namespace fluffy { namespace parser {
 				parameterDecl->typeDecl = parseType(ctx);
 
 				// Parametros nao podem ser do tipo void.
-				if (parameterDecl->typeDecl->typeID == TypeDeclID_e::Void)
+				if (parameterDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 				{
-					throw exceptions::custom_exception(
-						"Parameter '%s' can't have void type",
-						parameterDecl->typeDecl->line,
-						parameterDecl->typeDecl->column,
-						parameterDecl->identifier.str()
-					);
+					auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(parameterDecl->typeDecl.get());
+					if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+					{
+						throw exceptions::custom_exception(
+							"Parameter '%s' can't have void type",
+							parameterDecl->typeDecl->line,
+							parameterDecl->typeDecl->column,
+							parameterDecl->identifier.str()
+						);
+					}
 				}
 
 				// Adiciona o parametro a lista.
@@ -1654,13 +1667,17 @@ namespace fluffy { namespace parser {
 				parameterDecl->typeDecl = parseType(ctx);
 
 				// Parametros nao podem ser do tipo void.
-				if (parameterDecl->typeDecl->typeID == TypeDeclID_e::Void)
+				if (parameterDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 				{
-					throw exceptions::custom_exception(
-						"Parameter can't have void type",
-						parameterDecl->typeDecl->line,
-						parameterDecl->typeDecl->column
-					);
+					auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(parameterDecl->typeDecl.get());
+					if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+					{
+						throw exceptions::custom_exception(
+							"Parameter can't have void type",
+							parameterDecl->typeDecl->line,
+							parameterDecl->typeDecl->column
+						);
+					}
 				}
 
 				// Adiciona o parametro a lista.
@@ -1874,9 +1891,8 @@ namespace fluffy { namespace parser {
 		else
 		{
 			// Consome o tipo retorno.
-			classFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+			classFunctionDecl->returnType = ast::makePrimitiveType(
+				m_lexer->getToken().line, m_lexer->getToken().column, PrimitiveTypeID_e::Void
 			);
 		}
 
@@ -2024,13 +2040,17 @@ namespace fluffy { namespace parser {
 			classVariableDecl->typeDecl = parseType(ctx);
 
 			// Verifica se o tipo e valido.
-			if (classVariableDecl->typeDecl->typeID == TypeDeclID_e::Void)
+			if (classVariableDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 			{
-				throw exceptions::custom_exception(
-					"Variables or constant can't have void type",
-					line,
-					column
-				);
+				auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(classVariableDecl->typeDecl.get());
+				if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Variables or constant can't have void type",
+						line,
+						column
+					);
+				}
 			}
 		} else {
 			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
@@ -2222,9 +2242,8 @@ namespace fluffy { namespace parser {
 		else
 		{
 			// Consome o tipo retorno.
-			interfaceFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+			interfaceFunctionDecl->returnType = ast::makePrimitiveType(
+				m_lexer->getToken().line, m_lexer->getToken().column, PrimitiveTypeID_e::Void
 			);
 		}
 
@@ -2300,13 +2319,17 @@ namespace fluffy { namespace parser {
 			structVariableDecl->typeDecl = parseType(ctx);
 
 			// Verifica se o tipo e valido.
-			if (structVariableDecl->typeDecl->typeID == TypeDeclID_e::Void)
+			if (structVariableDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 			{
-				throw exceptions::custom_exception(
-					"Variables or constant can't have void type",
-					line,
-					column
-				);
+				auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(structVariableDecl->typeDecl.get());
+				if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Variables or constant can't have void type",
+						line,
+						column
+					);
+				}
 			}
 		} else {
 			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
@@ -2378,9 +2401,8 @@ namespace fluffy { namespace parser {
 		else
 		{
 			// Consome o tipo retorno.
-			traitFunctionDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+			traitFunctionDecl->returnType = ast::makePrimitiveType(
+				m_lexer->getToken().line, m_lexer->getToken().column, PrimitiveTypeID_e::Void
 			);
 		}
 
@@ -3004,13 +3026,17 @@ namespace fluffy { namespace parser {
 			variableDecl->typeDecl = parseType(ctx);
 
 			// Verifica se o tipo e valido.
-			if (variableDecl->typeDecl->typeID == TypeDeclID_e::Void)
+			if (variableDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 			{
-				throw exceptions::custom_exception(
-					"Variables or constant can't have void type",
-					line,
-					column
-				);
+				auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(variableDecl->typeDecl.get());
+				if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+				{
+					throw exceptions::custom_exception(
+						"Variables or constant can't have void type",
+						line,
+						column
+					);
+				}
 			}
 		} else {
 			// Se o tipo nao e declarado explicitamente a variavel deve ser iniciado.
@@ -3668,14 +3694,18 @@ namespace fluffy { namespace parser {
 							paramDecl->typeDecl = parseType(ctx);
 
 							// Parametro nao podem ter tipo nulo.
-							if (paramDecl->typeDecl->typeID == TypeDeclID_e::Void)
+							if (paramDecl->typeDecl->nodeType == AstNodeType_e::PrimitiveType)
 							{
-								throw exceptions::custom_exception(
-									"Parameter '%s' can't have void type",
-									m_lexer->getToken().line,
-									m_lexer->getToken().column,
-									paramDecl->identifier.str()
-								);
+								auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(paramDecl->typeDecl.get());
+								if (primitiveType->primitiveType == PrimitiveTypeID_e::Void)
+								{
+									throw exceptions::custom_exception(
+										"Parameter '%s' can't have void type",
+										m_lexer->getToken().line,
+										m_lexer->getToken().column,
+										paramDecl->identifier.str()
+									);
+								}
 							}
 
 							// Adiciona parametro a lista.
@@ -3951,7 +3981,7 @@ namespace fluffy { namespace parser {
 		case TokenType_e::ConstantInteger:
 			{
 				auto constantIntegerDecl = std::make_unique<ast::expr::ExpressionConstantIntegerDecl>(line, column);
-				constantIntegerDecl->valueType = TypeDeclID_e::I32;
+				constantIntegerDecl->valueType = PrimitiveTypeID_e::I32;
 				constantIntegerDecl->valueDecl = m_lexer->expectConstantInteger();
 				return constantIntegerDecl;
 			}
@@ -3959,7 +3989,7 @@ namespace fluffy { namespace parser {
 		case TokenType_e::ConstantFp32:
 			{
 				auto constantRealDecl = std::make_unique<ast::expr::ExpressionConstantRealDecl>(line, column);
-				constantRealDecl->valueType = TypeDeclID_e::Fp32;
+				constantRealDecl->valueType = PrimitiveTypeID_e::Fp32;
 				constantRealDecl->valueDecl = m_lexer->expectConstantFp32();
 				return constantRealDecl;
 			}
@@ -3967,7 +3997,7 @@ namespace fluffy { namespace parser {
 		case TokenType_e::ConstantFp64:
 			{
 				auto constantRealDecl = std::make_unique<ast::expr::ExpressionConstantRealDecl>(line, column);
-				constantRealDecl->valueType = TypeDeclID_e::Fp64;
+				constantRealDecl->valueType = PrimitiveTypeID_e::Fp64;
 				constantRealDecl->valueDecl = m_lexer->expectConstantFp64();
 				return constantRealDecl;
 			}
@@ -4450,9 +4480,8 @@ namespace fluffy { namespace parser {
 		// Se nao ha retorno explicito void e o tipo padrao.
 		if (!hasReturnExplicit)
 		{
-			functionTypeDecl->returnType = std::make_unique<ast::TypeDeclVoid>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+			functionTypeDecl->returnType = ast::makePrimitiveType(
+				m_lexer->getToken().line, m_lexer->getToken().column, PrimitiveTypeID_e::Void
 			);
 		}
 
@@ -4478,12 +4507,16 @@ namespace fluffy { namespace parser {
 			// Obrigatoriamente tuplas devem ter pelo menos 1 elemento.
 			if (auto tupleItemDecl = parseType(ctx))
 			{
-				if (tupleItemDecl->typeID == TypeDeclID_e::Void)
+				if (tupleItemDecl->nodeType == AstNodeType_e::PrimitiveType)
 				{
-					throw exceptions::unexpected_type_exception("void",
-						m_lexer->getToken().line,
-						m_lexer->getToken().column
-					);
+					auto primitiveType = ast::safe_cast<ast::TypeDeclPrimitive>(tupleItemDecl.get());
+					if (primitiveType->nodeType == AstNodeType_e::VoidType)
+					{
+						throw exceptions::unexpected_type_exception("void",
+							m_lexer->getToken().line,
+							m_lexer->getToken().column
+						);
+					}
 				}
 				tupleTypeDecl->tupleItemList.push_back(std::move(tupleItemDecl));
 			}

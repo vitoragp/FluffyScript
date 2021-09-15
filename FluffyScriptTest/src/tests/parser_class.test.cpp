@@ -71,9 +71,9 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->identifier, "R");
 		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->whereTypeList.size(), 0);
 		
-		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->nodeType, AstNodeType_e::NamedType);
 
-		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
+		auto namedTypeDecl = classObject->baseClass->to<ast::TypeDeclNamed>();
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Window");
 		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
@@ -89,9 +89,9 @@ namespace fluffy { namespace testing {
 
 		EXPECT_EQ(classObject->identifier, "Foo");
 
-		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->nodeType, AstNodeType_e::NamedType);
 
-		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
+		auto namedTypeDecl = classObject->baseClass->to<ast::TypeDeclNamed>();
 
 		EXPECT_EQ(namedTypeDecl->identifier, "Window");
 		EXPECT_EQ(namedTypeDecl->startFromRoot, true);
@@ -119,7 +119,7 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
@@ -127,7 +127,7 @@ namespace fluffy { namespace testing {
 			EXPECT_EQ(namedTypeDecl->startFromRoot, true);
 			EXPECT_EQ(namedTypeDecl->genericDefinitionList.size(), 1);
 
-			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->nodeType, AstNodeType_e::NamedType);
 
 			auto genericTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(namedTypeDecl->genericDefinitionList[0].get());
 
@@ -138,13 +138,13 @@ namespace fluffy { namespace testing {
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
 			EXPECT_EQ(namedTypeDecl->identifier, "Viewable");
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
-			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(namedTypeDecl->genericDefinitionList[0]->nodeType, AstNodeType_e::NamedType);
 			EXPECT_EQ(namedTypeDecl->startFromRoot, false);
 
 			EXPECT_EQ(namedTypeDecl->scopePath->identifier, "UI");
@@ -175,7 +175,7 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
@@ -186,7 +186,7 @@ namespace fluffy { namespace testing {
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 
@@ -211,7 +211,7 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->identifier, "R");
 		EXPECT_EQ(classObject->genericDecl->genericDeclItemList[1]->whereTypeList.size(), 0);
 				
-		EXPECT_EQ(classObject->baseClass->typeID, TypeDeclID_e::Named);
+		EXPECT_EQ(classObject->baseClass->nodeType, AstNodeType_e::NamedType);
 
 		auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->baseClass.get());
 
@@ -222,7 +222,7 @@ namespace fluffy { namespace testing {
 
 		// Clickable
 		{
-			EXPECT_EQ(classObject->interfaceList[0]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[0]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[0].get());
 
@@ -233,7 +233,7 @@ namespace fluffy { namespace testing {
 
 		// UI
 		{
-			EXPECT_EQ(classObject->interfaceList[1]->typeID, TypeDeclID_e::Named);
+			EXPECT_EQ(classObject->interfaceList[1]->nodeType, AstNodeType_e::NamedType);
 
 			auto namedTypeDecl = reinterpret_cast<ast::TypeDeclNamed*>(classObject->interfaceList[1].get());
 

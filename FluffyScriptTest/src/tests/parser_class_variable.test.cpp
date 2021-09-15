@@ -1,6 +1,7 @@
 #include <memory>
 #include "gtest/gtest.h"
 
+#include "ast\fl_ast_type.h"
 #include "parser\fl_parser.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
@@ -44,7 +45,8 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->isReference, false);
 		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
-		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassVariableTest, TestVariableRefI32)
@@ -60,7 +62,8 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->isReference, true);
 		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
-		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassVariableTest, TestConstI32)
@@ -76,7 +79,8 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->isReference, false);
 		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
-		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassVariableTest, TestConstRefI32)
@@ -92,7 +96,8 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->isReference, true);
 		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
-		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::I32);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 
 	TEST_F(ParserClassVariableTest, TestConstFunctionTypeWithFunctionExpr)
@@ -108,6 +113,13 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(classDecl->variableList[0]->isReference, true);
 		EXPECT_EQ(classDecl->variableList[0]->isStatic, false);
 		EXPECT_EQ(classDecl->variableList[0]->accessModifier, ClassMemberAccessModifier_e::Private);
-		EXPECT_EQ(classDecl->variableList[0]->typeDecl->typeID, TypeDeclID_e::Function);
+		EXPECT_EQ(classDecl->variableList[0]->typeDecl->nodeType, AstNodeType_e::FunctionType);
+
+		auto functionType = classDecl->variableList[0]->typeDecl->to<ast::TypeDeclFunction>();
+
+		EXPECT_EQ(functionType->parameterTypeList[0]->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(functionType->parameterTypeList[0]->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
+		EXPECT_EQ(functionType->returnType->nodeType, AstNodeType_e::PrimitiveType);
+		EXPECT_EQ(functionType->returnType->to<ast::TypeDeclPrimitive>()->primitiveType, PrimitiveTypeID_e::I32);
 	}
 } }

@@ -1,6 +1,7 @@
 #include <memory>
 #include "gtest/gtest.h"
 
+#include "ast\fl_ast_decl.h"
 #include "parser\fl_parser.h"
 #include "utils\fl_ast_utils.h"
 #include "fl_buffer.h"

@@ -173,205 +173,71 @@ namespace fluffy { namespace validations {
 		switch (node->nodeType)
 		{
 		case AstNodeType_e::CodeUnit:
-			if (auto n = reinterpret_cast<ast::CodeUnit*>(node))
-			{
-				auto scope = scope::Scope(scopeManager, nullptr, n);
-				
-				NodeList list;
-				for_each_ptr(scope.toMap(), [scopeManager, n, &list](ast::AstNode* const nodeA) {
-					for_each(list, [scopeManager, n, nodeA](ast::AstNode* const nodeB) {
-						if (utils::AstUtils::equals(nodeA, nodeB)) {
-							ast::AstNode* duplicatedNode = nullptr;
-							if (nodeA->line > nodeB->line)
-							{
-								duplicatedNode = nodeA;
-							}
-							else if (nodeA->line == nodeB->line && nodeA->column > nodeB->column)
-							{
-								duplicatedNode = nodeA;
-							}
-							else
-							{
-								duplicatedNode = nodeB;
-							}
-
-							throw exceptions::custom_exception(
-								"%s error: Duplicated identifier '%s'",
-								duplicatedNode->line, duplicatedNode->column,
-								n->identifier.str(),
-								duplicatedNode->identifier.str()
-							);
-						}
-					});
-					list.emplace_back(nodeA);
-				});
-			}
-			break;
-
 		case AstNodeType_e::NamespaceDecl:
-			if (auto n = reinterpret_cast<ast::NamespaceDecl*>(node))
-			{
-				auto scope = scopeManager->getParentScope();
-
-				NodeList list;
-				for_each_ptr(scope.toMap(), [scopeManager, n, &list](ast::AstNode* const nodeA) {
-					for_each(list, [scopeManager, n, nodeA](ast::AstNode* const nodeB) {
-						if (utils::AstUtils::equals(nodeA, nodeB)) {
-							ast::AstNode* duplicatedNode = nullptr;
-							if (nodeA->line > nodeB->line)
-							{
-								duplicatedNode = nodeA;
-							}
-							else if (nodeA->line == nodeB->line && nodeA->column > nodeB->column)
-							{
-								duplicatedNode = nodeA;
-							}
-							else
-							{
-								duplicatedNode = nodeB;
-							}
-
-							throw exceptions::custom_exception(
-								"%s error: Duplicated identifier '%s'",
-								duplicatedNode->line, duplicatedNode->column,
-								scopeManager->getCodeUnitName().str(),
-								duplicatedNode->identifier.str()
-							);
-						}
-					});
-					list.emplace_back(nodeA);
-				});
-			}
+			validateDuplication(scopeManager, node);
 			break;
-
 		case AstNodeType_e::ClassDecl:
-			if (auto n = reinterpret_cast<ast::ClassDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::InterfaceDecl:
-			if (auto n = reinterpret_cast<ast::InterfaceDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::InterfaceFunctionDecl:
-			if (auto n = reinterpret_cast<ast::InterfaceFunctionDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::StructDecl:
-			if (auto n = reinterpret_cast<ast::StructDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::EnumDecl:
-			if (auto n = reinterpret_cast<ast::EnumDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::TraitDecl:
-			if (auto n = reinterpret_cast<ast::TraitDecl*>(node))
-			{
-			}
-			break;
-
 		case AstNodeType_e::TraitForDecl:
-			if (auto n = reinterpret_cast<ast::TraitForDecl*>(node))
-			{
-			}
-			break;
-
-		case AstNodeType_e::NewExpr:
-			if (auto n = reinterpret_cast<ast::expr::ExpressionNewDecl*>(node))
-			{
-			}
-			break;
-
-		case AstNodeType_e::AnomClassDeclExpr:
-			if (auto n = reinterpret_cast<ast::expr::ExpressionAnomClassDecl*>(node))
-			{
-			}
-			break;
-
-		case AstNodeType_e::MatchWhenExpr:
-			if (auto n = reinterpret_cast<ast::expr::ExpressionMatchWhenDecl*>(node))
-			{
-			}
-			break;
-
-		case AstNodeType_e::NewBlockExpr:
-			if (auto n = reinterpret_cast<ast::expr::ExpressionNewBlockDecl*>(node))
-			{
-			}
-			break;
-
-		case AstNodeType_e::ClassConstructorDecl:
-			{
-			}
-			break;
-
-		case AstNodeType_e::ClassFunctionDecl:
-			{
-			}
-			break;
-
-		case AstNodeType_e::ClassDestructorDecl:
-			{
-			}
-			break;
-
-		case AstNodeType_e::TraitFunctionDecl:
-			{
-			}
-			break;
-
 		case AstNodeType_e::FunctionDecl:
-			{
-			}
-			break;
-
+		case AstNodeType_e::AnomClassDeclExpr:
+		case AstNodeType_e::MatchWhenExpr:
+		case AstNodeType_e::NewBlockExpr:
+		case AstNodeType_e::ClassConstructorDecl:
+		case AstNodeType_e::ClassFunctionDecl:
+		case AstNodeType_e::ClassDestructorDecl:
+		case AstNodeType_e::TraitFunctionDecl:
 		case AstNodeType_e::StmtFor:
-			{
-			}
-			break;
-
 		case AstNodeType_e::StmtWhile:
-			{
-			}
-			break;
-
 		case AstNodeType_e::StmtDoWhile:
-			{				
-			}
-			break;
-
 		case AstNodeType_e::StmtTry:
-			{
-			}
-			break;
-
 		case AstNodeType_e::StmtCatchBlockDecl:
-			{
-			}
-			break;
-
 		case AstNodeType_e::StmtMatchWhenDecl:
-			{
-			}
-			break;
-
 		case AstNodeType_e::FunctionDeclExpr:
-			{
-			}
+			validateDuplication(scopeManager, node);
 			break;
-
 		default:
 			break;
 		}
+	}
+
+	void
+	ValidationDuplicatedNodes::validateDuplication(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	{
+		auto scope = scope::Scope(scopeManager, nullptr, node);
+				
+		NodeList list;
+		for_each_ptr(scope.toMap(), [scopeManager, node, &list](ast::AstNode* const nodeA) {
+			for_each(list, [scopeManager, node, nodeA](ast::AstNode* const nodeB) {
+				if (utils::AstUtils::equals(nodeA, nodeB)) {
+					ast::AstNode* duplicatedNode = nullptr;
+					if (nodeA->line > nodeB->line)
+					{
+						duplicatedNode = nodeA;
+					}
+					else if (nodeA->line == nodeB->line && nodeA->column > nodeB->column)
+					{
+						duplicatedNode = nodeA;
+					}
+					else
+					{
+						duplicatedNode = nodeB;
+					}
+
+					throw exceptions::custom_exception(
+						"%s error: Duplicated identifier '%s'",
+						duplicatedNode->line, duplicatedNode->column,
+						scopeManager->getCodeUnitName().str(),
+						duplicatedNode->identifier.str()
+					);
+				}
+			});
+
+			list.emplace_back(nodeA);
+		});
 	}
 } }

@@ -3,10 +3,10 @@
 #include "fl_defs.h"
 #include "fl_collections.h"
 #define FLUFFY_PRIMITIVE_TYPE_DECL(type) \
-	class TypeDecl##type : public TypeDecl, public AstSafeCast<AstNodeType_e::type##Type> \
+	class TypeDecl##type : public ast::AstNode, public AstSafeCast<AstNodeType_e::type##Type> \
 	{ \
 	public: \
-		TypeDecl##type(U32 line, U32 column); \
+		TypeDecl##type(); \
 		virtual ~TypeDecl##type(); \
 	}
 
@@ -36,12 +36,11 @@ namespace fluffy { namespace ast {
 	class TypeDecl : public AstNode
 	{
 	protected:
-		TypeDecl(AstNodeType_e nodeType, TypeDeclID_e typeID, U32 line, U32 column);
+		TypeDecl(AstNodeType_e nodeType, U32 line, U32 column);
 
 	public:
 		virtual ~TypeDecl();
 
-		const TypeDeclID_e					typeID;
 		Bool								nullable;
 	};
 
@@ -63,6 +62,20 @@ namespace fluffy { namespace ast {
 	FLUFFY_PRIMITIVE_TYPE_DECL(Fp64);
 	FLUFFY_PRIMITIVE_TYPE_DECL(String);
 	FLUFFY_PRIMITIVE_TYPE_DECL(Object);
+
+	/**
+	 * TypeDeclPrimitive
+	 */
+
+	class TypeDeclPrimitive : public TypeDecl, public AstSafeCast<AstNodeType_e::PrimitiveType>
+	{
+	public:
+		TypeDeclPrimitive(U32 line, U32 column, ast::AstNode* const primitiveTypeRef, const PrimitiveTypeID_e primitiveType);
+		virtual ~TypeDeclPrimitive();
+
+		ast::AstNode* const					primitiveTypeRef;
+		const PrimitiveTypeID_e				primitiveType;
+	};
 
 	/**
 	 * TypeDeclArray
@@ -119,10 +132,6 @@ namespace fluffy { namespace ast {
 		ScopedPathDeclPtr					scopePath;
 		TypeDeclPtrList						genericDefinitionList;
 		Bool								startFromRoot;
-
-		AstNode*							referencedScope;
-		AstNode*							referencedNode;
-		Bool								hasBeenResolved;
 	};
 
 	/**
@@ -175,4 +184,11 @@ namespace fluffy { namespace ast {
 		UnsizedArrayDecl(U32 line, U32 column);
 		virtual ~UnsizedArrayDecl();
 	};
+
+	/**
+	 * Funcoes auxiliares
+	 */
+
+	std::unique_ptr<ast::TypeDeclPrimitive>
+	makePrimitiveType(U32 line, U32 column, PrimitiveTypeID_e typeId);
 } }
