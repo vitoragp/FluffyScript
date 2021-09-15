@@ -88,6 +88,15 @@ namespace fluffy { namespace scope {
 		FindResult_t
 		findNodeById(const TString& identifier, Bool findInRoot);
 
+		FindResult_t
+		findNodeById(const TString& identifier, ast::AstNode* const ignoredNode, Bool findInRoot);
+
+		FindResult_t
+		findNodeById(const TString& identifier, const AstNodeType_e ignoredType, Bool findInRoot);
+
+		FindResult_t
+		findAllNodeById(const TString& identifier);
+
 		void
 		interrupt();
 

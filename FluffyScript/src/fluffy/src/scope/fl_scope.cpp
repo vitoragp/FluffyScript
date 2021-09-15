@@ -392,21 +392,24 @@ namespace fluffy { namespace scope {
 					}
 				});
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});
+					});
+				}
 			}
 			break;
 
@@ -429,21 +432,24 @@ namespace fluffy { namespace scope {
 					}
 				});
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});
+					});
+				}
 			}
 			break;
 
@@ -451,21 +457,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::ClassDestructorDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});
+					});
+				}
 			}
 			break;
 
@@ -488,21 +497,24 @@ namespace fluffy { namespace scope {
 					}
 				});
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});
+					});
+				}
 			}
 			break;
 
@@ -525,21 +537,24 @@ namespace fluffy { namespace scope {
 					}
 				});
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});
+					});
+				}
 			}
 			break;
 
@@ -549,21 +564,24 @@ namespace fluffy { namespace scope {
 
 				appendSingle(mMap, n->initStmtDecl);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}				
 			}
 			break;
 
@@ -571,21 +589,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::stmt::StmtWhileDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}					
 			}
 			break;
 
@@ -593,21 +614,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::stmt::StmtDoWhileDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}
 			}
 			break;
 
@@ -615,21 +639,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::stmt::StmtTryDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}	
 			}
 			break;
 
@@ -637,21 +664,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::stmt::StmtCatchBlockDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}
 			}
 			break;
 
@@ -659,21 +689,24 @@ namespace fluffy { namespace scope {
 			{
 				auto n = ast::safe_cast<ast::stmt::StmtMatchWhenDecl>(mNode);
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}
 			}
 			break;
 
@@ -692,21 +725,24 @@ namespace fluffy { namespace scope {
 					}
 				});
 
-				filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
-					if (stmt->nodeType == AstNodeType_e::StmtVariable)
-					{
-						auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
+				if (n->blockDecl)
+				{
+					filterMap(mMap, n->blockDecl->stmtList, [](NodeMultiMap& mMap, ast::AstNode* const stmt) {
+						if (stmt->nodeType == AstNodeType_e::StmtVariable)
+						{
+							auto stmtVar = ast::safe_cast<ast::stmt::StmtVariableDecl>(stmt);
 
-						if (stmtVar->patternDecl == nullptr)
-						{
-							mMap.emplace(stmt->identifier, stmt);
+							if (stmtVar->patternDecl == nullptr)
+							{
+								mMap.emplace(stmt->identifier, stmt);
+							}
+							else
+							{
+								filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
+							}
 						}
-						else
-						{
-							filterSingle(mMap, stmtVar->patternDecl, appendPatternToScope);
-						}
-					}
-				});						
+					});
+				}
 			}
 			break;
 

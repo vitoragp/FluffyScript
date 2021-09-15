@@ -170,7 +170,7 @@ namespace fluffy {
 				getenv_s(&strSize, const_cast<char*>(str.c_str()), strSize, "FLUFFY_HOME");
 
 				fileWithPath = str + include->inFile + ".txt";
-				throw exceptions::not_implemented_feature_exception("include from system");
+				throw exceptions::not_implemented_feature_exception(fileWithPath, "include from system");
 			}
 			else
 			{

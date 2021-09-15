@@ -202,6 +202,7 @@ namespace fluffy { namespace parser {
 
 		// Atribui ao code unit o nome do arquivo.
 		codeUnit->identifier = TString(m_lexer->getFilename());
+		m_filename = m_lexer->getFilename();
 
 		if (m_lexer->isEof()) {
 			return codeUnit;
@@ -233,6 +234,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::Namespace
@@ -424,10 +426,9 @@ namespace fluffy { namespace parser {
 			if (classDecl->baseClass->nodeType != AstNodeType_e::NamedType)
 			{
 				throw exceptions::custom_exception(
-					"class '%s' extends must be a class element",
-					m_lexer->getToken().line,
-					m_lexer->getToken().column,
-					classDecl->identifier.str()
+					"%s error: The '%s' class extends must be a class element",
+					classDecl->baseClass->line, classDecl->baseClass->column,
+					m_filename.c_str(), classDecl->identifier.str()
 				);
 			}
 		}
@@ -446,10 +447,9 @@ namespace fluffy { namespace parser {
 				if (implementsDecl->nodeType != AstNodeType_e::NamedType)
 				{
 					throw exceptions::custom_exception(
-						"class '%s' implements must be a interface element",
-						m_lexer->getToken().line,
-						m_lexer->getToken().column,
-						classDecl->identifier.str()
+						"%s error: The '%s' class implements must be a interface element",
+						implementsDecl->line, implementsDecl->column,
+						m_filename.c_str(), classDecl->identifier.str()
 					);
 				}
 				classDecl->interfaceList.push_back(std::move(implementsDecl));
@@ -576,6 +576,7 @@ namespace fluffy { namespace parser {
 
 			default:
 				throw exceptions::unexpected_with_possibilities_token_exception(
+					m_filename,
 					m_lexer->getToken().value,
 					{
 						TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
@@ -644,6 +645,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{ TokenType_e::Fn, TokenType_e::RBracket },
 				m_lexer->getToken().line,
@@ -706,6 +708,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{ TokenType_e::Let, TokenType_e::Const, TokenType_e::RBracket },
 				m_lexer->getToken().line,
@@ -722,6 +725,9 @@ namespace fluffy { namespace parser {
 	std::unique_ptr<ast::GeneralStmtDecl>
 	Parser::parseTrait(ParserContext_s& ctx, Bool hasExport)
 	{
+		const U32 line = m_lexer->getToken().line;
+		const U32 column = m_lexer->getToken().column;
+
 		// Consome 'trait'.
 		m_lexer->expectToken(TokenType_e::Trait);
 
@@ -742,8 +748,7 @@ namespace fluffy { namespace parser {
 		if (m_lexer->isFor())
 		{
 			auto traitDecl = std::make_unique<ast::TraitForDecl>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line, column
 			);
 
 			traitDecl->isExported = hasExport;
@@ -758,6 +763,17 @@ namespace fluffy { namespace parser {
 
 			// Consome o tipo para qual o trait esta sendo implementado.
 			traitDecl->typeDefinitionDecl = parseType(ctx);
+
+			if (traitDecl->typeDefinitionDecl->nodeType != AstNodeType_e::PrimitiveType &&
+				traitDecl->typeDefinitionDecl->nodeType != AstNodeType_e::NamedType)
+			{
+				throw exceptions::custom_exception(
+					"%s error: trait definition type must be primitive or named",
+					traitDecl->typeDefinitionDecl->line,
+					traitDecl->typeDefinitionDecl->column,
+					m_filename.c_str()
+				);
+			}
 
 			ctx.insideTrait = false;
 
@@ -794,6 +810,7 @@ namespace fluffy { namespace parser {
 				}
 
 				throw exceptions::unexpected_with_possibilities_token_exception(
+					m_filename,
 					m_lexer->getToken().value,
 					{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
 					m_lexer->getToken().line,
@@ -809,8 +826,7 @@ namespace fluffy { namespace parser {
 		else
 		{
 			auto traitDecl = std::make_unique<ast::TraitDecl>(
-				m_lexer->getToken().line,
-				m_lexer->getToken().column
+				line, column
 			);
 
 			traitDecl->isExported = hasExport;
@@ -851,6 +867,7 @@ namespace fluffy { namespace parser {
 				}
 
 				throw exceptions::unexpected_with_possibilities_token_exception(
+					m_filename,
 					m_lexer->getToken().value,
 					{ TokenType_e::Fn, TokenType_e::Static, TokenType_e::RBracket },
 					m_lexer->getToken().line,
@@ -918,6 +935,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1028,6 +1046,7 @@ namespace fluffy { namespace parser {
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{ TokenType_e::Let, TokenType_e::Const },
 				m_lexer->getToken().line,
@@ -1338,9 +1357,9 @@ namespace fluffy { namespace parser {
 			else
 			{
 				throw exceptions::custom_exception(
-					"Self type only can be declared in traits",
-					line,
-					column
+					"%s error: Self type only can be declared in traits",
+					line, column,
+					m_filename.c_str()
 				);
 			}
 			break;
@@ -1353,6 +1372,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				m_lexer->getToken().line,
 				m_lexer->getToken().column
@@ -1558,7 +1578,7 @@ namespace fluffy { namespace parser {
 		case TokenType_e::LBracket:
 			return parseStructurePattern(ctx);
 		default:
-			throw exceptions::not_implemented_feature_exception("pattern matching");
+			throw exceptions::not_implemented_feature_exception(m_filename, "pattern matching");
 		}
 		return nullptr;
 	}
@@ -1774,6 +1794,7 @@ namespace fluffy { namespace parser {
 			return parseVariable(ctx, hasExport);
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::Abstract,
@@ -1993,6 +2014,7 @@ namespace fluffy { namespace parser {
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{ TokenType_e::Let, TokenType_e::Const },
 				m_lexer->getToken().line,
@@ -2273,6 +2295,7 @@ namespace fluffy { namespace parser {
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{ TokenType_e::Let, TokenType_e::Const },
 				m_lexer->getToken().line,
@@ -2497,6 +2520,7 @@ namespace fluffy { namespace parser {
 					}
 
 					throw exceptions::unexpected_with_possibilities_token_exception(
+						m_filename,
 						m_lexer->getToken().value,
 						{ TokenType_e::Comma, TokenType_e::RParBracket },
 						m_lexer->getToken().line,
@@ -2763,6 +2787,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::Comma,
@@ -2971,6 +2996,7 @@ namespace fluffy { namespace parser {
 			break;
 		default:
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::Let,
@@ -3724,6 +3750,7 @@ namespace fluffy { namespace parser {
 							}
 
 							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_filename,
 								m_lexer->getToken().value,
 								{
 									TokenType_e::Comma,
@@ -3795,6 +3822,7 @@ namespace fluffy { namespace parser {
 							}
 
 							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_filename,
 								m_lexer->getToken().value,
 								{
 									TokenType_e::Comma,
@@ -4147,6 +4175,7 @@ namespace fluffy { namespace parser {
 
 						default:
 							throw exceptions::unexpected_with_possibilities_token_exception(
+								m_filename,
 								m_lexer->getToken().value,
 								{
 									TokenType_e::Public, TokenType_e::Protected, TokenType_e::Private,
@@ -4211,6 +4240,7 @@ namespace fluffy { namespace parser {
 		}
 
 		throw exceptions::unexpected_token_exception(
+			m_filename,
 			m_lexer->getToken().value,
 			line,
 			column
@@ -4267,6 +4297,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::RParBracket,
@@ -4331,6 +4362,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::Comma,
@@ -4379,6 +4411,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_with_possibilities_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				{
 					TokenType_e::RParBracket,
@@ -4436,6 +4469,7 @@ namespace fluffy { namespace parser {
 			if (m_lexer->isVoid())
 			{
 				throw exceptions::unexpected_type_exception(
+					m_filename,
 					"void",
 					m_lexer->getToken().line,
 					m_lexer->getToken().column
@@ -4513,6 +4547,7 @@ namespace fluffy { namespace parser {
 					if (primitiveType->nodeType == AstNodeType_e::VoidType)
 					{
 						throw exceptions::unexpected_type_exception("void",
+							m_filename,
 							m_lexer->getToken().line,
 							m_lexer->getToken().column
 						);
@@ -4534,6 +4569,7 @@ namespace fluffy { namespace parser {
 			}
 
 			throw exceptions::unexpected_token_exception(
+				m_filename,
 				m_lexer->getToken().value,
 				m_lexer->getToken().line,
 				m_lexer->getToken().column

@@ -24,9 +24,6 @@ namespace fluffy { namespace transformations {
 		void
 		validateScope(ast::AstNode* const node);
 
-		void
-		updateTypeFromInclude(const scope::FindResult_t& findResult, ast::AstNode* const namedType);
-
 	private:
 		scope::ScopeManager*
 		mScopeManager;

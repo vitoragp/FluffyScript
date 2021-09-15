@@ -162,6 +162,87 @@ namespace fluffy { namespace scope {
 		return FindResult_t { nullptr, NodeList(), false };
 	}
 
+	FindResult_t
+	ScopeManager::findNodeById(const TString& identifier, ast::AstNode* const ignoredNode, Bool findInRoot)
+	{
+		if (findInRoot)
+		{
+			return getRootScope().findNodeById(identifier);
+		}
+		else
+		{
+			auto beginScope = mScopeStack.rbegin();
+			auto endScope = mScopeStack.rend();
+
+			for (; beginScope != endScope; beginScope++)
+			{
+				auto scopeNodeScope = beginScope + 1;
+				auto scope = scope::Scope(this, scopeNodeScope == endScope ? nullptr : *scopeNodeScope, *beginScope);
+
+				auto findResult = scope.findNodeById(identifier);
+				if (findResult.foundResult) {
+					if (findResult.nodeList.size() > 1 || (findResult.nodeList.size() == 1 && findResult.nodeList[0] != ignoredNode)) {
+						return findResult;
+					}
+				}
+			}
+		}
+		return FindResult_t { nullptr, NodeList(), false };
+	}
+
+	FindResult_t
+	ScopeManager::findNodeById(const TString& identifier, const AstNodeType_e ignoredType, Bool findInRoot)
+	{
+		if (findInRoot)
+		{
+			return getRootScope().findNodeById(identifier);
+		}
+		else
+		{
+			auto beginScope = mScopeStack.rbegin();
+			auto endScope = mScopeStack.rend();
+
+			for (; beginScope != endScope; beginScope++)
+			{
+				auto scopeNodeScope = beginScope + 1;
+				auto scope = scope::Scope(this, scopeNodeScope == endScope ? nullptr : *scopeNodeScope, *beginScope);
+
+				auto findResult = scope.findNodeById(identifier);
+				if (findResult.foundResult) {
+					Bool foundNode = false;
+					for (auto it = findResult.nodeList.begin(); it != findResult.nodeList.end();) {
+						auto node = *it;
+
+						if (node->nodeType == ignoredType)
+						{
+							it = findResult.nodeList.erase(it);
+						}
+						else
+						{
+							foundNode = true;
+							it++;
+						}
+					}
+
+					if (foundNode)
+					{
+						return findResult;
+					}
+				}
+			}
+		}
+		return FindResult_t { nullptr, NodeList(), false };
+	}
+
+	FindResult_t
+	ScopeManager::findAllNodeById(const TString& identifier)
+	{
+		// TODO: Implementar uma consulta que recebe todos os nos com o mesmo identificar do escopo atual
+		// ate a raiz.
+		FindResult_t finalFindResult = { nullptr, NodeList(), false };
+		return finalFindResult;
+	}
+
 	void
 	ScopeManager::interrupt()
 	{

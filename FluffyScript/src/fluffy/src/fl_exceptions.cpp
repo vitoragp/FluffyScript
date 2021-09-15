@@ -27,15 +27,17 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_token_exception
 	 */
 
-	unexpected_token_exception::unexpected_token_exception(I8 token, U32 line, U32 column)
-		: m_isChar(true)
+	unexpected_token_exception::unexpected_token_exception(const String& filename, I8 token, U32 line, U32 column)
+		: m_filename(filename)
+		, m_isChar(true)
 		, m_tokenChar(token)
 		, m_line(line)
 		, m_column(column)
 	{}
 
-	unexpected_token_exception::unexpected_token_exception(String token, U32 line, U32 column)
-		: m_isChar(false)
+	unexpected_token_exception::unexpected_token_exception(const String& filename, String token, U32 line, U32 column)
+		: m_filename(filename)
+		, m_isChar(false)
 		, m_tokenString(token)
 		, m_line(line)
 		, m_column(column)
@@ -48,9 +50,9 @@ namespace fluffy { namespace exceptions {
 	{
 		static char buffer[bufferSize];
 		if (m_isChar) {
-			sprintf_s(buffer, "Unexpected token '%c' at: line %d, column %d", m_tokenChar, m_line, m_column);
+			sprintf_s(buffer, "%s error: Unexpected token '%c' at: line %d, column %d", m_filename.c_str(), m_tokenChar, m_line, m_column);
 		} else {
-			sprintf_s(buffer, "Unexpected token '%s' at: line %d, column %d", m_tokenString.c_str(), m_line, m_column);
+			sprintf_s(buffer, "%s error: Unexpected token '%s' at: line %d, column %d", m_filename.c_str(), m_tokenString.c_str(), m_line, m_column);
 		}
 		return buffer;
 	}
@@ -59,13 +61,14 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_with_possibilities_token_exception
 	 */
 
-	unexpected_with_possibilities_token_exception::unexpected_with_possibilities_token_exception(String token, std::vector<TokenType_e> possibilities, U32 line, U32 column)
-		: m_line(line)
+	unexpected_with_possibilities_token_exception::unexpected_with_possibilities_token_exception(const String& filename, String token, std::vector<TokenType_e> possibilities, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 	{
 		std::stringstream stream;
 		{
-			stream << "Unexpected token '" << token << "', expected ";
+			stream << m_filename << " error: Unexpected token '" << token << "', expected ";
 
 			for (U32 i = 0; i < static_cast<U32>(possibilities.size()); i++)
 			{
@@ -94,7 +97,8 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_end_of_file_exception
 	 */
 
-	unexpected_end_of_file_exception::unexpected_end_of_file_exception()
+	unexpected_end_of_file_exception::unexpected_end_of_file_exception(const String& filename)
+		: m_filename(filename)
 	{}
 
 	unexpected_end_of_file_exception::~unexpected_end_of_file_exception()
@@ -103,16 +107,17 @@ namespace fluffy { namespace exceptions {
 	const char* unexpected_end_of_file_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "Unexpected end of file");
+		sprintf_s(buffer, "%s error: Unexpected end of file", m_filename.c_str());
 		return buffer;
 	}
 
 	/**
-		* malformed_number_exception
-		*/
+	 * malformed_number_exception
+	 */
 
-	malformed_number_exception::malformed_number_exception(U32 line, U32 column)
-		: m_line(line)
+	malformed_number_exception::malformed_number_exception(const String& filename, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 	{}
 
@@ -122,16 +127,17 @@ namespace fluffy { namespace exceptions {
 	const char* malformed_number_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "Malphormed number at: line %d, column %d", m_line, m_column);
+		sprintf_s(buffer, "%s error: Malphormed number at: line %d, column %d", m_filename.c_str(), m_line, m_column);
 		return buffer;
 	}
 
 	/**
-		* malformed_character_constant_exception
-		*/
+	 * malformed_character_constant_exception
+	 */
 
-	malformed_character_constant_exception::malformed_character_constant_exception(U32 line, U32 column)
-		: m_line(line)
+	malformed_character_constant_exception::malformed_character_constant_exception(const String& filename, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 	{}
 
@@ -141,16 +147,17 @@ namespace fluffy { namespace exceptions {
 	const char* malformed_character_constant_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "Malphormed character constant at: line %d, column %d", m_line, m_column);
+		sprintf_s(buffer, "%s error: Malphormed character constant at: line %d, column %d", m_filename.c_str(), m_line, m_column);
 		return buffer;
 	}
 
 	/**
-		* malformed_string_constant_exception
-		*/
+	 * malformed_string_constant_exception
+	 */
 
-	malformed_string_constant_exception::malformed_string_constant_exception(U32 line, U32 column)
-		: m_line(line)
+	malformed_string_constant_exception::malformed_string_constant_exception(const String& filename, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 	{}
 
@@ -160,16 +167,17 @@ namespace fluffy { namespace exceptions {
 	const char* malformed_string_constant_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "Malphormed string constant at: line %d, column %d", m_line, m_column);
+		sprintf_s(buffer, "%s error: Malphormed string constant at: line %d, column %d", m_filename.c_str(), m_line, m_column);
 		return buffer;
 	}
 
 	/**
-		* not_implemented_feature_exception
-		*/
+	 * not_implemented_feature_exception
+	 */
 
-	not_implemented_feature_exception::not_implemented_feature_exception(String feature)
-		: m_feature(feature)
+	not_implemented_feature_exception::not_implemented_feature_exception(const String& filename, String feature)
+		: m_filename(filename)
+		, m_feature(feature)
 	{}
 
 	not_implemented_feature_exception::~not_implemented_feature_exception()
@@ -178,7 +186,7 @@ namespace fluffy { namespace exceptions {
 	const char* not_implemented_feature_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "this feature '%s' is not implemented", m_feature.c_str());
+		sprintf_s(buffer, "%s error: This feature '%s' is not implemented", m_filename.c_str(), m_feature.c_str());
 		return buffer;
 	}
 
@@ -186,8 +194,9 @@ namespace fluffy { namespace exceptions {
 	 * unexpected_type_exception
 	 */
 
-	unexpected_type_exception::unexpected_type_exception(String type, U32 line, U32 column)
-		: m_line(line)
+	unexpected_type_exception::unexpected_type_exception(const String& filename, String type, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 		, m_type(type)
 	{}
@@ -198,7 +207,7 @@ namespace fluffy { namespace exceptions {
 	const char* unexpected_type_exception::what() const noexcept
 	{
 		static char buffer[bufferSize];
-		sprintf_s(buffer, "Unexpected type '%s' at: line %d, column %d", m_type.c_str(), m_line, m_column);
+		sprintf_s(buffer, "%s error: Unexpected type '%s' at: line %d, column %d", m_filename.c_str(), m_type.c_str(), m_line, m_column);
 		return buffer;
 	}
 
@@ -206,8 +215,9 @@ namespace fluffy { namespace exceptions {
 	 * expected_type_exception
 	 */
 
-	expected_type_exception::expected_type_exception(U32 line, U32 column)
-		: m_line(line)
+	expected_type_exception::expected_type_exception(const String& filename, U32 line, U32 column)
+		: m_filename(filename)
+		, m_line(line)
 		, m_column(column)
 	{}
 

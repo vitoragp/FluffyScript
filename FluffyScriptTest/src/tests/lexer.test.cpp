@@ -181,7 +181,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::unexpected_token_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "Unexpected token '#' at: line 1, column 1");
+			EXPECT_STREQ(e.what(), "anom_block error: Unexpected token '#' at: line 1, column 1");
 		}
 	}
 
@@ -252,7 +252,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::unexpected_end_of_file_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "Unexpected end of file");
+			EXPECT_STREQ(e.what(), "C:\\Users\\NPShinigami\\source\\repos\\FluffyScript\\FluffyScriptTest\\files\\lexer\\source_3.txt error: Unexpected end of file");
 		}
 	}
 
@@ -549,7 +549,7 @@ namespace fluffy { namespace testing {
 		}
 		catch (exceptions::unexpected_end_of_file_exception& e)
 		{
-			EXPECT_STREQ(e.what(), "Unexpected end of file");
+			EXPECT_STREQ(e.what(), "C:\\Users\\NPShinigami\\source\\repos\\FluffyScript\\FluffyScriptTest\\files\\lexer\\source_3.txt error: Unexpected end of file");
 		}
 	}
 

@@ -167,7 +167,7 @@ namespace fluffy { namespace ast {
 	T* const
 	AstNode::to()
 	{
-		return is<T>() ? ast::safe_cast<T>(this) : nullptr;
+		return ast::safe_cast<T>(this);
 	}
 
 	template <typename TAttribute>

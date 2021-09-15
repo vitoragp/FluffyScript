@@ -34,6 +34,9 @@ namespace fluffy { namespace attributes {
 		void
 		insertTraitDefinitionNode(const TString& identifier,  ast::AstNode* const node);
 
+		ast::AstNode* const
+		findScopeFromItem(ast::AstNode* const node);
+
 		IncludeEntryList
 		findInclude(const TString& identifier);
 

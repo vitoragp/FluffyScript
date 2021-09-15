@@ -507,7 +507,8 @@ namespace fluffy {
 
 		IncludedScope,
 		Reference,
-		ImplementedTraitList
+		ImplementedTraitList,
+		ImplementedTraitForList
 	};
 
 

@@ -1,13 +1,3 @@
-include { loo::Begin } in "loo";
-
 namespace foo {
 	export class Loo {}
-
-	trait Foo {}
-
-	export trait Foo for Loo {}
-
-	export trait Foo for u32 {}
-
-	trait Foo for i32 {}
 }

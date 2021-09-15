@@ -430,11 +430,11 @@ namespace fluffy { namespace testing {
 
 					ASSERT_TRUE(aNodeList.foundResult);
 
-					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StmtForInitDecl);
-
 					EXPECT_EQ(aNodeList.nodeList[0]->identifier, aIdentifier);
-					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::StmtVariable);
+					EXPECT_EQ(aNodeList.nodeList[0]->nodeType, AstNodeType_e::StmtForInitDecl);
+
+					EXPECT_EQ(aNodeList.nodeList[1]->identifier, aIdentifier);
+					EXPECT_EQ(aNodeList.nodeList[1]->nodeType, AstNodeType_e::StmtVariable);
 				}
 			}
 

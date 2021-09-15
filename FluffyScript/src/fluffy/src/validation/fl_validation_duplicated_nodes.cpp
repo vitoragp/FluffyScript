@@ -157,17 +157,17 @@ namespace fluffy { namespace validations {
 	}
 
 	/**
-	 * ValidationDuplicatedNodes
+	 * DuplicatedNodes
 	 */
 
-	ValidationDuplicatedNodes::ValidationDuplicatedNodes()
+	DuplicatedNodes::DuplicatedNodes()
 	{}
 
-	ValidationDuplicatedNodes::~ValidationDuplicatedNodes()
+	DuplicatedNodes::~DuplicatedNodes()
 	{}
 
 	void
-	ValidationDuplicatedNodes::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	DuplicatedNodes::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 	{
 		// Faz a validação nos filhos.
 		switch (node->nodeType)
@@ -206,7 +206,7 @@ namespace fluffy { namespace validations {
 	}
 
 	void
-	ValidationDuplicatedNodes::validateDuplication(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	DuplicatedNodes::validateDuplication(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
 	{
 		auto scope = scope::Scope(scopeManager, nullptr, node);
 				

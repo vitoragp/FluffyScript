@@ -222,9 +222,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != expectedToken) {
 			throw exceptions::custom_exception(
-				"Expected token '%s', received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected token '%s', received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				getTokenString(expectedToken),
 				m_token.value.c_str()
 			);
@@ -238,9 +238,9 @@ namespace fluffy { namespace lexer {
 		String value = m_token.value;
 		if (m_token.type != TokenType_e::Identifier) {
 			throw exceptions::custom_exception(
-				"Expected an identifier, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected an identifier, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -253,9 +253,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::True && m_token.type != TokenType_e::False) {
 			throw exceptions::custom_exception(
-				"Expected an boolean constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected an boolean constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -269,9 +269,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::ConstantInteger) {
 			throw exceptions::custom_exception(
-				"Expected an integer 8-bits constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected an integer 8-bits constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -285,9 +285,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::ConstantFp32) {
 			throw exceptions::custom_exception(
-				"Expected a real 32-bits constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected a real 32-bits constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -301,9 +301,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::ConstantFp64) {
 			throw exceptions::custom_exception(
-				"Expected a real 64-bits constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected a real 64-bits constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -317,9 +317,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::ConstantChar) {
 			throw exceptions::custom_exception(
-				"Expected a character constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected a character constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -333,9 +333,9 @@ namespace fluffy { namespace lexer {
 	{
 		if (m_token.type != TokenType_e::ConstantString) {
 			throw exceptions::custom_exception(
-				"Expected a string constant, received '%s'",
-				m_token.line,
-				m_token.column,
+				"%s error: Expected a string constant, received '%s'",
+				m_token.line, m_token.column,
+				m_filename.c_str(),
 				m_token.value.c_str()
 			);
 		}
@@ -1118,7 +1118,7 @@ namespace fluffy { namespace lexer {
 				parseString();
 				return;
 			}
-			throw exceptions::unexpected_token_exception(ch, m_token.line, m_token.column);
+			throw exceptions::unexpected_token_exception(m_filename, ch, m_token.line, m_token.column);
 		}
 		else
 		{
@@ -1202,7 +1202,7 @@ namespace fluffy { namespace lexer {
 					const I8 nch = readChar();
 
 					if (m_eof) {
-						throw exceptions::unexpected_end_of_file_exception();
+						throw exceptions::unexpected_end_of_file_exception(m_filename);
 					}
 
 					const I8 nch2 = readChar(1);
@@ -1413,7 +1413,7 @@ namespace fluffy { namespace lexer {
 						m_token.value.push_back(readCharAndAdv());
 						return;
 					}
-					throw exceptions::unexpected_token_exception(m_token.value, m_token.line, m_token.column);
+					throw exceptions::unexpected_token_exception(m_filename, m_token.value, m_token.line, m_token.column);
 				}
 			}
 			break;
@@ -1527,7 +1527,7 @@ namespace fluffy { namespace lexer {
 			}
 			break;
 		default:
-			throw exceptions::unexpected_token_exception(m_token.value, m_token.line, m_token.column);
+			throw exceptions::unexpected_token_exception(m_filename, m_token.value, m_token.line, m_token.column);
 		}
 	}
 
@@ -1551,7 +1551,7 @@ namespace fluffy { namespace lexer {
 				ch = readChar();
 				if (!ishex(ch)) {
 					if (!isValid) {
-						throw exceptions::malformed_number_exception(m_token.line, m_token.column);
+						throw exceptions::malformed_number_exception(m_filename, m_token.line, m_token.column);
 					}
 					return;
 				}
@@ -1576,7 +1576,7 @@ namespace fluffy { namespace lexer {
 				ch = readChar();
 				if (!isbin(ch)) {
 					if (!isValid) {
-						throw exceptions::malformed_number_exception(m_token.line, m_token.column);
+						throw exceptions::malformed_number_exception(m_filename, m_token.line, m_token.column);
 					}
 					return;
 				}
@@ -1659,7 +1659,7 @@ namespace fluffy { namespace lexer {
 					const I8 ch = readChar();
 
 					if (ch == '\0') {
-						throw exceptions::malformed_string_constant_exception(m_token.line, m_token.column);
+						throw exceptions::malformed_string_constant_exception(m_filename, m_token.line, m_token.column);
 					}
 					if (ch == '\"') {
 						nextChar(); // Consome "
@@ -1690,7 +1690,7 @@ namespace fluffy { namespace lexer {
 				m_token.value.push_back(readCharAndAdv());
 			}
 			if (ch == '\n' || ch == '\0') {
-				throw exceptions::malformed_string_constant_exception(m_token.line, m_token.column);
+				throw exceptions::malformed_string_constant_exception(m_filename, m_token.line, m_token.column);
 			}
 			if (ch == '\"') {
 				break;

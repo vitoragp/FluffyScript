@@ -239,7 +239,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{

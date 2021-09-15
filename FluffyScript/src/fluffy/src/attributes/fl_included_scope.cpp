@@ -1,3 +1,5 @@
+#include "fl_exceptions.h"
+#include "ast\fl_ast.h"
 #include "attributes\fl_included_scope.h"
 namespace fluffy { namespace attributes {
 	/**
@@ -26,6 +28,29 @@ namespace fluffy { namespace attributes {
 	IncludedScope::insertTraitDefinitionNode(const TString& identifier,  ast::AstNode* const node)
 	{
 		mTraitDefinitionMap.emplace(identifier, node);
+	}
+
+	ast::AstNode* const
+	IncludedScope::findScopeFromItem(ast::AstNode* const node)
+	{
+		auto includeList = findInclude(node->identifier);
+
+		if (!includeList.size())
+		{
+			throw exceptions::custom_exception(
+				"Failed to retrieve included scope from '%s",
+				node->identifier.str()
+			);
+		}
+
+		for (auto it : includeList)
+		{
+			if (it.node == node)
+			{
+				return it.scope;
+			}
+		}
+		return nullptr;
 	}
 
 	IncludeEntryList

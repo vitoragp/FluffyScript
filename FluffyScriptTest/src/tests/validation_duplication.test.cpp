@@ -7,7 +7,6 @@
 #include "transformation\fl_transformation_resolve_include.h"
 #include "transformation\fl_transformation_resolve_types.h"
 #include "validation\fl_validation_duplicated_nodes.h"
-#include "validation\fl_validation_duplicated_nodes.h"
 #include "fl_compiler.h"
 #include "fl_exceptions.h"
 
@@ -38,7 +37,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app {}\n"
@@ -47,7 +46,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -66,7 +65,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -76,7 +75,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -95,7 +94,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -106,7 +105,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -125,7 +124,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -136,7 +135,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -155,7 +154,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -166,7 +165,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -185,7 +184,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -196,7 +195,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -215,7 +214,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -226,7 +225,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -245,7 +244,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -258,7 +257,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -277,7 +276,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -290,7 +289,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -309,7 +308,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -322,7 +321,7 @@ namespace fluffy { namespace testing {
 			
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -341,7 +340,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -358,7 +357,7 @@ namespace fluffy { namespace testing {
 			
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -377,7 +376,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"
@@ -389,7 +388,7 @@ namespace fluffy { namespace testing {
 
 			compiler->build();
 
-			ASSERT_ANY_THROW("Unexpected result");
+			FAIL() << "Unexpected result";
 		}
 		catch (exceptions::custom_exception& e)
 		{
@@ -408,7 +407,7 @@ namespace fluffy { namespace testing {
 			compiler->initialize();
 			compiler->applyTransformation(new transformations::ResolveInclude());
 			compiler->applyTransformation(new transformations::ResolveTypes());
-			compiler->applyValidation(new validations::ValidationDuplicatedNodes());
+			compiler->applyValidation(new validations::DuplicatedNodes());
 
 			compiler->addBlockToBuild("source1",
 				"namespace app { \n"

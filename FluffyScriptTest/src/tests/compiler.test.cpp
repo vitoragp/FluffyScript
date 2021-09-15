@@ -2,8 +2,16 @@
 #include "test.h"
 #include "gtest/gtest.h"
 
-#include "fl_compiler.h"
+#include "ast\fl_ast.h"
+#include "ast\fl_ast_decl.h"
+#include "ast\fl_ast_stmt.h"
+#include "ast\fl_ast_expr.h"
+#include "transformation\fl_transformation_resolve_include.h"
+#include "transformation\fl_transformation_resolve_types.h"
+#include "validation\fl_validation_duplicated_nodes.h"
+#include "validation\fl_validation_general_rules.h"
 #include "fl_exceptions.h"
+#include "fl_compiler.h"
 
 namespace fluffy { namespace testing {
 
@@ -29,6 +37,10 @@ namespace fluffy { namespace testing {
 	{
 		String path = _BASE_PATH;
 		compiler->initialize(path + "\\files\\compiler\\");
+		compiler->applyTransformation(new transformations::ResolveInclude());
+		compiler->applyTransformation(new transformations::ResolveTypes());
+		compiler->applyValidation(new validations::DuplicatedNodes());
+		compiler->applyValidation(new validations::GeneralRules());
 		compiler->build("main.txt");
 	}
 

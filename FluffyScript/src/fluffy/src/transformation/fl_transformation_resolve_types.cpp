@@ -105,7 +105,11 @@ namespace fluffy { namespace transformations {
 			// Inclui o atributo de referencia no no de tipo.
 			if (findResult.scope->nodeType == AstNodeType_e::CodeUnit)
 			{
-				updateTypeFromInclude(findResult, namedType);
+				auto includeScope = findResult.scope->getAttribute<attributes::IncludedScope>();
+				namedType->insertAttribute(new attributes::Reference(
+					includeScope->findScopeFromItem(findResult.nodeList[0]),
+					findResult.nodeList[0]
+				));
 			}
 			else
 			{
@@ -188,38 +192,6 @@ namespace fluffy { namespace transformations {
 				node->line, node->column,
 				mScopeManager->getCodeUnitName().str(),
 				node->identifier.str()
-			);
-		}
-	}
-
-	void
-	ResolveTypes::updateTypeFromInclude(const scope::FindResult_t& findResult, ast::AstNode* const namedType)
-	{
-		if (auto includedScope = mScopeManager->getRootScope().getNode()->getAttribute<attributes::IncludedScope>())
-		{
-			auto includeList = includedScope->findInclude(findResult.nodeList[0]->identifier);
-
-			if (!includeList.size())
-			{
-				throw exceptions::custom_exception(
-					"Failed to retrieve included scope from '%s",
-					findResult.nodeList[0]->identifier.str()
-				);
-			}
-			for (auto it : includeList)
-			{
-				if (it.node == findResult.nodeList[0])
-				{
-					namedType->insertAttribute(new attributes::Reference(it.scope, it.node));
-					break;
-				}
-			}
-		}
-		else
-		{
-			throw exceptions::custom_exception(
-				"Failed to retrieve included scope from '%s",
-				mScopeManager->getCodeUnitName().str()
 			);
 		}
 	}

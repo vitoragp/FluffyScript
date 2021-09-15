@@ -29,13 +29,14 @@ namespace fluffy {
 		class unexpected_token_exception : public std::exception
 		{
 		public:
-									unexpected_token_exception(I8 token, U32 line, U32 column);
-									unexpected_token_exception(String token, U32 line, U32 column);
+									unexpected_token_exception(const String& filename, I8 token, U32 line, U32 column);
+									unexpected_token_exception(const String& filename, String token, U32 line, U32 column);
 									~unexpected_token_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			Bool					m_isChar;
 			I8 						m_tokenChar;
 			String					m_tokenString;
@@ -50,12 +51,13 @@ namespace fluffy {
 		class unexpected_with_possibilities_token_exception : public std::exception
 		{
 		public:
-									unexpected_with_possibilities_token_exception(String token, std::vector<TokenType_e> possibilities, U32 line, U32 column);
+									unexpected_with_possibilities_token_exception(const String& filename, String token, std::vector<TokenType_e> possibilities, U32 line, U32 column);
 									~unexpected_with_possibilities_token_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			String					m_out;
 			U32 					m_line;
 			U32 					m_column;
@@ -68,10 +70,13 @@ namespace fluffy {
 		class unexpected_end_of_file_exception : public std::exception
 		{
 		public:
-									unexpected_end_of_file_exception();
+									unexpected_end_of_file_exception(const String& filename);
 									~unexpected_end_of_file_exception();
 
 			virtual const char*		what() const noexcept override;
+
+		private:
+			String					m_filename;
 		};
 
 		/**
@@ -81,12 +86,13 @@ namespace fluffy {
 		class malformed_number_exception : public std::exception
 		{
 		public:
-									malformed_number_exception(U32 line, U32 column);
+									malformed_number_exception(const String& filename, U32 line, U32 column);
 									~malformed_number_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			U32 					m_line;
 			U32 					m_column;
 		};
@@ -98,12 +104,13 @@ namespace fluffy {
 		class malformed_character_constant_exception : public std::exception
 		{
 		public:
-									malformed_character_constant_exception(U32 line, U32 column);
+									malformed_character_constant_exception(const String& filename, U32 line, U32 column);
 									~malformed_character_constant_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			U32 					m_line;
 			U32 					m_column;
 		};
@@ -115,12 +122,13 @@ namespace fluffy {
 		class malformed_string_constant_exception : public std::exception
 		{
 		public:
-									malformed_string_constant_exception(U32 line, U32 column);
+									malformed_string_constant_exception(const String& filename, U32 line, U32 column);
 									~malformed_string_constant_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			U32 					m_line;
 			U32 					m_column;
 		};
@@ -132,12 +140,13 @@ namespace fluffy {
 		class not_implemented_feature_exception : public std::exception
 		{
 		public:
-									not_implemented_feature_exception(String feature);
+									not_implemented_feature_exception(const String& filename, String feature);
 									~not_implemented_feature_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			String 					m_feature;
 		};
 
@@ -148,12 +157,13 @@ namespace fluffy {
 		class unexpected_type_exception : public std::exception
 		{
 		public:
-									unexpected_type_exception(String type, U32 line, U32 column);
+									unexpected_type_exception(const String& filename, String type, U32 line, U32 column);
 									~unexpected_type_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			const U32 				m_line;
 			const U32 				m_column;
 			const String			m_type;
@@ -166,12 +176,13 @@ namespace fluffy {
 		class expected_type_exception : public std::exception
 		{
 		public:
-									expected_type_exception(U32 line, U32 column);
+									expected_type_exception(const String& filename, U32 line, U32 column);
 									~expected_type_exception();
 
 			virtual const char*		what() const noexcept override;
 
 		private:
+			String					m_filename;
 			const U32 				m_line;
 			const U32 				m_column;
 		};

@@ -15,13 +15,34 @@ namespace fluffy { namespace attributes {
 		virtual ~ImplementedTraitList();
 
 		void
-		insertTrait(const TString& identifier, ast::TraitForDecl* const traitFor);
+		insertTrait(const TString& identifier, ast::TraitDecl* const traitFor);
 
-		ast::TraitForDecl* const
+		ast::TraitDecl* const
 		findTrait(const TString& identifier);
 
 	private:
 		NodeMultiMap
 		mImplementedTraitList;
+	};
+
+	/**
+	 * ImplementedTraitForList
+	 */
+
+	class ImplementedTraitForList : public AttributeTemplate<AttributeType_e::ImplementedTraitForList>
+	{
+	public:
+		ImplementedTraitForList();
+		virtual ~ImplementedTraitForList();
+
+		void
+		insertTraitFor(ast::TraitForDecl* const traitFor);
+
+		Bool
+		findTraitFor(ast::TraitForDecl* const findedTraitFor);
+
+	private:
+		NodeList
+		mImplementedTraitForList;
 	};
 } }

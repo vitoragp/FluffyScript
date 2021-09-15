@@ -22,6 +22,18 @@ namespace fluffy { namespace validations {
 		void
 		validateTraitFor(ast::TraitForDecl* const traitFor);
 
+		void
+		validateTraitForDeclaration(ast::TraitForDecl* const traitFor);
+
+		void
+		validateTraitForRequiredFunctions(ast::TraitForDecl* const traitFor);
+
+		void
+		validateNamedTypeGeneric(ast::TypeDeclNamed* const type);
+
+		void
+		validateClassRequiredInterfaceFunctions(ast::ClassDecl* const classDecl);
+
 	private:
 		scope::ScopeManager*
 		mScopeManager;

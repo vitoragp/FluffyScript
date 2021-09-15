@@ -125,4 +125,18 @@ namespace fluffy { namespace testing {
 		EXPECT_EQ(std::get<0>(identifiers[3]), "Test3");
 		EXPECT_EQ(std::get<0>(identifiers[4]), "Test4");
 	}
+
+	TEST_F(AstUtilsTest, TestFunctionStaticAndNonStatic)
+	{
+		parser->loadSource(
+			"class Foo { \n"
+				"fn main(a: i32) {} \n"
+				"static fn main(a: i32) {} \n"
+			"}"
+		);
+
+		auto classA = parser->parseClass(ctx, false);
+
+		ASSERT_FALSE(utils::AstUtils::equals(classA->functionList[0].get(), classA->functionList[1].get()));
+	}
 } }

@@ -1,14 +1,29 @@
-include { foo::Foo } in "foo";
+include { foo::Loo } in "foo";
 
 namespace test1
 {
-	interface Loo {}
+	interface Foo
+	{
+		fn tonho();
+	}
 
-	class Xoo {}
+	interface Loo
+	{
+		fn tonho();
+	}
 
-	class Boo implements Loo {}
+	interface Zoo
+	{
+		fn tonho();
+	}
 
-	fn main(v: Foo)
+	class Xoo implements Foo, Loo, Zoo
+	{
+		public fn tonho()
+		{}
+	}
+
+	fn main(args: string)
 	{
 	}
 }

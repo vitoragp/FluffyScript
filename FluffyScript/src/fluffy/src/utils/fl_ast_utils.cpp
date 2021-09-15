@@ -128,6 +128,10 @@ namespace fluffy { namespace utils {
 					ast::ClassFunctionDecl* funcA = reinterpret_cast<ast::ClassFunctionDecl*>(nodeA);
 					ast::ClassFunctionDecl* funcB = reinterpret_cast<ast::ClassFunctionDecl*>(nodeB);
 
+					if (funcA->isStatic != funcB->isStatic)
+					{
+						return false;
+					}
 					if (funcA && funcB && funcA->identifier == funcB->identifier)
 					{
 						if (funcA->parameterList.size() == funcB->parameterList.size())
@@ -192,6 +196,39 @@ namespace fluffy { namespace utils {
 					}
 				}
 				return true;
+
+			case AstNodeType_e::TraitFunctionDecl:
+				{
+					ast::TraitFunctionDecl* funcA = reinterpret_cast<ast::TraitFunctionDecl*>(nodeA);
+					ast::TraitFunctionDecl* funcB = reinterpret_cast<ast::TraitFunctionDecl*>(nodeB);
+
+					if (funcA->isStatic != funcB->isStatic)
+					{
+						return false;
+					}
+					if (funcA && funcB && funcA->identifier == funcB->identifier)
+					{
+						if (funcA->parameterList.size() == funcB->parameterList.size())
+						{
+							for (U32 i = 0; i < static_cast<U32>(funcA->parameterList.size()); i++)
+							{
+								ast::FunctionParameterDecl* paramA = funcA->parameterList[i].get();
+								ast::FunctionParameterDecl* paramB = funcB->parameterList[i].get();
+
+								if (!equals(paramA->typeDecl.get(), paramB->typeDecl.get()))
+								{
+									return false;
+								}
+							}
+						}
+						else
+						{
+							return false;
+						}
+						return true;
+					}
+				}
+				return false;
 
 			case AstNodeType_e::FunctionParameterDeclExpr:
 				{
@@ -400,6 +437,77 @@ namespace fluffy { namespace utils {
 		}
 		else
 		{
+			// Compara uma funcao de classe com uma funcao de interface, necessario para varios tipos de validacao.
+			if (nodeA->nodeType == AstNodeType_e::ClassFunctionDecl && nodeB->nodeType == AstNodeType_e::InterfaceFunctionDecl)
+			{
+				auto funcA = nodeA->to<ast::ClassFunctionDecl>();
+				auto funcB = nodeB->to<ast::InterfaceFunctionDecl>();
+
+				if (funcA->isStatic)
+				{
+					return false;
+				}
+				if (funcA->identifier != funcB->identifier)
+				{
+					return false;
+				}
+				if (funcA->parameterList.size() == funcB->parameterList.size())
+				{
+					for (U32 i = 0; i < static_cast<U32>(funcA->parameterList.size()); i++)
+					{
+						ast::FunctionParameterDecl* paramA = funcA->parameterList[i].get();
+						ast::FunctionParameterDecl* paramB = funcB->parameterList[i].get();
+
+						if (!equals(paramA->typeDecl.get(), paramB->typeDecl.get()))
+						{
+							return false;
+						}
+					}
+				}
+				else
+				{
+					return false;
+				}
+				if (!equals(funcA->returnType.get(), funcB->returnType.get()))
+				{
+					return false;
+				}
+			}
+			else if (nodeB->nodeType == AstNodeType_e::ClassFunctionDecl && nodeA->nodeType == AstNodeType_e::InterfaceFunctionDecl)
+			{
+				auto funcA = nodeA->to<ast::InterfaceFunctionDecl>();
+				auto funcB = nodeB->to<ast::ClassFunctionDecl>();
+
+				if (funcB->isStatic)
+				{
+					return false;
+				}
+				if (funcA->identifier != funcB->identifier)
+				{
+					return false;
+				}
+				if (funcA->parameterList.size() == funcB->parameterList.size())
+				{
+					for (U32 i = 0; i < static_cast<U32>(funcA->parameterList.size()); i++)
+					{
+						ast::FunctionParameterDecl* paramA = funcA->parameterList[i].get();
+						ast::FunctionParameterDecl* paramB = funcB->parameterList[i].get();
+
+						if (!equals(paramA->typeDecl.get(), paramB->typeDecl.get()))
+						{
+							return false;
+						}
+					}
+				}
+				else
+				{
+					return false;
+				}
+				if (!equals(funcA->returnType.get(), funcB->returnType.get()))
+				{
+					return false;
+				}
+			}
 			if (nodeA->nodeType == AstNodeType_e::IncludeItemDecl)
 			{
 				auto includeItemA = ast::safe_cast<ast::IncludeItemDecl>(nodeA);

@@ -3,14 +3,14 @@
 #include "scope\fl_scope_manager.h"
 namespace fluffy { namespace validations {
 	/**
-	 * ValidationDuplicatedNodes
+	 * DuplicatedNodes
 	 */
 
-	class ValidationDuplicatedNodes : public scope::NodeProcessor
+	class DuplicatedNodes : public scope::NodeProcessor
 	{
 	public:
-		ValidationDuplicatedNodes();
-		virtual ~ValidationDuplicatedNodes();
+		DuplicatedNodes();
+		virtual ~DuplicatedNodes();
 
 		virtual void
 		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override;
