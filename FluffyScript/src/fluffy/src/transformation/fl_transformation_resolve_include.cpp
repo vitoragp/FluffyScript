@@ -50,14 +50,14 @@ namespace fluffy { namespace transformations {
 	{}
 
 	void
-	ResolveInclude::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	ResolveInclude::onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 	{
 		if (mScopeManager == nullptr)
 		{
 			mScopeManager = scopeManager;
 		}
 
-		if (node->nodeType == AstNodeType_e::IncludeDecl)
+		if (node->nodeType == AstNodeType_e::IncludeDecl && event == scope::NodeProcessorEvent_e::onBegin)
 		{
 			// Busca um atributo ja
 			mIncludedScope = scopeManager->getRootScope().getNode()->getOrCreateAttribute<attributes::IncludedScope>();

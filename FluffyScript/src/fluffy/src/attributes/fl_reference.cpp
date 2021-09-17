@@ -5,10 +5,22 @@ namespace fluffy { namespace attributes {
 	 */
 
 	Reference::Reference(ast::AstNode* const referencedScope, ast::AstNode* const referencedNode)
-		: referencedScope(referencedScope)
-		, referencedNode(referencedNode)
+		: mReferencedScope(referencedScope)
+		, mReferencedNode(referencedNode)
 	{}
 
 	Reference::~Reference()
 	{}
+
+	ast::AstNode* const
+	Reference::getScope()
+	{
+		return mReferencedScope;
+	}
+
+	ast::AstNode* const
+	Reference::get()
+	{
+		return mReferencedNode;
+	}
 } }

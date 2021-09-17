@@ -61,4 +61,10 @@ namespace fluffy { namespace ast {
 	{
 		attributeMap.emplace(attribute->type, attribute);
 	}
+
+	void
+	AstNode::removeAttribute(const AttributeType_e key)
+	{
+		attributeMap.erase(key);
+	}
 } }

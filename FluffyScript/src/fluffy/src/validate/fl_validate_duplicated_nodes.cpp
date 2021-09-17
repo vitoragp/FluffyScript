@@ -1,7 +1,7 @@
 #include <functional>
 #include "ast\fl_ast_decl.h"
 #include "utils\fl_ast_utils.h"
-#include "validation\fl_validation_duplicated_nodes.h"
+#include "validate\fl_validate_duplicated_nodes.h"
 namespace fluffy { namespace validations {
 	template <
 		typename TListDst,
@@ -167,41 +167,42 @@ namespace fluffy { namespace validations {
 	{}
 
 	void
-	DuplicatedNodes::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	DuplicatedNodes::onProcess(scope::ScopeManager* const scopeManager, const scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 	{
 		// Faz a validação nos filhos.
-		switch (node->nodeType)
+		if (event == scope::NodeProcessorEvent_e::onBegin)
 		{
-		case AstNodeType_e::CodeUnit:
-		case AstNodeType_e::NamespaceDecl:
-			validateDuplication(scopeManager, node);
-			break;
-		case AstNodeType_e::ClassDecl:
-		case AstNodeType_e::InterfaceDecl:
-		case AstNodeType_e::InterfaceFunctionDecl:
-		case AstNodeType_e::StructDecl:
-		case AstNodeType_e::EnumDecl:
-		case AstNodeType_e::TraitDecl:
-		case AstNodeType_e::TraitForDecl:
-		case AstNodeType_e::FunctionDecl:
-		case AstNodeType_e::AnomClassDeclExpr:
-		case AstNodeType_e::MatchWhenExpr:
-		case AstNodeType_e::NewBlockExpr:
-		case AstNodeType_e::ClassConstructorDecl:
-		case AstNodeType_e::ClassFunctionDecl:
-		case AstNodeType_e::ClassDestructorDecl:
-		case AstNodeType_e::TraitFunctionDecl:
-		case AstNodeType_e::StmtFor:
-		case AstNodeType_e::StmtWhile:
-		case AstNodeType_e::StmtDoWhile:
-		case AstNodeType_e::StmtTry:
-		case AstNodeType_e::StmtCatchBlockDecl:
-		case AstNodeType_e::StmtMatchWhenDecl:
-		case AstNodeType_e::FunctionDeclExpr:
-			validateDuplication(scopeManager, node);
-			break;
-		default:
-			break;
+			switch (node->nodeType)
+			{
+			case AstNodeType_e::CodeUnit:
+			case AstNodeType_e::NamespaceDecl:
+			case AstNodeType_e::ClassDecl:
+			case AstNodeType_e::InterfaceDecl:
+			case AstNodeType_e::InterfaceFunctionDecl:
+			case AstNodeType_e::StructDecl:
+			case AstNodeType_e::EnumDecl:
+			case AstNodeType_e::TraitDecl:
+			case AstNodeType_e::TraitForDecl:
+			case AstNodeType_e::FunctionDecl:
+			case AstNodeType_e::AnomClassDeclExpr:
+			case AstNodeType_e::MatchWhenExpr:
+			case AstNodeType_e::NewBlockExpr:
+			case AstNodeType_e::ClassConstructorDecl:
+			case AstNodeType_e::ClassFunctionDecl:
+			case AstNodeType_e::ClassDestructorDecl:
+			case AstNodeType_e::TraitFunctionDecl:
+			case AstNodeType_e::StmtFor:
+			case AstNodeType_e::StmtWhile:
+			case AstNodeType_e::StmtDoWhile:
+			case AstNodeType_e::StmtTry:
+			case AstNodeType_e::StmtCatchBlockDecl:
+			case AstNodeType_e::StmtMatchWhenDecl:
+			case AstNodeType_e::FunctionDeclExpr:
+				validateDuplication(scopeManager, node);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 

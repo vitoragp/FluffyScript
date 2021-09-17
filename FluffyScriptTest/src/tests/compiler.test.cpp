@@ -8,8 +8,10 @@
 #include "ast\fl_ast_expr.h"
 #include "transformation\fl_transformation_resolve_include.h"
 #include "transformation\fl_transformation_resolve_types.h"
-#include "validation\fl_validation_duplicated_nodes.h"
-#include "validation\fl_validation_general_rules.h"
+#include "validate\fl_validate_duplicated_nodes.h"
+#include "validate\fl_validate_class_rules.h"
+#include "validate\fl_validate_generic_rules.h"
+#include "validate\fl_validate_trait_rules.h"
 #include "fl_exceptions.h"
 #include "fl_compiler.h"
 
@@ -40,7 +42,9 @@ namespace fluffy { namespace testing {
 		compiler->applyTransformation(new transformations::ResolveInclude());
 		compiler->applyTransformation(new transformations::ResolveTypes());
 		compiler->applyValidation(new validations::DuplicatedNodes());
-		compiler->applyValidation(new validations::GeneralRules());
+		compiler->applyValidation(new validations::TraitRules());
+		compiler->applyValidation(new validations::GenericRules());
+		compiler->applyValidation(new validations::ClassRules());
 		compiler->build("main.txt");
 	}
 

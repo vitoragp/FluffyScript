@@ -17,7 +17,5 @@ namespace fluffy { namespace utils {
 		static NodeMultiMap
 		getPositionalSimplifiedNodeChildrenMap(scope::ScopeManager* const scopeManager, ast::AstNode* const parent, ast::AstNode* const node);
 
-		static ast::AstNode*
-		resolveExtendsClass(scope::ScopeManager* scopeManager, ast::AstNode* const node);
 	};
 } }

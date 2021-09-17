@@ -1,4 +1,5 @@
 #pragma once
+#include "ast\fl_ast.h"
 #include "attributes\fl_attribute.h"
 
 namespace fluffy { namespace ast {
@@ -17,9 +18,31 @@ namespace fluffy { namespace attributes {
 		~Reference();
 
 		ast::AstNode* const
-		referencedScope;
+		getScope();
 
 		ast::AstNode* const
-		referencedNode;
+		get();
+
+		template <typename T>
+		T* const
+		to();
+
+	private:
+		ast::AstNode* const
+		mReferencedScope;
+
+		ast::AstNode* const
+		mReferencedNode;
 	};
+
+	/**
+	 * Reference Impl
+	 */
+
+	template <typename T>
+	T* const
+	Reference::to()
+	{
+		return ast::safe_cast<T>(mReferencedNode);
+	}
 } }

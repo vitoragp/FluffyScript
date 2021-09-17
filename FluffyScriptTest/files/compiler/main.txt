@@ -1,29 +1,26 @@
-include { foo::Loo } in "foo";
-
 namespace test1
 {
-	interface Foo
+	interface Clickable<F>
 	{
-		fn tonho();
+		fn click(a: F);
 	}
 
-	interface Loo
+	interface Foo {}
+
+	abstract class Button<F> implements Clickable<F>
 	{
-		fn tonho();
+		
 	}
 
-	interface Zoo
+	class LongButton extends Button<i32>
 	{
-		fn tonho();
-	}
-
-	class Xoo implements Foo, Loo, Zoo
-	{
-		public fn tonho()
-		{}
+		public fn click(a: i32)
+		{
+		}
 	}
 
 	fn main(args: string)
 	{
+		
 	}
 }

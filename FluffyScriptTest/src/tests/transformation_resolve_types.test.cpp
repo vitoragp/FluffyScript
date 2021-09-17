@@ -30,10 +30,10 @@ namespace fluffy { namespace testing {
 	{
 		ASSERT_TRUE(reference != nullptr);
 
-		ASSERT_EQ(reference->referencedScope->identifier, scopeId);
-		ASSERT_EQ(reference->referencedScope->nodeType, scopeType);
-		ASSERT_EQ(reference->referencedNode->identifier, nodeId);
-		ASSERT_EQ(reference->referencedNode->nodeType, nodeType);
+		ASSERT_EQ(reference->getScope()->identifier, scopeId);
+		ASSERT_EQ(reference->getScope()->nodeType, scopeType);
+		ASSERT_EQ(reference->get()->identifier, nodeId);
+		ASSERT_EQ(reference->get()->nodeType, nodeType);
 	}
 
 	/**
@@ -52,9 +52,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -116,9 +116,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -170,9 +170,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -263,9 +263,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -319,9 +319,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -382,9 +382,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -432,9 +432,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::NamedType)
+				if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 
@@ -483,22 +483,25 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "p")
+				if (event == scope::NodeProcessorEvent_e::onBegin)
 				{
-					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
+					if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "p")
+					{
+						auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
-					validationPasses++;
-				}
+						validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validationPasses++;
+					}
 
-				if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "q")
-				{
-					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
+					if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "q")
+					{
+						auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
-					validationPasses++;
+						validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+						validationPasses++;
+					}
 				}
 			}
 
@@ -539,33 +542,36 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "p")
+				if (event == scope::NodeProcessorEvent_e::onBegin)
 				{
-					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
+					if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "p")
+					{
+						auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
-					validationPasses++;
-				}
+						validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "app", "T", AstNodeType_e::NamespaceDecl, AstNodeType_e::ClassDecl);
+						validationPasses++;
+					}
 
-				if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "q")
-				{
-					auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
+					if (node->nodeType == AstNodeType_e::ClassVariableDecl && node->identifier == "q")
+					{
+						auto var = ast::safe_cast<ast::ClassVariableDecl>(node);
 
-					validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
-					validationPasses++;
-				}
+						validateReference(var->typeDecl->getAttribute<attributes::Reference>(), "Foo", "T", AstNodeType_e::ClassDecl, AstNodeType_e::GenericItemDecl);
+						validationPasses++;
+					}
 
-				if (node->nodeType == AstNodeType_e::ClassFunctionDecl && node->identifier == "main")
-				{
-					auto var = ast::safe_cast<ast::ClassFunctionDecl>(node);
+					if (node->nodeType == AstNodeType_e::ClassFunctionDecl && node->identifier == "main")
+					{
+						auto var = ast::safe_cast<ast::ClassFunctionDecl>(node);
 
-					validateReference(
-						var->parameterList[0]->typeDecl->getAttribute<attributes::Reference>(),
-						"main", "T", AstNodeType_e::ClassFunctionDecl, AstNodeType_e::GenericItemDecl
-					);
-					validationPasses++;
+						validateReference(
+							var->parameterList[0]->typeDecl->getAttribute<attributes::Reference>(),
+							"main", "T", AstNodeType_e::ClassFunctionDecl, AstNodeType_e::GenericItemDecl
+						);
+						validationPasses++;
+					}
 				}
 			}
 

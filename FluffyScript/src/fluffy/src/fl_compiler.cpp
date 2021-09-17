@@ -7,7 +7,7 @@
 #include "utils\fl_ast_utils.h"
 #include "utils\fl_include_utils.h"
 #include "scope\fl_scope_manager.h"
-#include "validation\fl_validation_duplicated_nodes.h"
+#include "validate\fl_validate_duplicated_nodes.h"
 #include "fl_buffer.h"
 #include "fl_exceptions.h"
 #include "fl_compiler.h"

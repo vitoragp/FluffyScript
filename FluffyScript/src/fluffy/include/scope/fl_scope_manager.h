@@ -12,6 +12,16 @@ namespace fluffy { namespace scope {
 	class Scope;
 
 	/**
+	 * NodeProcessorEvent_e
+	 */
+
+	enum class NodeProcessorEvent_e
+	{
+		onBegin,
+		onEnd
+	};
+
+	/**
 	 * NodeProcessor
 	 */
 
@@ -22,7 +32,7 @@ namespace fluffy { namespace scope {
 		virtual ~NodeProcessor() {}
 
 		virtual void
-		onProcess(ScopeManager* const scopeManager, ast::AstNode* const node) = 0;
+		onProcess(ScopeManager* const scopeManager, const NodeProcessorEvent_e event, ast::AstNode* const node) = 0;
 
 	};
 

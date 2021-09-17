@@ -6,7 +6,7 @@
 #include "parser\fl_parser.h"
 #include "transformation\fl_transformation_resolve_include.h"
 #include "transformation\fl_transformation_resolve_types.h"
-#include "validation\fl_validation_duplicated_nodes.h"
+#include "validate\fl_validate_duplicated_nodes.h"
 #include "fl_compiler.h"
 #include "fl_exceptions.h"
 

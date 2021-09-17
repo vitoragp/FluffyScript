@@ -17,7 +17,7 @@ namespace fluffy { namespace transformations {
 	{}
 
 	void
-	ResolveTypes::onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+	ResolveTypes::onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 	{
 		scope::FindResult_t findResult = { nullptr, NodeList(), false };
 
@@ -26,7 +26,7 @@ namespace fluffy { namespace transformations {
 			mScopeManager = scopeManager;
 		}
 
-		if (node->nodeType == AstNodeType_e::NamedType)
+		if (node->nodeType == AstNodeType_e::NamedType && event == scope::NodeProcessorEvent_e::onBegin)
 		{
 			auto namedType = ast::safe_cast<ast::TypeDeclNamed>(node);
 

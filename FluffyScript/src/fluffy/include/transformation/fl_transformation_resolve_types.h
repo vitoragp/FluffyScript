@@ -12,7 +12,7 @@ namespace fluffy { namespace transformations {
 		virtual ~ResolveTypes();
 
 		virtual void
-		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override;
+		onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node) override;
 
 	private:
 		void

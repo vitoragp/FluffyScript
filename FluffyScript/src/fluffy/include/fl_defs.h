@@ -489,9 +489,9 @@ namespace fluffy {
 		PrimitiveType,
 		ArrayType,
 		FunctionType,
+		TupleType,
 		NamedType,
 		SelfType,
-		TupleType,
 
 		SizedArray,
 		UnsizedArray
@@ -508,7 +508,9 @@ namespace fluffy {
 		IncludedScope,
 		Reference,
 		ImplementedTraitList,
-		ImplementedTraitForList
+		ImplementedTraitForList,
+		Scope,
+		ReferenceStack
 	};
 
 

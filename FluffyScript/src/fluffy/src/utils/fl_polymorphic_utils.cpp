@@ -31,7 +31,7 @@ namespace fluffy { namespace utils {
 				{
 					auto referenceBaseClass = classDeclA->baseClass->getAttribute<attributes::Reference>();
 
-					if (canBe(referenceBaseClass->referencedNode, nodeB))
+					if (canBe(referenceBaseClass->get(), nodeB))
 					{
 						return true;
 					}
@@ -43,7 +43,7 @@ namespace fluffy { namespace utils {
 				{
 					auto referenceInterface = interfaceOfA->getAttribute<attributes::Reference>();
 
-					if (referenceInterface->referencedNode == nodeB)
+					if (referenceInterface->get() == nodeB)
 					{
 						return true;
 					}
@@ -52,7 +52,7 @@ namespace fluffy { namespace utils {
 				{
 					auto referenceBaseClass = classDeclA->baseClass->getAttribute<attributes::Reference>();
 
-					if (canBe(referenceBaseClass->referencedNode, nodeB))
+					if (canBe(referenceBaseClass->get(), nodeB))
 					{
 						return true;
 					}
@@ -75,7 +75,7 @@ namespace fluffy { namespace utils {
 				{
 					auto referenceBaseClass = classDeclA->baseClass->getAttribute<attributes::Reference>();
 
-					if (canBe(referenceBaseClass->referencedNode, nodeB))
+					if (canBe(referenceBaseClass->get(), nodeB))
 					{
 						return true;
 					}

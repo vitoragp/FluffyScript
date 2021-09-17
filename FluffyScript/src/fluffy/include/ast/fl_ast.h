@@ -47,6 +47,9 @@ namespace fluffy { namespace ast {
 		void
 		insertAttribute(attributes::Attribute* const attribute);
 
+		void
+		removeAttribute(const AttributeType_e key);
+
 		AttributeMap
 		attributeMap;
 

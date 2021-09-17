@@ -5,6 +5,7 @@
 #include "ast\fl_ast_decl.h"
 #include "attributes\fl_included_scope.h"
 #include "transformation\fl_transformation_resolve_include.h"
+#include "scope\fl_scope_manager.h"
 #include "fl_compiler.h"
 #include "fl_exceptions.h"
 
@@ -40,9 +41,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, const scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::CodeUnit)
+				if (node->nodeType == AstNodeType_e::CodeUnit && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto includedScope = node->getAttribute<attributes::IncludedScope>();
 
@@ -206,9 +207,9 @@ namespace fluffy { namespace testing {
 			{}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, const scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
-				if (node->nodeType == AstNodeType_e::CodeUnit)
+				if (node->nodeType == AstNodeType_e::CodeUnit && event == scope::NodeProcessorEvent_e::onBegin)
 				{
 					auto includedScope = node->getAttribute<attributes::IncludedScope>();
 

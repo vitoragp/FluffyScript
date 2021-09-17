@@ -44,7 +44,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -142,7 +142,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -196,7 +196,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -256,7 +256,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -319,7 +319,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -331,8 +331,8 @@ namespace fluffy { namespace testing {
 					auto bNode = scope.findNodeById(TString("b"));
 
 					ASSERT_TRUE(
-						aNode.foundResult == true && bNode.foundResult == false ||
-						aNode.foundResult == false && bNode.foundResult == true
+						(aNode.foundResult == true && bNode.foundResult == false) ||
+						(aNode.foundResult == false && bNode.foundResult == true)
 					);
 				}
 			}
@@ -370,7 +370,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -417,7 +417,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -471,7 +471,7 @@ namespace fluffy { namespace testing {
 			~Validate() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (node->nodeType == AstNodeType_e::StmtVariable)
 				{
@@ -545,7 +545,7 @@ namespace fluffy { namespace testing {
 			~CheckResult() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
 				{
@@ -623,7 +623,7 @@ namespace fluffy { namespace testing {
 			~CheckResult() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
 				{
@@ -701,7 +701,7 @@ namespace fluffy { namespace testing {
 			~CheckResult() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
 				{
@@ -746,10 +746,6 @@ namespace fluffy { namespace testing {
 					ASSERT_EQ(foundedItems, 4);
 				}
 			}
-
-			virtual void
-			onEndProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
-			{}
 		};
 
 		compiler->initialize();
@@ -789,7 +785,7 @@ namespace fluffy { namespace testing {
 			~CheckResult() {}
 
 			virtual void
-			onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node)
+			onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node)
 			{
 				if (scopeManager->getCodeUnitName() == "source1" && node->identifier == "app")
 				{

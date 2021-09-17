@@ -89,40 +89,6 @@ namespace fluffy { namespace scope {
 		processNode(codeUnit, nodeProcessor);
 	}
 
-	/*
-	ScopeRelationship_e
-	ScopeManager::getScopeRelationship(ast::AstNode* const requestor, ast::AstNode* const requestee)
-	{
-		ScopeRelationship_e relationship = ScopeRelationship_e::Irrelevant;
-
-		if (requestee->nodeType == AstNodeType_e::ClassDecl)
-		{
-			if (requestor == requestee)
-			{
-				relationship = ScopeRelationship_e::Itself;
-			}
-			else
-			{
-				if (requestor->nodeType == AstNodeType_e::ClassDecl)
-				{
-					auto requestorParentClass = utils::ScopeUtils::resolveExtendsClass(this, requestor);
-
-					if (requestorParentClass == requestee)
-					{
-						relationship = ScopeRelationship_e::Child;
-					}
-					relationship = ScopeRelationship_e::None;
-				}
-				else
-				{
-					relationship = ScopeRelationship_e::None;
-				}
-			}
-		}
-		return relationship;
-	}
-	*/
-
 	void
 	ScopeManager::setCodeUnit(ast::CodeUnit* const codeUnit)
 	{
@@ -293,7 +259,7 @@ namespace fluffy { namespace scope {
 		}
 
 		// Faz a validação no nodo.
-		nodeProcessor->onProcess(this, node);
+		nodeProcessor->onProcess(this, NodeProcessorEvent_e::onBegin, node);
 
 		// Faz a validação nos filhos.
 		switch (node->nodeType)
@@ -962,6 +928,9 @@ namespace fluffy { namespace scope {
 		default:
 			break;
 		}
+
+		// Faz a validação no nodo.
+		nodeProcessor->onProcess(this, NodeProcessorEvent_e::onEnd, node);
 	}
 
 	void

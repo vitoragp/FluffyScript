@@ -13,7 +13,7 @@ namespace fluffy { namespace validations {
 		virtual ~DuplicatedNodes();
 
 		virtual void
-		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override;
+		onProcess(scope::ScopeManager* const scopeManager, const scope::NodeProcessorEvent_e event, ast::AstNode* const node) override;
 
 	private:
 		void

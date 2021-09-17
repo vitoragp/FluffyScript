@@ -141,12 +141,10 @@ namespace fluffy { namespace utils {
 		{}
 
 		virtual void
-		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override
+		onProcess(scope::ScopeManager* const scopeManager, scope::NodeProcessorEvent_e event, ast::AstNode* const node) override
 		{
 			if (node->nodeType == AstNodeType_e::CodeUnit)
 			{
-				auto codeUnit = ast::safe_cast<ast::CodeUnit>(node);
-
 				auto scope = scope::Scope(scopeManager, nullptr, node);
 				auto nextId = mIncludeItem->scopePath.get();
 
@@ -1179,51 +1177,6 @@ namespace fluffy { namespace utils {
 			break;
 		}
 		return children;
-	}
-
-	class ExtractExtendsDecl : public scope::NodeProcessor
-	{
-	public:
-		ExtractExtendsDecl(ast::AstNode* const target)
-			: mTarget(target)
-			, mExtendsObject(nullptr)
-		{}
-
-		virtual ~ExtractExtendsDecl()
-		{}
-
-		virtual void
-		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override
-		{
-			if (node == mTarget)
-			{
-			}
-		}
-
-	private:
-		ast::AstNode* const
-		mTarget;
-
-		ast::AstNode*
-		mExtendsObject;
-	};
-
-	ast::AstNode*
-	ScopeUtils::resolveExtendsClass(scope::ScopeManager* scopeManager, ast::AstNode* const node)
-	{
-		auto classDecl = ast::safe_cast<ast::ClassDecl>(node);
-
-		if (classDecl->baseClass == nullptr)
-		{
-			return nullptr;
-		}
-
-		scope::ScopeManager scopeManagerInt;
-		scopeManagerInt.copyReferenceTree(scopeManager);
-
-		ExtractExtendsDecl extractExtendsDecl(node);
-
-		return nullptr;
 	}
 	
 } }

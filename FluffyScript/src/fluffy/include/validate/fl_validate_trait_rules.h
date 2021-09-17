@@ -3,22 +3,19 @@
 #include "scope\fl_scope_manager.h"
 namespace fluffy { namespace validations {
 	/**
-	 * 
+	 * TraitRules
 	 */
 
-	class GeneralRules : public scope::NodeProcessor
+	class TraitRules : public scope::NodeProcessor
 	{
 	public:
-		GeneralRules();
-		virtual ~GeneralRules();
+		TraitRules();
+		virtual ~TraitRules();
 
 		virtual void
-		onProcess(scope::ScopeManager* const scopeManager, ast::AstNode* const node) override;
+		onProcess(scope::ScopeManager* const scopeManager, const scope::NodeProcessorEvent_e event, ast::AstNode* const node) override;
 
 	private:
-		void
-		validateClassDecl(ast::ClassDecl* const classDecl);
-
 		void
 		validateTraitFor(ast::TraitForDecl* const traitFor);
 
@@ -27,12 +24,6 @@ namespace fluffy { namespace validations {
 
 		void
 		validateTraitForRequiredFunctions(ast::TraitForDecl* const traitFor);
-
-		void
-		validateNamedTypeGeneric(ast::TypeDeclNamed* const type);
-
-		void
-		validateClassRequiredInterfaceFunctions(ast::ClassDecl* const classDecl);
 
 	private:
 		scope::ScopeManager*

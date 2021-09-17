@@ -20,6 +20,9 @@ namespace fluffy { namespace utils {
 		static Bool
 		equals(ast::AstNode* nodeA, ast::AstNode* nodeB);
 
+		static Bool
+		same(ast::AstNode* nodeA, ast::AstNode* nodeB);
+
 		static std::vector<std::tuple<TString, U32, U32>>
 		extractFunctionIdentifiers(ast::AstNode* node);
 
@@ -32,7 +35,5 @@ namespace fluffy { namespace utils {
 		static String
 		printIncludeItem(ast::AstNode* const includeItem);
 
-		static Bool
-		getExtendsFromClass(ast::AstNode* const decl, ast::AstNode** outDecl);
 	};
 } }
